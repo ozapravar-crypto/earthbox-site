@@ -663,6 +663,32 @@
 }
 .colo-col a:hover{color:var(--accent-dk)}
 
+.colo-social{
+  display:flex;
+  gap:1rem;
+  margin-top:.5rem;
+}
+.colo-social a{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:32px;
+  height:32px;
+  border:1px solid var(--rule);
+  border-radius:50%;
+  color:var(--ink-soft);
+  transition:color .3s ease, border-color .3s ease, background .3s ease;
+}
+.colo-social a:hover{
+  color:var(--bg);
+  background:var(--ink);
+  border-color:var(--ink);
+}
+.colo-social svg{
+  width:16px;
+  height:16px;
+}
+
 .colo-bar{
   max-width:var(--max);
   margin:4rem auto 0;
