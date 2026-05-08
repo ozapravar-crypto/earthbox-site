@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><title>Debug</title></head>
+<body>
+<h1>Debug Article Body</h1>
+<pre id="out"></pre>
+<script type="module">
+import { articles } from './data/articles.js';
+const article = articles.find(a => a.slug === 'closed-terrarium-water-cycle');
+document.getElementById('out').textContent = JSON.stringify({
+  slug: article.slug,
+  hasBody: !!article.body,
+  bodyLength: article.body ? article.body.length : 0,
+  bodyPreview: article.body ? article.body.substring(0, 200) : 'NO BODY'
+}, null, 2);
+</script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+// ─────────────────────────────────────────────────────────────────────
+// data/volume-one.js · Volume I — 3D Printed Plant Accessories
+//
+// 16 products across 4 categories:
+//   Planters · Plant Support · Accessories · Mounts
+//
+// Pricing is material-based: ABS (budget) / ASA (standard) / PETG CF (premium)
+// Some products have size variants that affect pricing.
+// ─────────────────────────────────────────────────────────────────────
+
+export const categories = [
+  { slug: 'planters',      title: 'Planters',       description: '3D-printed vessels in matte, bisque, and metallic finishes.' },
+  { slug: 'plant-support', title: 'Plant Support',  description: 'Moss poles, trellises, and protective growth systems.' },
+  { slug: 'accessories',   title: 'Accessories',    description: 'Care tags, watering tools, and companion planters.' },
+  { slug: 'mounts',        title: 'Mounts',         description: 'Railing clips and hanging systems for urban spaces.' }
+];
+
+export const materials = [
+  { id: 'abs',     name: 'ABS',     description: 'Durable, budget-friendly' },
+  { id: 'asa',     name: 'ASA',     description: 'UV-resistant, weatherproof' },
+  { id: 'petg-cf', name: 'PETG CF', description: 'Carbon-fiber reinforced, premium' }
+];
+
+export const volumeOne = [
+  // ═══════════════════════════════════════════════════════════════════
+  // PLANTERS
+  // ═══════════════════════════════════════════════════════════════════
+  {
+    sku: 'V1-PLT-001',
+    name: 'TerraMesh Planter',
+    category: 'planters',
+    description: 'A bold interplay of structure and softness, the TerraMesh Planter features a textured lattice shell paired with a grounded, minimal base. Designed to elevate everyday plants into sculptural centerpieces, it balances visual depth with a clean, modern silhouette. Perfect as a statement duo or standalone accent.',
+    photo: 'terramesh-planter.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PLT-002',
+    name: 'Pillow Planter',
+    category: 'planters',
+    description: 'Inspired by the softness of quilted textures, the Pillow Planter brings a tactile, cushioned aesthetic into modern interiors. Its geometric padding effect adds depth while maintaining a clean, minimal form—designed to make greenery feel warmer and more inviting.',
+    photo: 'pillow-planter.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PLT-003',
+    name: 'Paper Planter',
+    category: 'planters',
+    description: 'A sculptural planter defined by sharp, faceted surfaces that catch light and shadow throughout the day. FacetForm turns greenery into a bold visual centerpiece, blending geometric precision with an organic presence. Designed to stand out—whether styled solo or as a pair.',
+    photo: 'paper-planter.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PLT-004',
+    name: 'Column Planter',
+    category: 'planters',
+    description: 'A modular vertical planting system designed to maximize space while creating dense, layered greenery. Each unit stacks seamlessly and rotates into multiple positions, allowing you to shape how plants grow and flow. Built for balconies and compact spaces, it transforms small areas into lush, living installations.',
+    photo: 'column-planter.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PLT-005',
+    name: 'Stackable Planter',
+    category: 'planters',
+    description: 'A modular planter system designed for compact living spaces, allowing plants to grow vertically through stackable interconnected units. Each module expands the system both upward and sideways, creating flexible configurations for herbs, vegetables, and indoor greenery while maximizing unused space. Clean, scalable, and built to evolve with your space.',
+    photo: 'stackable-planter.png',
+    variants: [
+      { id: 'big',   name: 'Big Block',   description: 'Single block with drainage hole' },
+      { id: 'small', name: 'Small Block', description: 'Single block with cavity' }
+    ],
+    pricing: {
+      big:   { abs: 949,  asa: 1499 },
+      small: { abs: 449,  asa: 699 }
+    },
+    status: 'available'
+  },
+  {
+    sku: 'V1-PLT-006',
+    name: 'Capsule Planter',
+    category: 'planters',
+    description: 'A minimalist hanging planter designed as a compact floating capsule for small indoor plants and trailing greens. Its clean suspended form blends into modern interiors while creating a lightweight, sculptural presence that turns unused vertical space into living decor. Soft geometry, simple suspension, effortless greenery.',
+    photo: 'capsule-planter.png',
+    pricing: { abs: 449, asa: 649 },
+    status: 'available'
+  },
+  {
+    sku: 'V1-PLT-007',
+    name: 'Glass Garden',
+    category: 'planters',
+    description: 'A self-contained glass garden designed to bring a living ecosystem into compact spaces. Layered planting structures support moss and small plants within a controlled environment, creating a slow-growing, low-maintenance display. Designed as a desk or shelf piece, it combines nature with form—quiet, contained, and constantly evolving.',
+    photo: 'glass-garden.png',
+    pricing: { abs: 2689, asa: 2339 },
+    priceRange: { abs: '2,689 – 3,500', asa: '2,339 – 3,000' },
+    status: 'available'
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
+  // PLANT SUPPORT
+  // ═══════════════════════════════════════════════════════════════════
+  {
+    sku: 'V1-SUP-001',
+    name: 'Vine Arc',
+    category: 'plant-support',
+    description: 'A vertical support frame designed to guide climbing plants as they grow. Its clean, structured form helps shape natural movement while doubling as a subtle wall accent. Ideal for monstera, pothos, and other climbers—turning growth into a composed, living display.',
+    photo: 'vine-arc.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-SUP-002',
+    name: 'KAVACH',
+    category: 'plant-support',
+    description: 'A protective growth tower designed to support and shield your plants as they thrive. The structured mesh enclosure guides vertical growth while protecting against pests, pets, and external damage—creating a controlled micro-environment for healthier plants. Ideal for balconies and compact outdoor spaces.',
+    photo: 'kavach.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-SUP-003',
+    name: 'Modular Moss Pole',
+    category: 'plant-support',
+    description: 'A modular growth pole designed to support climbing plants as they mature. Interlocking extension sections allow the pole to scale with plant growth, while the open lattice structure helps roots grip naturally around moss or growing medium. Built for monstera, philodendron, pothos, and other climbing species.',
+    photo: 'modular-moss-pole.png',
+    pricing: { abs: 1199, asa: 1849 },
+    status: 'available'
+  },
+  {
+    sku: 'V1-SUP-004',
+    name: 'Moss Pole Dripper',
+    category: 'plant-support',
+    description: 'A slow-release water reservoir designed for modular moss poles. The Drip Cap attaches directly to the top of the pole, gradually releasing water to keep moss evenly hydrated over time. Helps maintain consistent moisture levels for healthier aerial roots and stronger climbing growth.',
+    photo: 'moss-pole-dripper.png',
+    pricing: { abs: 549, asa: 849 },
+    status: 'available'
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
+  // ACCESSORIES
+  // ═══════════════════════════════════════════════════════════════════
+  {
+    sku: 'V1-ACC-001',
+    name: 'Plant Care Tags',
+    category: 'accessories',
+    description: 'Minimal plant care markers designed to visually indicate sunlight and watering needs. Each tag uses simple shapes and fill levels to help identify care requirements at a glance—making plant care easier for beginners and collectors alike. Designed to blend naturally into modern plant setups.',
+    photo: 'plant-care-tags.png',
+    unit: '30 pieces',
+    pricing: { abs: 199, asa: 299 },
+    status: 'available'
+  },
+  {
+    sku: 'V1-ACC-002',
+    name: 'Watering Ring',
+    category: 'accessories',
+    description: 'A slow-release watering ring designed to evenly hydrate larger indoor plants directly at the root zone. The circular system distributes water gradually around the base of the trunk, reducing runoff, dry spots, and overwatering while making plant care cleaner and more efficient. Simple watering, better absorption, healthier roots.',
+    photo: 'watering-ring.png',
+    pricing: { abs: 119, asa: 179, 'petg-cf': 349 },
+    status: 'available'
+  },
+  {
+    sku: 'V1-ACC-003',
+    name: 'Root Link Companion',
+    category: 'accessories',
+    description: 'A smart companion planter that shares water with your main pot. RootLink anchors into the soil and features a hollow base that allows excess water to flow directly into the larger planter—reducing waste while keeping both plants hydrated. Designed for layered planting with built-in water flow.',
+    photo: 'root-link-companion.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-ACC-004',
+    name: 'Hydroponic Planter',
+    category: 'accessories',
+    description: 'A self-contained indoor growing system designed to bring fresh, thriving plants into compact spaces. Nura combines structured planting modules with integrated lighting and a recirculating irrigation system—creating a controlled environment for consistent, healthy growth. Designed for modern homes, it turns everyday spaces into living, productive gardens.',
+    photo: 'hydroponic-planter.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
+  // MOUNTS
+  // ═══════════════════════════════════════════════════════════════════
+  {
+    sku: 'V1-MNT-001',
+    name: 'Hanging Garden Pot Mount',
+    category: 'mounts',
+    description: 'A clip-on railing planter system designed for balconies, window grills, and compact outdoor spaces. The detachable ring mount allows pots to securely hook onto railings without permanent installation, turning unused edges into functional growing space for herbs, flowers, and small plants. Flexible, space-saving, and made for urban gardening.',
+    photo: 'hanging-garden-pot-mount.png',
+    pricing: { abs: 169, asa: 249, 'petg-cf': 499 },
+    status: 'available'
+  }
+];
+
+export const enquiryWhatsApp = '918104811584';

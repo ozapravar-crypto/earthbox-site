@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 746 746" width="746" height="746">
+  <defs>
+    <clipPath id="inner-frame">
+      <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#inner-frame)">
+
+    <!-- Olive moon -->
+    <circle cx="431" cy="232" r="12" fill="#67684A"/>
+
+    <!-- Floating spore particles upper-left -->
+    <g fill="#1c1c18">
+      <circle cx="320" cy="278" r="0.9"/>
+      <circle cx="335" cy="282" r="1.0"/>
+      <circle cx="348" cy="278" r="0.9"/>
+      <circle cx="362" cy="285" r="1.1"/>
+      <circle cx="378" cy="280" r="0.9"/>
+      <circle cx="395" cy="287" r="1.0"/>
+      <circle cx="325" cy="295" r="1.1"/>
+      <circle cx="342" cy="298" r="1.0"/>
+      <circle cx="358" cy="302" r="1.1"/>
+      <circle cx="375" cy="298" r="1.0"/>
+      <circle cx="392" cy="305" r="0.9"/>
+      <circle cx="332" cy="315" r="1.0"/>
+      <circle cx="350" cy="320" r="1.1"/>
+      <circle cx="368" cy="315" r="1.0"/>
+      <circle cx="385" cy="322" r="0.9"/>
+      <circle cx="345" cy="338" r="0.9"/>
+      <circle cx="365" cy="335" r="0.8"/>
+      <circle cx="378" cy="343" r="0.7"/>
+    </g>
+
+    <!-- ===== SPORE STALKS (curved stems with bulbs) ===== -->
+    <g stroke="#1a1d18" stroke-width="1.4" fill="none" stroke-linecap="round">
+      <!-- Tallest center -->
+      <path d="M 372 530 C 370 480, 368 430, 369 380"/>
+      <!-- Slight left tall -->
+      <path d="M 358 532 C 354 490, 348 440, 348 405"/>
+      <!-- Right tall -->
+      <path d="M 388 532 C 392 490, 398 440, 398 405"/>
+      <!-- Mid left -->
+      <path d="M 348 535 C 344 500, 338 462, 335 425"/>
+      <!-- Mid right -->
+      <path d="M 396 535 C 402 500, 410 462, 412 425"/>
+      <!-- Outer left short -->
+      <path d="M 338 537 C 332 510, 322 475, 318 445"/>
+      <!-- Outer right short -->
+      <path d="M 408 537 C 414 510, 425 475, 428 445"/>
+      <!-- Tiny side -->
+      <path d="M 380 533 C 384 500, 388 470, 386 450"/>
+      <path d="M 366 533 C 362 500, 358 470, 360 450"/>
+    </g>
+
+    <!-- Spore heads (filled black bulbs) -->
+    <g fill="#15170f">
+      <circle cx="369" cy="378" r="8"/>     <!-- tallest -->
+      <circle cx="348" cy="402" r="7"/>
+      <circle cx="398" cy="402" r="7"/>
+      <circle cx="335" cy="423" r="6"/>
+      <circle cx="412" cy="423" r="6"/>
+      <circle cx="318" cy="443" r="5"/>
+      <circle cx="428" cy="443" r="5"/>
+      <circle cx="386" cy="448" r="4.5"/>
+      <circle cx="360" cy="448" r="4.5"/>
+    </g>
+
+    <!-- ===== DIRT MOUND ===== -->
+    <!-- Outer mound silhouette (lighter olive-black) -->
+    <path d="M 259 545
+             C 280 538, 305 532, 330 538
+             C 350 528, 385 528, 410 538
+             C 435 532, 460 538, 487 542
+             L 487 610 L 259 610 Z"
+          fill="#2a2c20"/>
+
+    <!-- Inner darker mound -->
+    <path d="M 259 558
+             C 285 548, 320 545, 350 552
+             C 385 558, 420 548, 455 555
+             C 470 552, 480 558, 487 560
+             L 487 610 L 259 610 Z"
+          fill="#15170f"/>
+
+    <!-- Solid base black -->
+    <path d="M 259 580
+             C 290 572, 325 572, 360 575
+             C 395 578, 430 572, 460 575
+             C 475 575, 482 578, 487 580
+             L 487 610 L 259 610 Z"
+          fill="#070806"/>
+
+    <!-- Sand/grit speckles in dirt -->
+    <g fill="#a8a89c" opacity="0.55">
+      <circle cx="285" cy="565" r="0.6"/>
+      <circle cx="305" cy="572" r="0.7"/>
+      <circle cx="325" cy="568" r="0.6"/>
+      <circle cx="345" cy="575" r="0.7"/>
+      <circle cx="365" cy="570" r="0.6"/>
+      <circle cx="382" cy="578" r="0.6"/>
+      <circle cx="402" cy="572" r="0.7"/>
+      <circle cx="422" cy="578" r="0.6"/>
+      <circle cx="445" cy="572" r="0.6"/>
+      <circle cx="465" cy="578" r="0.7"/>
+      <circle cx="295" cy="588" r="0.6"/>
+      <circle cx="318" cy="592" r="0.6"/>
+      <circle cx="345" cy="595" r="0.7"/>
+      <circle cx="372" cy="590" r="0.6"/>
+      <circle cx="398" cy="595" r="0.6"/>
+      <circle cx="425" cy="590" r="0.7"/>
+      <circle cx="450" cy="595" r="0.6"/>
+      <circle cx="295" cy="600" r="0.5"/>
+      <circle cx="335" cy="602" r="0.6"/>
+      <circle cx="378" cy="600" r="0.6"/>
+      <circle cx="418" cy="602" r="0.5"/>
+    </g>
+  </g>
+
+  <!-- Outer frame -->
+  <path d="M 282 131 L 463 131 L 493 161 L 493 585 L 463 615 L 282 615 L 252 585 L 252 161 Z"
+        fill="none" stroke="#000" stroke-width="3.5" stroke-linejoin="miter"/>
+  <!-- Inner thin frame -->
+  <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"
+        fill="none" stroke="#000" stroke-width="1.2" stroke-linejoin="miter"/>
+</svg>

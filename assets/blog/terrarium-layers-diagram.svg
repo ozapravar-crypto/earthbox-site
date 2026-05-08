@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 520" fill="none">
+  <style>
+    .label { font-family: 'Quattrocento Sans', sans-serif; font-size: 12px; fill: #4A4A4A; }
+    .label-bold { font-family: 'Quattrocento Sans', sans-serif; font-size: 13px; fill: #2C2C2B; font-weight: bold; }
+    .title { font-family: 'Oranienbaum', serif; font-size: 22px; fill: #2C2C2B; }
+    .layer-label { font-family: 'Oranienbaum', serif; font-size: 16px; fill: #2C2C2B; }
+    .depth { font-family: 'Quattrocento Sans', sans-serif; font-size: 11px; fill: #787878; }
+  </style>
+
+  <!-- Background -->
+  <rect width="600" height="520" fill="#F8F7F5"/>
+
+  <!-- Title -->
+  <text x="300" y="35" text-anchor="middle" class="title">Terrarium Layer Structure</text>
+
+  <!-- Glass container outline -->
+  <rect x="150" y="70" width="300" height="380" rx="8" fill="none" stroke="#2C2C2B" stroke-width="2"/>
+
+  <!-- Layer 5: Plants (top) -->
+  <g>
+    <!-- Plant 1 - Fern -->
+    <g transform="translate(220, 130)">
+      <path d="M0 50 Q-25 30 -20 5 M0 50 Q-15 25 -5 0 M0 50 Q5 20 10 -5 M0 50 Q20 30 25 10 M0 50 Q30 40 30 25"
+            stroke="#6B8E5A" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </g>
+    <!-- Plant 2 - Fittonia -->
+    <g transform="translate(300, 145)">
+      <ellipse cx="0" cy="0" rx="22" ry="12" fill="#7DA469"/>
+      <path d="M0 0 L0 -10" stroke="#F8F7F5" stroke-width="1.5"/>
+      <path d="M-12 2 L12 -2" stroke="#F8F7F5" stroke-width="0.8"/>
+      <ellipse cx="18" cy="15" rx="18" ry="10" fill="#8AB87A"/>
+      <path d="M18 15 L18 6" stroke="#F8F7F5" stroke-width="1.5"/>
+      <ellipse cx="-12" cy="20" rx="16" ry="9" fill="#6B8E5A"/>
+    </g>
+    <!-- Plant 3 - Small fern -->
+    <g transform="translate(380, 140)">
+      <path d="M0 40 Q-15 20 -12 0 M0 40 Q0 15 5 -5 M0 40 Q15 25 12 5"
+            stroke="#7DA469" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- Layer 4: Growing Medium / Soil -->
+  <rect x="150" y="180" width="300" height="100" fill="#8B7355"/>
+  <text x="480" y="230" class="layer-label">Soil Mix</text>
+  <text x="480" y="248" class="label">Coco coir + perlite</text>
+  <text x="480" y="263" class="label">+ orchid bark</text>
+  <line x1="450" y1="230" x2="465" y2="230" stroke="#B8A99A" stroke-width="1.5"/>
+  <!-- Soil texture -->
+  <g fill="#9A8A7B" opacity="0.5">
+    <circle cx="180" cy="200" r="3"/>
+    <circle cx="220" cy="220" r="2"/>
+    <circle cx="260" cy="195" r="3"/>
+    <circle cx="300" cy="240" r="2"/>
+    <circle cx="340" cy="210" r="3"/>
+    <circle cx="380" cy="250" r="2"/>
+    <circle cx="420" cy="205" r="3"/>
+    <circle cx="200" cy="260" r="2"/>
+    <circle cx="280" cy="270" r="3"/>
+    <circle cx="360" cy="265" r="2"/>
+  </g>
+  <!-- Depth marker -->
+  <line x1="135" y1="180" x2="135" y2="280" stroke="#B8A99A" stroke-width="1"/>
+  <line x1="130" y1="180" x2="140" y2="180" stroke="#B8A99A" stroke-width="1"/>
+  <line x1="130" y1="280" x2="140" y2="280" stroke="#B8A99A" stroke-width="1"/>
+  <text x="125" y="235" text-anchor="end" class="depth">5-8 cm</text>
+
+  <!-- Layer 3: Activated Charcoal -->
+  <rect x="150" y="280" width="300" height="30" fill="#3D3D3D"/>
+  <text x="480" y="300" class="layer-label">Charcoal</text>
+  <text x="480" y="318" class="label">Filters &amp; absorbs odors</text>
+  <line x1="450" y1="295" x2="465" y2="295" stroke="#B8A99A" stroke-width="1.5"/>
+  <!-- Charcoal pieces texture -->
+  <g fill="#2C2C2B">
+    <rect x="165" y="285" width="12" height="8" rx="1" transform="rotate(10 171 289)"/>
+    <rect x="195" y="288" width="10" height="7" rx="1" transform="rotate(-5 200 291)"/>
+    <rect x="230" y="284" width="14" height="9" rx="1" transform="rotate(15 237 288)"/>
+    <rect x="270" y="287" width="11" height="8" rx="1"/>
+    <rect x="305" y="285" width="13" height="8" rx="1" transform="rotate(-8 311 289)"/>
+    <rect x="340" y="288" width="10" height="7" rx="1" transform="rotate(5 345 291)"/>
+    <rect x="375" y="284" width="12" height="9" rx="1" transform="rotate(12 381 288)"/>
+    <rect x="405" y="287" width="11" height="7" rx="1" transform="rotate(-3 410 290)"/>
+  </g>
+  <!-- Depth marker -->
+  <line x1="135" y1="280" x2="135" y2="310" stroke="#B8A99A" stroke-width="1"/>
+  <line x1="130" y1="310" x2="140" y2="310" stroke="#B8A99A" stroke-width="1"/>
+  <text x="125" y="300" text-anchor="end" class="depth">1 cm</text>
+
+  <!-- Layer 2: Sphagnum Moss Barrier -->
+  <rect x="150" y="310" width="300" height="25" fill="#C4A574"/>
+  <text x="480" y="327" class="layer-label">Moss Barrier</text>
+  <text x="480" y="345" class="label">Prevents soil migration</text>
+  <line x1="450" y1="322" x2="465" y2="322" stroke="#B8A99A" stroke-width="1.5"/>
+  <!-- Moss fiber texture -->
+  <g stroke="#A89060" stroke-width="0.8" fill="none">
+    <path d="M160 318 Q170 315 180 320 Q190 325 200 318"/>
+    <path d="M210 322 Q225 318 240 323 Q255 328 270 320"/>
+    <path d="M280 317 Q295 322 310 318 Q325 314 340 320"/>
+    <path d="M350 323 Q365 318 380 322 Q395 326 410 319"/>
+    <path d="M420 321 Q430 317 440 322"/>
+  </g>
+
+  <!-- Layer 1: Drainage (bottom) -->
+  <rect x="150" y="335" width="300" height="115" fill="#EFECE5"/>
+  <text x="480" y="390" class="layer-label">Drainage</text>
+  <text x="480" y="408" class="label">LECA or pebbles</text>
+  <text x="480" y="423" class="label">Excess water collects here</text>
+  <line x1="450" y1="392" x2="465" y2="392" stroke="#B8A99A" stroke-width="1.5"/>
+  <!-- LECA balls -->
+  <g fill="none" stroke="#B8A99A" stroke-width="1.5">
+    <ellipse cx="175" cy="360" rx="12" ry="10"/>
+    <ellipse cx="205" cy="375" rx="14" ry="11"/>
+    <ellipse cx="240" cy="355" rx="11" ry="9"/>
+    <ellipse cx="270" cy="380" rx="13" ry="10"/>
+    <ellipse cx="305" cy="360" rx="12" ry="11"/>
+    <ellipse cx="340" cy="378" rx="14" ry="10"/>
+    <ellipse cx="375" cy="355" rx="11" ry="9"/>
+    <ellipse cx="405" cy="372" rx="13" ry="11"/>
+    <ellipse cx="430" cy="358" rx="10" ry="8"/>
+    <ellipse cx="190" cy="400" rx="13" ry="10"/>
+    <ellipse cx="225" cy="415" rx="11" ry="9"/>
+    <ellipse cx="260" cy="398" rx="14" ry="11"/>
+    <ellipse cx="295" cy="420" rx="12" ry="10"/>
+    <ellipse cx="330" cy="402" rx="13" ry="9"/>
+    <ellipse cx="365" cy="418" rx="11" ry="10"/>
+    <ellipse cx="400" cy="405" rx="12" ry="9"/>
+    <ellipse cx="435" cy="395" rx="10" ry="8"/>
+    <ellipse cx="175" cy="430" rx="11" ry="9"/>
+    <ellipse cx="210" cy="440" rx="12" ry="8"/>
+    <ellipse cx="250" cy="435" rx="10" ry="9"/>
+    <ellipse cx="290" cy="442" rx="13" ry="8"/>
+    <ellipse cx="330" cy="438" rx="11" ry="9"/>
+    <ellipse cx="370" cy="442" rx="12" ry="8"/>
+    <ellipse cx="410" cy="435" rx="10" ry="9"/>
+    <ellipse cx="440" cy="428" rx="9" ry="7"/>
+  </g>
+  <!-- Water indication at bottom -->
+  <path d="M155 445 Q200 442 250 446 Q300 450 350 445 Q400 440 445 447"
+        stroke="#A8D4E6" stroke-width="2" fill="none" opacity="0.6"/>
+  <!-- Depth marker -->
+  <line x1="135" y1="335" x2="135" y2="450" stroke="#B8A99A" stroke-width="1"/>
+  <line x1="130" y1="335" x2="140" y2="335" stroke="#B8A99A" stroke-width="1"/>
+  <line x1="130" y1="450" x2="140" y2="450" stroke="#B8A99A" stroke-width="1"/>
+  <text x="125" y="395" text-anchor="end" class="depth">2-3 cm</text>
+
+  <!-- Layer numbers on left -->
+  <g>
+    <circle cx="95" cy="230" r="12" fill="#B8A99A"/>
+    <text x="95" y="234" text-anchor="middle" class="label" style="fill:#F8F7F5; font-weight:bold;">4</text>
+
+    <circle cx="95" cy="295" r="12" fill="#B8A99A"/>
+    <text x="95" y="299" text-anchor="middle" class="label" style="fill:#F8F7F5; font-weight:bold;">3</text>
+
+    <circle cx="95" cy="322" r="12" fill="#B8A99A"/>
+    <text x="95" y="326" text-anchor="middle" class="label" style="fill:#F8F7F5; font-weight:bold;">2</text>
+
+    <circle cx="95" cy="392" r="12" fill="#B8A99A"/>
+    <text x="95" y="396" text-anchor="middle" class="label" style="fill:#F8F7F5; font-weight:bold;">1</text>
+  </g>
+
+  <!-- Bottom caption -->
+  <text x="300" y="495" text-anchor="middle" class="label" style="font-style: italic;">
+    Each layer serves a purpose — never skip the drainage
+  </text>
+</svg>

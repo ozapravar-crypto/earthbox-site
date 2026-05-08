@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 746 746" width="746" height="746">
+  <defs>
+    <clipPath id="inner-frame">
+      <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"/>
+    </clipPath>
+    <radialGradient id="lava-glow" cx="0.5" cy="0.5" r="0.6">
+      <stop offset="0" stop-color="#ff7a1a" stop-opacity="0.85"/>
+      <stop offset="0.4" stop-color="#c8500e" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#5a230a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <g clip-path="url(#inner-frame)">
+
+    <!-- Olive moon -->
+    <circle cx="431" cy="232" r="12" fill="#67684A"/>
+
+    <!-- ===== FALLING EMBERS (vertical column of small dots) ===== -->
+    <g>
+      <circle cx="372" cy="280" r="1.0" fill="#5a3a1a"/>
+      <circle cx="372" cy="291" r="1.1" fill="#7a4a1e"/>
+      <circle cx="372" cy="302" r="1.2" fill="#945514"/>
+      <circle cx="372" cy="313" r="1.3" fill="#a25a16"/>
+      <circle cx="372" cy="324" r="1.3" fill="#b26318"/>
+      <circle cx="372" cy="335" r="1.4" fill="#bd6a18"/>
+      <circle cx="372" cy="346" r="1.5" fill="#c87018"/>
+      <circle cx="372" cy="357" r="1.5" fill="#cf761a"/>
+      <circle cx="372" cy="368" r="1.6" fill="#d37b1c"/>
+      <circle cx="372" cy="379" r="1.7" fill="#d37e1e"/>
+      <circle cx="372" cy="390" r="1.7" fill="#cb781c"/>
+      <circle cx="372" cy="401" r="1.6" fill="#b8691a"/>
+    </g>
+
+    <!-- ===== LAVA GLOW UNDER MOUNTAIN ===== -->
+    <ellipse cx="372" cy="555" rx="120" ry="38" fill="url(#lava-glow)"/>
+
+    <!-- ===== DARK VOLCANO PEAK ===== -->
+    <!-- Sharp irregular mountain with jagged silhouette -->
+    <path d="M 290 555
+             L 295 540
+             L 305 530
+             L 315 520
+             L 322 510
+             L 330 498
+             L 338 485
+             L 343 472
+             L 348 455
+             L 352 442
+             L 358 455
+             L 362 470
+             L 365 485
+             L 368 500
+             L 372 515
+             L 378 528
+             L 385 540
+             L 395 552
+             L 410 558
+             L 425 562
+             L 440 564
+             L 460 562
+             L 480 560
+             L 487 562
+             L 487 610 L 259 610 Z"
+          fill="#15151a"/>
+
+    <!-- Highlight ridge on volcano right side (subtle) -->
+    <path d="M 352 442 L 358 455 L 365 485 L 372 515 L 385 540"
+          stroke="#3a3a3f" stroke-width="0.8" fill="none" opacity="0.7"/>
+
+    <!-- ===== LAVA POOL (orange surface) ===== -->
+    <path d="M 295 558
+             C 320 552, 345 555, 365 560
+             C 380 555, 395 558, 410 562
+             C 430 558, 450 560, 470 558
+             L 487 560 L 487 580 L 259 580 L 259 562 Z"
+          fill="#b35a16"/>
+
+    <!-- Bright lava streaks -->
+    <path d="M 300 560
+             C 325 555, 350 558, 375 562
+             C 400 558, 425 560, 450 558
+             C 465 557, 478 560, 487 558"
+          stroke="#ff8a28" stroke-width="2.2" fill="none" opacity="0.85"/>
+
+    <!-- Foreground darker crust -->
+    <path d="M 259 575
+             C 285 568, 320 568, 355 572
+             C 390 575, 425 568, 460 572
+             C 475 572, 482 575, 487 575
+             L 487 610 L 259 610 Z"
+          fill="#0a0a07"/>
+
+    <!-- Tiny lava sparks at base -->
+    <g fill="#ff8a28" opacity="0.9">
+      <circle cx="305" cy="567" r="0.7"/>
+      <circle cx="328" cy="572" r="0.6"/>
+      <circle cx="350" cy="568" r="0.7"/>
+      <circle cx="395" cy="570" r="0.7"/>
+      <circle cx="420" cy="567" r="0.6"/>
+      <circle cx="445" cy="572" r="0.7"/>
+      <circle cx="465" cy="568" r="0.6"/>
+    </g>
+  </g>
+
+  <!-- Outer frame -->
+  <path d="M 282 131 L 463 131 L 493 161 L 493 585 L 463 615 L 282 615 L 252 585 L 252 161 Z"
+        fill="none" stroke="#000" stroke-width="3.5" stroke-linejoin="miter"/>
+  <!-- Inner thin frame -->
+  <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"
+        fill="none" stroke="#000" stroke-width="1.2" stroke-linejoin="miter"/>
+</svg>

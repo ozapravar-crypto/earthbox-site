@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 450" fill="none">
+  <style>
+    .label { font-family: 'Quattrocento Sans', sans-serif; font-size: 11px; fill: #4A4A4A; }
+    .title { font-family: 'Oranienbaum', serif; font-size: 20px; fill: #2C2C2B; }
+    .heading { font-family: 'Oranienbaum', serif; font-size: 14px; fill: #2C2C2B; }
+    .detail { font-family: 'Quattrocento Sans', sans-serif; font-size: 10px; fill: #787878; }
+    .percent { font-family: 'Quattrocento Sans', sans-serif; font-size: 9px; fill: #F8F7F5; font-weight: bold; }
+  </style>
+
+  <!-- Background -->
+  <rect width="700" height="450" fill="#F8F7F5"/>
+
+  <!-- Title -->
+  <text x="350" y="30" text-anchor="middle" class="title">Substrate Mixes for Different Plant Types</text>
+  <text x="350" y="48" text-anchor="middle" class="detail">Recommended ratios for terrarium and pot plants</text>
+
+  <!-- Legend -->
+  <g transform="translate(500, 65)">
+    <rect x="0" y="0" width="180" height="100" rx="4" fill="#EFECE5" stroke="#E5E2DB"/>
+    <text x="90" y="18" text-anchor="middle" class="heading" style="font-size:11px;">Components</text>
+    <rect x="10" y="28" width="12" height="12" fill="#8B7355"/>
+    <text x="28" y="38" class="label">Potting soil</text>
+    <rect x="10" y="45" width="12" height="12" fill="#D4C4A8"/>
+    <text x="28" y="55" class="label">Perlite</text>
+    <rect x="10" y="62" width="12" height="12" fill="#C4A574"/>
+    <text x="28" y="72" class="label">Sand/Grit</text>
+    <rect x="10" y="79" width="12" height="12" fill="#5D8A4A"/>
+    <text x="28" y="89" class="label">Sphagnum moss</text>
+    <rect x="100" y="28" width="12" height="12" fill="#4A3728"/>
+    <text x="118" y="38" class="label">Charcoal</text>
+    <rect x="100" y="45" width="12" height="12" fill="#9A8A7B"/>
+    <text x="118" y="55" class="label">Bark chips</text>
+    <rect x="100" y="62" width="12" height="12" fill="#6B8E5A"/>
+    <text x="118" y="72" class="label">Coco coir</text>
+  </g>
+
+  <!-- Mix 1: Tropical/Ferns -->
+  <g transform="translate(50, 90)">
+    <rect x="0" y="0" width="200" height="160" rx="6" fill="#6BA3BE" opacity="0.1" stroke="#6BA3BE" stroke-width="1.5"/>
+    <text x="100" y="22" text-anchor="middle" class="heading">Tropical / Ferns</text>
+    <text x="100" y="38" text-anchor="middle" class="detail">High moisture retention</text>
+
+    <!-- Stacked bar visualization -->
+    <g transform="translate(30, 50)">
+      <rect x="0" y="0" width="140" height="20" fill="#8B7355"/>
+      <text x="70" y="14" text-anchor="middle" class="percent">Soil 40%</text>
+
+      <rect x="0" y="22" width="140" height="15" fill="#6B8E5A"/>
+      <text x="70" y="33" text-anchor="middle" class="percent">Coco coir 25%</text>
+
+      <rect x="0" y="39" width="140" height="12" fill="#D4C4A8"/>
+      <text x="70" y="49" text-anchor="middle" class="percent">Perlite 20%</text>
+
+      <rect x="0" y="53" width="140" height="10" fill="#4A3728"/>
+      <text x="70" y="62" text-anchor="middle" class="percent">Charcoal 15%</text>
+    </g>
+
+    <!-- Plant icons -->
+    <g transform="translate(100, 130)">
+      <path d="M-20 0 Q-25 -15 -15 -25 M-20 0 Q-15 -20 -5 -28 M-20 0 Q-10 -15 0 -22"
+            stroke="#6B8E5A" stroke-width="2" fill="none"/>
+      <text x="0" y="15" text-anchor="middle" class="detail">Ferns, Fittonia</text>
+    </g>
+  </g>
+
+  <!-- Mix 2: Succulents/Cacti -->
+  <g transform="translate(270, 90)">
+    <rect x="0" y="0" width="200" height="160" rx="6" fill="#F5D76E" opacity="0.15" stroke="#F5D76E" stroke-width="1.5"/>
+    <text x="100" y="22" text-anchor="middle" class="heading">Succulents / Cacti</text>
+    <text x="100" y="38" text-anchor="middle" class="detail">Fast drainage essential</text>
+
+    <!-- Stacked bar visualization -->
+    <g transform="translate(30, 50)">
+      <rect x="0" y="0" width="140" height="14" fill="#8B7355"/>
+      <text x="70" y="11" text-anchor="middle" class="percent">Soil 30%</text>
+
+      <rect x="0" y="16" width="140" height="18" fill="#C4A574"/>
+      <text x="70" y="28" text-anchor="middle" class="percent">Sand/Grit 35%</text>
+
+      <rect x="0" y="36" width="140" height="15" fill="#D4C4A8"/>
+      <text x="70" y="47" text-anchor="middle" class="percent">Perlite 25%</text>
+
+      <rect x="0" y="53" width="140" height="8" fill="#4A3728"/>
+      <text x="70" y="60" text-anchor="middle" class="percent">Charcoal 10%</text>
+    </g>
+
+    <!-- Plant icons -->
+    <g transform="translate(100, 130)">
+      <ellipse cx="-15" cy="-15" rx="10" ry="6" fill="#7DA469"/>
+      <ellipse cx="0" cy="-20" rx="8" ry="5" fill="#8AB87A"/>
+      <ellipse cx="15" cy="-12" rx="12" ry="7" fill="#6B8E5A"/>
+      <text x="0" y="15" text-anchor="middle" class="detail">Echeveria, Haworthia</text>
+    </g>
+  </g>
+
+  <!-- Mix 3: Moss Terrarium -->
+  <g transform="translate(50, 270)">
+    <rect x="0" y="0" width="200" height="160" rx="6" fill="#6B8E5A" opacity="0.1" stroke="#6B8E5A" stroke-width="1.5"/>
+    <text x="100" y="22" text-anchor="middle" class="heading">Moss Terrarium</text>
+    <text x="100" y="38" text-anchor="middle" class="detail">Acidic, moisture-loving</text>
+
+    <!-- Stacked bar visualization -->
+    <g transform="translate(30, 50)">
+      <rect x="0" y="0" width="140" height="22" fill="#5D8A4A"/>
+      <text x="70" y="15" text-anchor="middle" class="percent">Sphagnum 40%</text>
+
+      <rect x="0" y="24" width="140" height="14" fill="#8B7355"/>
+      <text x="70" y="34" text-anchor="middle" class="percent">Peat soil 25%</text>
+
+      <rect x="0" y="40" width="140" height="10" fill="#D4C4A8"/>
+      <text x="70" y="49" text-anchor="middle" class="percent">Perlite 15%</text>
+
+      <rect x="0" y="52" width="140" height="10" fill="#4A3728"/>
+      <text x="70" y="61" text-anchor="middle" class="percent">Charcoal 20%</text>
+    </g>
+
+    <!-- Plant icons -->
+    <g transform="translate(100, 130)">
+      <ellipse cx="0" cy="-12" rx="25" ry="8" fill="#7DA469"/>
+      <ellipse cx="-10" cy="-16" rx="12" ry="5" fill="#8AB87A"/>
+      <ellipse cx="12" cy="-14" rx="10" ry="4" fill="#6B8E5A"/>
+      <text x="0" y="15" text-anchor="middle" class="detail">Sheet moss, Cushion moss</text>
+    </g>
+  </g>
+
+  <!-- Mix 4: Orchids/Epiphytes -->
+  <g transform="translate(270, 270)">
+    <rect x="0" y="0" width="200" height="160" rx="6" fill="#9A8A7B" opacity="0.2" stroke="#9A8A7B" stroke-width="1.5"/>
+    <text x="100" y="22" text-anchor="middle" class="heading">Orchids / Epiphytes</text>
+    <text x="100" y="38" text-anchor="middle" class="detail">Airy, well-draining</text>
+
+    <!-- Stacked bar visualization -->
+    <g transform="translate(30, 50)">
+      <rect x="0" y="0" width="140" height="25" fill="#9A8A7B"/>
+      <text x="70" y="16" text-anchor="middle" class="percent">Bark chips 45%</text>
+
+      <rect x="0" y="27" width="140" height="15" fill="#5D8A4A"/>
+      <text x="70" y="38" text-anchor="middle" class="percent">Sphagnum 25%</text>
+
+      <rect x="0" y="44" width="140" height="10" fill="#D4C4A8"/>
+      <text x="70" y="53" text-anchor="middle" class="percent">Perlite 15%</text>
+
+      <rect x="0" y="56" width="140" height="8" fill="#4A3728"/>
+      <text x="70" y="63" text-anchor="middle" class="percent">Charcoal 15%</text>
+    </g>
+
+    <!-- Plant icons -->
+    <g transform="translate(100, 130)">
+      <path d="M-10 0 Q-15 -20 -5 -30 M0 0 Q5 -25 15 -32 M10 0 Q20 -15 25 -25"
+            stroke="#7DA469" stroke-width="2" fill="none"/>
+      <text x="0" y="15" text-anchor="middle" class="detail">Phalaenopsis, Air plants</text>
+    </g>
+  </g>
+
+  <!-- Key principles box -->
+  <g transform="translate(490, 180)">
+    <rect x="0" y="0" width="190" height="250" rx="6" fill="#B8A99A" opacity="0.15" stroke="#B8A99A" stroke-width="1.5"/>
+    <text x="95" y="22" text-anchor="middle" class="heading">Key Principles</text>
+
+    <g transform="translate(15, 40)">
+      <circle cx="8" cy="8" r="5" fill="#6BA3BE"/>
+      <text x="20" y="6" class="label">Moisture lovers:</text>
+      <text x="20" y="18" class="detail">More coir/moss</text>
+
+      <circle cx="8" cy="48" r="5" fill="#F5D76E"/>
+      <text x="20" y="46" class="label">Drought tolerant:</text>
+      <text x="20" y="58" class="detail">More sand/grit</text>
+
+      <circle cx="8" cy="88" r="5" fill="#4A3728"/>
+      <text x="20" y="86" class="label">Always include:</text>
+      <text x="20" y="98" class="detail">10-20% charcoal</text>
+      <text x="20" y="110" class="detail">(prevents odor)</text>
+
+      <circle cx="8" cy="138" r="5" fill="#D4C4A8"/>
+      <text x="20" y="136" class="label">Drainage layer:</text>
+      <text x="20" y="148" class="detail">Perlite or pumice</text>
+
+      <circle cx="8" cy="178" r="5" fill="#6B8E5A"/>
+      <text x="20" y="176" class="label">Test moisture:</text>
+      <text x="20" y="188" class="detail">Water should drain</text>
+      <text x="20" y="200" class="detail">in 5-10 seconds</text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,67 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Running head · fixed top bar with brand mark, nav, scroll counter
+   mix-blend-difference makes it readable over both light & dark sections.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.runhead{
+  position:fixed;
+  top:0;left:0;right:0;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  padding:1.5rem var(--pad);
+  z-index:80;
+  pointer-events:none;
+  mix-blend-mode:difference;
+}
+.runhead > *{pointer-events:auto}
+
+.runhead .caption{
+  color:rgba(248,247,245,.92);
+  font-size:.62rem;
+  letter-spacing:.38em;
+}
+
+.runhead-left{justify-self:start}
+
+.runhead-nav{
+  justify-self:center;
+  display:flex;
+  gap:2.5rem;
+}
+.runhead-nav a{
+  font-family:var(--sans);
+  font-size:.62rem;
+  letter-spacing:.34em;
+  text-transform:uppercase;
+  color:rgba(248,247,245,.78);
+  position:relative;
+  transition:color .25s ease;
+}
+.runhead-nav a:hover{
+  color:rgba(248,247,245,.98);
+}
+.runhead-nav a[aria-current="page"]{
+  color:rgba(248,247,245,.98);
+}
+.runhead-nav a[aria-current="page"]::after{
+  content:"";
+  position:absolute;
+  left:0;right:0;
+  bottom:-6px;
+  height:1px;
+  background:var(--accent);
+}
+
+.runhead-right{justify-self:end}
+.runhead .counter{
+  display:inline-block;
+  min-width:1.5em;
+  color:rgba(184,169,154,.95);
+}
+
+@media (max-width: 720px){
+  .runhead{grid-template-columns:auto 1fr;}
+  .runhead-nav{display:none}
+  .runhead-right{justify-self:end}
+}

@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 746 746" width="746" height="746">
+  <defs>
+    <clipPath id="inner-frame">
+      <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"/>
+    </clipPath>
+    <!-- Mask: dark mountains MINUS the arch hole -->
+    <mask id="arch-cutout">
+      <rect x="0" y="0" width="746" height="746" fill="white"/>
+      <ellipse cx="362" cy="453" rx="20" ry="11" fill="black"/>
+    </mask>
+  </defs>
+
+  <g clip-path="url(#inner-frame)">
+
+    <!-- Olive moon -->
+    <circle cx="431" cy="232" r="12" fill="#67684A"/>
+
+    <!-- ===== DARK MOUNTAIN MASS (with arch cutout) ===== -->
+    <g mask="url(#arch-cutout)">
+      <!-- Back ridge: high left peak, lower right -->
+      <path d="M 259 425
+               C 270 410, 282 395, 295 388
+               C 308 378, 320 372, 332 376
+               C 344 380, 354 388, 362 398
+               C 370 388, 380 384, 392 388
+               C 405 392, 418 405, 432 418
+               C 446 425, 462 432, 480 438
+               L 487 442 L 487 610 L 259 610 Z"
+            fill="#1a1a16"/>
+
+      <!-- Mid ridge with bumpy crest -->
+      <path d="M 259 460
+               C 275 444, 290 438, 305 446
+               C 318 438, 332 440, 345 450
+               C 357 442, 372 442, 385 452
+               C 400 446, 416 450, 430 460
+               C 446 454, 462 458, 480 466
+               L 487 470 L 487 610 L 259 610 Z"
+            fill="#0e0e0a"/>
+
+      <!-- Front layer with gentle wavy crest -->
+      <path d="M 259 498
+               C 280 484, 305 482, 325 492
+               C 345 484, 368 484, 388 494
+               C 410 486, 435 488, 458 498
+               C 470 494, 480 498, 487 502
+               L 487 610 L 259 610 Z"
+            fill="#06060a"/>
+
+      <!-- Foreground darkest swell -->
+      <path d="M 259 540
+               C 285 528, 320 528, 355 538
+               C 388 545, 420 530, 455 540
+               C 470 538, 480 542, 487 544
+               L 487 610 L 259 610 Z"
+            fill="#020202"/>
+    </g>
+
+    <!-- Subtle highlight/ridge line under arch -->
+    <path d="M 340 458 Q 362 463 384 458" stroke="#3a3a32" stroke-width="0.8" fill="none" opacity="0.7"/>
+
+    <!-- ===== STAR/SAND SPECKLES IN DARK AREAS ===== -->
+    <g fill="#e6e2d4" opacity="0.55">
+      <circle cx="280" cy="500" r="0.6"/>
+      <circle cx="298" cy="515" r="0.7"/>
+      <circle cx="312" cy="505" r="0.5"/>
+      <circle cx="278" cy="535" r="0.7"/>
+      <circle cx="295" cy="548" r="0.6"/>
+      <circle cx="310" cy="558" r="0.6"/>
+      <circle cx="320" cy="540" r="0.5"/>
+      <circle cx="335" cy="555" r="0.6"/>
+      <circle cx="290" cy="572" r="0.7"/>
+      <circle cx="305" cy="582" r="0.6"/>
+      <circle cx="322" cy="573" r="0.5"/>
+      <circle cx="338" cy="585" r="0.6"/>
+      <circle cx="358" cy="575" r="0.5"/>
+      <circle cx="373" cy="588" r="0.6"/>
+      <circle cx="395" cy="578" r="0.6"/>
+      <circle cx="412" cy="585" r="0.5"/>
+      <circle cx="430" cy="572" r="0.6"/>
+      <circle cx="450" cy="585" r="0.5"/>
+      <circle cx="468" cy="578" r="0.6"/>
+      <circle cx="285" cy="595" r="0.5"/>
+      <circle cx="318" cy="600" r="0.6"/>
+      <circle cx="350" cy="598" r="0.5"/>
+      <circle cx="385" cy="600" r="0.6"/>
+      <circle cx="420" cy="595" r="0.5"/>
+      <circle cx="455" cy="600" r="0.6"/>
+    </g>
+
+    <!-- Faint hatch texture on the back ridge (very subtle) -->
+    <g stroke="#2a2a25" stroke-width="0.4" opacity="0.5" fill="none">
+      <line x1="320" y1="420" x2="335" y2="425"/>
+      <line x1="305" y1="430" x2="320" y2="436"/>
+      <line x1="345" y1="425" x2="362" y2="430"/>
+      <line x1="395" y1="420" x2="412" y2="426"/>
+      <line x1="428" y1="430" x2="445" y2="436"/>
+    </g>
+  </g>
+
+  <!-- Outer frame -->
+  <path d="M 282 131 L 463 131 L 493 161 L 493 585 L 463 615 L 282 615 L 252 585 L 252 161 Z"
+        fill="none" stroke="#000" stroke-width="3.5" stroke-linejoin="miter"/>
+  <!-- Inner thin frame -->
+  <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"
+        fill="none" stroke="#000" stroke-width="1.2" stroke-linejoin="miter"/>
+</svg>

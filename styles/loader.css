@@ -1,0 +1,93 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   loader.css · First-load intro animation
+   Wordmark rises, hairline draws, panel slides up (~2.4s total).
+   Plays once per session via sessionStorage flag.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.loader{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:1.5rem;
+}
+
+.loader-wordmark{
+  font-family:var(--serif);
+  font-size:clamp(2.5rem,8vw,5rem);
+  letter-spacing:-.015em;
+  line-height:1;
+  color:var(--ink);
+  display:flex;
+  overflow:hidden;
+}
+.loader-wordmark span{
+  display:inline-block;
+  transform:translateY(110%);
+  opacity:0;
+}
+.loader.is-playing .loader-wordmark span{
+  animation:loaderRise .7s var(--ease-rise) forwards;
+}
+@keyframes loaderRise{
+  to{transform:translateY(0);opacity:1}
+}
+
+.loader-rule{
+  width:0;
+  height:1px;
+  background:var(--rule);
+}
+.loader.is-playing .loader-rule{
+  animation:loaderRule .5s ease forwards;
+  animation-delay:.75s;
+}
+@keyframes loaderRule{
+  to{width:min(280px, 60vw)}
+}
+
+.loader-panel{
+  position:absolute;
+  inset:0;
+  background:var(--bg);
+  transform:translateY(0);
+}
+.loader.is-playing .loader-panel{
+  animation:loaderSlide 1s var(--ease-archival) forwards;
+  animation-delay:1.4s;
+}
+@keyframes loaderSlide{
+  to{transform:translateY(-100%)}
+}
+
+.loader.is-done{
+  pointer-events:none;
+  visibility:hidden;
+}
+
+body.is-loading{
+  overflow:hidden;
+}
+body.is-loading .hero,
+body.is-loading .runhead,
+body.is-loading .watcher{
+  opacity:0;
+}
+body:not(.is-loading) .hero,
+body:not(.is-loading) .runhead,
+body:not(.is-loading) .watcher{
+  opacity:1;
+  transition:opacity .4s ease;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .loader{display:none}
+  body.is-loading{overflow:auto}
+  body.is-loading .hero,
+  body.is-loading .runhead,
+  body.is-loading .watcher{opacity:1}
+}

@@ -1,0 +1,118 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   category.css · Individual category sub-pages
+   /catalogue/terrariums.html, /catalogue/planters.html, etc.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.category-head{
+  padding-block:clamp(7rem,15vh,12rem) clamp(2rem,4vh,3rem);
+  text-align:center;
+}
+.category-head h1{
+  font-size:clamp(3rem,7vw,6rem);
+  max-width:18ch;
+  margin:1.5rem auto 0;
+}
+.category-head .lede{
+  margin-top:1.5rem;
+  margin-inline:auto;
+  max-width:54ch;
+}
+
+.back-link{
+  display:inline-block;
+  margin-bottom:1.5rem;
+  color:var(--mute);
+  text-decoration:none;
+  transition:color .25s ease;
+}
+.back-link:hover{
+  color:var(--ink);
+}
+
+.category-products{
+  padding-block:clamp(2rem,4vh,3rem) clamp(4rem,8vh,6rem);
+  max-width:900px;
+  margin:0 auto;
+}
+
+/* Product row styling (inherits from products.css but with adjustments) */
+.category-products .product-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:2rem;
+  padding:2rem 0;
+  border-bottom:1px solid var(--rule);
+  text-decoration:none;
+  color:inherit;
+  transition:background .25s ease;
+}
+.category-products .product-row:first-child{
+  border-top:1px solid var(--rule);
+}
+.category-products .product-row:hover{
+  background:var(--bg-tint);
+}
+
+.category-products .product-meta{
+  display:flex;
+  flex-direction:column;
+  gap:.5rem;
+}
+.category-products .product-index{
+  font-family:var(--serif);
+  font-size:2rem;
+  color:var(--accent);
+  line-height:1;
+  margin-bottom:.5rem;
+}
+.category-products .product-name{
+  font-family:var(--serif);
+  font-size:1.5rem;
+  font-weight:400;
+  color:var(--ink);
+}
+.category-products .product-sub{
+  font-family:var(--body);
+  font-size:.85rem;
+  color:var(--mute);
+  font-style:italic;
+}
+.category-products .product-desc{
+  font-family:var(--body);
+  font-size:.95rem;
+  color:var(--ink-soft);
+  line-height:1.6;
+  max-width:48ch;
+}
+
+.category-products .product-price{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:.5rem;
+  text-align:right;
+}
+.category-products .price-value{
+  font-family:var(--serif);
+  font-size:1.1rem;
+  color:var(--ink);
+}
+.category-products .product-row-cta{
+  margin-top:.5rem;
+  color:var(--accent);
+  transition:color .25s ease;
+}
+.category-products .product-row:hover .product-row-cta{
+  color:var(--ink);
+}
+
+@media (max-width: 720px){
+  .category-products .product-row{
+    grid-template-columns:1fr;
+    gap:1.5rem;
+  }
+  .category-products .product-price{
+    align-items:flex-start;
+    text-align:left;
+  }
+}

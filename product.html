@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EarthBox — Product</title>
+  <meta name="description" content="View product details from the EarthBox catalogue. 3D printed plant accessories and terrariums, designed in Mumbai." />
+  <link rel="canonical" href="https://earthbox.in/product.html" />
+  <link rel="icon" type="image/png" href="assets/logo.png" />
+  <link rel="apple-touch-icon" href="assets/logo.png" />
+
+  <!-- Geo Tags -->
+  <meta name="geo.region" content="IN-MH" />
+  <meta name="geo.placename" content="Kandivali, Mumbai" />
+  <meta name="geo.position" content="19.2047;72.8567" />
+  <meta name="ICBM" content="19.2047, 72.8567" />
+
+  <!-- Open Graph (defaults, JS updates dynamically) -->
+  <meta property="og:type" content="product" />
+  <meta property="og:url" content="https://earthbox.in/product.html" />
+  <meta property="og:title" content="EarthBox — Product" />
+  <meta property="og:description" content="View product details from the EarthBox catalogue." />
+  <meta property="og:image" content="https://earthbox.in/assets/og-home.jpg" />
+  <meta property="og:site_name" content="EarthBox" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="EarthBox — Product" />
+  <meta name="twitter:description" content="View product details from the EarthBox catalogue." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oranienbaum&family=Quattrocento+Sans:ital,wght@0,400;0,700;1,400&family=Liter&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/reset.css">
+  <link rel="stylesheet" href="styles/typography.css">
+  <link rel="stylesheet" href="styles/primitives.css">
+  <link rel="stylesheet" href="styles/atmosphere.css">
+  <link rel="stylesheet" href="styles/runhead.css">
+  <link rel="stylesheet" href="styles/menu.css">
+  <link rel="stylesheet" href="styles/motion.css">
+  <link rel="stylesheet" href="styles/cursor.css">
+  <link rel="stylesheet" href="styles/home.css">
+  <link rel="stylesheet" href="styles/products.css">
+  <link rel="stylesheet" href="styles/product-detail.css">
+
+  <script type="module" src="scripts/main.js"></script>
+</head>
+<body>
+
+<!-- ═══ SHARED · running head ═══ -->
+<header class="runhead" role="banner">
+  <span class="runhead-left caption">EarthBox</span>
+  <nav class="runhead-nav" aria-label="Primary">
+    <a href="index.html">Home</a>
+    <a href="products.html">Catalogue</a>
+    <a href="about.html">About</a>
+  </nav>
+  <span class="runhead-right caption">
+    <span class="counter" id="scrollPct">00</span> / 100
+  </span>
+</header>
+
+<!-- ═══ SHARED · watcher specimen frame ═══ -->
+<div class="watcher" aria-hidden="true">
+  <svg viewBox="0 0 70 98">
+    <rect class="wfill" x="4" y="6" width="62" height="86"/>
+    <rect class="wstroke" x="4" y="6" width="62" height="86"/>
+    <rect class="winner" x="7" y="9" width="56" height="80"/>
+    <line class="wstroke" x1="32" y1="2" x2="38" y2="2"/>
+    <line class="wstroke" x1="32" y1="96" x2="38" y2="96"/>
+    <rect class="wdot wpulse" x="57" y="11" width="3.5" height="3.5"/>
+  </svg>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PRODUCT DETAIL · all containers populated by render-product-detail.js
+     URL pattern: /product.html?id=<SKU>
+     ═══════════════════════════════════════════════════════════════════ -->
+<main id="productDetail" class="product-detail">
+
+  <!-- Empty by default — JS fills this with the right layout for V1/V2/V3 -->
+  <div class="pd-loading" id="pdLoading">
+    <span class="caption italic">Loading…</span>
+  </div>
+
+  <div class="pd-not-found" id="pdNotFound" hidden>
+    <h1>Piece not found</h1>
+    <p class="lede italic" style="margin-top:1rem">We couldn't find that product. It may have been retired, or the link is mistyped.</p>
+    <a class="cta" href="products.html" style="margin-top:2rem" data-cursor="VIEW">
+      Back to the catalogue
+      <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
+    </a>
+  </div>
+
+</main>
+
+
+<!-- ═══ SHARED · colophon footer (same across all pages) ═══ -->
+<footer class="colophon">
+  <div class="colo-main">
+    <div class="colo-mark">
+      <img src="assets/logo.png" alt="EarthBox logo" width="60" height="60"/>
+      <div>
+        <div class="wname">EarthBox</div>
+        <span class="ws">Contained Worlds</span>
+      </div>
+    </div>
+
+    <div class="colo-col">
+      <h5>Browse</h5>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html">Catalogue</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+    </div>
+
+    <div class="colo-col">
+      <h5>Correspondence</h5>
+      <ul>
+        <li><a href="mailto:aayush.lilani@gmail.com">aayush.lilani@gmail.com</a></li>
+        <li><a href="tel:+918104811584">+91 81048 11584</a></li>
+        <li><a href="https://www.instagram.com/earthbox_india" target="_blank" rel="noopener">@earthbox_india</a></li>
+        <li><a href="https://www.linkedin.com/in/aayush-lilani-13a329292/" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li>Kandivali · Mumbai</li>
+      </ul>
+    </div>
+
+    <div class="colo-col">
+      <h5>Studio</h5>
+      <ul>
+        <li>By enquiry only</li>
+        <li>Delivery within Mumbai</li>
+        <li>Studio visit by appointment</li>
+      </ul>
+    </div>
+
+    <div class="colo-col">
+      <h5>Replacement &amp; Cancellation</h5>
+      <ul>
+        <li>Within 12 hours of order · full refund</li>
+        <li>Before shipping · 70% refund</li>
+        <li>After shipping · 50% refund</li>
+        <li>Replacement case-by-case</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="colo-bar">
+    <span>© 2026 &nbsp;·&nbsp; EarthBox · Kandivali, Mumbai</span>
+    <span class="quote">The brand speaks softly, like a crafted object label.</span>
+  </div>
+</footer>
+
+</body>
+</html>

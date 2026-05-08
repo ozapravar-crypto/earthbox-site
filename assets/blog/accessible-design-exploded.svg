@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 500" fill="none">
+  <style>
+    .label { font-family: 'Quattrocento Sans', sans-serif; font-size: 11px; fill: #4A4A4A; }
+    .title { font-family: 'Oranienbaum', serif; font-size: 20px; fill: #2C2C2B; }
+    .heading { font-family: 'Oranienbaum', serif; font-size: 14px; fill: #2C2C2B; }
+    .detail { font-family: 'Quattrocento Sans', sans-serif; font-size: 10px; fill: #787878; }
+    .feature { font-family: 'Quattrocento Sans', sans-serif; font-size: 9px; fill: #6B8E5A; }
+  </style>
+
+  <!-- Background -->
+  <rect width="700" height="500" fill="#F8F7F5"/>
+
+  <!-- Title -->
+  <text x="350" y="30" text-anchor="middle" class="title">Accessible Component Design</text>
+  <text x="350" y="48" text-anchor="middle" class="detail">Exploded view showing modular, easy-to-maintain elements</text>
+
+  <!-- Main exploded view container -->
+  <g transform="translate(200, 80)">
+
+    <!-- Component 1: Plant/Terrarium top (removable) -->
+    <g transform="translate(0, 0)">
+      <!-- Terrarium dome -->
+      <ellipse cx="150" cy="50" rx="80" ry="30" fill="#F8F7F5" stroke="#9A8A7B" stroke-width="2" opacity="0.8"/>
+      <path d="M70 50 Q70 -20 150 -30 Q230 -20 230 50" fill="#F8F7F5" stroke="#9A8A7B" stroke-width="2" opacity="0.6"/>
+
+      <!-- Plant inside -->
+      <g transform="translate(150, 20)">
+        <ellipse cx="0" cy="0" rx="30" ry="12" fill="#7DA469"/>
+        <path d="M-15 -5 Q-20 -25 -10 -35 M0 -8 Q5 -30 15 -38 M15 -3 Q25 -20 30 -28"
+              stroke="#6B8E5A" stroke-width="2" fill="none"/>
+      </g>
+
+      <!-- Lift indicator -->
+      <path d="M150 -45 L150 -65" stroke="#6B8E5A" stroke-width="2" marker-end="url(#arrowUp)"/>
+      <text x="150" y="-72" text-anchor="middle" class="feature">Removable lid</text>
+    </g>
+
+    <!-- Dashed connection line -->
+    <line x1="150" y1="80" x2="150" y2="100" stroke="#B8A99A" stroke-dasharray="4 3"/>
+
+    <!-- Component 2: Inner pot (removable) -->
+    <g transform="translate(0, 110)">
+      <!-- Pot outline -->
+      <ellipse cx="150" cy="70" rx="60" ry="20" fill="#C4A574" stroke="#9A8A7B" stroke-width="1.5"/>
+      <path d="M90 70 L90 20 Q90 0 110 0 L190 0 Q210 0 210 20 L210 70"
+            fill="#C4A574" stroke="#9A8A7B" stroke-width="1.5"/>
+      <ellipse cx="150" cy="0" rx="60" ry="15" fill="#D4C4A8" stroke="#9A8A7B" stroke-width="1.5"/>
+
+      <!-- Soil visible -->
+      <ellipse cx="150" cy="0" rx="50" ry="10" fill="#8B7355"/>
+
+      <!-- Handles indication -->
+      <rect x="80" y="30" width="15" height="25" rx="3" fill="#B8A99A" stroke="#9A8A7B"/>
+      <rect x="205" y="30" width="15" height="25" rx="3" fill="#B8A99A" stroke="#9A8A7B"/>
+
+      <!-- Lift arrows at handles -->
+      <path d="M87 20 L87 5" stroke="#6B8E5A" stroke-width="1.5" marker-end="url(#arrowUpSmall)"/>
+      <path d="M213 20 L213 5" stroke="#6B8E5A" stroke-width="1.5" marker-end="url(#arrowUpSmall)"/>
+    </g>
+
+    <!-- Callout: Inner pot -->
+    <g transform="translate(280, 150)">
+      <line x1="0" y1="0" x2="40" y2="0" stroke="#B8A99A" stroke-dasharray="2 2"/>
+      <text x="45" y="4" class="label">Inner pot with handles</text>
+      <text x="45" y="16" class="detail">Lifts out for repotting</text>
+      <text x="45" y="28" class="detail">or drainage check</text>
+    </g>
+
+    <!-- Dashed connection line -->
+    <line x1="150" y1="195" x2="150" y2="215" stroke="#B8A99A" stroke-dasharray="4 3"/>
+
+    <!-- Component 3: Drainage tray -->
+    <g transform="translate(0, 225)">
+      <!-- Tray shape -->
+      <ellipse cx="150" cy="30" rx="75" ry="22" fill="#E5E2DB" stroke="#9A8A7B" stroke-width="1.5"/>
+      <path d="M75 30 L75 10 Q75 0 95 0 L205 0 Q225 0 225 10 L225 30"
+            fill="#E5E2DB" stroke="#9A8A7B" stroke-width="1.5"/>
+
+      <!-- Water level indication -->
+      <ellipse cx="150" cy="25" rx="60" ry="15" fill="#6BA3BE" opacity="0.3"/>
+
+      <!-- Drainage holes -->
+      <g fill="#9A8A7B">
+        <circle cx="120" cy="10" r="4"/>
+        <circle cx="150" cy="10" r="4"/>
+        <circle cx="180" cy="10" r="4"/>
+      </g>
+    </g>
+
+    <!-- Callout: Drainage tray -->
+    <g transform="translate(280, 250)">
+      <line x1="0" y1="0" x2="40" y2="0" stroke="#B8A99A" stroke-dasharray="2 2"/>
+      <text x="45" y="4" class="label">Drainage tray</text>
+      <text x="45" y="16" class="detail">Catches excess water</text>
+      <text x="45" y="28" class="detail">Easy to empty & clean</text>
+    </g>
+
+    <!-- Dashed connection line -->
+    <line x1="150" y1="280" x2="150" y2="300" stroke="#B8A99A" stroke-dasharray="4 3"/>
+
+    <!-- Component 4: Outer vessel/cradle -->
+    <g transform="translate(0, 310)">
+      <!-- Cradle shape -->
+      <path d="M50 60 Q50 80 80 80 L220 80 Q250 80 250 60 L250 0 Q250 -15 220 -15 L80 -15 Q50 -15 50 0 Z"
+            fill="#B8A99A" stroke="#9A8A7B" stroke-width="2"/>
+
+      <!-- Decorative rim -->
+      <ellipse cx="150" cy="-15" rx="100" ry="20" fill="none" stroke="#9A8A7B" stroke-width="2"/>
+
+      <!-- Parabolic inner curve -->
+      <path d="M70 60 Q100 20 150 10 Q200 20 230 60" fill="none" stroke="#C4A574" stroke-width="3"/>
+    </g>
+
+    <!-- Callout: Outer cradle -->
+    <g transform="translate(280, 355)">
+      <line x1="0" y1="0" x2="40" y2="0" stroke="#B8A99A" stroke-dasharray="2 2"/>
+      <text x="45" y="4" class="label">Parabolic cradle</text>
+      <text x="45" y="16" class="detail">Distributes weight evenly</text>
+      <text x="45" y="28" class="detail">Stable, won't tip</text>
+    </g>
+  </g>
+
+  <!-- Left side: Accessibility features list -->
+  <g transform="translate(30, 120)">
+    <rect x="0" y="0" width="140" height="200" rx="6" fill="#6B8E5A" opacity="0.1" stroke="#6B8E5A"/>
+    <text x="70" y="22" text-anchor="middle" class="heading" style="fill:#6B8E5A; font-size:12px;">Accessible Features</text>
+
+    <g transform="translate(15, 40)">
+      <circle cx="6" cy="6" r="4" fill="#6B8E5A"/>
+      <text x="16" y="10" class="label" style="font-size:10px;">Modular design</text>
+
+      <circle cx="6" cy="30" r="4" fill="#6B8E5A"/>
+      <text x="16" y="34" class="label" style="font-size:10px;">No tools needed</text>
+
+      <circle cx="6" cy="54" r="4" fill="#6B8E5A"/>
+      <text x="16" y="58" class="label" style="font-size:10px;">Lift-out inner pot</text>
+
+      <circle cx="6" cy="78" r="4" fill="#6B8E5A"/>
+      <text x="16" y="82" class="label" style="font-size:10px;">Easy drainage</text>
+
+      <circle cx="6" cy="102" r="4" fill="#6B8E5A"/>
+      <text x="16" y="106" class="label" style="font-size:10px;">Washable parts</text>
+
+      <circle cx="6" cy="126" r="4" fill="#6B8E5A"/>
+      <text x="16" y="130" class="label" style="font-size:10px;">Stable base</text>
+
+      <circle cx="6" cy="150" r="4" fill="#6B8E5A"/>
+      <text x="16" y="154" class="label" style="font-size:10px;">One-hand operation</text>
+    </g>
+  </g>
+
+  <!-- Assembly direction arrows (vertical) -->
+  <g transform="translate(550, 200)">
+    <rect x="0" y="0" width="120" height="100" rx="6" fill="#B8A99A" opacity="0.15" stroke="#B8A99A"/>
+    <text x="60" y="20" text-anchor="middle" class="heading" style="font-size:11px;">Assembly</text>
+
+    <g transform="translate(20, 35)">
+      <!-- Stack order -->
+      <rect x="0" y="0" width="80" height="12" rx="2" fill="#B8A99A"/>
+      <text x="40" y="10" text-anchor="middle" class="detail" style="fill:#F8F7F5;">4. Cradle</text>
+
+      <rect x="0" y="16" width="80" height="12" rx="2" fill="#E5E2DB"/>
+      <text x="40" y="26" text-anchor="middle" class="detail">3. Tray</text>
+
+      <rect x="0" y="32" width="80" height="12" rx="2" fill="#C4A574"/>
+      <text x="40" y="42" text-anchor="middle" class="detail" style="fill:#F8F7F5;">2. Inner pot</text>
+
+      <rect x="0" y="48" width="80" height="12" rx="2" fill="#9A8A7B" opacity="0.5"/>
+      <text x="40" y="58" text-anchor="middle" class="detail">1. Lid/dome</text>
+    </g>
+  </g>
+
+  <!-- Bottom note -->
+  <g transform="translate(200, 465)">
+    <text x="150" y="0" text-anchor="middle" class="detail">All components designed for easy separation — simplifies maintenance, cleaning, and plant care</text>
+  </g>
+
+  <defs>
+    <marker id="arrowUp" markerWidth="8" markerHeight="8" refX="4" refY="6" orient="auto">
+      <path d="M0,8 L4,0 L8,8 Z" fill="#6B8E5A"/>
+    </marker>
+    <marker id="arrowUpSmall" markerWidth="6" markerHeight="6" refX="3" refY="5" orient="auto">
+      <path d="M0,6 L3,0 L6,6 Z" fill="#6B8E5A"/>
+    </marker>
+  </defs>
+</svg>

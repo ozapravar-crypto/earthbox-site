@@ -1,0 +1,166 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 746 746" width="746" height="746">
+  <defs>
+    <clipPath id="inner-frame">
+      <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#inner-frame)">
+
+    <!-- Olive sun/moon -->
+    <circle cx="431" cy="232" r="12" fill="#67684A"/>
+
+    <!-- ===== FERN ===== -->
+    <!-- Trunk -->
+    <path d="M 373 305 L 373 482" stroke="#1a1d12" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+
+    <!-- Drooping fern fronds (paired). Each frond curves outward and droops. -->
+    <g stroke="#1a1d12" stroke-width="1.3" fill="none" stroke-linecap="round">
+      <!-- top tiny tip -->
+      <path d="M 373 305 C 372 300, 372 297, 374 293"/>
+
+      <!-- frond 1 -->
+      <path d="M 373 318 Q 363 320, 356 324"/>
+      <path d="M 373 318 Q 383 320, 390 324"/>
+      <!-- frond 2 -->
+      <path d="M 373 333 Q 360 336, 350 342"/>
+      <path d="M 373 333 Q 386 336, 396 342"/>
+      <!-- frond 3 -->
+      <path d="M 373 348 Q 358 352, 346 360"/>
+      <path d="M 373 348 Q 388 352, 400 360"/>
+      <!-- frond 4 -->
+      <path d="M 373 362 Q 354 367, 340 376"/>
+      <path d="M 373 362 Q 392 367, 406 376"/>
+      <!-- frond 5 -->
+      <path d="M 373 377 Q 351 383, 335 393"/>
+      <path d="M 373 377 Q 395 383, 411 393"/>
+      <!-- frond 6 -->
+      <path d="M 373 391 Q 348 398, 330 410"/>
+      <path d="M 373 391 Q 398 398, 416 410"/>
+      <!-- frond 7 -->
+      <path d="M 373 406 Q 345 414, 326 427"/>
+      <path d="M 373 406 Q 401 414, 420 427"/>
+      <!-- frond 8 -->
+      <path d="M 373 421 Q 343 430, 322 444"/>
+      <path d="M 373 421 Q 403 430, 424 444"/>
+      <!-- frond 9 -->
+      <path d="M 373 436 Q 341 446, 320 461"/>
+      <path d="M 373 436 Q 405 446, 426 461"/>
+      <!-- frond 10 (longest, near base) -->
+      <path d="M 373 451 Q 339 462, 318 478"/>
+      <path d="M 373 451 Q 407 462, 428 478"/>
+      <!-- frond 11 -->
+      <path d="M 373 466 Q 343 477, 324 488"/>
+      <path d="M 373 466 Q 403 477, 422 488"/>
+    </g>
+
+    <!-- Leaf dots running along each frond -->
+    <g fill="#1a1d12">
+      <!-- frond 1 -->
+      <circle cx="365" cy="320" r="1.2"/><circle cx="360" cy="322" r="1.2"/>
+      <circle cx="381" cy="320" r="1.2"/><circle cx="386" cy="322" r="1.2"/>
+      <!-- frond 2 -->
+      <circle cx="365" cy="335" r="1.3"/><circle cx="358" cy="338" r="1.3"/><circle cx="353" cy="340" r="1.3"/>
+      <circle cx="381" cy="335" r="1.3"/><circle cx="388" cy="338" r="1.3"/><circle cx="393" cy="340" r="1.3"/>
+      <!-- frond 3 -->
+      <circle cx="364" cy="350" r="1.4"/><circle cx="356" cy="354" r="1.4"/><circle cx="349" cy="358" r="1.4"/>
+      <circle cx="382" cy="350" r="1.4"/><circle cx="390" cy="354" r="1.4"/><circle cx="397" cy="358" r="1.4"/>
+      <!-- frond 4 -->
+      <circle cx="362" cy="365" r="1.5"/><circle cx="353" cy="370" r="1.5"/><circle cx="345" cy="374" r="1.5"/>
+      <circle cx="384" cy="365" r="1.5"/><circle cx="393" cy="370" r="1.5"/><circle cx="401" cy="374" r="1.5"/>
+      <!-- frond 5 -->
+      <circle cx="361" cy="380" r="1.5"/><circle cx="350" cy="386" r="1.5"/><circle cx="340" cy="391" r="1.5"/>
+      <circle cx="385" cy="380" r="1.5"/><circle cx="396" cy="386" r="1.5"/><circle cx="406" cy="391" r="1.5"/>
+      <!-- frond 6 -->
+      <circle cx="360" cy="395" r="1.6"/><circle cx="348" cy="402" r="1.6"/><circle cx="335" cy="408" r="1.6"/>
+      <circle cx="386" cy="395" r="1.6"/><circle cx="398" cy="402" r="1.6"/><circle cx="411" cy="408" r="1.6"/>
+      <!-- frond 7 -->
+      <circle cx="358" cy="410" r="1.6"/><circle cx="345" cy="418" r="1.6"/><circle cx="331" cy="425" r="1.6"/>
+      <circle cx="388" cy="410" r="1.6"/><circle cx="401" cy="418" r="1.6"/><circle cx="415" cy="425" r="1.6"/>
+      <!-- frond 8 -->
+      <circle cx="358" cy="425" r="1.7"/><circle cx="343" cy="434" r="1.7"/><circle cx="328" cy="442" r="1.7"/>
+      <circle cx="388" cy="425" r="1.7"/><circle cx="403" cy="434" r="1.7"/><circle cx="418" cy="442" r="1.7"/>
+      <!-- frond 9 -->
+      <circle cx="356" cy="441" r="1.7"/><circle cx="340" cy="450" r="1.7"/><circle cx="326" cy="459" r="1.7"/>
+      <circle cx="390" cy="441" r="1.7"/><circle cx="406" cy="450" r="1.7"/><circle cx="420" cy="459" r="1.7"/>
+      <!-- frond 10 -->
+      <circle cx="354" cy="457" r="1.8"/><circle cx="338" cy="466" r="1.8"/><circle cx="324" cy="475" r="1.8"/>
+      <circle cx="392" cy="457" r="1.8"/><circle cx="408" cy="466" r="1.8"/><circle cx="422" cy="475" r="1.8"/>
+      <!-- frond 11 -->
+      <circle cx="358" cy="472" r="1.7"/><circle cx="343" cy="481" r="1.7"/><circle cx="330" cy="486" r="1.7"/>
+      <circle cx="388" cy="472" r="1.7"/><circle cx="403" cy="481" r="1.7"/><circle cx="416" cy="486" r="1.7"/>
+    </g>
+
+    <!-- ===== LUMPY MOSS HILLS ===== -->
+    <!-- Back layer: lots of round bumps (lighter olive) -->
+    <path d="M 259 502
+             C 268 488, 282 484, 290 492
+             C 298 482, 312 482, 320 490
+             C 330 478, 348 478, 358 488
+             C 368 478, 388 478, 398 488
+             C 408 480, 425 480, 435 490
+             C 445 482, 460 482, 470 492
+             C 478 488, 485 494, 487 500
+             L 487 610 L 259 610 Z"
+          fill="#3d4329"/>
+
+    <!-- Mid layer bumps -->
+    <path d="M 259 524
+             C 270 510, 285 508, 295 516
+             C 305 506, 322 506, 332 516
+             C 342 508, 360 508, 372 518
+             C 384 510, 402 510, 414 520
+             C 425 512, 442 512, 455 522
+             C 468 516, 480 518, 487 524
+             L 487 610 L 259 610 Z"
+          fill="#2c3220"/>
+
+    <!-- Foreground darker bumps (rounder, larger) -->
+    <path d="M 259 546
+             C 272 532, 290 528, 305 540
+             C 318 528, 340 528, 355 540
+             C 370 530, 392 530, 408 542
+             C 422 532, 445 534, 460 544
+             C 472 538, 482 542, 487 548
+             L 487 610 L 259 610 Z"
+          fill="#1c2113"/>
+
+    <!-- Solid base black -->
+    <path d="M 259 572
+             C 280 565, 308 564, 335 568
+             C 360 572, 388 565, 412 568
+             C 438 572, 465 568, 487 570
+             L 487 610 L 259 610 Z"
+          fill="#0c0e07"/>
+
+    <!-- Small moss highlight dots scattered on bumps -->
+    <g fill="#525a3a" opacity="0.55">
+      <circle cx="285" cy="498" r="1.4"/>
+      <circle cx="305" cy="495" r="1.3"/>
+      <circle cx="328" cy="493" r="1.4"/>
+      <circle cx="354" cy="496" r="1.3"/>
+      <circle cx="383" cy="493" r="1.4"/>
+      <circle cx="408" cy="494" r="1.3"/>
+      <circle cx="436" cy="495" r="1.3"/>
+      <circle cx="460" cy="496" r="1.2"/>
+      <circle cx="294" cy="516" r="1.3"/>
+      <circle cx="324" cy="515" r="1.3"/>
+      <circle cx="362" cy="516" r="1.3"/>
+      <circle cx="396" cy="518" r="1.3"/>
+      <circle cx="428" cy="518" r="1.3"/>
+      <circle cx="455" cy="520" r="1.2"/>
+      <circle cx="298" cy="540" r="1.2"/>
+      <circle cx="332" cy="540" r="1.3"/>
+      <circle cx="372" cy="540" r="1.3"/>
+      <circle cx="412" cy="542" r="1.2"/>
+      <circle cx="447" cy="544" r="1.2"/>
+    </g>
+  </g>
+
+  <!-- Outer frame -->
+  <path d="M 282 131 L 463 131 L 493 161 L 493 585 L 463 615 L 282 615 L 252 585 L 252 161 Z"
+        fill="none" stroke="#000" stroke-width="3.5" stroke-linejoin="miter"/>
+  <!-- Inner thin frame -->
+  <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"
+        fill="none" stroke="#000" stroke-width="1.2" stroke-linejoin="miter"/>
+</svg>

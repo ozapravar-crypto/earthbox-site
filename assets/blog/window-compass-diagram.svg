@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" fill="none">
+  <style>
+    .label { font-family: 'Quattrocento Sans', sans-serif; font-size: 12px; fill: #4A4A4A; }
+    .label-sm { font-family: 'Quattrocento Sans', sans-serif; font-size: 11px; fill: #787878; }
+    .title { font-family: 'Oranienbaum', serif; font-size: 22px; fill: #2C2C2B; }
+    .direction { font-family: 'Oranienbaum', serif; font-size: 28px; fill: #2C2C2B; }
+    .direction-label { font-family: 'Oranienbaum', serif; font-size: 14px; fill: #2C2C2B; }
+  </style>
+
+  <!-- Background -->
+  <rect width="600" height="600" fill="#F8F7F5"/>
+
+  <!-- Title -->
+  <text x="300" y="40" text-anchor="middle" class="title">Window Orientation Guide for Indian Homes</text>
+
+  <!-- Outer compass circle -->
+  <circle cx="300" cy="310" r="200" fill="none" stroke="#EFECE5" stroke-width="40"/>
+  <circle cx="300" cy="310" r="220" fill="none" stroke="#2C2C2B" stroke-width="1.5"/>
+  <circle cx="300" cy="310" r="180" fill="none" stroke="#2C2C2B" stroke-width="1.5"/>
+
+  <!-- Inner circle (house representation) -->
+  <circle cx="300" cy="310" r="60" fill="#EFECE5" stroke="#2C2C2B" stroke-width="1.5"/>
+  <text x="300" y="305" text-anchor="middle" class="label-sm">YOUR</text>
+  <text x="300" y="320" text-anchor="middle" class="label-sm">HOME</text>
+
+  <!-- North Section (top) - Low/Consistent light -->
+  <path d="M300 110 L300 130 A180 180 0 0 1 300 130 L220 180 A180 180 0 0 0 380 180 Z" fill="#A8D4E6" opacity="0.3"/>
+  <text x="300" y="85" text-anchor="middle" class="direction">N</text>
+  <rect x="220" y="95" width="160" height="55" rx="4" fill="#F8F7F5" stroke="#A8D4E6" stroke-width="2"/>
+  <text x="300" y="115" text-anchor="middle" class="direction-label">North-Facing</text>
+  <text x="300" y="132" text-anchor="middle" class="label">Gentle, consistent light</text>
+  <text x="300" y="146" text-anchor="middle" class="label-sm">Best for: ferns, low-light plants</text>
+
+  <!-- South Section (bottom) - Strongest light -->
+  <path d="M300 510 L300 490 A180 180 0 0 1 300 490 L220 440 A180 180 0 0 0 380 440 Z" fill="#F5D76E" opacity="0.4"/>
+  <text x="300" y="545" text-anchor="middle" class="direction">S</text>
+  <rect x="210" y="550" width="180" height="55" rx="4" fill="#F8F7F5" stroke="#F5D76E" stroke-width="2"/>
+  <text x="300" y="570" text-anchor="middle" class="direction-label">South-Facing</text>
+  <text x="300" y="587" text-anchor="middle" class="label">Strongest, longest exposure</text>
+  <text x="300" y="601" text-anchor="middle" class="label-sm">Caution: Too intense for most terrariums</text>
+
+  <!-- East Section (right) - Morning sun -->
+  <path d="M500 310 L480 310 A180 180 0 0 1 480 310 L430 230 A180 180 0 0 0 430 390 Z" fill="#FFB347" opacity="0.3"/>
+  <text x="535" y="315" text-anchor="middle" class="direction">E</text>
+  <rect x="515" y="220" width="85" height="80" rx="4" fill="#F8F7F5" stroke="#FFB347" stroke-width="2"/>
+  <text x="557" y="242" text-anchor="middle" class="direction-label">East</text>
+  <text x="557" y="260" text-anchor="middle" class="label">Gentle</text>
+  <text x="557" y="274" text-anchor="middle" class="label">morning</text>
+  <text x="557" y="288" text-anchor="middle" class="label">sun</text>
+  <text x="557" y="305" text-anchor="middle" class="label-sm" style="fill:#6B8E5A; font-weight:bold;">IDEAL</text>
+
+  <!-- West Section (left) - Afternoon sun -->
+  <path d="M100 310 L120 310 A180 180 0 0 1 120 310 L170 230 A180 180 0 0 0 170 390 Z" fill="#E67E22" opacity="0.3"/>
+  <text x="65" y="315" text-anchor="middle" class="direction">W</text>
+  <rect x="0" y="230" width="85" height="70" rx="4" fill="#F8F7F5" stroke="#E67E22" stroke-width="2"/>
+  <text x="42" y="252" text-anchor="middle" class="direction-label">West</text>
+  <text x="42" y="270" text-anchor="middle" class="label">Hot</text>
+  <text x="42" y="284" text-anchor="middle" class="label">afternoon</text>
+  <text x="42" y="298" text-anchor="middle" class="label-sm" style="fill:#E67E22;">Can overheat</text>
+
+  <!-- Sun path arc -->
+  <path d="M480 310 A180 180 0 0 0 120 310" fill="none" stroke="#F5D76E" stroke-width="3" stroke-dasharray="8 4"/>
+  <!-- Sun icon on arc -->
+  <circle cx="300" cy="130" r="15" fill="#F5D76E" stroke="#E6C75A" stroke-width="2"/>
+  <g stroke="#F5D76E" stroke-width="2">
+    <line x1="300" y1="105" x2="300" y2="95"/>
+    <line x1="300" y1="155" x2="300" y2="165"/>
+    <line x1="275" y1="130" x2="265" y2="130"/>
+    <line x1="325" y1="130" x2="335" y2="130"/>
+    <line x1="282" y1="112" x2="275" y2="105"/>
+    <line x1="318" y1="112" x2="325" y2="105"/>
+    <line x1="282" y1="148" x2="275" y2="155"/>
+    <line x1="318" y1="148" x2="325" y2="155"/>
+  </g>
+
+  <!-- Morning/Evening labels on arc -->
+  <text x="430" y="200" class="label-sm" transform="rotate(-30 430 200)">Morning ☀</text>
+  <text x="150" y="200" class="label-sm" transform="rotate(30 150 200)">Evening ☀</text>
+
+  <!-- Terrarium recommendation -->
+  <rect x="420" y="370" width="170" height="50" rx="6" fill="#6B8E5A" opacity="0.15" stroke="#6B8E5A" stroke-width="1.5"/>
+  <text x="505" y="392" text-anchor="middle" class="label" style="fill:#6B8E5A; font-weight:bold;">Terrarium Sweet Spot</text>
+  <text x="505" y="408" text-anchor="middle" class="label-sm">East or North window</text>
+  <line x1="420" y1="395" x2="380" y2="350" stroke="#6B8E5A" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- India latitude note -->
+  <text x="300" y="80" text-anchor="middle" class="label-sm">Mumbai: 19°N latitude</text>
+</svg>

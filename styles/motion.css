@@ -1,0 +1,67 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Motion · reveal base classes only
+   IntersectionObserver in scripts/reveal.js adds .in when in view.
+   Page-specific animations live in their own CSS files.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.reveal{
+  opacity:0;
+  transform:translateY(28px);
+  transition:opacity var(--dur-base) var(--ease-archival),
+             transform var(--dur-base) var(--ease-archival);
+  transition-delay:var(--d, 0ms);
+}
+.reveal.in{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* Line-mask reveal · text rises from below an overflow-hidden frame */
+.reveal-line{
+  overflow:hidden;
+  display:block;
+}
+.reveal-line > *{
+  display:block;
+  transform:translateY(105%);
+  transition:transform var(--dur-base) var(--ease-rise);
+  transition-delay:var(--d, 0ms);
+}
+.reveal.in .reveal-line > *{
+  transform:translateY(0);
+}
+
+/* Universal fade-in helper · used by hero corner stamps */
+.fade-in{
+  opacity:0;
+  animation:fadeIn 1s ease forwards;
+  animation-delay:var(--d, 0ms);
+}
+@keyframes fadeIn{to{opacity:1}}
+
+/* Clip-path curtain reveal · top-down · for images and large illustrations */
+.reveal-clip{
+  clip-path:inset(100% 0 0 0);
+  -webkit-clip-path:inset(100% 0 0 0);
+  transition:clip-path 1.2s var(--ease-archival),
+            -webkit-clip-path 1.2s var(--ease-archival);
+  transition-delay:var(--d, 0ms);
+}
+.reveal-clip.in{
+  clip-path:inset(0 0 0 0);
+  -webkit-clip-path:inset(0 0 0 0);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .reveal,
+  .reveal-line > *,
+  .fade-in,
+  .reveal-clip{
+    transition:none;
+    animation:none;
+    opacity:1;
+    transform:none;
+    clip-path:none;
+    -webkit-clip-path:none;
+  }
+}

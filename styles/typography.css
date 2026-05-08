@@ -1,0 +1,56 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Typography · headings, eyebrow, caption, lede, italic
+   ═══════════════════════════════════════════════════════════════════════ */
+
+h1,h2,.display{
+  font-family:var(--serif);
+  font-weight:400;
+  letter-spacing:-.012em;
+  line-height:1;
+  color:var(--ink);
+}
+h1{font-size:clamp(4.5rem,18vw,16rem)}
+h2{font-size:clamp(2.5rem,6.5vw,5.5rem);line-height:1.03}
+h3{
+  font-family:var(--serif);
+  font-weight:400;
+  font-size:clamp(1.75rem,3vw,2.5rem);
+  line-height:1.15;
+}
+h4{
+  font-family:var(--serif);
+  font-weight:400;
+  font-size:1.35rem;
+  line-height:1.3;
+}
+
+.eyebrow{
+  font-family:var(--sans);
+  font-size:.68rem;
+  font-weight:400;
+  letter-spacing:.44em;
+  text-transform:uppercase;
+  color:var(--accent);
+  display:inline-block;
+}
+.caption{
+  font-family:var(--sans);
+  font-size:.72rem;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  color:var(--mute);
+}
+.lede{
+  font-family:var(--body);
+  font-size:clamp(1.05rem,1.4vw,1.25rem);
+  line-height:1.7;
+  max-width:58ch;
+}
+.italic{font-style:italic}
+
+/* Roman-numeral year stamp — used on /about colophon and product editions */
+.roman{
+  font-family:var(--serif);
+  letter-spacing:.04em;
+  font-feature-settings:"lnum";
+}

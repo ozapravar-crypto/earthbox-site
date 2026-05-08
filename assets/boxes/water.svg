@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 746 746" width="746" height="746">
+  <!-- Transparent background: no <rect> behind anything -->
+
+  <defs>
+    <!-- Inner playable area, used to clip waves & sediment so they sit inside the frame -->
+    <clipPath id="inner-frame">
+      <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- ============= SCENE INSIDE FRAME ============= -->
+  <g clip-path="url(#inner-frame)">
+
+    <!-- Olive sun/moon -->
+    <circle cx="431" cy="236" r="12.5" fill="#5B5D44"/>
+
+    <!-- Rising bubbles (hollow, fine stroke) -->
+    <circle cx="338" cy="361" r="5"  fill="none" stroke="#1a1a1a" stroke-width="1.4"/>
+    <circle cx="358" cy="396" r="7"  fill="none" stroke="#1a1a1a" stroke-width="1.4"/>
+    <circle cx="394" cy="432" r="8.5" fill="none" stroke="#1a1a1a" stroke-width="1.4"/>
+    <circle cx="370" cy="470" r="8.5" fill="none" stroke="#1a1a1a" stroke-width="1.4"/>
+
+    <!-- ===== WATER SURFACE (layered wavy bands) ===== -->
+    <!-- Base mid-gray water mass -->
+    <path d="M 260 491
+             C 285 482, 310 500, 340 491
+             C 370 482, 400 500, 430 491
+             C 455 484, 475 498, 487 492
+             L 487 545 L 260 545 Z"
+          fill="#8a8d8a"/>
+
+    <!-- Light highlight band 1 -->
+    <path d="M 260 498
+             C 285 490, 310 506, 340 498
+             C 370 491, 400 507, 430 498
+             C 455 492, 475 504, 487 500
+             L 487 508
+             C 470 514, 445 506, 420 511
+             C 390 517, 360 509, 330 514
+             C 300 519, 280 511, 260 514 Z"
+          fill="#d8dad6"/>
+
+    <!-- Mid darker ripple -->
+    <path d="M 260 514
+             C 285 508, 310 520, 340 514
+             C 370 508, 400 520, 430 513
+             C 455 509, 475 519, 487 515
+             L 487 522
+             C 470 528, 445 521, 420 526
+             C 390 531, 360 524, 330 528
+             C 300 532, 280 525, 260 528 Z"
+          fill="#a3a6a2"/>
+
+    <!-- Top white crest highlights -->
+    <path d="M 265 528
+             C 290 522, 315 533, 345 527
+             C 375 521, 405 532, 435 526
+             C 460 521, 478 530, 485 528
+             L 485 533
+             C 470 538, 445 530, 420 535
+             C 390 540, 360 533, 330 537
+             C 300 541, 280 534, 265 537 Z"
+          fill="#eef0ec"/>
+
+    <!-- Last wavy line bordering sediment -->
+    <path d="M 260 538
+             C 285 532, 310 543, 340 537
+             C 370 531, 400 543, 430 537
+             C 455 532, 475 542, 487 539
+             L 487 545 L 260 545 Z"
+          fill="#7d8079"/>
+
+    <!-- ===== SEDIMENT (speckled black) ===== -->
+    <rect x="259" y="544" width="229" height="65" fill="#0e1009"/>
+
+    <!-- Subtle speckles / sand grains / stars -->
+    <g fill="#e8e6dc" opacity="0.85">
+      <circle cx="275" cy="553" r="0.7"/>
+      <circle cx="289" cy="566" r="0.6"/>
+      <circle cx="298" cy="580" r="0.8"/>
+      <circle cx="306" cy="558" r="0.6"/>
+      <circle cx="318" cy="572" r="0.9"/>
+      <circle cx="327" cy="585" r="0.6"/>
+      <circle cx="335" cy="554" r="0.7"/>
+      <circle cx="346" cy="568" r="0.6"/>
+      <circle cx="354" cy="582" r="0.8"/>
+      <circle cx="361" cy="560" r="0.7"/>
+      <circle cx="370" cy="575" r="0.6"/>
+      <circle cx="379" cy="588" r="0.9"/>
+      <circle cx="388" cy="555" r="0.6"/>
+      <circle cx="397" cy="570" r="0.7"/>
+      <circle cx="405" cy="583" r="0.6"/>
+      <circle cx="412" cy="562" r="0.8"/>
+      <circle cx="420" cy="577" r="0.6"/>
+      <circle cx="428" cy="590" r="0.7"/>
+      <circle cx="437" cy="556" r="0.6"/>
+      <circle cx="446" cy="569" r="0.8"/>
+      <circle cx="454" cy="582" r="0.6"/>
+      <circle cx="463" cy="563" r="0.7"/>
+      <circle cx="471" cy="578" r="0.6"/>
+      <circle cx="480" cy="591" r="0.8"/>
+      <circle cx="282" cy="593" r="0.6"/>
+      <circle cx="312" cy="595" r="0.7"/>
+      <circle cx="343" cy="596" r="0.6"/>
+      <circle cx="375" cy="597" r="0.7"/>
+      <circle cx="408" cy="596" r="0.6"/>
+      <circle cx="438" cy="598" r="0.7"/>
+      <circle cx="467" cy="595" r="0.6"/>
+      <circle cx="293" cy="548" r="0.5"/>
+      <circle cx="324" cy="549" r="0.5"/>
+      <circle cx="356" cy="548" r="0.5"/>
+      <circle cx="389" cy="549" r="0.5"/>
+      <circle cx="421" cy="548" r="0.5"/>
+      <circle cx="453" cy="549" r="0.5"/>
+    </g>
+  </g>
+
+  <!-- ============= DOUBLE OCTAGONAL FRAME ============= -->
+  <!-- Outer frame -->
+  <path d="M 282 131 L 463 131 L 493 161 L 493 585 L 463 615 L 282 615 L 252 585 L 252 161 Z"
+        fill="none" stroke="#000" stroke-width="3.5" stroke-linejoin="miter"/>
+
+  <!-- Inner thin frame -->
+  <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"
+        fill="none" stroke="#000" stroke-width="1.2" stroke-linejoin="miter"/>
+</svg>

@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 500" fill="none">
+  <style>
+    .label { font-family: 'Quattrocento Sans', sans-serif; font-size: 13px; fill: #4A4A4A; }
+    .label-num { font-family: 'Oranienbaum', serif; font-size: 18px; fill: #2C2C2B; }
+    .title { font-family: 'Oranienbaum', serif; font-size: 22px; fill: #2C2C2B; }
+  </style>
+
+  <!-- Background -->
+  <rect width="600" height="500" fill="#F8F7F5"/>
+
+  <!-- Title -->
+  <text x="300" y="35" text-anchor="middle" class="title">The Terrarium Water Cycle</text>
+
+  <!-- Glass Container (bell jar shape) -->
+  <path d="M150 420 L150 180 Q150 100 300 100 Q450 100 450 180 L450 420"
+        stroke="#2C2C2B" stroke-width="2" fill="none"/>
+  <!-- Glass base -->
+  <rect x="130" y="420" width="340" height="20" rx="3" fill="#EFECE5" stroke="#2C2C2B" stroke-width="1.5"/>
+
+  <!-- Cork/lid -->
+  <ellipse cx="300" cy="100" rx="40" ry="12" fill="#B8A99A" stroke="#9A8A7B" stroke-width="1.5"/>
+
+  <!-- Soil layer -->
+  <path d="M160 420 L160 380 Q230 370 300 380 Q370 390 440 375 L440 420 Z" fill="#9A8A7B"/>
+  <path d="M160 380 Q230 370 300 380 Q370 390 440 375" stroke="#787878" stroke-width="1" fill="none"/>
+
+  <!-- Drainage layer -->
+  <ellipse cx="200" cy="410" rx="8" ry="5" fill="#EFECE5" stroke="#B8A99A"/>
+  <ellipse cx="240" cy="415" rx="6" ry="4" fill="#EFECE5" stroke="#B8A99A"/>
+  <ellipse cx="280" cy="408" rx="7" ry="4" fill="#EFECE5" stroke="#B8A99A"/>
+  <ellipse cx="330" cy="412" rx="8" ry="5" fill="#EFECE5" stroke="#B8A99A"/>
+  <ellipse cx="380" cy="410" rx="6" ry="4" fill="#EFECE5" stroke="#B8A99A"/>
+  <ellipse cx="410" cy="415" rx="7" ry="4" fill="#EFECE5" stroke="#B8A99A"/>
+
+  <!-- Plants -->
+  <!-- Fern left -->
+  <g transform="translate(200, 340)">
+    <path d="M0 40 Q-30 20 -25 -10 M0 40 Q-20 15 -10 -15 M0 40 Q0 10 5 -20 M0 40 Q20 15 15 -10 M0 40 Q30 25 25 0"
+          stroke="#6B8E5A" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="-25" cy="-10" r="4" fill="#7DA469"/>
+    <circle cx="-10" cy="-15" r="5" fill="#8AB87A"/>
+    <circle cx="5" cy="-20" r="6" fill="#7DA469"/>
+    <circle cx="15" cy="-10" r="4" fill="#8AB87A"/>
+    <circle cx="25" cy="0" r="5" fill="#7DA469"/>
+  </g>
+
+  <!-- Moss center -->
+  <g transform="translate(300, 365)">
+    <ellipse cx="0" cy="0" rx="35" ry="12" fill="#8AB87A"/>
+    <ellipse cx="-15" cy="-3" rx="10" ry="6" fill="#7DA469"/>
+    <ellipse cx="12" cy="-2" rx="12" ry="7" fill="#6B8E5A"/>
+    <ellipse cx="0" cy="-5" rx="8" ry="5" fill="#9BC88B"/>
+  </g>
+
+  <!-- Fittonia right -->
+  <g transform="translate(380, 330)">
+    <ellipse cx="0" cy="0" rx="18" ry="10" fill="#7DA469"/>
+    <path d="M0 0 L0 -8" stroke="#F8F7F5" stroke-width="1"/>
+    <path d="M-8 2 L8 -2" stroke="#F8F7F5" stroke-width="0.5"/>
+    <ellipse cx="20" cy="10" rx="15" ry="8" fill="#8AB87A"/>
+    <path d="M20 10 L20 3" stroke="#F8F7F5" stroke-width="1"/>
+    <ellipse cx="-5" cy="18" rx="14" ry="7" fill="#6B8E5A"/>
+    <path d="M-5 18 L-5 12" stroke="#F8F7F5" stroke-width="1"/>
+  </g>
+
+  <!-- Water droplets on glass (condensation) -->
+  <g fill="#A8D4E6" opacity="0.7">
+    <ellipse cx="175" cy="200" rx="4" ry="6"/>
+    <ellipse cx="182" cy="240" rx="3" ry="5"/>
+    <ellipse cx="170" cy="280" rx="5" ry="7"/>
+    <ellipse cx="178" cy="330" rx="3" ry="4"/>
+    <ellipse cx="425" cy="190" rx="4" ry="6"/>
+    <ellipse cx="420" cy="250" rx="5" ry="7"/>
+    <ellipse cx="428" cy="300" rx="3" ry="5"/>
+    <ellipse cx="422" cy="350" rx="4" ry="6"/>
+  </g>
+
+  <!-- Evaporation arrows (from soil going up) -->
+  <g stroke="#A8D4E6" stroke-width="1.5" fill="none" stroke-dasharray="4 3">
+    <path d="M220 350 Q220 300 240 260"/>
+    <path d="M300 355 Q300 290 300 240"/>
+    <path d="M360 345 Q360 295 340 255"/>
+  </g>
+  <!-- Arrow heads for evaporation -->
+  <g fill="#A8D4E6">
+    <polygon points="237,265 243,265 240,255"/>
+    <polygon points="297,245 303,245 300,235"/>
+    <polygon points="337,260 343,260 340,250"/>
+  </g>
+
+  <!-- Transpiration wisps from plants -->
+  <g stroke="#A8D4E6" stroke-width="1" fill="none" opacity="0.6">
+    <path d="M195 310 Q190 290 200 270"/>
+    <path d="M385 305 Q395 285 390 265"/>
+  </g>
+
+  <!-- Condensation arrows (hitting glass, going down) -->
+  <g stroke="#6BA3BE" stroke-width="1.5" fill="none">
+    <path d="M172 290 L172 360"/>
+    <path d="M424 260 L424 340"/>
+  </g>
+  <!-- Arrow heads for condensation -->
+  <g fill="#6BA3BE">
+    <polygon points="169,355 175,355 172,368"/>
+    <polygon points="421,335 427,335 424,348"/>
+  </g>
+
+  <!-- Numbered labels -->
+  <!-- 1. Evaporation -->
+  <circle cx="60" cy="300" r="14" fill="#B8A99A"/>
+  <text x="60" y="305" text-anchor="middle" class="label-num">1</text>
+  <text x="60" y="330" text-anchor="middle" class="label">Evaporation</text>
+  <text x="60" y="345" text-anchor="middle" class="label">from soil</text>
+
+  <!-- 2. Transpiration -->
+  <circle cx="60" cy="200" r="14" fill="#B8A99A"/>
+  <text x="60" y="205" text-anchor="middle" class="label-num">2</text>
+  <text x="60" y="230" text-anchor="middle" class="label">Transpiration</text>
+  <text x="60" y="245" text-anchor="middle" class="label">from leaves</text>
+
+  <!-- 3. Condensation -->
+  <circle cx="540" cy="200" r="14" fill="#B8A99A"/>
+  <text x="540" y="205" text-anchor="middle" class="label-num">3</text>
+  <text x="540" y="230" text-anchor="middle" class="label">Condensation</text>
+  <text x="540" y="245" text-anchor="middle" class="label">on glass</text>
+
+  <!-- 4. Return to soil -->
+  <circle cx="540" cy="340" r="14" fill="#B8A99A"/>
+  <text x="540" y="345" text-anchor="middle" class="label-num">4</text>
+  <text x="540" y="370" text-anchor="middle" class="label">Droplets return</text>
+  <text x="540" y="385" text-anchor="middle" class="label">to soil</text>
+
+  <!-- Cycle indicator -->
+  <path d="M100 260 Q80 250 100 200" stroke="#B8A99A" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M500 240 Q520 280 500 330" stroke="#B8A99A" stroke-width="1.5" fill="none" marker-end="url(#arrowhead2)"/>
+
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#B8A99A"/>
+    </marker>
+    <marker id="arrowhead2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#B8A99A"/>
+    </marker>
+  </defs>
+
+  <!-- Bottom caption -->
+  <text x="300" y="475" text-anchor="middle" class="label" style="font-style: italic;">
+    A self-sustaining cycle that continues indefinitely
+  </text>
+</svg>

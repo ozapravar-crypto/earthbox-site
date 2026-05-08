@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 746 746" width="746" height="746">
+  <defs>
+    <clipPath id="inner-frame">
+      <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#inner-frame)">
+
+    <!-- Olive moon -->
+    <circle cx="431" cy="232" r="12" fill="#67684A"/>
+
+    <!-- ===== FLOWING WIND LINES (topographic-style) ===== -->
+    <g stroke="#7d7e7c" stroke-width="1.1" fill="none" stroke-linecap="round">
+      <!-- Top short ridge above the rising swell -->
+      <path d="M 295 298 Q 340 282, 380 290 Q 420 298, 470 296"/>
+      <path d="M 280 312 Q 330 295, 380 305 Q 425 313, 478 309"/>
+      <!-- Wave that rises in middle then drops -->
+      <path d="M 270 332 Q 310 308, 360 310 Q 400 312, 430 332 Q 460 350, 480 340"/>
+      <path d="M 270 350 Q 305 322, 360 326 Q 405 328, 432 350 Q 462 368, 480 358"/>
+      <!-- Long flowing curves -->
+      <path d="M 268 372 Q 308 342, 365 348 Q 410 354, 438 378 Q 462 392, 480 386"/>
+      <path d="M 268 392 Q 308 360, 368 366 Q 412 372, 440 396 Q 462 410, 480 404"/>
+      <path d="M 268 412 Q 308 378, 372 384 Q 415 390, 442 414 Q 462 428, 480 422"/>
+      <path d="M 268 432 Q 308 398, 376 404 Q 418 410, 444 432 Q 462 446, 480 440"/>
+      <path d="M 268 452 Q 308 420, 378 424 Q 420 430, 446 452 Q 463 466, 480 460"/>
+      <path d="M 268 472 Q 310 442, 380 446 Q 420 452, 446 472 Q 462 484, 480 480"/>
+      <path d="M 268 492 Q 312 466, 380 466 Q 420 470, 446 488 Q 462 498, 480 496"/>
+    </g>
+
+    <!-- ===== DARK LANDMASS AT BOTTOM ===== -->
+    <path d="M 259 540
+             C 275 528, 290 525, 305 532
+             C 320 522, 340 522, 358 532
+             C 372 524, 388 524, 402 534
+             C 418 528, 432 528, 445 538
+             C 460 532, 475 538, 487 542
+             L 487 610 L 259 610 Z"
+          fill="#1a1a16"/>
+
+    <!-- Foreground darker swell -->
+    <path d="M 259 562
+             C 285 552, 320 552, 355 558
+             C 388 565, 420 555, 455 562
+             C 470 558, 480 562, 487 564
+             L 487 610 L 259 610 Z"
+          fill="#0a0a07"/>
+
+    <!-- Subtle highlight on landmass crest -->
+    <path d="M 280 538 Q 320 530, 360 535 Q 400 540, 440 535"
+          stroke="#3a3a35" stroke-width="0.6" fill="none" opacity="0.8"/>
+  </g>
+
+  <!-- Outer frame -->
+  <path d="M 282 131 L 463 131 L 493 161 L 493 585 L 463 615 L 282 615 L 252 585 L 252 161 Z"
+        fill="none" stroke="#000" stroke-width="3.5" stroke-linejoin="miter"/>
+  <!-- Inner thin frame -->
+  <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"
+        fill="none" stroke="#000" stroke-width="1.2" stroke-linejoin="miter"/>
+</svg>

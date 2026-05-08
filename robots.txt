@@ -1,0 +1,9 @@
+# EarthBox robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://earthbox.in/sitemap.xml
+
+# Disallow debug/test pages
+Disallow: /debug.html

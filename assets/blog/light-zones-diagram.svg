@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 650 450" fill="none">
+  <style>
+    .label { font-family: 'Quattrocento Sans', sans-serif; font-size: 12px; fill: #4A4A4A; }
+    .label-bold { font-family: 'Quattrocento Sans', sans-serif; font-size: 13px; fill: #2C2C2B; font-weight: bold; }
+    .title { font-family: 'Oranienbaum', serif; font-size: 22px; fill: #2C2C2B; }
+    .zone-label { font-family: 'Oranienbaum', serif; font-size: 14px; fill: #2C2C2B; }
+    .fc { font-family: 'Quattrocento Sans', sans-serif; font-size: 11px; fill: #787878; }
+  </style>
+
+  <!-- Background -->
+  <rect width="650" height="450" fill="#F8F7F5"/>
+
+  <!-- Title -->
+  <text x="325" y="35" text-anchor="middle" class="title">Light Intensity Zones in a Typical Room</text>
+
+  <!-- Room outline (3D perspective) -->
+  <!-- Back wall -->
+  <rect x="100" y="70" width="400" height="250" fill="#EFECE5" stroke="#2C2C2B" stroke-width="1.5"/>
+  <!-- Floor -->
+  <polygon points="100,320 500,320 580,400 20,400" fill="#E5E2DB" stroke="#2C2C2B" stroke-width="1.5"/>
+  <!-- Left wall -->
+  <polygon points="100,70 100,320 20,400 20,140" fill="#F0EDE6" stroke="#2C2C2B" stroke-width="1.5"/>
+
+  <!-- Window on back wall -->
+  <rect x="200" y="100" width="200" height="180" fill="#D4E8F0" stroke="#2C2C2B" stroke-width="2"/>
+  <!-- Window panes -->
+  <line x1="300" y1="100" x2="300" y2="280" stroke="#2C2C2B" stroke-width="1"/>
+  <line x1="200" y1="190" x2="400" y2="190" stroke="#2C2C2B" stroke-width="1"/>
+  <!-- Sun rays from window -->
+  <g stroke="#F5D76E" stroke-width="2" opacity="0.4">
+    <line x1="220" y1="140" x2="180" y2="200"/>
+    <line x1="260" y1="140" x2="220" y2="220"/>
+    <line x1="300" y1="140" x2="280" y2="240"/>
+    <line x1="340" y1="140" x2="340" y2="260"/>
+    <line x1="380" y1="140" x2="400" y2="240"/>
+  </g>
+
+  <!-- Zone 1: High Light (closest to window) -->
+  <ellipse cx="300" cy="340" rx="80" ry="30" fill="#F5D76E" opacity="0.4"/>
+  <ellipse cx="300" cy="340" rx="60" ry="22" fill="#F5D76E" opacity="0.3"/>
+
+  <!-- Zone 2: Medium Light -->
+  <ellipse cx="300" cy="365" rx="150" ry="45" fill="#B8A99A" opacity="0.25" stroke="#B8A99A" stroke-width="1" stroke-dasharray="4 2"/>
+
+  <!-- Zone 3: Low Light (far from window) -->
+  <ellipse cx="300" cy="385" rx="240" ry="60" fill="#787878" opacity="0.15" stroke="#787878" stroke-width="1" stroke-dasharray="4 2"/>
+
+  <!-- Plant icons in zones -->
+  <!-- High light plant (succulent) -->
+  <g transform="translate(300, 330)">
+    <ellipse cx="0" cy="8" rx="12" ry="5" fill="#9A8A7B"/>
+    <ellipse cx="0" cy="0" rx="8" ry="12" fill="#7DA469"/>
+    <ellipse cx="-8" cy="2" rx="5" ry="9" fill="#8AB87A" transform="rotate(-20 -8 2)"/>
+    <ellipse cx="8" cy="2" rx="5" ry="9" fill="#8AB87A" transform="rotate(20 8 2)"/>
+  </g>
+
+  <!-- Medium light plant (fern) -->
+  <g transform="translate(180, 360)">
+    <ellipse cx="0" cy="10" rx="10" ry="4" fill="#9A8A7B"/>
+    <path d="M0 8 Q-15 -5 -12 -15 M0 8 Q0 -10 3 -18 M0 8 Q15 -5 12 -15"
+          stroke="#6B8E5A" stroke-width="2" fill="none"/>
+  </g>
+
+  <!-- Low light plant (pothos) -->
+  <g transform="translate(80, 380)">
+    <ellipse cx="0" cy="8" rx="10" ry="4" fill="#9A8A7B"/>
+    <path d="M0 5 Q-8 -5 -5 -12" stroke="#6B8E5A" stroke-width="2" fill="none"/>
+    <ellipse cx="-5" cy="-12" rx="6" ry="4" fill="#7DA469"/>
+    <path d="M0 5 Q5 -8 8 -10" stroke="#6B8E5A" stroke-width="2" fill="none"/>
+    <ellipse cx="8" cy="-10" rx="5" ry="3" fill="#8AB87A"/>
+  </g>
+
+  <!-- Zone labels with boxes -->
+  <!-- High Light -->
+  <rect x="420" y="90" width="140" height="70" rx="4" fill="#F8F7F5" stroke="#F5D76E" stroke-width="2"/>
+  <circle cx="440" cy="110" r="8" fill="#F5D76E"/>
+  <text x="455" y="114" class="zone-label">High Light</text>
+  <text x="440" y="132" class="fc">1000-2000+ FC</text>
+  <text x="440" y="148" class="label">Succulents, cacti,</text>
+  <text x="440" y="162" class="label">flowering plants</text>
+  <line x1="420" y1="125" x2="380" y2="300" stroke="#F5D76E" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- Medium Light -->
+  <rect x="480" y="180" width="140" height="70" rx="4" fill="#F8F7F5" stroke="#B8A99A" stroke-width="2"/>
+  <circle cx="500" cy="200" r="8" fill="#B8A99A"/>
+  <text x="515" y="204" class="zone-label">Medium Light</text>
+  <text x="500" y="222" class="fc">250-1000 FC</text>
+  <text x="500" y="238" class="label">Ferns, philodendrons,</text>
+  <text x="500" y="252" class="label">terrarium plants</text>
+  <line x1="480" y1="215" x2="420" y2="360" stroke="#B8A99A" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- Low Light -->
+  <rect x="500" y="290" width="130" height="70" rx="4" fill="#F8F7F5" stroke="#787878" stroke-width="2"/>
+  <circle cx="520" cy="310" r="8" fill="#787878"/>
+  <text x="535" y="314" class="zone-label">Low Light</text>
+  <text x="520" y="332" class="fc">50-250 FC</text>
+  <text x="520" y="348" class="label">Pothos, snake plant,</text>
+  <text x="520" y="362" class="label">ZZ plant</text>
+  <line x1="500" y1="330" x2="150" y2="385" stroke="#787878" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- Distance markers -->
+  <g class="fc">
+    <line x1="200" y1="395" x2="200" y2="410" stroke="#787878" stroke-width="1"/>
+    <line x1="300" y1="395" x2="300" y2="410" stroke="#787878" stroke-width="1"/>
+    <line x1="400" y1="395" x2="400" y2="410" stroke="#787878" stroke-width="1"/>
+    <line x1="200" y1="405" x2="400" y2="405" stroke="#787878" stroke-width="1"/>
+    <text x="250" y="425">1m</text>
+    <text x="350" y="425">2m</text>
+  </g>
+
+  <!-- Window label -->
+  <text x="300" y="295" text-anchor="middle" class="label-bold">WINDOW</text>
+
+  <!-- Bottom note -->
+  <text x="325" y="445" text-anchor="middle" class="label" style="font-style: italic;">
+    FC = foot-candles · Light drops dramatically with distance from window
+  </text>
+</svg>

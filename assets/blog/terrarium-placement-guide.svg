@@ -1,0 +1,187 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" fill="none">
+  <style>
+    .label { font-family: 'Quattrocento Sans', sans-serif; font-size: 11px; fill: #4A4A4A; }
+    .title { font-family: 'Oranienbaum', serif; font-size: 20px; fill: #2C2C2B; }
+    .heading { font-family: 'Oranienbaum', serif; font-size: 14px; fill: #2C2C2B; }
+    .detail { font-family: 'Quattrocento Sans', sans-serif; font-size: 10px; fill: #787878; }
+  </style>
+
+  <!-- Background -->
+  <rect width="700" height="420" fill="#F8F7F5"/>
+
+  <!-- Title -->
+  <text x="350" y="30" text-anchor="middle" class="title">Terrarium Placement: Ideal vs Problematic</text>
+
+  <!-- Top row: Good placements -->
+  <rect x="30" y="50" width="640" height="160" rx="6" fill="#6B8E5A" opacity="0.08" stroke="#6B8E5A" stroke-width="1"/>
+  <text x="350" y="72" text-anchor="middle" class="heading" style="fill:#6B8E5A;">✓ Ideal Locations</text>
+
+  <!-- Good location 1: Bright indirect (near window, not in sun) -->
+  <g transform="translate(60, 85)">
+    <rect x="0" y="0" width="130" height="110" rx="4" fill="#F8F7F5" stroke="#E5E2DB"/>
+    <!-- Window -->
+    <rect x="80" y="10" width="40" height="50" fill="#A8D4E6" stroke="#9A8A7B"/>
+    <line x1="100" y1="10" x2="100" y2="60" stroke="#9A8A7B"/>
+    <!-- Light rays (indirect) -->
+    <g stroke="#F5D76E" stroke-width="1.5" opacity="0.5" stroke-dasharray="3 2">
+      <path d="M90 35 Q60 50 45 70"/>
+      <path d="M95 40 Q70 55 55 75"/>
+    </g>
+    <!-- Terrarium -->
+    <g transform="translate(40, 60)">
+      <ellipse cx="0" cy="25" rx="25" ry="10" fill="#E5E2DB"/>
+      <path d="M-20 25 Q-20 -10 0 -15 Q20 -10 20 25" fill="#F8F7F5" stroke="#9A8A7B" stroke-width="1.5" opacity="0.8"/>
+      <ellipse cx="0" cy="10" rx="12" ry="5" fill="#7DA469"/>
+    </g>
+    <text x="65" y="105" text-anchor="middle" class="detail">Bright indirect light</text>
+  </g>
+
+  <!-- Good location 2: North-facing window -->
+  <g transform="translate(220, 85)">
+    <rect x="0" y="0" width="130" height="110" rx="4" fill="#F8F7F5" stroke="#E5E2DB"/>
+    <!-- Window with N indicator -->
+    <rect x="45" y="5" width="40" height="50" fill="#D5E8F0" stroke="#9A8A7B"/>
+    <circle cx="65" cy="0" r="12" fill="#6BA3BE"/>
+    <text x="65" y="5" text-anchor="middle" style="fill:#F8F7F5; font-size:10px; font-weight:bold;">N</text>
+    <!-- Soft diffused light -->
+    <g fill="#F5D76E" opacity="0.3">
+      <ellipse cx="65" cy="70" rx="40" ry="15"/>
+    </g>
+    <!-- Terrarium on sill -->
+    <g transform="translate(65, 50)">
+      <ellipse cx="0" cy="25" rx="22" ry="8" fill="#E5E2DB"/>
+      <path d="M-18 25 Q-18 -5 0 -10 Q18 -5 18 25" fill="#F8F7F5" stroke="#9A8A7B" stroke-width="1.5" opacity="0.8"/>
+      <ellipse cx="0" cy="10" rx="10" ry="4" fill="#7DA469"/>
+    </g>
+    <text x="65" y="105" text-anchor="middle" class="detail">North-facing window</text>
+  </g>
+
+  <!-- Good location 3: Shaded shelf -->
+  <g transform="translate(380, 85)">
+    <rect x="0" y="0" width="130" height="110" rx="4" fill="#F8F7F5" stroke="#E5E2DB"/>
+    <!-- Bookshelf -->
+    <rect x="20" y="20" width="90" height="8" fill="#C4A574"/>
+    <rect x="20" y="50" width="90" height="8" fill="#C4A574"/>
+    <rect x="20" y="80" width="90" height="8" fill="#C4A574"/>
+    <rect x="15" y="15" width="8" height="78" fill="#B8A99A"/>
+    <rect x="107" y="15" width="8" height="78" fill="#B8A99A"/>
+    <!-- Terrarium on middle shelf -->
+    <g transform="translate(65, 35)">
+      <ellipse cx="0" cy="15" rx="18" ry="6" fill="#E5E2DB"/>
+      <path d="M-15 15 Q-15 -5 0 -8 Q15 -5 15 15" fill="#F8F7F5" stroke="#9A8A7B" stroke-width="1.5" opacity="0.8"/>
+      <ellipse cx="0" cy="5" rx="8" ry="3" fill="#7DA469"/>
+    </g>
+    <text x="65" y="105" text-anchor="middle" class="detail">Shaded interior shelf</text>
+  </g>
+
+  <!-- Good location 4: Under grow light -->
+  <g transform="translate(540, 85)">
+    <rect x="0" y="0" width="130" height="110" rx="4" fill="#F8F7F5" stroke="#E5E2DB"/>
+    <!-- Grow light -->
+    <rect x="35" y="10" width="60" height="8" rx="2" fill="#2C2C2B"/>
+    <!-- Light cone -->
+    <path d="M45 18 L30 65 L100 65 L85 18" fill="#F5D76E" opacity="0.2"/>
+    <g stroke="#F5D76E" stroke-width="1" opacity="0.5">
+      <line x1="50" y1="18" x2="40" y2="55"/>
+      <line x1="65" y1="18" x2="65" y2="55"/>
+      <line x1="80" y1="18" x2="90" y2="55"/>
+    </g>
+    <!-- Terrarium -->
+    <g transform="translate(65, 50)">
+      <ellipse cx="0" cy="25" rx="22" ry="8" fill="#E5E2DB"/>
+      <path d="M-18 25 Q-18 -5 0 -10 Q18 -5 18 25" fill="#F8F7F5" stroke="#9A8A7B" stroke-width="1.5" opacity="0.8"/>
+      <ellipse cx="0" cy="10" rx="10" ry="4" fill="#7DA469"/>
+    </g>
+    <text x="65" y="105" text-anchor="middle" class="detail">Under grow light</text>
+  </g>
+
+  <!-- Bottom row: Bad placements -->
+  <rect x="30" y="225" width="640" height="180" rx="6" fill="#C0392B" opacity="0.08" stroke="#C0392B" stroke-width="1"/>
+  <text x="350" y="247" text-anchor="middle" class="heading" style="fill:#C0392B;">✗ Problematic Locations</text>
+
+  <!-- Bad location 1: Direct sunlight -->
+  <g transform="translate(60, 260)">
+    <rect x="0" y="0" width="130" height="110" rx="4" fill="#F8F7F5" stroke="#E5E2DB"/>
+    <!-- Window with intense sun -->
+    <rect x="45" y="5" width="40" height="50" fill="#F5D76E" opacity="0.5" stroke="#9A8A7B"/>
+    <!-- Harsh sun rays -->
+    <g stroke="#E67E22" stroke-width="2">
+      <line x1="55" y1="30" x2="45" y2="70"/>
+      <line x1="65" y1="30" x2="65" y2="75"/>
+      <line x1="75" y1="30" x2="85" y2="70"/>
+    </g>
+    <!-- Overheated terrarium -->
+    <g transform="translate(65, 55)">
+      <ellipse cx="0" cy="25" rx="22" ry="8" fill="#E5E2DB"/>
+      <path d="M-18 25 Q-18 -5 0 -10 Q18 -5 18 25" fill="#F8F7F5" stroke="#E67E22" stroke-width="2" opacity="0.8"/>
+      <ellipse cx="0" cy="10" rx="10" ry="4" fill="#8B7355"/>
+      <!-- Heat waves -->
+      <path d="M-25 0 Q-30 -10 -25 -15" stroke="#E67E22" stroke-width="1" fill="none"/>
+      <path d="M25 0 Q30 -10 25 -15" stroke="#E67E22" stroke-width="1" fill="none"/>
+    </g>
+    <text x="65" y="100" text-anchor="middle" class="detail" style="fill:#C0392B;">Direct sunlight</text>
+    <text x="65" y="112" text-anchor="middle" class="detail" style="fill:#C0392B;">(overheating)</text>
+  </g>
+
+  <!-- Bad location 2: Near AC/heater -->
+  <g transform="translate(220, 260)">
+    <rect x="0" y="0" width="130" height="110" rx="4" fill="#F8F7F5" stroke="#E5E2DB"/>
+    <!-- AC unit -->
+    <rect x="70" y="10" width="50" height="25" rx="3" fill="#E5E2DB" stroke="#9A8A7B"/>
+    <rect x="75" y="15" width="40" height="5" fill="#A8D4E6"/>
+    <!-- Cold air blast -->
+    <g stroke="#6BA3BE" stroke-width="1.5" stroke-dasharray="4 2">
+      <path d="M80 35 Q60 50 45 70"/>
+      <path d="M90 35 Q75 55 65 75"/>
+      <path d="M100 35 Q90 50 85 65"/>
+    </g>
+    <!-- Stressed terrarium -->
+    <g transform="translate(45, 55)">
+      <ellipse cx="0" cy="25" rx="20" ry="7" fill="#E5E2DB"/>
+      <path d="M-16 25 Q-16 -3 0 -8 Q16 -3 16 25" fill="#F8F7F5" stroke="#9A8A7B" stroke-width="1.5" opacity="0.8"/>
+      <ellipse cx="0" cy="10" rx="9" ry="4" fill="#9A8A7B"/>
+    </g>
+    <text x="65" y="100" text-anchor="middle" class="detail" style="fill:#C0392B;">Near AC/heater</text>
+    <text x="65" y="112" text-anchor="middle" class="detail" style="fill:#C0392B;">(temp swings)</text>
+  </g>
+
+  <!-- Bad location 3: Dark corner -->
+  <g transform="translate(380, 260)">
+    <rect x="0" y="0" width="130" height="110" rx="4" fill="#787878" opacity="0.2" stroke="#E5E2DB"/>
+    <!-- Dark corner walls -->
+    <line x1="110" y1="10" x2="110" y2="90" stroke="#9A8A7B" stroke-width="3"/>
+    <line x1="20" y1="90" x2="110" y2="90" stroke="#9A8A7B" stroke-width="3"/>
+    <!-- Sad terrarium in darkness -->
+    <g transform="translate(50, 50)">
+      <ellipse cx="0" cy="25" rx="22" ry="8" fill="#5D4E3C"/>
+      <path d="M-18 25 Q-18 -5 0 -10 Q18 -5 18 25" fill="#787878" stroke="#5D4E3C" stroke-width="1.5" opacity="0.8"/>
+      <ellipse cx="0" cy="10" rx="10" ry="4" fill="#5D4E3C"/>
+    </g>
+    <text x="65" y="100" text-anchor="middle" class="detail" style="fill:#C0392B;">Dark corner</text>
+    <text x="65" y="112" text-anchor="middle" class="detail" style="fill:#C0392B;">(no light)</text>
+  </g>
+
+  <!-- Bad location 4: Bathroom (too humid) -->
+  <g transform="translate(540, 260)">
+    <rect x="0" y="0" width="130" height="110" rx="4" fill="#F8F7F5" stroke="#E5E2DB"/>
+    <!-- Steam/humidity indication -->
+    <g fill="#A8D4E6" opacity="0.4">
+      <ellipse cx="30" cy="30" rx="15" ry="10"/>
+      <ellipse cx="65" cy="20" rx="20" ry="12"/>
+      <ellipse cx="100" cy="35" rx="15" ry="10"/>
+      <ellipse cx="50" cy="50" rx="18" ry="10"/>
+      <ellipse cx="85" cy="55" rx="15" ry="8"/>
+    </g>
+    <!-- Moldy terrarium -->
+    <g transform="translate(65, 55)">
+      <ellipse cx="0" cy="25" rx="22" ry="8" fill="#E5E2DB"/>
+      <path d="M-18 25 Q-18 -5 0 -10 Q18 -5 18 25" fill="#A8D4E6" stroke="#6BA3BE" stroke-width="1.5" opacity="0.6"/>
+      <!-- Mold spots -->
+      <circle cx="-8" cy="5" r="4" fill="#787878" opacity="0.6"/>
+      <circle cx="5" cy="12" r="3" fill="#787878" opacity="0.6"/>
+      <circle cx="10" cy="0" r="3" fill="#787878" opacity="0.6"/>
+    </g>
+    <text x="65" y="100" text-anchor="middle" class="detail" style="fill:#C0392B;">Humid bathroom</text>
+    <text x="65" y="112" text-anchor="middle" class="detail" style="fill:#C0392B;">(mold risk)</text>
+  </g>
+</svg>

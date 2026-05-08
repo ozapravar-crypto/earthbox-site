@@ -1,0 +1,44 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   EarthBox · Design Tokens
+   Single source of truth for palette, type, spacing, motion.
+   Pure variables. No layout, no behavior.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* PALETTE */
+  --bg:            #F8F7F5;
+  --bg-tint:       #EFECE5;
+  --ink:           #2C2C2B;
+  --ink-soft:      #4A4A4A;
+  --mute:          #787878;
+  --accent:        #B8A99A;
+  --accent-dk:     #9A8A7B;
+  --reverse:       #F8F7F5;
+  --rule:          rgba(44,44,43,.12);
+  --rule-stronger: rgba(44,44,43,.22);
+
+  /* TYPE FAMILIES */
+  --serif: 'Oranienbaum', 'Cormorant Garamond', serif;
+  --sans:  'Liter', 'Inter', -apple-system, sans-serif;
+  --body:  'Quattrocento Sans', 'Source Sans Pro', sans-serif;
+
+  /* SPACING / RHYTHM */
+  --pad: clamp(1.5rem, 5vw, 5rem);
+  --sec: clamp(6rem, 14vh, 12rem);
+  --max: 1440px;
+
+  /* MOTION — defined now so passes 2-4 don't retrofit */
+  --ease-archival: cubic-bezier(.2,.7,.2,1);
+  --ease-rise:     cubic-bezier(.2,.8,.2,1);
+  --ease-curtain:  cubic-bezier(.7,0,.3,1);
+  --ease-draw:     cubic-bezier(.4,.1,.2,1);
+
+  --dur-fast:    .4s;
+  --dur-base:    1.1s;
+  --dur-curtain: .8s;
+  --dur-draw:    1.6s;
+
+  /* CURSOR (pass 2) */
+  --cursor-ring-size: 32px;
+  --cursor-dot-size:  4px;
+}

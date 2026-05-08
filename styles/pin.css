@@ -1,0 +1,57 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   pin.css · sticky-pinned scroll sections
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.pin-spacer{
+  position:relative;
+  /* 150vh = 50vh of pinned scroll past the initial viewport.
+     Was 220vh which felt like the page was getting "stuck". */
+  height:150vh;
+}
+.pin-content{
+  position:sticky;
+  top:0;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding-block:6vh;
+  overflow:hidden;
+}
+
+.pin-target{
+  opacity:.25;
+  transform:translateY(0) scale(.96);
+  transition:
+    opacity .55s var(--ease-archival),
+    transform .55s var(--ease-archival);
+}
+.pin-target.is-active{
+  opacity:1;
+  transform:translateY(-4px) scale(1);
+}
+
+.pin-progress-bar{
+  width:100%;
+  max-width:560px;
+  margin:4rem auto 0;
+  height:1px;
+  background:var(--rule);
+  position:relative;
+}
+.pin-progress-fill{
+  position:absolute;
+  top:0;left:0;
+  height:1px;
+  background:var(--accent);
+  width:0;
+  transition:width .12s linear;
+}
+
+/* Reduced motion · disable pin entirely · sections render in order */
+@media (prefers-reduced-motion: reduce){
+  .pin-spacer{height:auto}
+  .pin-content{position:static;min-height:auto;padding-block:var(--sec)}
+  .pin-target{opacity:1;transform:none}
+  .pin-progress-bar{display:none}
+}

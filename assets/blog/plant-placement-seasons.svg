@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400" fill="none">
+  <style>
+    .label { font-family: 'Quattrocento Sans', sans-serif; font-size: 11px; fill: #4A4A4A; }
+    .title { font-family: 'Oranienbaum', serif; font-size: 20px; fill: #2C2C2B; }
+    .heading { font-family: 'Oranienbaum', serif; font-size: 16px; fill: #2C2C2B; }
+    .detail { font-family: 'Quattrocento Sans', sans-serif; font-size: 10px; fill: #787878; }
+  </style>
+
+  <!-- Background -->
+  <rect width="700" height="400" fill="#F8F7F5"/>
+
+  <!-- Title -->
+  <text x="350" y="30" text-anchor="middle" class="title">Seasonal Plant Placement Guide</text>
+
+  <!-- Left: Summer -->
+  <rect x="30" y="50" width="300" height="330" rx="6" fill="#F5D76E" opacity="0.1" stroke="#F5D76E" stroke-width="1.5"/>
+  <text x="180" y="75" text-anchor="middle" class="heading">Summer Placement</text>
+  <text x="180" y="92" text-anchor="middle" class="detail">Protect from intense direct sun</text>
+
+  <!-- Summer room illustration -->
+  <g transform="translate(50, 110)">
+    <!-- Window frame -->
+    <rect x="60" y="0" width="140" height="100" fill="#A8D4E6" stroke="#2C2C2B" stroke-width="2"/>
+    <line x1="130" y1="0" x2="130" y2="100" stroke="#2C2C2B" stroke-width="1.5"/>
+    <line x1="60" y1="50" x2="200" y2="50" stroke="#2C2C2B" stroke-width="1.5"/>
+
+    <!-- Intense sun rays -->
+    <g stroke="#F5D76E" stroke-width="3" opacity="0.8">
+      <line x1="130" y1="-30" x2="130" y2="10"/>
+      <line x1="100" y1="-20" x2="115" y2="15"/>
+      <line x1="160" y1="-20" x2="145" y2="15"/>
+      <line x1="80" y1="-5" x2="105" y2="20"/>
+      <line x1="180" y1="-5" x2="155" y2="20"/>
+    </g>
+
+    <!-- Sun icon -->
+    <circle cx="130" cy="-45" r="15" fill="#F5D76E"/>
+
+    <!-- Sheer curtain (recommended) -->
+    <rect x="65" y="5" width="60" height="90" fill="#F8F7F5" opacity="0.6" stroke="#E5E2DB" stroke-dasharray="3 2"/>
+    <text x="95" y="55" text-anchor="middle" class="detail" style="fill:#6B8E5A;">Sheer</text>
+    <text x="95" y="67" text-anchor="middle" class="detail" style="fill:#6B8E5A;">curtain</text>
+
+    <!-- Floor -->
+    <rect x="0" y="100" width="260" height="20" fill="#E5E2DB"/>
+
+    <!-- Plant position - pulled back from window -->
+    <g transform="translate(180, 80)">
+      <!-- Pot -->
+      <ellipse cx="0" cy="20" rx="20" ry="8" fill="#B8A99A"/>
+      <rect x="-18" y="0" width="36" height="20" fill="#C4A574"/>
+      <ellipse cx="0" cy="0" rx="18" ry="6" fill="#B8A99A"/>
+      <!-- Plant -->
+      <ellipse cx="0" cy="-15" rx="25" ry="15" fill="#7DA469"/>
+      <ellipse cx="-8" cy="-20" rx="12" ry="8" fill="#8AB87A"/>
+      <ellipse cx="10" cy="-18" rx="10" ry="7" fill="#6B8E5A"/>
+    </g>
+
+    <!-- Distance arrow -->
+    <g stroke="#6B8E5A" stroke-width="1.5">
+      <line x1="130" y1="130" x2="180" y2="130" marker-end="url(#arrowGreen)" marker-start="url(#arrowGreenBack)"/>
+    </g>
+    <text x="155" y="145" text-anchor="middle" class="detail" style="fill:#6B8E5A;">1-2m back</text>
+  </g>
+
+  <!-- Summer tips -->
+  <g transform="translate(50, 290)">
+    <circle cx="10" cy="8" r="5" fill="#F5D76E"/>
+    <text x="25" y="12" class="label">Use sheer curtains to filter light</text>
+    <circle cx="10" cy="28" r="5" fill="#F5D76E"/>
+    <text x="25" y="32" class="label">Move 1-2m back from south windows</text>
+    <circle cx="10" cy="48" r="5" fill="#F5D76E"/>
+    <text x="25" y="52" class="label">Avoid hot afternoon sun (12-4pm)</text>
+  </g>
+
+  <!-- Divider -->
+  <line x1="350" y1="60" x2="350" y2="370" stroke="#E5E2DB" stroke-width="2"/>
+
+  <!-- Right: Winter -->
+  <rect x="370" y="50" width="300" height="330" rx="6" fill="#6BA3BE" opacity="0.1" stroke="#6BA3BE" stroke-width="1.5"/>
+  <text x="520" y="75" text-anchor="middle" class="heading">Winter Placement</text>
+  <text x="520" y="92" text-anchor="middle" class="detail">Maximize available light</text>
+
+  <!-- Winter room illustration -->
+  <g transform="translate(390, 110)">
+    <!-- Window frame -->
+    <rect x="60" y="0" width="140" height="100" fill="#D5E8F0" stroke="#2C2C2B" stroke-width="2"/>
+    <line x1="130" y1="0" x2="130" y2="100" stroke="#2C2C2B" stroke-width="1.5"/>
+    <line x1="60" y1="50" x2="200" y2="50" stroke="#2C2C2B" stroke-width="1.5"/>
+
+    <!-- Weak winter sun rays -->
+    <g stroke="#F5D76E" stroke-width="2" opacity="0.5">
+      <line x1="100" y1="-15" x2="115" y2="20"/>
+      <line x1="130" y1="-20" x2="130" y2="15"/>
+      <line x1="160" y1="-15" x2="145" y2="20"/>
+    </g>
+
+    <!-- Smaller sun (lower angle) -->
+    <circle cx="100" cy="-30" r="12" fill="#F5D76E" opacity="0.7"/>
+
+    <!-- No curtain - open -->
+    <path d="M65 5 Q55 50 65 95" stroke="#E5E2DB" stroke-width="2" fill="none"/>
+
+    <!-- Floor -->
+    <rect x="0" y="100" width="260" height="20" fill="#E5E2DB"/>
+
+    <!-- Plant position - close to window -->
+    <g transform="translate(130, 75)">
+      <!-- Pot -->
+      <ellipse cx="0" cy="25" rx="20" ry="8" fill="#B8A99A"/>
+      <rect x="-18" y="5" width="36" height="20" fill="#C4A574"/>
+      <ellipse cx="0" cy="5" rx="18" ry="6" fill="#B8A99A"/>
+      <!-- Plant -->
+      <ellipse cx="0" cy="-10" rx="25" ry="15" fill="#7DA469"/>
+      <ellipse cx="-8" cy="-15" rx="12" ry="8" fill="#8AB87A"/>
+      <ellipse cx="10" cy="-13" rx="10" ry="7" fill="#6B8E5A"/>
+    </g>
+
+    <!-- Close to window indicator -->
+    <text x="130" y="130" text-anchor="middle" class="detail" style="fill:#6BA3BE;">Right at window</text>
+
+    <!-- Cold draft warning -->
+    <g transform="translate(200, 60)">
+      <polygon points="0,-12 10,8 -10,8" fill="#C0392B" opacity="0.8"/>
+      <text x="0" y="3" text-anchor="middle" style="fill:#F8F7F5; font-size:10px; font-weight:bold;">!</text>
+    </g>
+    <text x="220" y="85" text-anchor="start" class="detail" style="fill:#C0392B;">Avoid</text>
+    <text x="220" y="97" text-anchor="start" class="detail" style="fill:#C0392B;">cold drafts</text>
+  </g>
+
+  <!-- Winter tips -->
+  <g transform="translate(390, 290)">
+    <circle cx="10" cy="8" r="5" fill="#6BA3BE"/>
+    <text x="25" y="12" class="label">Move plants closer to windows</text>
+    <circle cx="10" cy="28" r="5" fill="#6BA3BE"/>
+    <text x="25" y="32" class="label">Open curtains during daylight</text>
+    <circle cx="10" cy="48" r="5" fill="#6BA3BE"/>
+    <text x="25" y="52" class="label">Keep away from cold drafts</text>
+  </g>
+
+  <defs>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#6B8E5A"/>
+    </marker>
+    <marker id="arrowGreenBack" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto">
+      <path d="M8,0 L0,4 L8,8 Z" fill="#6B8E5A"/>
+    </marker>
+  </defs>
+</svg>

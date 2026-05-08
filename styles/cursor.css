@@ -1,0 +1,163 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   cursor.css · custom cursor system + magnetic transforms
+   Disabled on touch devices and when prefers-reduced-motion is set.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (hover: hover) and (pointer: fine){
+  body.cursor-ready{
+    cursor:none;
+  }
+  body.cursor-ready a,
+  body.cursor-ready button,
+  body.cursor-ready input,
+  body.cursor-ready textarea,
+  body.cursor-ready label{
+    cursor:none;
+  }
+}
+
+.cursor-ring,
+.cursor-dot{
+  position:fixed;
+  top:0;left:0;
+  pointer-events:none;
+  z-index:10000;
+  transform:translate3d(-50%, -50%, 0);
+  will-change:transform, width, height;
+}
+.cursor-ring{
+  width:var(--cursor-ring-size, 32px);
+  height:var(--cursor-ring-size, 32px);
+  border:1px solid var(--accent);
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:width .25s ease, height .25s ease, border-radius .25s ease, border-color .25s ease;
+}
+.cursor-dot{
+  width:var(--cursor-dot-size, 4px);
+  height:var(--cursor-dot-size, 4px);
+  background:var(--accent);
+  border-radius:50%;
+  transition:opacity .2s ease;
+}
+
+/* Hover state: link/button — ring grows, dot vanishes, label appears */
+.cursor-ring.is-hover{
+  width:60px;
+  height:60px;
+}
+.cursor-dot.is-hover{
+  opacity:0;
+}
+.cursor-label{
+  font-family:var(--sans);
+  font-size:.52rem;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  color:var(--accent);
+  opacity:0;
+  transition:opacity .2s ease .05s;
+  pointer-events:none;
+  white-space:nowrap;
+}
+.cursor-ring.is-hover .cursor-label{
+  opacity:1;
+}
+
+/* Hover state: image / svg illustration — ring becomes a square specimen frame */
+.cursor-ring.is-frame{
+  width:48px;
+  height:64px;
+  border-radius:0;
+}
+
+/* Inverts cleanly over the dark manifesto section */
+.cursor-ring.is-dark{
+  border-color:var(--bg);
+  mix-blend-mode:normal;
+}
+.cursor-dot.is-dark{
+  background:var(--bg);
+}
+.cursor-ring.is-dark .cursor-label{
+  color:var(--bg);
+}
+
+/* Sprig trail — sprigs are appended into this layer, then removed */
+.cursor-sprigs{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:5;
+  overflow:hidden;
+}
+.cursor-sprig{
+  position:absolute;
+  width:14px;
+  height:18px;
+  transform:translate(-50%, -100%) scaleY(0);
+  transform-origin:bottom center;
+  opacity:0;
+  animation:sprigGrow 400ms var(--ease-rise) forwards,
+            sprigFade 1600ms ease 400ms forwards;
+}
+.cursor-sprig svg{width:100%;height:100%}
+.cursor-sprig path{
+  stroke:var(--accent-dk);
+  stroke-width:.7;
+  fill:none;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+@keyframes sprigGrow{
+  to{transform:translate(-50%, -100%) scaleY(1);opacity:.7}
+}
+@keyframes sprigFade{
+  to{opacity:0}
+}
+
+/* Trail dots — small breadcrumbs between sprigs */
+.cursor-trail-dot{
+  position:absolute;
+  width:2px;height:2px;
+  background:var(--accent);
+  border-radius:50%;
+  transform:translate(-50%, -50%);
+  opacity:.3;
+  animation:trailFade 800ms ease forwards;
+}
+@keyframes trailFade{to{opacity:0}}
+
+
+/* ═══ MAGNETIC TRANSFORM ═══
+   Applied via JS · uses --mx, --my CSS vars set on the element. */
+.magnetic{
+  display:inline-flex;
+  transform:translate3d(var(--mx, 0px), var(--my, 0px), 0);
+  transition:transform .35s cubic-bezier(.2,.8,.2,1);
+  will-change:transform;
+}
+.magnetic.is-magnetized{
+  transition:none;
+}
+
+
+/* ═══ TEXT SCRAMBLE ═══
+   No CSS needed except cursor hint — scramble is text replacement only. */
+.scramble{
+  cursor:default;
+}
+
+
+/* Disable everything on touch + reduced motion */
+@media (hover: none), (pointer: coarse){
+  .cursor-ring, .cursor-dot, .cursor-sprigs{display:none}
+  body{cursor:auto !important}
+}
+@media (prefers-reduced-motion: reduce){
+  .cursor-ring, .cursor-dot, .cursor-sprigs{display:none}
+  .magnetic{transform:none}
+  body{cursor:auto !important}
+}

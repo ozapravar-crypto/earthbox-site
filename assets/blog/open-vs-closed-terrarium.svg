@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 450" fill="none">
+  <style>
+    .label { font-family: 'Quattrocento Sans', sans-serif; font-size: 11px; fill: #4A4A4A; }
+    .title { font-family: 'Oranienbaum', serif; font-size: 20px; fill: #2C2C2B; }
+    .heading { font-family: 'Oranienbaum', serif; font-size: 16px; fill: #2C2C2B; }
+    .feature { font-family: 'Quattrocento Sans', sans-serif; font-size: 11px; fill: #787878; }
+    .good { fill: #6B8E5A; }
+    .neutral { fill: #787878; }
+  </style>
+
+  <!-- Background -->
+  <rect width="700" height="450" fill="#F8F7F5"/>
+
+  <!-- Title -->
+  <text x="350" y="35" text-anchor="middle" class="title">Open vs Closed Terrariums: Side by Side</text>
+
+  <!-- Left: Open Terrarium -->
+  <rect x="30" y="55" width="300" height="380" rx="6" fill="#F5D76E" opacity="0.1" stroke="#F5D76E" stroke-width="1.5"/>
+  <text x="180" y="80" text-anchor="middle" class="heading">Open Terrarium</text>
+
+  <!-- Open container illustration -->
+  <g transform="translate(100, 100)">
+    <!-- Wide bowl shape -->
+    <path d="M0 150 Q0 180 40 180 L120 180 Q160 180 160 150 L160 60 Q160 40 120 40 L40 40 Q0 40 0 60 Z"
+          fill="#F8F7F5" stroke="#2C2C2B" stroke-width="2"/>
+    <!-- No lid indicator -->
+    <path d="M30 35 Q80 25 130 35" stroke="#F5D76E" stroke-width="2" stroke-dasharray="5 3" fill="none"/>
+    <text x="80" y="22" text-anchor="middle" class="feature" style="fill:#F5D76E;">No lid</text>
+
+    <!-- Soil -->
+    <path d="M10 150 L10 130 Q40 120 80 130 Q120 140 150 125 L150 150 Q150 170 120 170 L40 170 Q10 170 10 150 Z"
+          fill="#C4A574"/>
+
+    <!-- Succulents/cacti -->
+    <g transform="translate(40, 100)">
+      <!-- Succulent rosette -->
+      <ellipse cx="0" cy="0" rx="15" ry="8" fill="#7DA469"/>
+      <ellipse cx="-8" cy="-5" rx="8" ry="5" fill="#8AB87A"/>
+      <ellipse cx="8" cy="-5" rx="8" ry="5" fill="#8AB87A"/>
+      <ellipse cx="0" cy="-8" rx="6" ry="4" fill="#9BC88B"/>
+    </g>
+    <g transform="translate(100, 95)">
+      <!-- Small cactus -->
+      <ellipse cx="0" cy="15" rx="8" ry="4" fill="#C4A574"/>
+      <ellipse cx="0" cy="0" rx="10" ry="18" fill="#6B8E5A"/>
+      <ellipse cx="0" cy="0" rx="8" ry="15" fill="#7DA469"/>
+    </g>
+
+    <!-- Airflow arrows -->
+    <g stroke="#787878" stroke-width="1" fill="none" stroke-dasharray="3 2">
+      <path d="M20 30 Q30 10 50 30"/>
+      <path d="M110 30 Q130 10 140 30"/>
+    </g>
+  </g>
+
+  <!-- Open terrarium features -->
+  <g transform="translate(50, 300)">
+    <circle cx="10" cy="8" r="6" fill="#F5D76E"/>
+    <text x="25" y="12" class="label">Low humidity (40-60%)</text>
+
+    <circle cx="10" cy="33" r="6" fill="#F5D76E"/>
+    <text x="25" y="37" class="label">Needs regular watering</text>
+
+    <circle cx="10" cy="58" r="6" fill="#F5D76E"/>
+    <text x="25" y="62" class="label">Good airflow</text>
+
+    <circle cx="10" cy="83" r="6" fill="#F5D76E"/>
+    <text x="25" y="87" class="label">Succulents &amp; cacti</text>
+
+    <circle cx="10" cy="108" r="6" fill="#F5D76E"/>
+    <text x="25" y="112" class="label">More forgiving of mistakes</text>
+  </g>
+
+  <!-- VS divider -->
+  <line x1="350" y1="70" x2="350" y2="420" stroke="#E5E2DB" stroke-width="2"/>
+  <circle cx="350" cy="200" r="20" fill="#F8F7F5" stroke="#B8A99A" stroke-width="2"/>
+  <text x="350" y="205" text-anchor="middle" class="label" style="font-weight:bold;">VS</text>
+
+  <!-- Right: Closed Terrarium -->
+  <rect x="370" y="55" width="300" height="380" rx="6" fill="#6BA3BE" opacity="0.1" stroke="#6BA3BE" stroke-width="1.5"/>
+  <text x="520" y="80" text-anchor="middle" class="heading">Closed Terrarium</text>
+
+  <!-- Closed container illustration -->
+  <g transform="translate(440, 100)">
+    <!-- Bell jar shape -->
+    <path d="M0 180 L0 60 Q0 20 80 20 Q160 20 160 60 L160 180"
+          fill="#F8F7F5" stroke="#2C2C2B" stroke-width="2"/>
+    <!-- Cork lid -->
+    <ellipse cx="80" cy="20" rx="30" ry="10" fill="#B8A99A" stroke="#9A8A7B" stroke-width="1.5"/>
+    <!-- Sealed indicator -->
+    <text x="80" y="5" text-anchor="middle" class="feature" style="fill:#6BA3BE;">Sealed</text>
+
+    <!-- Soil layer -->
+    <path d="M10 180 L10 150 Q40 140 80 150 Q120 160 150 145 L150 180 Z"
+          fill="#8B7355"/>
+
+    <!-- Tropical plants (ferns, moss) -->
+    <g transform="translate(40, 120)">
+      <!-- Fern -->
+      <path d="M0 30 Q-20 10 -15 -10 M0 30 Q-10 5 -3 -15 M0 30 Q5 0 10 -12 M0 30 Q15 10 18 -5"
+            stroke="#6B8E5A" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(80, 135)">
+      <!-- Moss mound -->
+      <ellipse cx="0" cy="0" rx="25" ry="10" fill="#8AB87A"/>
+      <ellipse cx="-10" cy="-3" rx="10" ry="5" fill="#7DA469"/>
+      <ellipse cx="8" cy="-2" rx="12" ry="6" fill="#6B8E5A"/>
+    </g>
+    <g transform="translate(120, 125)">
+      <!-- Fittonia -->
+      <ellipse cx="0" cy="0" rx="12" ry="7" fill="#7DA469"/>
+      <path d="M0 0 L0 -5" stroke="#F8F7F5" stroke-width="1"/>
+      <ellipse cx="10" cy="8" rx="10" ry="6" fill="#8AB87A"/>
+    </g>
+
+    <!-- Condensation droplets -->
+    <g fill="#A8D4E6" opacity="0.6">
+      <ellipse cx="15" cy="70" rx="3" ry="5"/>
+      <ellipse cx="20" cy="100" rx="4" ry="6"/>
+      <ellipse cx="12" cy="130" rx="3" ry="4"/>
+      <ellipse cx="145" cy="80" rx="4" ry="6"/>
+      <ellipse cx="148" cy="115" rx="3" ry="5"/>
+      <ellipse cx="142" cy="145" rx="4" ry="5"/>
+    </g>
+
+    <!-- Water cycle arrows (internal) -->
+    <g stroke="#A8D4E6" stroke-width="1" fill="none" opacity="0.5">
+      <path d="M60 100 Q60 60 80 50"/>
+      <path d="M100 100 Q100 55 90 45"/>
+    </g>
+  </g>
+
+  <!-- Closed terrarium features -->
+  <g transform="translate(390, 300)">
+    <circle cx="10" cy="8" r="6" fill="#6BA3BE"/>
+    <text x="25" y="12" class="label">High humidity (80-100%)</text>
+
+    <circle cx="10" cy="33" r="6" fill="#6BA3BE"/>
+    <text x="25" y="37" class="label">Self-watering ecosystem</text>
+
+    <circle cx="10" cy="58" r="6" fill="#6BA3BE"/>
+    <text x="25" y="62" class="label">Minimal airflow</text>
+
+    <circle cx="10" cy="83" r="6" fill="#6BA3BE"/>
+    <text x="25" y="87" class="label">Ferns, moss, tropical plants</text>
+
+    <circle cx="10" cy="108" r="6" fill="#6BA3BE"/>
+    <text x="25" y="112" class="label">Requires precise balance</text>
+  </g>
+
+  <!-- Bottom recommendation -->
+  <rect x="150" y="425" width="400" height="20" rx="4" fill="#B8A99A" opacity="0.3"/>
+  <text x="350" y="439" text-anchor="middle" class="label">Choose based on: your plants, your space, and how much attention you can give</text>
+</svg>

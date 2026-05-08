@@ -1,0 +1,80 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Layout primitives · the only layout vocabulary the pages use
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.page{
+  max-width:var(--max);
+  margin:0 auto;
+  padding-inline:var(--pad);
+}
+section{
+  position:relative;
+  padding-block:var(--sec);
+}
+
+/* Rules · hairline accents and full-width dividers */
+.rule-s{
+  display:block;
+  width:56px;
+  height:1px;
+  background:var(--accent);
+  border:0;
+}
+.rule-full{
+  width:100%;
+  height:1px;
+  background:var(--rule);
+  border:0;
+}
+
+/* Stack · vertical rhythm with tunable gap */
+.stack > * + *{margin-top:var(--gap, 1rem)}
+
+/* Row · horizontal alignment helpers */
+.row{
+  display:flex;
+  align-items:center;
+  gap:var(--gap, 1rem);
+}
+.row-spread{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:var(--gap, 1rem);
+}
+
+/* Tinted surface · alternate section background */
+.surface-tint{background:var(--bg-tint)}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Accessibility · skip link, focus styles
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.skip-link{
+  position:absolute;
+  top:-100%;
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--ink);
+  color:var(--bg);
+  padding:.75rem 1.5rem;
+  border-radius:4px;
+  font-family:var(--sans);
+  font-size:.85rem;
+  text-decoration:none;
+  z-index:10000;
+  transition:top .2s ease;
+}
+.skip-link:focus{
+  top:1rem;
+  outline:none;
+}
+
+:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:3px;
+}
+a:focus:not(:focus-visible),
+button:focus:not(:focus-visible){
+  outline:none;
+}

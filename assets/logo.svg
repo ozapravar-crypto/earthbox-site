@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 746 746" width="746" height="746">
+  <defs>
+    <clipPath id="logo-inner-clip">
+      <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- ═══ INSIDE FRAME — clipped to inner path ═══ -->
+  <g clip-path="url(#logo-inner-clip)">
+
+    <!-- Olive-gold sun (top right) -->
+    <circle cx="431" cy="222" r="14" fill="#B8A99A"/>
+
+    <!-- Dotted rain line (sun → ground) -->
+    <line x1="431" y1="244" x2="431" y2="488"
+          stroke="#1a1a1a" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"/>
+
+    <!-- Plant stem -->
+    <line x1="335" y1="478" x2="335" y2="375"
+          stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round"/>
+
+    <!-- Leaves on stem (alternating sides) -->
+    <ellipse cx="318" cy="442" rx="14" ry="6" fill="#1a1a1a" transform="rotate(-30 318 442)"/>
+    <ellipse cx="352" cy="425" rx="14" ry="6" fill="#1a1a1a" transform="rotate(30 352 425)"/>
+    <ellipse cx="318" cy="408" rx="13" ry="5.5" fill="#1a1a1a" transform="rotate(-30 318 408)"/>
+    <ellipse cx="352" cy="390" rx="13" ry="5.5" fill="#1a1a1a" transform="rotate(30 352 390)"/>
+
+    <!-- Dark sediment ground (slightly undulating top edge) -->
+    <path d="M 265 482 Q 320 472 380 482 Q 440 492 480 482 L 480 581 L 265 581 Z"
+          fill="#0e1009"/>
+
+    <!-- Root system (white inside dark sediment) -->
+    <g stroke="#FFFFFF" stroke-width="1.4" fill="none" stroke-linecap="round">
+      <path d="M 335 478 L 335 555"/>
+      <path d="M 335 495 Q 318 510 305 525"/>
+      <path d="M 335 495 Q 352 510 365 525"/>
+      <path d="M 335 515 Q 312 530 300 555"/>
+      <path d="M 335 515 Q 358 530 370 555"/>
+      <path d="M 335 530 Q 320 545 310 568"/>
+      <path d="M 335 530 Q 350 545 360 568"/>
+      <path d="M 335 545 Q 325 558 318 575"/>
+      <path d="M 335 545 Q 345 558 352 575"/>
+    </g>
+
+    <!-- Subtle sediment speckles -->
+    <g fill="#FFFFFF" opacity="0.5">
+      <circle cx="285" cy="558" r="0.7"/>
+      <circle cx="298" cy="568" r="0.6"/>
+      <circle cx="395" cy="555" r="0.7"/>
+      <circle cx="412" cy="566" r="0.6"/>
+      <circle cx="430" cy="572" r="0.7"/>
+      <circle cx="448" cy="558" r="0.6"/>
+      <circle cx="465" cy="568" r="0.7"/>
+    </g>
+
+  </g>
+
+  <!-- ═══ DOUBLE CHAMFERED FRAME (drawn on top, outside clip) ═══ -->
+  <path d="M 282 131 L 463 131 L 493 161 L 493 585 L 463 615 L 282 615 L 252 585 L 252 161 Z"
+        fill="none" stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="miter"/>
+  <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"
+        fill="none" stroke="#1a1a1a" stroke-width="1.2" stroke-linejoin="miter"/>
+</svg>

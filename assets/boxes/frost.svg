@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 746 746" width="746" height="746">
+  <defs>
+    <clipPath id="inner-frame">
+      <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"/>
+    </clipPath>
+    <linearGradient id="crystal-shade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#bcbec0"/>
+      <stop offset="0.5" stop-color="#f3f4f5"/>
+      <stop offset="1" stop-color="#9da0a3"/>
+    </linearGradient>
+  </defs>
+
+  <g clip-path="url(#inner-frame)">
+
+    <!-- Olive moon -->
+    <circle cx="431" cy="232" r="12" fill="#67684A"/>
+
+    <!-- Falling snow dust particles -->
+    <g fill="#9b9b95" opacity="0.7">
+      <circle cx="318" cy="262" r="0.8"/>
+      <circle cx="335" cy="278" r="0.7"/>
+      <circle cx="350" cy="262" r="0.8"/>
+      <circle cx="370" cy="282" r="0.7"/>
+      <circle cx="388" cy="270" r="0.7"/>
+      <circle cx="405" cy="288" r="0.6"/>
+      <circle cx="322" cy="298" r="0.7"/>
+      <circle cx="345" cy="305" r="0.6"/>
+      <circle cx="362" cy="320" r="0.8"/>
+      <circle cx="382" cy="310" r="0.6"/>
+      <circle cx="402" cy="325" r="0.7"/>
+      <circle cx="420" cy="318" r="0.6"/>
+      <circle cx="338" cy="335" r="0.7"/>
+      <circle cx="358" cy="345" r="0.7"/>
+      <circle cx="378" cy="340" r="0.6"/>
+      <circle cx="395" cy="358" r="0.6"/>
+      <circle cx="415" cy="355" r="0.7"/>
+      <circle cx="430" cy="370" r="0.6"/>
+      <circle cx="305" cy="350" r="0.6"/>
+      <circle cx="320" cy="378" r="0.7"/>
+      <circle cx="288" cy="395" r="0.6"/>
+      <circle cx="425" cy="395" r="0.6"/>
+      <circle cx="442" cy="412" r="0.6"/>
+      <circle cx="455" cy="385" r="0.7"/>
+    </g>
+
+    <!-- ===== CRYSTAL CLUSTER ===== -->
+    <!-- Left smaller crystal -->
+    <polygon points="320,490 322,440 333,425 345,440 343,500"
+             fill="url(#crystal-shade)" stroke="#5a5d5f" stroke-width="1"/>
+    <line x1="333" y1="425" x2="333" y2="495" stroke="#7a7d80" stroke-width="0.6" opacity="0.7"/>
+
+    <!-- Right small crystal -->
+    <polygon points="395,500 397,452 408,438 418,452 416,505"
+             fill="url(#crystal-shade)" stroke="#5a5d5f" stroke-width="1"/>
+    <line x1="408" y1="438" x2="408" y2="502" stroke="#7a7d80" stroke-width="0.6" opacity="0.7"/>
+
+    <!-- Far right tiny crystal -->
+    <polygon points="425,510 427,478 433,468 440,478 438,512"
+             fill="url(#crystal-shade)" stroke="#5a5d5f" stroke-width="0.9"/>
+
+    <!-- Central tallest crystal (front) -->
+    <polygon points="350,510 352,400 372,378 392,400 390,510"
+             fill="url(#crystal-shade)" stroke="#4a4d50" stroke-width="1.1"/>
+    <!-- Center facet line -->
+    <line x1="372" y1="378" x2="372" y2="510" stroke="#7a7d80" stroke-width="0.8" opacity="0.7"/>
+    <!-- Top facet shading -->
+    <polygon points="352,400 372,378 372,440 352,420" fill="#dfe1e3" opacity="0.6"/>
+    <polygon points="372,378 392,400 392,420 372,440" fill="#a8abae" opacity="0.5"/>
+
+    <!-- ===== SNOWY GROUND ===== -->
+    <!-- Mid snow drift -->
+    <path d="M 259 530
+             C 280 522, 305 520, 330 526
+             C 360 530, 390 528, 420 524
+             C 445 520, 470 524, 487 530
+             L 487 610 L 259 610 Z"
+          fill="#cfd0cc"/>
+
+    <!-- Front snow drift slightly darker -->
+    <path d="M 259 555
+             C 290 545, 325 545, 360 552
+             C 395 558, 430 552, 460 548
+             C 475 547, 482 552, 487 555
+             L 487 610 L 259 610 Z"
+          fill="#b8b9b3"/>
+
+    <!-- Snow surface highlight -->
+    <path d="M 259 540
+             Q 320 530, 372 538
+             Q 430 545, 487 540"
+          stroke="#e8e8e3" stroke-width="1.2" fill="none" opacity="0.8"/>
+
+    <!-- Snow texture flecks -->
+    <g fill="#7a7c78" opacity="0.45">
+      <circle cx="285" cy="555" r="0.6"/>
+      <circle cx="305" cy="568" r="0.5"/>
+      <circle cx="320" cy="580" r="0.6"/>
+      <circle cx="340" cy="572" r="0.5"/>
+      <circle cx="358" cy="585" r="0.6"/>
+      <circle cx="380" cy="575" r="0.5"/>
+      <circle cx="400" cy="588" r="0.6"/>
+      <circle cx="425" cy="580" r="0.5"/>
+      <circle cx="448" cy="590" r="0.6"/>
+      <circle cx="465" cy="575" r="0.5"/>
+      <circle cx="295" cy="595" r="0.6"/>
+      <circle cx="335" cy="595" r="0.5"/>
+      <circle cx="375" cy="598" r="0.6"/>
+      <circle cx="415" cy="595" r="0.5"/>
+      <circle cx="450" cy="598" r="0.6"/>
+    </g>
+  </g>
+
+  <!-- Outer frame -->
+  <path d="M 282 131 L 463 131 L 493 161 L 493 585 L 463 615 L 282 615 L 252 585 L 252 161 Z"
+        fill="none" stroke="#000" stroke-width="3.5" stroke-linejoin="miter"/>
+  <!-- Inner thin frame -->
+  <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"
+        fill="none" stroke="#000" stroke-width="1.2" stroke-linejoin="miter"/>
+</svg>

@@ -1,0 +1,336 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   blog.css · Journal index + article pages
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.journal-head{
+  padding-block:clamp(7rem,15vh,12rem) clamp(2rem,4vh,3rem);
+  text-align:center;
+}
+.journal-head h1{
+  font-size:clamp(3rem,7vw,6rem);
+  margin:1.5rem auto 0;
+}
+.journal-head .lede{
+  margin-top:1.5rem;
+  max-width:54ch;
+  margin-inline:auto;
+}
+
+/* Category filter tabs */
+.journal-filters{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:.75rem;
+  margin-top:2rem;
+}
+.filter-btn{
+  background:none;
+  border:1px solid var(--rule);
+  padding:.5rem 1rem;
+  font-family:var(--sans);
+  font-size:.72rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--mute);
+  cursor:pointer;
+  transition:all .25s ease;
+}
+.filter-btn:hover,
+.filter-btn.is-active{
+  border-color:var(--ink);
+  color:var(--ink);
+}
+
+/* Article grid */
+.journal-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));
+  gap:3rem 2rem;
+  margin-top:4rem;
+}
+
+/* Article card */
+.article-card{
+  text-decoration:none;
+  color:inherit;
+  display:block;
+}
+.article-card-inner{
+  border-bottom:1px solid var(--rule);
+  padding-bottom:2rem;
+  transition:border-color .25s ease;
+}
+.article-card:hover .article-card-inner{
+  border-color:var(--accent);
+}
+.article-meta{
+  display:flex;
+  gap:1rem;
+  align-items:center;
+  margin-bottom:1rem;
+}
+.article-category{
+  font-family:var(--sans);
+  font-size:.68rem;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--accent);
+}
+.article-date{
+  font-family:var(--sans);
+  font-size:.72rem;
+  color:var(--mute);
+}
+.article-card h3{
+  font-family:var(--serif);
+  font-size:clamp(1.25rem,2.5vw,1.5rem);
+  font-weight:400;
+  line-height:1.3;
+  margin-bottom:.75rem;
+  transition:color .25s ease;
+}
+.article-card:hover h3{
+  color:var(--accent);
+}
+.article-excerpt{
+  font-family:var(--body);
+  font-size:.95rem;
+  line-height:1.6;
+  color:var(--ink-soft);
+}
+.article-read{
+  display:inline-block;
+  margin-top:1rem;
+  font-family:var(--sans);
+  font-size:.72rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--mute);
+}
+.article-card:hover .article-read{
+  color:var(--ink);
+}
+
+/* Single article page */
+.article-head{
+  padding-block:clamp(7rem,15vh,12rem) clamp(2rem,4vh,3rem);
+  text-align:center;
+  max-width:800px;
+  margin:0 auto;
+}
+.article-head h1{
+  font-size:clamp(2rem,5vw,3.5rem);
+  line-height:1.2;
+  margin:1.5rem 0;
+}
+.article-subtitle{
+  font-family:var(--body);
+  font-size:1.1rem;
+  font-style:italic;
+  color:var(--ink-soft);
+}
+.article-byline{
+  margin-top:2rem;
+  font-family:var(--sans);
+  font-size:.8rem;
+  color:var(--mute);
+}
+.article-byline span{
+  margin:0 .5rem;
+}
+
+/* Article body */
+.article-body{
+  max-width:680px;
+  margin:0 auto;
+  padding-block:3rem 6rem;
+}
+.article-body p{
+  font-family:var(--body);
+  font-size:clamp(1rem,1.2vw,1.1rem);
+  line-height:1.8;
+  margin-bottom:1.5rem;
+  color:var(--ink);
+}
+.article-body h2{
+  font-family:var(--serif);
+  font-size:clamp(1.5rem,3vw,2rem);
+  font-weight:400;
+  margin:3rem 0 1.5rem;
+  color:var(--ink);
+}
+.article-body h3{
+  font-family:var(--serif);
+  font-size:1.25rem;
+  font-weight:400;
+  margin:2rem 0 1rem;
+}
+.article-body ul,
+.article-body ol{
+  margin:1.5rem 0;
+  padding-left:1.5rem;
+}
+.article-body li{
+  font-family:var(--body);
+  font-size:1rem;
+  line-height:1.7;
+  margin-bottom:.5rem;
+}
+.article-body blockquote{
+  border-left:2px solid var(--accent);
+  padding-left:1.5rem;
+  margin:2rem 0;
+  font-style:italic;
+  color:var(--ink-soft);
+}
+
+/* FAQ section */
+.faq-section{
+  background:var(--bg-tint);
+  padding:2rem;
+  margin:3rem 0;
+}
+.faq-section h2{
+  margin-top:0;
+  font-size:1.25rem;
+}
+.faq-item{
+  margin-top:1.5rem;
+  padding-top:1.5rem;
+  border-top:1px solid var(--rule);
+}
+.faq-item:first-of-type{
+  margin-top:1rem;
+  padding-top:0;
+  border-top:none;
+}
+.faq-question{
+  font-family:var(--serif);
+  font-size:1.1rem;
+  color:var(--ink);
+  margin-bottom:.5rem;
+}
+.faq-answer{
+  font-family:var(--body);
+  font-size:.95rem;
+  line-height:1.7;
+  color:var(--ink-soft);
+}
+
+/* Definitions block */
+.definitions{
+  background:var(--bg);
+  border:1px solid var(--rule);
+  padding:1.5rem 2rem;
+  margin:2rem 0;
+}
+.definitions h3{
+  font-family:var(--sans);
+  font-size:.72rem;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--mute);
+  margin:0 0 1rem;
+}
+.definitions dl{
+  margin:0;
+}
+.definitions dt{
+  font-family:var(--serif);
+  font-weight:400;
+  color:var(--ink);
+}
+.definitions dd{
+  font-family:var(--body);
+  font-size:.95rem;
+  color:var(--ink-soft);
+  margin:0 0 1rem 0;
+}
+
+/* Article images */
+.article-body figure{
+  margin:2.5rem 0;
+}
+.article-body figure img{
+  width:100%;
+  height:auto;
+  display:block;
+  background:var(--bg-tint);
+  border:1px solid var(--rule);
+}
+.article-body figcaption{
+  font-family:var(--sans);
+  font-size:.8rem;
+  color:var(--mute);
+  margin-top:.75rem;
+  text-align:center;
+}
+.article-body .image-placeholder{
+  aspect-ratio:16/9;
+  background:var(--bg-tint);
+  border:1px dashed var(--rule);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--mute);
+  font-family:var(--sans);
+  font-size:.8rem;
+}
+
+/* Callout boxes */
+.article-body .callout{
+  background:var(--bg-tint);
+  border-left:3px solid var(--accent);
+  padding:1.5rem;
+  margin:2rem 0;
+}
+.article-body .callout-title{
+  font-family:var(--sans);
+  font-size:.72rem;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:.75rem;
+}
+
+/* Related articles */
+.related-section{
+  border-top:1px solid var(--rule);
+  padding-top:3rem;
+  margin-top:4rem;
+}
+.related-section h2{
+  font-size:1.25rem;
+  margin-bottom:2rem;
+}
+.related-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+  gap:2rem;
+}
+
+/* Back link */
+.back-link{
+  display:inline-block;
+  margin-bottom:1rem;
+  font-family:var(--sans);
+  font-size:.8rem;
+  color:var(--mute);
+  text-decoration:none;
+  transition:color .25s ease;
+}
+.back-link:hover{
+  color:var(--ink);
+}
+
+@media (max-width:600px){
+  .journal-grid{
+    grid-template-columns:1fr;
+  }
+  .article-meta{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:.5rem;
+  }
+}

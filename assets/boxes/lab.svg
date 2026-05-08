@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 746 746" width="746" height="746">
+  <defs>
+    <clipPath id="inner-frame">
+      <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#inner-frame)">
+
+    <!-- Olive moon -->
+    <circle cx="431" cy="232" r="12" fill="#67684A"/>
+
+    <!-- ===== ISOMETRIC WIREFRAME CUBE ===== -->
+    <!-- Cube center at (372, 432), edge length ~40 in iso projection -->
+    <g stroke="#1c1c18" stroke-width="1.5" fill="none" stroke-linejoin="miter" stroke-linecap="round">
+      <!-- Hexagonal outline (cube silhouette) -->
+      <polygon points="372,395 410,415 410,455 372,475 334,455 334,415"/>
+      <!-- Three inner edges meeting at center (showing 3D faces) -->
+      <line x1="334" y1="415" x2="372" y2="435"/>
+      <line x1="410" y1="415" x2="372" y2="435"/>
+      <line x1="372" y1="475" x2="372" y2="435"/>
+    </g>
+
+    <!-- ===== GRAINY GROUND STRIP ===== -->
+    <!-- Base solid black -->
+    <rect x="259" y="540" width="228" height="70" fill="#0a0b07"/>
+
+    <!-- Gray gritty band on top -->
+    <path d="M 259 510
+             C 285 506, 310 504, 335 510
+             C 360 514, 390 506, 415 510
+             C 440 514, 465 510, 487 514
+             L 487 545
+             C 465 543, 440 545, 415 543
+             C 390 540, 360 543, 335 545
+             C 310 543, 285 545, 259 545 Z"
+          fill="#bdbeb8"/>
+
+    <!-- Fine grit speckles in gray band -->
+    <g fill="#3a3b35" opacity="0.85">
+      <circle cx="270" cy="518" r="0.6"/>
+      <circle cx="278" cy="525" r="0.7"/>
+      <circle cx="286" cy="520" r="0.6"/>
+      <circle cx="294" cy="528" r="0.6"/>
+      <circle cx="302" cy="522" r="0.7"/>
+      <circle cx="310" cy="530" r="0.6"/>
+      <circle cx="318" cy="524" r="0.6"/>
+      <circle cx="326" cy="532" r="0.7"/>
+      <circle cx="334" cy="525" r="0.6"/>
+      <circle cx="342" cy="535" r="0.6"/>
+      <circle cx="350" cy="528" r="0.6"/>
+      <circle cx="358" cy="538" r="0.7"/>
+      <circle cx="366" cy="530" r="0.6"/>
+      <circle cx="374" cy="538" r="0.7"/>
+      <circle cx="382" cy="528" r="0.6"/>
+      <circle cx="390" cy="538" r="0.6"/>
+      <circle cx="398" cy="528" r="0.7"/>
+      <circle cx="406" cy="538" r="0.6"/>
+      <circle cx="414" cy="528" r="0.6"/>
+      <circle cx="422" cy="535" r="0.7"/>
+      <circle cx="430" cy="528" r="0.6"/>
+      <circle cx="438" cy="535" r="0.6"/>
+      <circle cx="446" cy="528" r="0.7"/>
+      <circle cx="454" cy="535" r="0.6"/>
+      <circle cx="462" cy="528" r="0.6"/>
+      <circle cx="470" cy="535" r="0.7"/>
+      <circle cx="478" cy="528" r="0.6"/>
+      <circle cx="275" cy="535" r="0.6"/>
+      <circle cx="298" cy="538" r="0.6"/>
+      <circle cx="322" cy="540" r="0.6"/>
+      <circle cx="348" cy="540" r="0.6"/>
+      <circle cx="378" cy="540" r="0.6"/>
+      <circle cx="408" cy="542" r="0.6"/>
+      <circle cx="436" cy="540" r="0.6"/>
+      <circle cx="464" cy="542" r="0.6"/>
+    </g>
+
+    <!-- Edge highlight strip on top of gray band -->
+    <path d="M 264 514 Q 320 510, 372 513 Q 430 516, 482 512" stroke="#e6e6df" stroke-width="0.8" fill="none" opacity="0.65"/>
+
+  </g>
+
+  <!-- Outer frame -->
+  <path d="M 282 131 L 463 131 L 493 161 L 493 585 L 463 615 L 282 615 L 252 585 L 252 161 Z"
+        fill="none" stroke="#000" stroke-width="3.5" stroke-linejoin="miter"/>
+  <!-- Inner thin frame -->
+  <path d="M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z"
+        fill="none" stroke="#000" stroke-width="1.2" stroke-linejoin="miter"/>
+</svg>

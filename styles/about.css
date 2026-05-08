@@ -1,0 +1,211 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   about.css · About page · simple vertical layout
+   Numbers removed · founder side-by-side · everything else plain.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── HEADER ─── */
+.about-head{
+  padding-block:clamp(8rem,18vh,14rem) clamp(4rem,8vh,7rem);
+  text-align:center;
+}
+.about-head .eyebrow{margin-bottom:1.5rem}
+.about-head h1{
+  font-size:clamp(3.5rem,9vw,7rem);
+  line-height:1;
+}
+.about-head .italic{
+  display:block;
+  margin-top:1.5rem;
+  font-family:var(--body);
+  font-style:italic;
+  color:var(--mute);
+  font-size:1.05rem;
+  max-width:48ch;
+  margin-left:auto;
+  margin-right:auto;
+}
+.about-head .rule-s{margin:3rem auto 0}
+
+
+/* ─── SECTIONS ─── */
+.about-sections{
+  max-width:920px;
+  margin:0 auto;
+  padding-inline:var(--pad);
+}
+.about-section{
+  padding-block:clamp(4rem,8vh,7rem);
+  border-top:1px solid var(--rule);
+}
+.about-section:first-child{border-top:0}
+
+.about-section-head{margin-bottom:2rem}
+.about-section-head::before{
+  content:"";
+  display:block;
+  width:48px;
+  height:1px;
+  background:var(--accent);
+  margin-bottom:1.25rem;
+}
+.about-title{
+  font-size:clamp(2.5rem,5vw,4rem);
+  line-height:1;
+  font-weight:400;
+  font-family:var(--serif);
+}
+
+.about-body{max-width:60ch}
+.about-body p{
+  color:var(--ink-soft);
+  margin-bottom:1.25rem;
+  font-size:1.02rem;
+  line-height:1.75;
+}
+.about-body p:first-child{
+  font-style:italic;
+  color:var(--ink);
+  font-size:1.1rem;
+}
+
+
+/* ─── METHOD STEPS ─── */
+.about-steps{
+  margin-top:2rem;
+  display:grid;
+  gap:1.25rem;
+  border-top:1px solid var(--rule);
+  padding-top:2rem;
+  list-style:none;
+}
+.about-steps li{
+  display:grid;
+  grid-template-columns:60px 1fr;
+  gap:1.5rem;
+  align-items:baseline;
+}
+.about-steps .step-n{
+  font-family:var(--serif);
+  font-size:1.4rem;
+  color:var(--accent);
+  line-height:1;
+}
+.about-steps .step-text{
+  font-family:var(--body);
+  color:var(--ink-soft);
+  line-height:1.6;
+}
+
+
+/* ─── FOUNDER · side-by-side (image LEFT, info RIGHT) ─── */
+.founder-split{
+  margin-top:2rem;
+  display:grid;
+  grid-template-columns:1.4fr 1fr;
+  gap:clamp(2rem,4vw,4rem);
+  align-items:center;
+}
+.founder-image{
+  position:relative;
+  border:1px solid var(--rule-stronger);
+  overflow:hidden;
+  background:var(--ink);
+}
+.founder-image::before,
+.founder-image::after{
+  content:"";
+  position:absolute;
+  width:10px;height:10px;
+  background:var(--accent);
+  z-index:2;
+}
+.founder-image::before{top:-5px;left:-5px}
+.founder-image::after{bottom:-5px;right:-5px}
+.founder-image img{
+  width:100%;
+  height:auto;
+  display:block;
+}
+.founder-info{
+  display:flex;
+  flex-direction:column;
+}
+.founder-name{
+  font-family:var(--serif);
+  font-size:clamp(1.5rem,2.4vw,2rem);
+  color:var(--ink);
+  line-height:1.05;
+  margin-bottom:.5rem;
+}
+.founder-role{
+  font-size:.62rem;
+  letter-spacing:.32em;
+  color:var(--accent);
+  margin-bottom:1.25rem;
+}
+.founder-bio{
+  font-family:var(--body);
+  font-style:italic;
+  color:var(--ink-soft);
+  font-size:.95rem;
+  line-height:1.65;
+  margin-bottom:1.5rem;
+}
+.founder-location{
+  font-family:var(--body);
+  font-style:italic;
+  color:var(--mute);
+  font-size:.88rem;
+}
+
+
+/* ─── KEY-VALUE TABLE (Materials, Contact) ─── */
+.kv-table{
+  margin-top:2rem;
+  display:grid;
+  gap:1.25rem;
+  border-top:1px solid var(--rule);
+  padding-top:2rem;
+}
+.kv-table > div{
+  display:grid;
+  grid-template-columns:160px 1fr;
+  gap:2rem;
+  align-items:baseline;
+}
+.kv-table dt{font-size:.6rem}
+.kv-table dd{
+  font-family:var(--serif);
+  font-size:1.05rem;
+  color:var(--ink);
+}
+
+
+/* ─── CLOSING STATEMENT ─── */
+.about-closing{
+  padding-block:clamp(8rem,16vh,12rem);
+  padding-inline:var(--pad);
+  text-align:center;
+}
+.about-closing .rule-s{margin:0 auto 3rem}
+.about-closing .statement{
+  font-family:var(--serif);
+  font-size:clamp(2rem,5vw,3.5rem);
+  line-height:1.15;
+  color:var(--ink);
+  max-width:18ch;
+  margin:0 auto;
+  letter-spacing:-.012em;
+}
+.about-closing .rule-bottom{margin:3rem auto 0}
+
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 1000px){
+  .founder-split{grid-template-columns:1fr;gap:2rem}
+  .kv-table > div{grid-template-columns:1fr;gap:.5rem}
+  .kv-table dt{margin-bottom:.25rem}
+}
+@media (max-width: 560px){
+  .about-steps li{grid-template-columns:40px 1fr;gap:1rem}
+}

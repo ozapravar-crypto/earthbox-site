@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 450" fill="none">
+  <style>
+    .label { font-family: 'Quattrocento Sans', sans-serif; font-size: 11px; fill: #4A4A4A; }
+    .title { font-family: 'Oranienbaum', serif; font-size: 20px; fill: #2C2C2B; }
+    .heading { font-family: 'Oranienbaum', serif; font-size: 14px; fill: #2C2C2B; }
+    .detail { font-family: 'Quattrocento Sans', sans-serif; font-size: 10px; fill: #787878; }
+    .callout { font-family: 'Quattrocento Sans', sans-serif; font-size: 9px; fill: #4A4A4A; }
+  </style>
+
+  <!-- Background -->
+  <rect width="700" height="450" fill="#F8F7F5"/>
+
+  <!-- Title -->
+  <text x="350" y="30" text-anchor="middle" class="title">Internal Drainage Channel Design</text>
+  <text x="350" y="48" text-anchor="middle" class="detail">Cross-section view of EarthBox self-draining vessel system</text>
+
+  <!-- Main cross-section container -->
+  <rect x="100" y="70" width="500" height="320" rx="8" fill="#EFECE5" stroke="#9A8A7B" stroke-width="2"/>
+
+  <!-- Vessel outer wall (thick) -->
+  <path d="M150 100 L150 350 Q150 370 200 370 L500 370 Q550 370 550 350 L550 100"
+        fill="none" stroke="#C4A574" stroke-width="12"/>
+
+  <!-- Inner pot area -->
+  <rect x="185" y="120" width="330" height="230" fill="#F8F7F5"/>
+
+  <!-- Soil layers -->
+  <!-- Top soil -->
+  <rect x="185" y="120" width="330" height="80" fill="#8B7355"/>
+  <!-- Middle soil with roots -->
+  <rect x="185" y="200" width="330" height="60" fill="#9A8A7B"/>
+  <!-- Drainage layer (gravel) -->
+  <rect x="185" y="260" width="330" height="40" fill="#B8A99A"/>
+  <!-- Gravel pattern -->
+  <g fill="#9A8A7B" opacity="0.6">
+    <circle cx="200" cy="275" r="5"/>
+    <circle cx="220" cy="285" r="6"/>
+    <circle cx="245" cy="272" r="5"/>
+    <circle cx="270" cy="280" r="7"/>
+    <circle cx="300" cy="275" r="5"/>
+    <circle cx="325" cy="285" r="6"/>
+    <circle cx="350" cy="270" r="5"/>
+    <circle cx="380" cy="280" r="6"/>
+    <circle cx="405" cy="275" r="5"/>
+    <circle cx="430" cy="285" r="6"/>
+    <circle cx="455" cy="272" r="5"/>
+    <circle cx="480" cy="280" r="7"/>
+    <circle cx="500" cy="275" r="5"/>
+  </g>
+
+  <!-- Root system -->
+  <g stroke="#F5F0E8" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8">
+    <path d="M280 140 L280 180 Q270 210 260 240"/>
+    <path d="M280 160 Q250 180 230 200"/>
+    <path d="M280 160 Q310 175 330 195"/>
+    <path d="M350 145 L350 190 Q340 220 330 245"/>
+    <path d="M350 170 Q320 185 300 210"/>
+    <path d="M350 170 Q380 190 400 215"/>
+    <path d="M420 140 L420 175 Q430 200 440 230"/>
+    <path d="M420 155 Q450 170 470 195"/>
+  </g>
+
+  <!-- Water reservoir chamber (hidden below) -->
+  <rect x="185" y="300" width="330" height="50" fill="#6BA3BE" opacity="0.3"/>
+
+  <!-- Drainage channels (vertical) -->
+  <g fill="#6BA3BE" opacity="0.4">
+    <rect x="220" y="260" width="15" height="90" rx="2"/>
+    <rect x="300" y="260" width="15" height="90" rx="2"/>
+    <rect x="380" y="260" width="15" height="90" rx="2"/>
+    <rect x="460" y="260" width="15" height="90" rx="2"/>
+  </g>
+
+  <!-- Channel detail callouts -->
+  <!-- Left channel detail -->
+  <g transform="translate(227, 310)">
+    <rect x="-12" y="-15" width="24" height="30" fill="#F8F7F5" stroke="#6BA3BE" stroke-width="1" stroke-dasharray="2 2"/>
+  </g>
+
+  <!-- Water flow arrows -->
+  <g stroke="#6BA3BE" stroke-width="1.5" fill="none">
+    <path d="M227 270 L227 295" marker-end="url(#arrowBlue)"/>
+    <path d="M307 270 L307 295" marker-end="url(#arrowBlue)"/>
+    <path d="M387 270 L387 295" marker-end="url(#arrowBlue)"/>
+    <path d="M467 270 L467 295" marker-end="url(#arrowBlue)"/>
+  </g>
+
+  <!-- Overflow outlet -->
+  <rect x="515" y="320" width="40" height="15" fill="#F8F7F5" stroke="#9A8A7B" stroke-width="1.5"/>
+  <path d="M555 327 L575 327" stroke="#6BA3BE" stroke-width="2" stroke-dasharray="4 2"/>
+
+  <!-- Layer labels (right side) -->
+  <g transform="translate(560, 0)">
+    <line x1="0" y1="140" x2="30" y2="140" stroke="#787878" stroke-dasharray="2 2"/>
+    <text x="35" y="144" class="label">Potting soil</text>
+
+    <line x1="0" y1="220" x2="30" y2="220" stroke="#787878" stroke-dasharray="2 2"/>
+    <text x="35" y="224" class="label">Root zone</text>
+
+    <line x1="0" y1="280" x2="30" y2="280" stroke="#787878" stroke-dasharray="2 2"/>
+    <text x="35" y="284" class="label">Drainage gravel</text>
+
+    <line x1="0" y1="325" x2="30" y2="325" stroke="#787878" stroke-dasharray="2 2"/>
+    <text x="35" y="329" class="label">Water reservoir</text>
+  </g>
+
+  <!-- Channel detail zoom box -->
+  <rect x="50" y="200" width="100" height="120" rx="4" fill="#F8F7F5" stroke="#6BA3BE" stroke-width="2"/>
+  <text x="100" y="218" text-anchor="middle" class="heading" style="fill:#6BA3BE; font-size:11px;">Channel Detail</text>
+
+  <!-- Zoomed channel cross-section -->
+  <g transform="translate(70, 235)">
+    <!-- Channel walls -->
+    <rect x="0" y="0" width="60" height="70" fill="#B8A99A" stroke="#9A8A7B"/>
+    <rect x="15" y="5" width="30" height="60" fill="#6BA3BE" opacity="0.4"/>
+
+    <!-- Water droplets in channel -->
+    <ellipse cx="30" cy="25" rx="8" ry="5" fill="#6BA3BE" opacity="0.6"/>
+    <ellipse cx="30" cy="45" rx="6" ry="4" fill="#6BA3BE" opacity="0.6"/>
+
+    <!-- Air gap indicators -->
+    <g fill="#F8F7F5" opacity="0.8">
+      <circle cx="22" cy="15" r="3"/>
+      <circle cx="38" cy="35" r="3"/>
+      <circle cx="25" cy="55" r="3"/>
+    </g>
+  </g>
+
+  <text x="100" y="315" text-anchor="middle" class="callout">15mm wide</text>
+
+  <!-- Connection line to main diagram -->
+  <path d="M150 260 Q120 240 120 230" stroke="#6BA3BE" stroke-width="1" stroke-dasharray="3 2" fill="none"/>
+
+  <!-- Benefits section -->
+  <g transform="translate(50, 340)">
+    <rect x="0" y="0" width="200" height="95" rx="4" fill="#6B8E5A" opacity="0.1" stroke="#6B8E5A"/>
+    <text x="100" y="18" text-anchor="middle" class="heading" style="fill:#6B8E5A; font-size:12px;">Design Benefits</text>
+    <circle cx="15" cy="38" r="4" fill="#6B8E5A"/>
+    <text x="25" y="42" class="callout">Excess water drains to reservoir</text>
+    <circle cx="15" cy="55" r="4" fill="#6B8E5A"/>
+    <text x="25" y="59" class="callout">Air pockets prevent root rot</text>
+    <circle cx="15" cy="72" r="4" fill="#6B8E5A"/>
+    <text x="25" y="76" class="callout">Overflow prevents waterlogging</text>
+    <circle cx="15" cy="89" r="4" fill="#6B8E5A"/>
+    <text x="25" y="93" class="callout">Capillary action for self-watering</text>
+  </g>
+
+  <!-- Technical specs -->
+  <g transform="translate(270, 400)">
+    <text x="0" y="0" class="detail">Channel spacing: 80mm | Channel width: 15mm | Reservoir depth: 50mm | Overflow height: 45mm</text>
+  </g>
+
+  <defs>
+    <marker id="arrowBlue" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#6BA3BE"/>
+    </marker>
+  </defs>
+</svg>
