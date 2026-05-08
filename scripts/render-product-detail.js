@@ -11,6 +11,7 @@
 
 import { volumeOne as v1Products, categories as v1Categories, materials } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
+import { observeReveals } from './reveal.js';
 
 
 const ENQUIRY_WHATSAPP = '918104811584';
@@ -398,6 +399,9 @@ function renderProduct(id){
   document.getElementById('pdLoading')?.remove();
   document.getElementById('pdNotFound')?.remove();
   host.insertAdjacentHTML('beforeend', html);
+
+  // Initialize reveals for dynamically added content
+  observeReveals(host);
 
   // Initialize selectors for V1 products
   if (found.kind === 'printed') {
