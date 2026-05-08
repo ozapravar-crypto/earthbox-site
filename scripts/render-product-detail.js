@@ -15,12 +15,46 @@ import { observeReveals } from './reveal.js';
 
 
 const ENQUIRY_WHATSAPP = '918104811584';
+const SITE_URL = 'https://earthbox.in';
 
-function enquiryHref(itemName, material, variant){
-  let text = `Hi Aayush, I'm interested in ${itemName}`;
-  if (material) text += ` (${material.toUpperCase()})`;
-  if (variant) text += ` — ${variant}`;
-  text += `. Could you share availability and next steps?`;
+function enquiryHref(opts = {}){
+  const { name, sku, material, variant, price, volume = 1 } = opts;
+  const productUrl = sku ? `${SITE_URL}/product.html#${encodeURIComponent(sku)}` : '';
+
+  let text = '';
+
+  if (volume === 1) {
+    // V1: 3D Printed products — warm craftsman tone
+    text = `Hi — I was just looking at the ${name}`;
+    if (variant) text += ` (${variant})`;
+    if (material) text += ` in ${material.toUpperCase()}`;
+    text += `.\n\n`;
+    text += `It's one of my favourites from Volume I. `;
+    text += `Each is 3D-printed here in Mumbai, takes about a week.\n\n`;
+    if (price) text += `Noted price: ${price}\n\n`;
+    text += `Happy to answer any questions or talk through material options.\n\n`;
+    text += `${productUrl}`;
+  }
+  else if (volume === 2) {
+    // V2: Elemental Boxes — slightly more formal, anticipation tone
+    text = `Hi — I was looking at the ${name} from Volume II.\n\n`;
+    text += `I understand it's coming soon. Would love to know more about availability, `;
+    text += `specs, or how to reserve one.\n\n`;
+    text += `${productUrl}`;
+  }
+  else if (volume === 3) {
+    // V3: Digital Vivariums — curiosity/research tone
+    text = `Hi — I came across the Digital Vivariums concept (Volume III).\n\n`;
+    text += `Really intrigued by the idea. Is there a way to register interest `;
+    text += `or learn more about where this is headed?\n\n`;
+    text += `${productUrl}`;
+  }
+  else {
+    // Fallback
+    text = `Hi — I was looking at ${name}. Could you share more details?`;
+    if (productUrl) text += `\n\n${productUrl}`;
+  }
+
   return `https://wa.me/${ENQUIRY_WHATSAPP}?text=${encodeURIComponent(text)}`;
 }
 
@@ -139,7 +173,14 @@ function renderPrinted(p){
           </div>
 
           <a class="cta magnetic pd-cta" id="pdEnquiryCta"
-             href="${enquiryHref(p.name, availableMaterials[0], hasVariants ? p.variants[0].name : null)}"
+             href="${enquiryHref({
+               name: p.name,
+               sku: p.sku,
+               material: availableMaterials[0],
+               variant: hasVariants ? p.variants[0].name : null,
+               price: hasPricing ? formatPrice(hasVariants ? p.pricing[p.variants[0].id][availableMaterials[0]] : p.pricing[availableMaterials[0]]) : null,
+               volume: 1
+             })}"
              target="_blank" rel="noopener"
              data-cursor="ASK">
             Enquire on WhatsApp
@@ -203,7 +244,14 @@ function initPrintedSelectors(p){
     priceEl.textContent = price ? formatPrice(price) : 'Price on enquiry';
 
     const variantName = hasVariants ? p.variants.find(v => v.id === currentVariant)?.name : null;
-    ctaEl.href = enquiryHref(p.name, currentMaterial, variantName);
+    ctaEl.href = enquiryHref({
+      name: p.name,
+      sku: p.sku,
+      material: currentMaterial,
+      variant: variantName,
+      price: price ? formatPrice(price) : null,
+      volume: 1
+    });
   }
 
   // Variant selector
@@ -280,7 +328,7 @@ function renderBox(b){
             `).join('')}
           </dl>
           <a class="cta magnetic pd-cta"
-             href="${enquiryHref(b.sku + ' (Volume II)')}"
+             href="${enquiryHref({ name: b.sku, sku: b.sku, volume: 2 })}"
              target="_blank" rel="noopener"
              data-cursor="ASK">
             Enquire on WhatsApp
@@ -333,7 +381,7 @@ function renderVivarium(v){
         <p class="italic" style="margin-top:1.5rem;color:var(--mute)">${v.note}</p>
         <a class="cta magnetic pd-cta"
            style="margin-top:2rem"
-           href="${enquiryHref('Digital Vivariums (Volume III) — early signal')}"
+           href="${enquiryHref({ name: 'Digital Vivariums', sku: v.sku, volume: 3 })}"
            target="_blank" rel="noopener"
            data-cursor="ASK">
           Write in on WhatsApp
