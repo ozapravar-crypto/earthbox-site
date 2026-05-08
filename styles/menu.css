@@ -23,7 +23,10 @@
   width:22px;
   height:1.5px;
   background:rgba(248,247,245,.92);
-  transition:transform .35s ease, opacity .35s ease;
+  transition:transform .35s ease, opacity .35s ease, background .35s ease;
+}
+.runhead.is-scrolled .hamburger span{
+  background:var(--ink);
 }
 body.menu-open .hamburger span:nth-child(1){
   transform:translateY(6.5px) rotate(45deg);
@@ -125,6 +128,36 @@ body.menu-open .hamburger span:nth-child(3){
   padding-top:2rem;
   border-top:1px solid var(--rule);
   font-size:.6rem;
+  color:var(--mute);
+}
+
+/* ─── Theme toggle row in mobile menu ─── */
+.mobile-nav-theme{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:1.5rem 0;
+  margin-top:2rem;
+  border-top:1px solid var(--rule);
+}
+.mobile-theme-label{
+  font-size:.65rem;
+  letter-spacing:.25em;
+  text-transform:uppercase;
+  color:var(--mute);
+}
+.theme-toggle-mobile .toggle-track{
+  background:var(--rule);
+  border-color:var(--rule-stronger);
+}
+.theme-toggle-mobile .toggle-thumb{
+  background:var(--ink);
+}
+.theme-toggle-mobile.is-dark .toggle-thumb{
+  background:var(--bg);
+}
+.theme-toggle-mobile .toggle-icon-sun,
+.theme-toggle-mobile .toggle-icon-moon{
   color:var(--mute);
 }
 

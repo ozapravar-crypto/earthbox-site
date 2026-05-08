@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────
-// theme.js · Dark/Light mode toggle
+// theme.js · Dark/Light mode toggle (pill switch)
 //
 // Priority: localStorage > prefers-color-scheme > light (default)
 // Stores preference in localStorage as 'earthbox-theme'
@@ -29,23 +29,15 @@ function setStoredTheme(theme) {
 
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
-  updateToggleIcon(theme);
+  updateAllToggles(theme);
 }
 
-function updateToggleIcon(theme) {
-  const toggle = document.getElementById('themeToggle');
-  if (!toggle) return;
-
-  const sunIcon = toggle.querySelector('.theme-icon-sun');
-  const moonIcon = toggle.querySelector('.theme-icon-moon');
-
-  if (sunIcon && moonIcon) {
-    // Show sun in dark mode (click to go light), moon in light mode (click to go dark)
-    sunIcon.style.display = theme === 'dark' ? 'block' : 'none';
-    moonIcon.style.display = theme === 'light' ? 'block' : 'none';
-  }
-
-  toggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+function updateAllToggles(theme) {
+  document.querySelectorAll('.theme-toggle').forEach(toggle => {
+    toggle.classList.toggle('is-dark', theme === 'dark');
+    toggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    toggle.setAttribute('aria-checked', theme === 'dark' ? 'true' : 'false');
+  });
 }
 
 function toggleTheme() {
@@ -55,55 +47,52 @@ function toggleTheme() {
   setStoredTheme(next);
 }
 
+function createToggle(theme) {
+  const toggle = document.createElement('button');
+  toggle.className = 'theme-toggle' + (theme === 'dark' ? ' is-dark' : '');
+  toggle.type = 'button';
+  toggle.setAttribute('role', 'switch');
+  toggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  toggle.setAttribute('aria-checked', theme === 'dark' ? 'true' : 'false');
+  toggle.innerHTML = `
+    <span class="toggle-track">
+      <span class="toggle-icons">
+        <svg class="toggle-icon-sun" viewBox="0 0 16 16" fill="currentColor">
+          <circle cx="8" cy="8" r="3"/>
+          <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/>
+        </svg>
+        <svg class="toggle-icon-moon" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M6 2a6 6 0 1 0 6.5 9.5A5 5 0 0 1 6 2z"/>
+        </svg>
+      </span>
+      <span class="toggle-thumb"></span>
+    </span>
+  `;
+  toggle.addEventListener('click', toggleTheme);
+  return toggle;
+}
+
 export function initTheme() {
-  // Determine initial theme
   const stored = getStoredTheme();
   const theme = stored || getSystemPreference();
-
-  // Apply immediately (no flash)
   applyTheme(theme);
 
-  // Create toggle button in runhead
+  // Desktop toggle in runhead (right side)
   const runhead = document.querySelector('.runhead');
   if (runhead) {
-    const toggle = document.createElement('button');
-    toggle.id = 'themeToggle';
-    toggle.className = 'theme-toggle';
-    toggle.type = 'button';
-    toggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-    toggle.innerHTML = `
-      <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="12" cy="12" r="5"/>
-        <line x1="12" y1="1" x2="12" y2="3"/>
-        <line x1="12" y1="21" x2="12" y2="23"/>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-        <line x1="1" y1="12" x2="3" y2="12"/>
-        <line x1="21" y1="12" x2="23" y2="12"/>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-      </svg>
-      <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-      </svg>
-    `;
-
-    toggle.addEventListener('click', toggleTheme);
-
-    // Insert before the scroll counter (runhead-right)
-    const runheadRight = runhead.querySelector('.runhead-right');
-    if (runheadRight) {
-      runhead.insertBefore(toggle, runheadRight);
-    } else {
-      runhead.appendChild(toggle);
-    }
-
-    updateToggleIcon(theme);
+    const toggle = createToggle(theme);
+    toggle.classList.add('theme-toggle-desktop');
+    runhead.appendChild(toggle);
   }
+
+  // Mobile toggle will be added by menu.js after panel is created
+  // We expose a helper function for it
+  window.__earthboxCreateThemeToggle = () => createToggle(
+    document.documentElement.getAttribute('data-theme') || 'light'
+  );
 
   // Listen for system preference changes
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    // Only auto-switch if user hasn't set a preference
     if (!getStoredTheme()) {
       applyTheme(e.matches ? 'dark' : 'light');
     }

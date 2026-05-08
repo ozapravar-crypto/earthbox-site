@@ -54,11 +54,28 @@ export function initMenu(){
         }).join('')}
       </ul>
     </nav>
+    <div class="mobile-nav-theme"></div>
     <div class="mobile-nav-foot caption">Kandivali · Mumbai</div>
   `;
 
   document.body.appendChild(overlay);
   document.body.appendChild(panel);
+
+  // Add theme toggle to mobile menu (after theme.js has initialized)
+  setTimeout(() => {
+    const themeContainer = panel.querySelector('.mobile-nav-theme');
+    if (themeContainer && window.__earthboxCreateThemeToggle) {
+      const mobileToggle = window.__earthboxCreateThemeToggle();
+      mobileToggle.classList.add('theme-toggle-mobile');
+
+      const label = document.createElement('span');
+      label.className = 'mobile-theme-label caption';
+      label.textContent = 'Dark mode';
+
+      themeContainer.appendChild(label);
+      themeContainer.appendChild(mobileToggle);
+    }
+  }, 0);
 
   // ─── Open / close behaviour ───
   const setOpen = (open) => {
