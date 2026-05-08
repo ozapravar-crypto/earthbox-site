@@ -346,16 +346,14 @@ function renderVivarium(v){
 }
 
 
-// ─── Boot ───
-export function initProductDetail(){
+// ─── Render product by ID ───
+function renderProduct(id){
   const host = document.getElementById('productDetail');
   if (!host) return;
 
-  // Try hash first (e.g., #V1-PLT-001), then fall back to query param (?id=...)
-  const hashId = location.hash ? decodeURIComponent(location.hash.slice(1)) : null;
-  const params = new URLSearchParams(location.search);
-  const queryId = params.get('id');
-  const id = hashId || queryId;
+  // Clear previous content (keep loading/notfound placeholders if they exist)
+  const existingArticle = host.querySelector('article');
+  if (existingArticle) existingArticle.remove();
 
   if (!id){
     document.getElementById('pdLoading')?.setAttribute('hidden', 'true');
@@ -405,4 +403,31 @@ export function initProductDetail(){
   if (found.kind === 'printed') {
     initPrintedSelectors(found.data);
   }
+
+  // Scroll to top when navigating to new product
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+
+// ─── Get product ID from URL ───
+function getProductId(){
+  const hashId = location.hash ? decodeURIComponent(location.hash.slice(1)) : null;
+  const params = new URLSearchParams(location.search);
+  const queryId = params.get('id');
+  return hashId || queryId;
+}
+
+
+// ─── Boot ───
+export function initProductDetail(){
+  const host = document.getElementById('productDetail');
+  if (!host) return;
+
+  // Initial render
+  renderProduct(getProductId());
+
+  // Re-render on hash change (for related product links)
+  window.addEventListener('hashchange', () => {
+    renderProduct(getProductId());
+  });
 }
