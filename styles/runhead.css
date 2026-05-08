@@ -13,8 +13,31 @@
   z-index:80;
   pointer-events:none;
   mix-blend-mode:difference;
+  transition:background .35s ease, backdrop-filter .35s ease, box-shadow .35s ease;
 }
 .runhead > *{pointer-events:auto}
+
+/* Frosted glass effect when scrolled */
+.runhead.is-scrolled{
+  mix-blend-mode:normal;
+  background:rgba(248,247,245,.88);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  box-shadow:0 1px 0 rgba(44,44,43,.08);
+}
+.runhead.is-scrolled .caption{
+  color:var(--ink-soft);
+}
+.runhead.is-scrolled .runhead-nav a{
+  color:var(--ink-soft);
+}
+.runhead.is-scrolled .runhead-nav a:hover,
+.runhead.is-scrolled .runhead-nav a[aria-current="page"]{
+  color:var(--ink);
+}
+.runhead.is-scrolled .counter{
+  color:var(--accent);
+}
 
 .runhead .caption{
   color:rgba(248,247,245,.92);
