@@ -156,9 +156,11 @@ body.menu-open .hamburger span:nth-child(3){
 .theme-toggle-mobile.is-dark .toggle-thumb{
   background:var(--bg);
 }
-.theme-toggle-mobile .toggle-icon-sun,
+.theme-toggle-mobile .toggle-icon-sun{
+  color:#C9982E;
+}
 .theme-toggle-mobile .toggle-icon-moon{
-  color:var(--mute);
+  color:#5A7088;
 }
 
 

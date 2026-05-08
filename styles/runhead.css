@@ -142,17 +142,17 @@
 }
 
 .toggle-icon-sun{
-  color:rgba(248,247,245,.7);
+  color:#E8B84A;
 }
 .toggle-icon-moon{
-  color:rgba(248,247,245,.5);
+  color:#7B8FA3;
 }
 
 .theme-toggle.is-dark .toggle-icon-sun{
-  color:rgba(248,247,245,.5);
+  color:#D4A43A;
 }
 .theme-toggle.is-dark .toggle-icon-moon{
-  color:rgba(248,247,245,.7);
+  color:#9BB0C8;
 }
 
 /* Desktop toggle positioning */
@@ -171,9 +171,11 @@
 .runhead.is-scrolled .theme-toggle.is-dark .toggle-thumb{
   background:var(--bg);
 }
-.runhead.is-scrolled .toggle-icon-sun,
+.runhead.is-scrolled .toggle-icon-sun{
+  color:#A07A1A;
+}
 .runhead.is-scrolled .toggle-icon-moon{
-  color:var(--mute);
+  color:#4A5F73;
 }
 
 /* Dark mode scrolled */
