@@ -9,6 +9,7 @@
 // codebase but un-imported, ready if we want to switch back.
 // ─────────────────────────────────────────────────────────────────────
 
+import { initTheme }         from './theme.js';
 import { initLoader }        from './loader.js';
 import { initRunhead }       from './runhead.js';
 import { initMenu }          from './menu.js';
@@ -27,6 +28,7 @@ import { initMagnetic }   from './magnetic.js';
 import { initScramble }   from './scramble.js';
 
 const boot = () => {
+  initTheme();
   initRunhead();
   initMenu();
   initProducts();

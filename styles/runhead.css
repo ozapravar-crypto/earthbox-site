@@ -17,7 +17,7 @@
 }
 .runhead > *{pointer-events:auto}
 
-/* Frosted glass effect when scrolled */
+/* Frosted glass effect when scrolled — Light mode */
 .runhead.is-scrolled{
   mix-blend-mode:normal;
   background:rgba(248,247,245,.88);
@@ -37,6 +37,12 @@
 }
 .runhead.is-scrolled .counter{
   color:var(--accent);
+}
+
+/* Frosted glass effect when scrolled — Dark mode */
+[data-theme="dark"] .runhead.is-scrolled{
+  background:rgba(26,25,24,.88);
+  box-shadow:0 1px 0 rgba(240,237,232,.08);
 }
 
 .runhead .caption{
@@ -76,11 +82,46 @@
   background:var(--accent);
 }
 
-.runhead-right{justify-self:end}
+.runhead-right{justify-self:end;display:flex;align-items:center;gap:1rem}
 .runhead .counter{
   display:inline-block;
   min-width:1.5em;
   color:rgba(184,169,154,.95);
+}
+
+/* Theme toggle button */
+.theme-toggle{
+  width:28px;
+  height:28px;
+  padding:0;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:rgba(248,247,245,.78);
+  transition:color .25s ease, transform .25s ease;
+}
+.theme-toggle:hover{
+  color:rgba(248,247,245,.98);
+  transform:scale(1.1);
+}
+.theme-toggle svg{
+  width:18px;
+  height:18px;
+}
+.theme-icon-sun,
+.theme-icon-moon{
+  display:none;
+}
+
+/* Scrolled state overrides for theme toggle */
+.runhead.is-scrolled .theme-toggle{
+  color:var(--ink-soft);
+}
+.runhead.is-scrolled .theme-toggle:hover{
+  color:var(--ink);
 }
 
 @media (max-width: 720px){

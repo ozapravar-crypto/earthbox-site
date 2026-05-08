@@ -18,6 +18,7 @@ body{
   overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
+  transition:background-color .4s ease, color .4s ease;
 }
 ::selection{background:var(--accent);color:var(--bg)}
 img{max-width:100%;display:block}

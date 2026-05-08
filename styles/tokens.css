@@ -5,7 +5,7 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 :root{
-  /* PALETTE */
+  /* PALETTE · Light Mode (default) */
   --bg:            #F8F7F5;
   --bg-tint:       #EFECE5;
   --ink:           #2C2C2B;
@@ -16,6 +16,20 @@
   --reverse:       #F8F7F5;
   --rule:          rgba(44,44,43,.12);
   --rule-stronger: rgba(44,44,43,.22);
+
+/* PALETTE · Dark Mode */
+[data-theme="dark"]{
+  --bg:            #1A1918;
+  --bg-tint:       #252422;
+  --ink:           #F0EDE8;
+  --ink-soft:      #C8C5C0;
+  --mute:          #8A8785;
+  --accent:        #C4B5A6;
+  --accent-dk:     #D4C5B6;
+  --reverse:       #1A1918;
+  --rule:          rgba(240,237,232,.12);
+  --rule-stronger: rgba(240,237,232,.22);
+}
 
   /* TYPE FAMILIES */
   --serif: 'Oranienbaum', 'Cormorant Garamond', serif;
