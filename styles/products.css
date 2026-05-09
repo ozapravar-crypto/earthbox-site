@@ -942,6 +942,38 @@
   max-width:52ch;
   margin-top:.5rem;
 }
+.v1-cat-price{
+  grid-column:2;
+  font-family:var(--sans);
+  font-size:.7rem;
+  letter-spacing:.12em;
+  color:var(--ink-soft);
+  margin-top:.75rem;
+  padding:.4rem .8rem;
+  background:var(--bg-tint);
+  border-radius:2px;
+  width:fit-content;
+}
+
+.v1-coming-divider{
+  display:flex;
+  align-items:center;
+  gap:1.5rem;
+  margin:2.5rem 0 1.5rem;
+  color:var(--mute);
+}
+.v1-coming-divider::before,
+.v1-coming-divider::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:var(--rule);
+}
+.v1-coming-divider .caption{
+  font-size:.6rem;
+  letter-spacing:.3em;
+  white-space:nowrap;
+}
 
 .v1-grid{
   display:grid;

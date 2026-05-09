@@ -11,11 +11,43 @@ import { volumeTwo, volumeThree } from '../data/upcoming.js';
 
 const ENQUIRY_WHATSAPP = '918104811584';
 
-function formatPrice(pricing, materials){
+function formatPrice(pricing){
   if (!pricing) return 'Coming soon';
   const firstMat = Object.keys(pricing)[0];
   const price = pricing[firstMat];
   return `From ₹${price.toLocaleString('en-IN')}`;
+}
+
+function getCategoryPriceRange(products){
+  const availableProducts = products.filter(p => p.status === 'available' && p.pricing);
+  if (availableProducts.length === 0) return null;
+
+  let allPrices = [];
+  availableProducts.forEach(p => {
+    if (p.variants && typeof p.pricing === 'object') {
+      Object.values(p.pricing).forEach(variantPrices => {
+        if (typeof variantPrices === 'object') {
+          allPrices.push(...Object.values(variantPrices));
+        }
+      });
+    } else if (typeof p.pricing === 'object') {
+      allPrices.push(...Object.values(p.pricing));
+    }
+  });
+
+  if (allPrices.length === 0) return null;
+
+  const min = Math.min(...allPrices);
+  const max = Math.max(...allPrices);
+
+  if (min === max) return `₹${min.toLocaleString('en-IN')}`;
+  return `₹${min.toLocaleString('en-IN')} – ₹${max.toLocaleString('en-IN')}`;
+}
+
+function sortByAvailability(products){
+  const available = products.filter(p => p.status === 'available');
+  const comingSoon = products.filter(p => p.status === 'coming-soon');
+  return { available, comingSoon };
 }
 
 function enquiryHref(itemName){
@@ -35,35 +67,53 @@ function renderVolumeOne(){
     products: volumeOne.filter(p => p.category === cat.slug)
   }));
 
-  host.innerHTML = grouped.map(({ cat, products }, catIndex) => `
+  host.innerHTML = grouped.map(({ cat, products }, catIndex) => {
+    const priceRange = getCategoryPriceRange(products);
+    const { available, comingSoon } = sortByAvailability(products);
+    const hasAvailable = available.length > 0;
+    const hasComingSoon = comingSoon.length > 0;
+
+    const renderCard = (p) => `
+      <article class="v1-card ${p.status === 'coming-soon' ? 'v1-card--soon' : ''}">
+        <a class="v1-card-link" href="product.html#${encodeURIComponent(p.sku)}" data-cursor="VIEW">
+          <div class="v1-card-img">
+            <img src="assets/v1/${p.photo}" alt="${p.name}" loading="lazy" onerror="this.parentElement.classList.add('v1-card-img--placeholder')"/>
+          </div>
+          <div class="v1-card-meta">
+            <h4 class="v1-card-name">${p.name}</h4>
+            <p class="v1-card-price">
+              ${p.status === 'coming-soon'
+                ? '<span class="v1-soon-badge">Coming soon</span>'
+                : formatPrice(p.pricing)}
+            </p>
+          </div>
+        </a>
+      </article>
+    `;
+
+    return `
     <section class="v1-category reveal" id="cat-${cat.slug}">
       <header class="v1-cat-header">
         <span class="caption v1-cat-num">${String(catIndex + 1).padStart(2, '0')}</span>
         <h3 class="v1-cat-title">${cat.title}</h3>
         <p class="v1-cat-desc">${cat.description}</p>
+        ${priceRange ? `<span class="v1-cat-price">${priceRange}</span>` : ''}
       </header>
 
-      <div class="v1-grid">
-        ${products.map(p => `
-          <article class="v1-card ${p.status === 'coming-soon' ? 'v1-card--soon' : ''}">
-            <a class="v1-card-link" href="product.html#${encodeURIComponent(p.sku)}" data-cursor="VIEW">
-              <div class="v1-card-img">
-                <img src="assets/v1/${p.photo}" alt="${p.name}" loading="lazy" onerror="this.parentElement.classList.add('v1-card-img--placeholder')"/>
-              </div>
-              <div class="v1-card-meta">
-                <h4 class="v1-card-name">${p.name}</h4>
-                <p class="v1-card-price">
-                  ${p.status === 'coming-soon'
-                    ? '<span class="v1-soon-badge">Coming soon</span>'
-                    : formatPrice(p.pricing)}
-                </p>
-              </div>
-            </a>
-          </article>
-        `).join('')}
-      </div>
+      ${hasAvailable ? `
+        <div class="v1-grid v1-grid--available">
+          ${available.map(renderCard).join('')}
+        </div>
+      ` : ''}
+
+      ${hasComingSoon ? `
+        ${hasAvailable ? '<div class="v1-coming-divider"><span class="caption">Coming Soon</span></div>' : ''}
+        <div class="v1-grid v1-grid--soon">
+          ${comingSoon.map(renderCard).join('')}
+        </div>
+      ` : ''}
     </section>
-  `).join('');
+  `;}).join('');
 }
 
 
