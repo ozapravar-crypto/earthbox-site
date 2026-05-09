@@ -279,7 +279,7 @@
   justify-content:space-between;
   max-width:var(--max);
   margin:0 auto;
-  padding:0 var(--pad);
+  padding:.5rem var(--pad);
 }
 
 /* Volume Tabs */
@@ -291,7 +291,7 @@
   display:flex;
   align-items:center;
   gap:.35rem;
-  padding:.5rem 1rem;
+  padding:0 1rem;
   background:transparent;
   border:0;
   border-right:1px solid var(--rule);
@@ -540,8 +540,11 @@
   .catalogue-bar{
     top:56px;
   }
+  .catalogue-bar-inner{
+    padding:.4rem var(--pad);
+  }
   .vol-pill{
-    padding:.4rem .7rem;
+    padding:0 .7rem;
     gap:.25rem;
   }
   .pill-num{font-size:.85rem}
@@ -559,7 +562,7 @@
   .search-result-vol{font-size:.5rem}
   .search-result-cta{margin-top:.5rem}
   .vol-pill{
-    padding:.35rem .5rem;
+    padding:0 .5rem;
   }
   .vol-pill:first-child{padding-left:0}
   .pill-label{display:none}
