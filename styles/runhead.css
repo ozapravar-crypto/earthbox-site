@@ -139,20 +139,25 @@
 .toggle-icon-moon{
   width:12px;
   height:12px;
+  transition:opacity .3s ease;
 }
 
 .toggle-icon-sun{
   color:#E8B84A;
+  opacity:0;
 }
 .toggle-icon-moon{
   color:#7B8FA3;
+  opacity:1;
 }
 
 .theme-toggle.is-dark .toggle-icon-sun{
   color:#D4A43A;
+  opacity:1;
 }
 .theme-toggle.is-dark .toggle-icon-moon{
   color:#9BB0C8;
+  opacity:0;
 }
 
 /* Desktop toggle positioning */
@@ -175,6 +180,12 @@
   color:#A07A1A;
 }
 .runhead.is-scrolled .toggle-icon-moon{
+  color:#4A5F73;
+}
+.runhead.is-scrolled .theme-toggle.is-dark .toggle-icon-sun{
+  color:#8A6A15;
+}
+.runhead.is-scrolled .theme-toggle.is-dark .toggle-icon-moon{
   color:#4A5F73;
 }
 

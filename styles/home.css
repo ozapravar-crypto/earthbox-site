@@ -361,6 +361,9 @@
   max-width:40ch;
   margin:2rem auto 0;
 }
+[data-theme="dark"] .manifesto-tail{
+  color:rgba(26,25,24,.6);
+}
 
 
 /* ─── BRAND CONTEXT (spread) ─── */
