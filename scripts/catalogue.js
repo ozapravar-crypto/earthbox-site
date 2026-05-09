@@ -1,54 +1,41 @@
 // ─────────────────────────────────────────────────────────────────────
-// catalogue.js · single-page catalogue: tab switching + search
+// catalogue.js · single-page catalogue: pill tabs + search overlay
 //
-// Tabs swap content in/out via the [hidden] attribute. URL hash
-// (#vol-1, #vol-2, #vol-3) updates so links can be shared.
+// Pills swap content via the [hidden] attribute. URL hash updates for
+// shareable links (#vol-1, #vol-2, #vol-3).
 //
-// Search filters across all three volumes by name / sub / description.
-// While search has text, tabs hide and a flat search-results panel
-// shows. Clearing the search restores the active tab.
-//
-// No-op on pages without .vol-tabs.
+// Search opens as an overlay, filters across all volumes.
+// No-op on pages without .vol-pills.
 // ─────────────────────────────────────────────────────────────────────
 
 import { volumeOne, categories as v1Categories } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
 
-const ENQUIRY_WHATSAPP = '918104811584';
-
-function enquiryHref(itemName){
-  const text = `Hi Aayush, I'm interested in ${itemName}. Could you share availability, customisation, and pricing?`;
-  return `https://wa.me/${ENQUIRY_WHATSAPP}?text=${encodeURIComponent(text)}`;
-}
-
 // ─── Tab switching ───
 function setActiveTab(volNum){
-  const tabs   = document.querySelectorAll('.vol-tab');
+  const pills  = document.querySelectorAll('.vol-pill');
   const panels = document.querySelectorAll('.vol-panel');
 
-  tabs.forEach(t => {
-    const isActive = t.dataset.vol === String(volNum);
-    t.classList.toggle('is-active', isActive);
-    t.setAttribute('aria-selected', String(isActive));
+  pills.forEach(p => {
+    const isActive = p.dataset.vol === String(volNum);
+    p.classList.toggle('is-active', isActive);
+    p.setAttribute('aria-selected', String(isActive));
   });
 
   panels.forEach(p => {
     p.hidden = p.dataset.vol !== String(volNum);
   });
 
-  // Reflect in URL hash so links are shareable; replace (don't push) so
-  // back button doesn't fill with tab clicks.
   if (history.replaceState){
     history.replaceState(null, '', `#vol-${volNum}`);
   }
 }
 
 
-// ─── Search index — flatten all volumes into a searchable shape ───
+// ─── Search index — flatten all volumes ───
 function buildIndex(){
   const items = [];
 
-  // Volume I — 3D Printed accessories
   volumeOne.forEach(p => {
     const cat = v1Categories.find(c => c.slug === p.category);
     items.push({
@@ -61,7 +48,6 @@ function buildIndex(){
     });
   });
 
-  // Volume II — boxes
   volumeTwo.boxes.forEach(b => {
     items.push({
       vol: 2,
@@ -73,7 +59,6 @@ function buildIndex(){
     });
   });
 
-  // Volume III — single horizon entry
   items.push({
     vol: 3,
     sku:  'VIV-III',
@@ -90,17 +75,27 @@ function buildIndex(){
 function renderSearchResults(query, items){
   const list  = document.getElementById('searchResultsList');
   const empty = document.getElementById('searchEmpty');
-  if (!list || !empty) return;
+  const hint  = document.getElementById('searchHint');
+  if (!list) return;
 
   const q = query.toLowerCase().trim();
+
+  if (q.length === 0){
+    list.innerHTML = '';
+    if (empty) empty.hidden = true;
+    if (hint) hint.hidden = false;
+    return 0;
+  }
+
+  if (hint) hint.hidden = true;
   const matches = items.filter(it => it.blob.includes(q));
 
   if (matches.length === 0){
     list.innerHTML = '';
-    empty.hidden = false;
-    return;
+    if (empty) empty.hidden = false;
+    return 0;
   }
-  empty.hidden = true;
+  if (empty) empty.hidden = true;
 
   list.innerHTML = matches.map(m => `
     <a class="search-result"
@@ -111,7 +106,7 @@ function renderSearchResults(query, items){
         <h3 class="search-result-name">${m.name}</h3>
         <p class="search-result-desc italic">${m.sub || m.desc}</p>
       </div>
-      <span class="search-result-cta caption">View details →</span>
+      <span class="search-result-cta caption">View →</span>
     </a>
   `).join('');
 
@@ -121,95 +116,91 @@ function renderSearchResults(query, items){
 
 // ─── Boot ───
 export function initCatalogue(){
-  const tabs       = document.querySelectorAll('.vol-tab');
-  if (!tabs.length) return;
-
-  const tabsSection   = document.querySelector('.catalogue-tabs');
-  const panelsWrap    = document.querySelector('.vol-panels');
-  const newlySection  = document.getElementById('newlyLaunchedSection');
-  const searchInput   = document.getElementById('cat-search');
-  const searchClear   = document.getElementById('cat-search-clear');
-  const searchCount   = document.getElementById('cat-search-count');
-  const searchPanel   = document.getElementById('searchResults');
-  const searchEmpty   = document.getElementById('searchEmpty');
-  const searchClearLink = document.getElementById('searchEmptyClear');
+  const pills = document.querySelectorAll('.vol-pill');
+  if (!pills.length) return;
 
   const index = buildIndex();
-  const totalItems = index.length;
 
-  // ─── Tab clicks ───
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => setActiveTab(tab.dataset.vol));
+  // ─── Pill clicks ───
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => setActiveTab(pill.dataset.vol));
   });
 
-  // ─── Initial tab from URL hash, else default to Volume I ───
+  // ─── Initial tab from URL hash ───
   const hash = location.hash.match(/^#vol-([123])$/);
   const initialVol = hash ? hash[1] : '1';
   setActiveTab(initialVol);
 
-  // ─── Search behaviour ───
-  if (searchInput){
-    const update = () => {
-      const q = searchInput.value.trim();
+  // ─── Search overlay ───
+  const searchBtn     = document.getElementById('catalogueSearchBtn');
+  const searchOverlay = document.getElementById('catalogueSearchOverlay');
+  const searchClose   = document.getElementById('catalogueSearchClose');
+  const searchInput   = document.getElementById('cat-search');
+  const backdrop      = searchOverlay?.querySelector('.search-overlay-backdrop');
 
-      if (q.length === 0){
-        // Empty query: show tabs + active panel, hide search panel
-        if (tabsSection)  tabsSection.hidden  = false;
-        if (panelsWrap)   panelsWrap.hidden   = false;
-        if (newlySection) newlySection.hidden = false;
-        if (searchPanel)  searchPanel.hidden  = true;
-        if (searchClear)  searchClear.hidden  = true;
-        if (searchCount)  searchCount.textContent = '';
-        return;
-      }
-
-      // Has query: hide tabs + panels, show flat search results
-      if (tabsSection)  tabsSection.hidden  = true;
-      if (panelsWrap)   panelsWrap.hidden   = true;
-      if (newlySection) newlySection.hidden = true;
-      if (searchPanel)  searchPanel.hidden  = false;
-      if (searchClear)  searchClear.hidden  = false;
-
-      const count = renderSearchResults(q, index);
-      if (searchCount){
-        searchCount.textContent = count != null
-          ? `Showing ${count} of ${totalItems} pieces`
-          : '';
-      }
-    };
-
-    searchInput.addEventListener('input', update);
-    if (searchClear){
-      searchClear.addEventListener('click', () => {
-        searchInput.value = '';
-        searchInput.focus();
-        update();
-      });
-    }
-    if (searchClearLink){
-      searchClearLink.addEventListener('click', () => {
-        searchInput.value = '';
-        searchInput.focus();
-        update();
-      });
-    }
+  function openSearch(){
+    if (!searchOverlay) return;
+    searchOverlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => searchInput?.focus(), 50);
   }
 
-  // ─── Sticky tabs detection ───
-  const catalogueTabs = document.querySelector('.catalogue-tabs');
-  if (catalogueTabs){
+  function closeSearch(){
+    if (!searchOverlay) return;
+    searchOverlay.hidden = true;
+    document.body.style.overflow = '';
+    if (searchInput) searchInput.value = '';
+    renderSearchResults('', index);
+  }
+
+  if (searchBtn){
+    searchBtn.addEventListener('click', openSearch);
+  }
+
+  if (searchClose){
+    searchClose.addEventListener('click', closeSearch);
+  }
+
+  if (backdrop){
+    backdrop.addEventListener('click', closeSearch);
+  }
+
+  // Keyboard: Escape to close, Cmd/Ctrl+K to open
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && searchOverlay && !searchOverlay.hidden){
+      closeSearch();
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k'){
+      e.preventDefault();
+      if (searchOverlay?.hidden){
+        openSearch();
+      } else {
+        closeSearch();
+      }
+    }
+  });
+
+  // Search input
+  if (searchInput){
+    searchInput.addEventListener('input', () => {
+      renderSearchResults(searchInput.value, index);
+    });
+  }
+
+  // ─── Sticky bar detection ───
+  const catalogueBar = document.querySelector('.catalogue-bar');
+  if (catalogueBar){
     const observer = new IntersectionObserver(
       ([entry]) => {
-        catalogueTabs.classList.toggle('is-stuck', !entry.isIntersecting);
+        catalogueBar.classList.toggle('is-stuck', !entry.isIntersecting);
       },
       { rootMargin: '-61px 0px 0px 0px', threshold: 0 }
     );
 
-    // Create a sentinel element just above the tabs
     const sentinel = document.createElement('div');
     sentinel.className = 'sticky-sentinel';
     sentinel.setAttribute('aria-hidden', 'true');
-    catalogueTabs.parentNode.insertBefore(sentinel, catalogueTabs);
+    catalogueBar.parentNode.insertBefore(sentinel, catalogueBar);
     observer.observe(sentinel);
   }
 }
