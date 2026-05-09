@@ -286,6 +286,9 @@
   padding-block:clamp(4rem,8vh,7rem);
   background:var(--bg-tint);
 }
+.home-vol-preview.volume-i{
+  padding-block:clamp(4rem,8vh,7rem) clamp(6rem,12vh,10rem);
+}
 
 /* ─── MANIFESTO ─── */
 .manifesto{
