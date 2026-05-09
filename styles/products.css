@@ -259,7 +259,7 @@
   top:60px;
   z-index:70;
   margin-top:clamp(1.5rem,3vh,2rem);
-  padding-block:15px 5px;
+  padding-block:20px 5px;
   background:var(--bg);
   border-top:1px solid var(--rule);
   border-bottom:1px solid var(--rule);
