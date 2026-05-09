@@ -70,7 +70,7 @@ export function initMenu(){
 
       const label = document.createElement('span');
       label.className = 'mobile-theme-label caption';
-      label.textContent = 'Dark mode';
+      label.textContent = 'Appearance';
 
       themeContainer.appendChild(label);
       themeContainer.appendChild(mobileToggle);
