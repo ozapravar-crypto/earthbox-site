@@ -218,6 +218,24 @@ function renderPrinted(p){
       ` : ''}
 
     </article>
+
+    <!-- Mobile sticky CTA -->
+    <div class="pd-mobile-cta" id="pdMobileCta">
+      <a class="cta magnetic" id="pdMobileCtaBtn"
+         href="${enquiryHref({
+           name: p.name,
+           sku: p.sku,
+           material: availableMaterials[0],
+           variant: hasVariants ? p.variants[0].name : null,
+           price: hasPricing ? formatPrice(hasVariants ? p.pricing[p.variants[0].id][availableMaterials[0]] : p.pricing[availableMaterials[0]]) : null,
+           volume: 1
+         })}"
+         target="_blank" rel="noopener"
+         data-cursor="ASK">
+        Enquire on WhatsApp
+        <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
+      </a>
+    </div>
   `;
 }
 
@@ -230,6 +248,7 @@ function initPrintedSelectors(p){
 
   const priceEl = document.getElementById('pdPrice');
   const ctaEl = document.getElementById('pdEnquiryCta');
+  const mobileCtaEl = document.getElementById('pdMobileCtaBtn');
   if (!priceEl || !ctaEl) return;
 
   let currentVariant = hasVariants ? p.variants[0].id : null;
@@ -244,7 +263,7 @@ function initPrintedSelectors(p){
     priceEl.textContent = price ? formatPrice(price) : 'Price on enquiry';
 
     const variantName = hasVariants ? p.variants.find(v => v.id === currentVariant)?.name : null;
-    ctaEl.href = enquiryHref({
+    const href = enquiryHref({
       name: p.name,
       sku: p.sku,
       material: currentMaterial,
@@ -252,6 +271,8 @@ function initPrintedSelectors(p){
       price: price ? formatPrice(price) : null,
       volume: 1
     });
+    ctaEl.href = href;
+    if (mobileCtaEl) mobileCtaEl.href = href;
   }
 
   // Variant selector
@@ -360,6 +381,17 @@ function renderBox(b){
       ` : ''}
 
     </article>
+
+    <!-- Mobile sticky CTA -->
+    <div class="pd-mobile-cta">
+      <a class="cta magnetic"
+         href="${enquiryHref({ name: b.sku, sku: b.sku, volume: 2 })}"
+         target="_blank" rel="noopener"
+         data-cursor="ASK">
+        Enquire on WhatsApp
+        <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
+      </a>
+    </div>
   `;
 }
 
@@ -391,6 +423,17 @@ function renderVivarium(v){
       </section>
 
     </article>
+
+    <!-- Mobile sticky CTA -->
+    <div class="pd-mobile-cta">
+      <a class="cta magnetic"
+         href="${enquiryHref({ name: 'Digital Vivariums', sku: v.sku, volume: 3 })}"
+         target="_blank" rel="noopener"
+         data-cursor="ASK">
+        Write in on WhatsApp
+        <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
+      </a>
+    </div>
   `;
 }
 

@@ -409,6 +409,39 @@
 }
 
 
+/* ═══════════════════════════════════════════════════════════════════════
+   MOBILE STICKY CTA · Fixed bottom bar on mobile, hidden on desktop
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.pd-mobile-cta{
+  display:none;
+}
+
+@media (max-width: 1000px){
+  .pd-mobile-cta{
+    display:block;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    z-index:100;
+    background:var(--bg);
+    border-top:1px solid var(--rule);
+    padding:1rem var(--pad);
+    padding-bottom:calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+  .pd-mobile-cta .cta{
+    width:100%;
+    justify-content:center;
+  }
+
+  /* Add bottom padding to main content so it doesn't hide behind sticky bar */
+  .product-detail{
+    padding-bottom:calc(5rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+
 /* ─── RESPONSIVE ─── */
 @media (max-width: 1000px){
   .pd-body{grid-template-columns:1fr}
