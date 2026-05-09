@@ -258,7 +258,6 @@
   position:sticky;
   top:60px;
   z-index:70;
-  height:43px;
   margin-top:clamp(1.5rem,3vh,2rem);
   background:var(--bg);
   border-top:1px solid var(--rule);
@@ -280,8 +279,8 @@
   justify-content:space-between;
   max-width:var(--max);
   margin:0 auto;
-  padding:0 var(--pad);
-  height:43px;
+  padding:5px var(--pad);
+  height:auto;
 }
 
 /* Volume Tabs */
@@ -541,10 +540,9 @@
 @media (max-width:720px){
   .catalogue-bar{
     top:56px;
-    height:38px;
   }
   .catalogue-bar-inner{
-    height:38px;
+    padding:5px var(--pad);
   }
   .vol-pill{
     padding:0 .7rem;
