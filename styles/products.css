@@ -279,7 +279,8 @@
   justify-content:space-between;
   max-width:var(--max);
   margin:0 auto;
-  padding:.5rem var(--pad);
+  padding:0 var(--pad);
+  height:45px;
 }
 
 /* Volume Tabs */
@@ -541,7 +542,7 @@
     top:56px;
   }
   .catalogue-bar-inner{
-    padding:.4rem var(--pad);
+    height:40px;
   }
   .vol-pill{
     padding:0 .7rem;
