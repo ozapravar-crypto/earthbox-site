@@ -26,7 +26,6 @@ import { initPin }        from './pin.js';
 import { initCursor }     from './cursor.js';
 import { initMagnetic }   from './magnetic.js';
 import { initScramble }   from './scramble.js';
-import { initSearch }     from './search.js';
 
 const boot = () => {
   initTheme();
@@ -45,7 +44,6 @@ const boot = () => {
   initCursor();
   initMagnetic();
   initScramble();
-  initSearch();
 };
 
 const start = () => {
