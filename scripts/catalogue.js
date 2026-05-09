@@ -194,4 +194,22 @@ export function initCatalogue(){
       });
     }
   }
+
+  // ─── Sticky tabs detection ───
+  const catalogueTabs = document.querySelector('.catalogue-tabs');
+  if (catalogueTabs){
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        catalogueTabs.classList.toggle('is-stuck', !entry.isIntersecting);
+      },
+      { rootMargin: '-61px 0px 0px 0px', threshold: 0 }
+    );
+
+    // Create a sentinel element just above the tabs
+    const sentinel = document.createElement('div');
+    sentinel.className = 'sticky-sentinel';
+    sentinel.setAttribute('aria-hidden', 'true');
+    catalogueTabs.parentNode.insertBefore(sentinel, catalogueTabs);
+    observer.observe(sentinel);
+  }
 }

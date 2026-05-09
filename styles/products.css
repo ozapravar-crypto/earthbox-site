@@ -246,9 +246,31 @@
 }
 
 
-/* ─── VOLUME TABS ─── */
+/* ─── VOLUME TABS · Sticky ─── */
+.sticky-sentinel{
+  position:absolute;
+  top:0;
+  height:1px;
+  width:100%;
+  pointer-events:none;
+}
 .catalogue-tabs{
-  padding-block:clamp(2rem,4vh,3rem) 0;
+  position:sticky;
+  top:60px;
+  z-index:70;
+  padding-block:0;
+  margin-top:clamp(2rem,4vh,3rem);
+  background:var(--bg);
+  transition:background .3s ease, box-shadow .3s ease;
+}
+.catalogue-tabs.is-stuck{
+  background:rgba(248,247,245,.95);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  box-shadow:0 1px 0 var(--rule);
+}
+[data-theme="dark"] .catalogue-tabs.is-stuck{
+  background:rgba(26,25,24,.95);
 }
 .vol-tabs{
   display:grid;
@@ -256,6 +278,9 @@
   gap:0;
   border-top:1px solid var(--rule);
   border-bottom:1px solid var(--rule);
+  max-width:var(--max);
+  margin:0 auto;
+  padding-inline:var(--pad);
 }
 .vol-tab{
   display:flex;
@@ -398,18 +423,48 @@
 
 /* ─── RESPONSIVE ─── */
 @media (max-width:1000px){
-  .vol-tabs{grid-template-columns:1fr}
-  .vol-tab{border-left:0;border-top:1px solid var(--rule)}
-  .vol-tab:first-child{border-top:0}
   .newly-strip{grid-auto-columns:minmax(260px, 1fr)}
 }
+
+@media (max-width:720px){
+  .catalogue-tabs{
+    top:56px;
+  }
+  .vol-tabs{
+    display:flex;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    padding-inline:var(--pad);
+    gap:0;
+  }
+  .vol-tabs::-webkit-scrollbar{display:none}
+  .vol-tab{
+    flex:0 0 auto;
+    min-width:0;
+    padding:1rem 1.25rem;
+    gap:.6rem;
+    border-left:1px solid var(--rule);
+    border-top:0;
+  }
+  .vol-tab:first-child{border-left:0}
+  .tab-num{font-size:1.3rem}
+  .tab-meta{display:none}
+  .vol-tab.is-active .tab-meta{
+    display:flex;
+  }
+  .tab-label{font-size:.9rem;white-space:nowrap}
+  .tab-sub{display:none}
+}
+
 @media (max-width:560px){
   .newly-strip{grid-auto-columns:minmax(220px, 250px)}
   .search-result{grid-template-columns:1fr;gap:.5rem}
   .search-result-vol{font-size:.5rem}
   .search-result-cta{margin-top:.5rem}
-  .vol-tab{padding:1rem;gap:.75rem}
-  .tab-label{font-size:.95rem}
+  .vol-tab{padding:.85rem 1rem;gap:.5rem}
+  .tab-num{font-size:1.1rem}
+  .tab-label{font-size:.8rem}
 }
 
 
