@@ -83,7 +83,7 @@ function renderReviewsSection(sku){
 
   if (reviews.length === 0) {
     return `
-      <section class="pd-reviews reveal">
+      <section class="pd-reviews reveal" id="reviews">
         <header class="pd-reviews-head">
           <span class="eyebrow">R e v i e w s</span>
         </header>
@@ -95,7 +95,7 @@ function renderReviewsSection(sku){
   }
 
   return `
-    <section class="pd-reviews reveal">
+    <section class="pd-reviews reveal" id="reviews">
       <header class="pd-reviews-head">
         <span class="eyebrow">R e v i e w s</span>
         <span class="pd-reviews-count">${reviews.length} ${reviews.length === 1 ? 'review' : 'reviews'}</span>
@@ -172,11 +172,28 @@ function renderPrinted(p){
     .filter(o => o.sku !== p.sku && o.category === p.category)
     .slice(0, 4);
 
+  // Reviews summary for trust signal
+  const reviews = getReviews(p.sku);
+  const avgRating = getAverageRating(p.sku);
+  const reviewCount = reviews.length;
+
+  // Extract key points from description (first sentence or up to 100 chars)
+  const shortDesc = p.description.split('.')[0] + '.';
+
   return `
     <article class="pd-page pd-page--printed">
 
+      <nav class="pd-breadcrumb reveal" aria-label="Breadcrumb">
+        <a href="index.html">Home</a>
+        <span class="pd-breadcrumb-sep">›</span>
+        <a href="products.html">Catalogue</a>
+        <span class="pd-breadcrumb-sep">›</span>
+        <a href="products.html#vol-1">${cat ? cat.title : 'Volume I'}</a>
+        <span class="pd-breadcrumb-sep">›</span>
+        <span class="pd-breadcrumb-current">${p.name}</span>
+      </nav>
+
       <header class="pd-head reveal">
-        <a href="products.html" class="back-link caption">← Catalogue</a>
         <span class="eyebrow">Volume I &nbsp;·&nbsp; ${cat ? cat.title : '3D Printed'}</span>
         <h1 class="pd-title scramble">${p.name}</h1>
         ${p.unit ? `<p class="pd-unit caption">${p.unit}</p>` : ''}
@@ -189,6 +206,9 @@ function renderPrinted(p){
           </div>
         </div>
         <aside class="pd-body-side reveal" style="--d:120ms">
+
+          <!-- Short description -->
+          <p class="pd-short-desc">${shortDesc}</p>
 
           ${isComingSoon ? `
             <div class="pd-coming-soon">
@@ -254,6 +274,24 @@ function renderPrinted(p){
             Enquire on WhatsApp
             <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
           </a>
+
+          <!-- Trust signals -->
+          <div class="pd-trust-signals">
+            <div class="pd-lead-time">
+              <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              <span>Made to order · ~1 week</span>
+            </div>
+            ${reviewCount > 0 ? `
+              <a href="#reviews" class="pd-rating-badge">
+                <svg viewBox="0 0 12 12"><path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="currentColor"/></svg>
+                <span>${avgRating} · ${reviewCount} ${reviewCount === 1 ? 'review' : 'reviews'}</span>
+              </a>
+            ` : ''}
+            <div class="pd-delivery">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M1 4h9v7H1z" stroke="currentColor" stroke-width="1.2"/><path d="M10 6h3l2 3v2h-5V6z" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="12" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="12" cy="12" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
+              <span>Delivery within Mumbai</span>
+            </div>
+          </div>
         </aside>
       </section>
 
