@@ -44,6 +44,38 @@ const boot = () => {
   initCursor();
   initMagnetic();
   initScramble();
+
+  // GA4: Track floating WhatsApp clicks
+  const floatingWa = document.querySelector('.floating-wa');
+  if (floatingWa) {
+    floatingWa.addEventListener('click', () => {
+      if (typeof gtag === 'function') {
+        gtag('event', 'floating_wa_click', {
+          page: window.location.pathname
+        });
+      }
+    });
+  }
+
+  // GA4: Track hero CTA clicks
+  const heroCta = document.querySelector('.hero-cta');
+  if (heroCta) {
+    heroCta.addEventListener('click', () => {
+      if (typeof gtag === 'function') {
+        gtag('event', 'hero_cta_click');
+      }
+    });
+  }
+
+  // GA4: Track manifesto CTA clicks
+  const manifestoCta = document.querySelector('.manifesto-cta');
+  if (manifestoCta) {
+    manifestoCta.addEventListener('click', () => {
+      if (typeof gtag === 'function') {
+        gtag('event', 'manifesto_cta_click');
+      }
+    });
+  }
 };
 
 const start = () => {
