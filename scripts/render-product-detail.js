@@ -177,7 +177,7 @@ function renderPrinted(p){
 
       <header class="pd-head reveal">
         <a href="products.html" class="back-link caption">← Catalogue</a>
-        <span class="eyebrow" style="margin-top:1rem;display:inline-block">Volume I &nbsp;·&nbsp; ${cat ? cat.title : '3D Printed'}</span>
+        <span class="eyebrow">Volume I &nbsp;·&nbsp; ${cat ? cat.title : '3D Printed'}</span>
         <h1 class="pd-title scramble">${p.name}</h1>
         ${p.unit ? `<p class="pd-unit caption">${p.unit}</p>` : ''}
       </header>
@@ -392,7 +392,7 @@ function renderBox(b){
 
       <header class="pd-head reveal">
         <a href="products.html" class="back-link caption">← Catalogue</a>
-        <span class="eyebrow" style="margin-top:1rem;display:inline-block">Volume II &nbsp;·&nbsp; Elemental Boxes</span>
+        <span class="eyebrow">Volume II &nbsp;·&nbsp; Elemental Boxes</span>
         <h1 class="pd-title scramble">${b.sku}</h1>
         <p class="pd-tagline italic">${b.tagline}</p>
       </header>
@@ -473,7 +473,7 @@ function renderVivarium(v){
 
       <header class="pd-head reveal">
         <a href="products.html" class="back-link caption">← Catalogue</a>
-        <span class="eyebrow" style="margin-top:1rem;display:inline-block">Volume III &nbsp;·&nbsp; Horizon</span>
+        <span class="eyebrow">Volume III &nbsp;·&nbsp; Horizon</span>
         <h1 class="pd-title scramble">${v.title}</h1>
         <p class="pd-tagline italic">${v.subtitle}</p>
       </header>
