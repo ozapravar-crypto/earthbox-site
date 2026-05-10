@@ -183,4 +183,17 @@ export function initProducts(){
   renderVolumeOne();
   renderVolumeTwo();
   renderVolumeThree();
+
+  // GA4: Track enquiry clicks on catalogue page
+  document.querySelectorAll('a[href*="wa.me"]').forEach(link => {
+    link.addEventListener('click', () => {
+      if (typeof gtag === 'function') {
+        gtag('event', 'enquire_click', {
+          product_name: 'Digital Vivariums',
+          product_volume: 3,
+          source: 'catalogue'
+        });
+      }
+    });
+  });
 }

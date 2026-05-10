@@ -571,6 +571,29 @@ function renderProduct(id){
 
   // Scroll to top when navigating to new product
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // GA4: Track product view
+  if (typeof gtag === 'function') {
+    gtag('event', 'product_view', {
+      product_name: name,
+      product_sku: id,
+      product_volume: found.volume,
+      product_type: found.kind
+    });
+  }
+
+  // GA4: Track enquiry clicks
+  host.querySelectorAll('a[href*="wa.me"]').forEach(link => {
+    link.addEventListener('click', () => {
+      if (typeof gtag === 'function') {
+        gtag('event', 'enquire_click', {
+          product_name: name,
+          product_sku: id,
+          product_volume: found.volume
+        });
+      }
+    });
+  });
 }
 
 
