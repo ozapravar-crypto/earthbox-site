@@ -11,6 +11,7 @@
 
 import { volumeOne as v1Products, categories as v1Categories, materials } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
+import { getReviews, getAverageRating } from '../data/reviews.js';
 import { observeReveals } from './reveal.js';
 
 
@@ -61,6 +62,73 @@ function enquiryHref(opts = {}){
 function formatPrice(price){
   if (!price) return null;
   return `₹${price.toLocaleString('en-IN')}`;
+}
+
+function formatReviewDate(isoDate){
+  const date = new Date(isoDate);
+  return date.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
+}
+
+function renderStars(rating){
+  return Array.from({ length: 5 }, (_, i) => `
+    <svg viewBox="0 0 12 12" class="${i < rating ? 'filled' : ''}">
+      <path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="currentColor"/>
+    </svg>
+  `).join('');
+}
+
+function renderReviewsSection(sku){
+  const reviews = getReviews(sku);
+  const avgRating = getAverageRating(sku);
+
+  if (reviews.length === 0) {
+    return `
+      <section class="pd-reviews reveal">
+        <header class="pd-reviews-head">
+          <span class="eyebrow">R e v i e w s</span>
+        </header>
+        <div class="pd-no-reviews">
+          <p>No reviews yet. Be the first to share your experience.</p>
+        </div>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="pd-reviews reveal">
+      <header class="pd-reviews-head">
+        <span class="eyebrow">R e v i e w s</span>
+        <span class="pd-reviews-count">${reviews.length} ${reviews.length === 1 ? 'review' : 'reviews'}</span>
+        ${avgRating ? `
+          <span class="pd-reviews-avg">
+            <svg viewBox="0 0 12 12"><path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="currentColor"/></svg>
+            ${avgRating}
+          </span>
+        ` : ''}
+      </header>
+      <div class="pd-reviews-list">
+        ${reviews.map(r => `
+          <article class="pd-review">
+            <header class="pd-review-header">
+              <div class="pd-review-author">
+                <span class="pd-review-name">${r.name}</span>
+                ${r.location ? `<span class="pd-review-location">${r.location}</span>` : ''}
+              </div>
+              <span class="pd-review-date">${formatReviewDate(r.date)}</span>
+            </header>
+            <div class="pd-review-rating">${renderStars(r.rating)}</div>
+            <p class="pd-review-text">${r.text}</p>
+            ${r.verified ? `
+              <span class="pd-review-verified">
+                <svg viewBox="0 0 12 12"><path d="M10 3L4.5 8.5 2 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Verified Purchase
+              </span>
+            ` : ''}
+          </article>
+        `).join('')}
+      </div>
+    </section>
+  `;
 }
 
 
@@ -194,6 +262,8 @@ function renderPrinted(p){
           <p>${p.description}</p>
         </div>
       </section>
+
+      ${renderReviewsSection(p.sku)}
 
       ${related.length ? `
         <section class="pd-related reveal">
