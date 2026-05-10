@@ -1,0 +1,379 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   components.css · Shared UI Components
+
+   Single source of truth for reusable elements.
+   Changes here propagate to ALL pages.
+
+   Contents:
+   1. Buttons (.cta, .cta-secondary, .cta-small)
+   2. Cards (.card base + modifiers)
+   3. Badges (.badge, .badge-accent)
+   4. Trust Signals (.trust-strip, .trust-item)
+   5. Floating Actions (.floating-wa)
+   6. Form Elements (inputs, selectors)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   1. BUTTONS
+   Base: .cta
+   Variants: .cta-secondary, .cta-small, .cta-block
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.cta{
+  --cta-bg: var(--bg);
+  --cta-color: var(--ink);
+  --cta-border: var(--ink);
+  --cta-hover-bg: var(--ink);
+  --cta-hover-color: var(--bg);
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.85rem;
+  font-family:var(--sans);
+  font-size:.7rem;
+  letter-spacing:.3em;
+  text-transform:uppercase;
+  text-decoration:none;
+  color:var(--cta-color);
+  padding:.95rem 1.4rem;
+  border:1px solid var(--cta-border);
+  background:var(--cta-bg);
+  white-space:nowrap;
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  transition:color .35s var(--ease-archival),
+             border-color .35s ease,
+             transform .35s ease;
+  cursor:pointer;
+}
+
+.cta::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:var(--cta-hover-bg);
+  transform:translateY(101%);
+  transition:transform .4s var(--ease-archival);
+  z-index:-1;
+}
+
+.cta:hover{
+  color:var(--cta-hover-color);
+  border-color:var(--cta-border);
+}
+.cta:hover::before{transform:translateY(0)}
+.cta:active{transform:scale(.98)}
+
+.cta svg{
+  width:16px;
+  height:8px;
+  flex-shrink:0;
+  transition:transform .35s ease;
+}
+.cta:hover svg{transform:translateX(6px)}
+
+/* Secondary: ghost style, no fill on hover */
+.cta-secondary{
+  --cta-border: var(--rule-stronger);
+  --cta-color: var(--ink-soft);
+}
+.cta-secondary:hover{
+  --cta-color: var(--ink);
+  --cta-border: var(--ink);
+}
+.cta-secondary::before{display:none}
+
+/* Small: compact version for inline use */
+.cta-small{
+  font-size:.6rem;
+  letter-spacing:.22em;
+  padding:.65rem 1rem;
+  gap:.5rem;
+}
+.cta-small svg{width:12px;height:6px}
+
+/* Block: full-width */
+.cta-block{
+  width:100%;
+}
+
+@media (max-width:560px){
+  .cta{
+    font-size:.62rem;
+    letter-spacing:.22em;
+    padding:.85rem 1rem;
+    gap:.6rem;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   2. CARDS
+   Base: .card
+   Provides consistent border, background, hover for all card patterns
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.card{
+  display:block;
+  text-decoration:none;
+  color:inherit;
+  border:1px solid var(--rule);
+  background:var(--bg);
+  transition:background .35s ease,
+             border-color .35s ease,
+             transform .35s ease,
+             box-shadow .35s ease;
+}
+
+.card:hover{
+  background:var(--bg-tint);
+  border-color:var(--rule-stronger);
+}
+
+.card-elevated:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(0,0,0,.06);
+}
+
+.card-img{
+  aspect-ratio:1 / 1;
+  overflow:hidden;
+  background:var(--ink);
+}
+.card-img img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  transition:transform .5s var(--ease-archival);
+}
+.card:hover .card-img img{
+  transform:scale(1.04);
+}
+
+.card-body{
+  padding:1rem;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   3. BADGES
+   Status indicators, labels, tags
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  font-family:var(--sans);
+  font-size:.55rem;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--mute);
+  padding:.4rem .7rem;
+  border:1px solid var(--rule);
+  background:var(--bg);
+}
+
+.badge-accent{
+  border-color:var(--accent);
+  color:var(--accent-dk);
+}
+
+.badge-solid{
+  background:var(--ink);
+  border-color:var(--ink);
+  color:var(--reverse);
+}
+
+.badge svg{
+  width:10px;
+  height:10px;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   4. TRUST SIGNALS
+   Social proof strip, rating displays, trust indicators
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.trust-strip{
+  background:var(--bg-tint);
+  border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
+  padding:1.5rem var(--pad);
+}
+
+.trust-strip-inner{
+  max-width:var(--max);
+  margin:0 auto;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:clamp(2rem,5vw,4rem);
+}
+
+.trust-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:.25rem;
+}
+
+.trust-num{
+  font-family:var(--serif);
+  font-size:clamp(1.25rem,2.5vw,1.75rem);
+  color:var(--ink);
+}
+
+.trust-label{
+  font-family:var(--sans);
+  font-size:.55rem;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--mute);
+}
+
+.trust-divider{
+  width:1px;
+  height:2.5rem;
+  background:var(--rule);
+}
+
+@media (max-width:1000px){
+  .trust-strip-inner{gap:1.5rem}
+}
+@media (max-width:560px){
+  .trust-strip-inner{flex-direction:column;gap:1.25rem}
+  .trust-divider{width:3rem;height:1px}
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   5. FLOATING ACTIONS
+   Fixed position action buttons (WhatsApp, scroll-to-top, etc.)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.floating-action{
+  position:fixed;
+  z-index:90;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  transition:transform .2s ease, box-shadow .2s ease;
+  box-shadow:0 4px 12px rgba(0,0,0,.15);
+}
+.floating-action:hover{
+  transform:scale(1.08);
+  box-shadow:0 6px 20px rgba(0,0,0,.2);
+}
+
+/* WhatsApp specific */
+.floating-wa{
+  position:fixed;
+  bottom:1.5rem;
+  right:1.5rem;
+  z-index:90;
+  width:56px;
+  height:56px;
+  background:#25D366;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  box-shadow:0 4px 12px rgba(0,0,0,.15);
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+.floating-wa:hover{
+  transform:scale(1.08);
+  box-shadow:0 6px 20px rgba(0,0,0,.2);
+}
+.floating-wa svg{
+  width:28px;
+  height:28px;
+}
+
+@media (max-width:560px){
+  .floating-wa{
+    bottom:1rem;
+    right:1rem;
+    width:50px;
+    height:50px;
+  }
+  .floating-wa svg{width:24px;height:24px}
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   6. FORM ELEMENTS
+   Inputs, selectors, chips
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Selector buttons (material, variant pickers) */
+.selector-btn{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  padding:.75rem 1rem;
+  background:var(--bg);
+  border:1px solid var(--rule);
+  cursor:pointer;
+  transition:all .25s ease;
+  text-align:left;
+}
+.selector-btn:hover{
+  border-color:var(--rule-stronger);
+  background:var(--bg-tint);
+}
+.selector-btn.active{
+  border-color:var(--accent);
+  background:var(--bg);
+}
+
+/* Chip variant (inline, compact) */
+.selector-chip{
+  display:inline-flex;
+  padding:.5rem .9rem;
+  font-family:var(--sans);
+  font-size:.65rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  background:var(--bg);
+  border:1px solid var(--rule);
+  cursor:pointer;
+  transition:all .25s ease;
+}
+.selector-chip:hover{
+  border-color:var(--rule-stronger);
+}
+.selector-chip.active{
+  background:var(--ink);
+  color:var(--reverse);
+  border-color:var(--ink);
+}
+
+/* Text input base */
+.input{
+  font-family:var(--body);
+  font-size:1rem;
+  color:var(--ink);
+  background:var(--bg);
+  border:1px solid var(--rule);
+  padding:.75rem 1rem;
+  width:100%;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.input:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(184,169,154,.15);
+}
+.input::placeholder{
+  color:var(--mute);
+}

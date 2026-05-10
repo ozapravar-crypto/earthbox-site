@@ -543,71 +543,7 @@
 }
 .notice-body em{color:var(--ink);font-style:italic}
 
-/* ─── CTA · outlined box · hover micro-interaction · single-line ─── */
-.cta{
-  display:inline-flex;
-  align-items:center;
-  gap:.85rem;
-  font-family:var(--sans);
-  font-size:.7rem;
-  letter-spacing:.3em;
-  text-transform:uppercase;
-  color:var(--ink);
-  padding:.95rem 1.4rem;
-  border:1px solid var(--ink);
-  background:var(--bg);
-  white-space:nowrap;
-  margin-top:1rem;
-  position:relative;
-  overflow:hidden;
-  isolation:isolate;
-  transition:color .35s var(--ease-archival),
-            border-color .35s ease,
-            transform .35s ease;
-  cursor:pointer;
-}
-.cta::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:var(--ink);
-  transform:translateY(101%);
-  transition:transform .4s var(--ease-archival);
-  z-index:-1;
-}
-.cta:hover{
-  color:var(--bg);
-  border-color:var(--ink);
-}
-.cta:hover::before{transform:translateY(0)}
-.cta:active{transform:scale(.98)}
-.cta svg{
-  width:16px;height:8px;
-  flex-shrink:0;
-  transition:transform .35s ease;
-}
-.cta:hover svg{transform:translateX(6px)}
-
-/* Secondary variant · ghost box, no fill on hover · for "back" links */
-.cta-secondary{
-  border-color:var(--rule-stronger);
-  color:var(--ink-soft);
-}
-.cta-secondary:hover{
-  color:var(--ink);
-  border-color:var(--ink);
-}
-.cta-secondary::before{display:none}
-
-/* Mobile · tighten so it stays single-line in narrow containers */
-@media (max-width:560px){
-  .cta{
-    font-size:.62rem;
-    letter-spacing:.22em;
-    padding:.85rem 1rem;
-    gap:.6rem;
-  }
-}
+/* CTA styles moved to components.css */
 
 .notice-meta{
   display:grid;
@@ -720,81 +656,11 @@
 }
 
 
-/* ─── TRUST STRIP ─── */
-.trust-strip{
-  background:var(--bg-tint);
-  border-top:1px solid var(--rule);
-  border-bottom:1px solid var(--rule);
-  padding:1.5rem var(--pad);
-}
-.trust-strip-inner{
-  max-width:var(--max);
-  margin:0 auto;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:clamp(2rem,5vw,4rem);
-}
-.trust-item{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:.25rem;
-}
-.trust-num{
-  font-family:var(--serif);
-  font-size:clamp(1.25rem,2.5vw,1.75rem);
-  color:var(--ink);
-}
-.trust-label{
-  font-family:var(--sans);
-  font-size:.55rem;
-  letter-spacing:.2em;
-  text-transform:uppercase;
-  color:var(--mute);
-}
-.trust-divider{
-  width:1px;
-  height:2.5rem;
-  background:var(--rule);
-}
+/* Trust strip & floating-wa styles moved to components.css */
 
-
-/* ─── MANIFESTO CTA ─── */
+/* ─── PAGE-SPECIFIC OVERRIDES ─── */
 .manifesto-cta{
   margin-top:2.5rem;
-}
-
-
-/* ─── FLOATING WHATSAPP ─── */
-.floating-wa{
-  position:fixed;
-  bottom:1.5rem;
-  right:1.5rem;
-  z-index:90;
-  width:56px;
-  height:56px;
-  background:#25D366;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#fff;
-  box-shadow:0 4px 12px rgba(0,0,0,.15);
-  transition:transform .2s ease, box-shadow .2s ease;
-}
-.floating-wa:hover{
-  transform:scale(1.08);
-  box-shadow:0 6px 20px rgba(0,0,0,.2);
-}
-.floating-wa svg{
-  width:28px;
-  height:28px;
-}
-
-/* Hide on product detail pages (has its own CTA) */
-.product-detail ~ .floating-wa{
-  display:none;
 }
 
 
@@ -809,13 +675,8 @@
   .colo-mark{grid-column:1/-1}
   .notice-meta{grid-template-columns:1fr;gap:1.25rem}
   .colo-bar{flex-direction:column;gap:1rem;text-align:center}
-  .trust-strip-inner{gap:1.5rem}
 }
 @media (max-width:560px){
   .hero-bottom{flex-direction:column;align-items:flex-start;gap:2.5rem}
   .principles{grid-template-columns:1fr}
-  .trust-strip-inner{flex-direction:column;gap:1.25rem}
-  .trust-divider{width:3rem;height:1px}
-  .floating-wa{bottom:1rem;right:1rem;width:50px;height:50px}
-  .floating-wa svg{width:24px;height:24px}
 }
