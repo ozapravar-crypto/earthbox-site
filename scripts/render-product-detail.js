@@ -81,6 +81,8 @@ function renderReviewsSection(sku){
   const reviews = getReviews(sku);
   const avgRating = getAverageRating(sku);
 
+  const googleReviewUrl = 'https://share.google/jIhGVZ3frNwyVZ6ZW';
+
   if (reviews.length === 0) {
     return `
       <section class="pd-reviews reveal" id="reviews">
@@ -89,6 +91,10 @@ function renderReviewsSection(sku){
         </header>
         <div class="pd-no-reviews">
           <p>No reviews yet. Be the first to share your experience.</p>
+          <a class="cta-small pd-review-cta" href="${googleReviewUrl}" target="_blank" rel="noopener">
+            Leave a review
+            <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
+          </a>
         </div>
       </section>
     `;
@@ -126,6 +132,12 @@ function renderReviewsSection(sku){
             ` : ''}
           </article>
         `).join('')}
+      </div>
+      <div class="pd-reviews-footer">
+        <a class="pd-review-link" href="${googleReviewUrl}" target="_blank" rel="noopener">
+          <svg viewBox="0 0 12 12"><path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="currentColor"/></svg>
+          Leave a review on Google
+        </a>
       </div>
     </section>
   `;
