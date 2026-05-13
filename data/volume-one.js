@@ -1,18 +1,19 @@
 // ─────────────────────────────────────────────────────────────────────
-// data/volume-one.js · Volume I — 3D Printed Plant Accessories
+// data/volume-one.js · Volume I — 3D Printed Plant Accessories + Plants
 //
-// 17 products across 4 categories:
-//   Planters · Plant Support · Accessories · Mounts
+// 32 products across 5 categories:
+//   Planters · Plant Support · Accessories · Mounts · Plant Packets
 //
-// Pricing is material-based: PETG (standard) / ABS (high strength) / ASA (outdoor)
-// Some products have size variants that affect pricing.
+// 3D products: material-based pricing (PETG/ABS/ASA)
+// Plant Packets: live plants, priced individually
 // ─────────────────────────────────────────────────────────────────────
 
 export const categories = [
   { slug: 'planters',      title: 'Planters',       description: '3D-printed vessels in matte, bisque, and metallic finishes.' },
   { slug: 'plant-support', title: 'Plant Support',  description: 'Moss poles, trellises, and protective growth systems.' },
   { slug: 'accessories',   title: 'Accessories',    description: 'Care tags, watering tools, and companion planters.' },
-  { slug: 'mounts',        title: 'Mounts',         description: 'Railing clips and hanging systems for urban spaces.' }
+  { slug: 'mounts',        title: 'Mounts',         description: 'Railing clips and hanging systems for urban spaces.' },
+  { slug: 'plant-packets', title: 'Plant Packets',  description: 'Live plants and cuttings to start or expand your collection.' }
 ];
 
 export const materials = [
@@ -206,6 +207,145 @@ export const volumeOne = [
     photo: 'bird-feeder.png',
     pricing: { petg: 399, abs: 499, asa: 599 },
     status: 'available'
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
+  // PLANT PACKETS — Live plants and cuttings
+  // ═══════════════════════════════════════════════════════════════════
+  {
+    sku: 'V1-PP-001',
+    name: 'Tradescantia',
+    category: 'plant-packets',
+    description: 'A trailing plant with stunning purple and green striped leaves. Fast-growing, easy to propagate, and perfect for hanging baskets or shelves where it can cascade freely.',
+    photo: 'tradescantia.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PP-002',
+    name: 'Pothos Marble',
+    category: 'plant-packets',
+    description: 'Classic pothos with elegant white and green marbled leaves. One of the easiest houseplants to grow—thrives in low light and tolerates irregular watering.',
+    photo: 'pothos-marble.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PP-003',
+    name: 'Pothos Satin',
+    category: 'plant-packets',
+    description: 'Silvery-green leaves with a satin sheen that catches the light. More compact than other pothos varieties, making it ideal for smaller spaces.',
+    photo: 'pothos-satin.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PP-004',
+    name: 'Mini Monstera',
+    category: 'plant-packets',
+    description: 'Compact fenestrated leaves resembling the iconic Monstera deliciosa. A climbing aroid that grows quickly and adds tropical texture to any space.',
+    photo: 'mini-monstera.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PP-005',
+    name: 'Monstera Adansonii',
+    category: 'plant-packets',
+    description: 'The Swiss Cheese Vine—distinctive holes in each leaf create a playful, tropical aesthetic. A vigorous climber that pairs beautifully with moss poles.',
+    photo: 'monstera-adansonii.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PP-006',
+    name: 'Syngonium White',
+    category: 'plant-packets',
+    description: 'Arrow-shaped leaves in soft white and green. Compact when young, but can climb or trail as it matures. Adaptable to various light conditions.',
+    photo: 'syngonium-white.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PP-007',
+    name: 'Syngonium Bronze',
+    category: 'plant-packets',
+    description: 'Deep bronze-green foliage that adds warmth to plant collections. New leaves emerge with a copper tint before maturing to rich green.',
+    photo: 'syngonium-bronze.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PP-008',
+    name: 'Syngonium Confetti',
+    category: 'plant-packets',
+    description: 'Speckled pink and green leaves that look like confetti frozen in time. Each leaf is unique—a collector favorite.',
+    photo: 'syngonium-confetti.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PP-009',
+    name: 'Syngonium Mottled',
+    category: 'plant-packets',
+    description: 'Striking mottled pattern across arrow-shaped leaves. Bold variegation that stands out in any arrangement.',
+    photo: 'syngonium-mottled.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PP-010',
+    name: 'Syngonium Pinkline',
+    category: 'plant-packets',
+    description: 'Delicate pink veins running through green leaves create an elegant, understated look. Low-maintenance and compact.',
+    photo: 'syngonium-pinkline.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PP-011',
+    name: 'Syngonium Strawberry Ice',
+    category: 'plant-packets',
+    description: 'Soft pink and cream variegation reminiscent of strawberry ice cream. A rare variety that brightens any collection.',
+    photo: 'syngonium-strawberry-ice.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PP-012',
+    name: 'Syngonium Dark Maria',
+    category: 'plant-packets',
+    description: 'Deep, moody green leaves with subtle silver markings. Adds depth and drama to plant shelves and terrariums.',
+    photo: 'syngonium-dark-maria.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PP-013',
+    name: 'Philodendron Xanadu',
+    category: 'plant-packets',
+    description: 'Dense, deeply lobed leaves create a sculptural mound of green. A self-heading philodendron that stays compact and bushy.',
+    photo: 'philo-xanadu.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PP-014',
+    name: 'Philodendron Florida Ghost',
+    category: 'plant-packets',
+    description: 'New leaves emerge white or pale green before maturing to deeper tones. A stunning, sought-after variety for collectors.',
+    photo: 'philo-florida-ghost.png',
+    pricing: null,
+    status: 'coming-soon'
+  },
+  {
+    sku: 'V1-PP-015',
+    name: 'Alocasia',
+    category: 'plant-packets',
+    description: 'Bold, dramatic leaves with striking veins and architectural presence. A statement plant that commands attention in any room.',
+    photo: 'alocasia.png',
+    pricing: null,
+    status: 'coming-soon'
   }
 ];
 
