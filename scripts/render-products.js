@@ -73,11 +73,13 @@ function renderVolumeOne(){
     const hasAvailable = available.length > 0;
     const hasComingSoon = comingSoon.length > 0;
 
-    const renderCard = (p) => `
+    const renderCard = (p) => {
+      const imgPath = p.category === 'plant-packets' ? `assets/plants/${p.photo}` : `assets/v1/${p.photo}`;
+      return `
       <article class="v1-card ${p.status === 'coming-soon' ? 'v1-card--soon' : ''}">
         <a class="v1-card-link" href="product.html#${encodeURIComponent(p.sku)}" data-cursor="VIEW">
           <div class="v1-card-img">
-            <img src="assets/v1/${p.photo}" alt="${p.name}" loading="lazy" onerror="this.parentElement.classList.add('v1-card-img--placeholder')"/>
+            <img src="${imgPath}" alt="${p.name}" loading="lazy" onerror="this.parentElement.classList.add('v1-card-img--placeholder')"/>
           </div>
           <div class="v1-card-meta">
             <h4 class="v1-card-name">${p.name}</h4>
@@ -90,6 +92,7 @@ function renderVolumeOne(){
         </a>
       </article>
     `;
+    };
 
     return `
     <section class="v1-category reveal" id="cat-${cat.slug}">
