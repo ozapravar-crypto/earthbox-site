@@ -1,10 +1,10 @@
 // ─────────────────────────────────────────────────────────────────────
 // data/volume-one.js · Volume I — 3D Printed Plant Accessories
 //
-// 16 products across 4 categories:
+// 17 products across 4 categories:
 //   Planters · Plant Support · Accessories · Mounts
 //
-// Pricing is material-based: ABS (budget) / ASA (standard) / PETG CF (premium)
+// Pricing is material-based: PETG (standard) / ABS (high strength) / ASA (outdoor)
 // Some products have size variants that affect pricing.
 // ─────────────────────────────────────────────────────────────────────
 
@@ -16,9 +16,9 @@ export const categories = [
 ];
 
 export const materials = [
-  { id: 'abs',     name: 'ABS',     description: 'Durable, budget-friendly' },
-  { id: 'asa',     name: 'ASA',     description: 'UV-resistant, weatherproof' },
-  { id: 'petg-cf', name: 'PETG CF', description: 'Carbon-fiber reinforced, premium' }
+  { id: 'petg', name: 'PETG', description: 'Standard indoor, glossy finish' },
+  { id: 'abs',  name: 'ABS',  description: 'High strength, matte, heat resistant' },
+  { id: 'asa',  name: 'ASA',  description: 'Outdoor pro, UV resistant, weatherproof' }
 ];
 
 export const volumeOne = [
@@ -69,11 +69,13 @@ export const volumeOne = [
     photo: 'stackable-planter.png',
     variants: [
       { id: 'big',   name: 'Big Block',   description: 'Single block with drainage hole' },
-      { id: 'small', name: 'Small Block', description: 'Single block with cavity' }
+      { id: 'small-block', name: 'Small Block', description: 'Single block with cavity' },
+      { id: 'small-circle', name: 'Small Circle', description: 'Single circle with cavity' }
     ],
     pricing: {
-      big:   { abs: 949,  asa: 1499 },
-      small: { abs: 449,  asa: 699 }
+      big:   { petg: 1399, abs: 1499, asa: 1799 },
+      'small-block':  { petg: 699,  abs: 799,  asa: 1099 },
+      'small-circle': { petg: 399,  abs: 499,  asa: 799 }
     },
     status: 'available'
   },
@@ -83,7 +85,7 @@ export const volumeOne = [
     category: 'planters',
     description: 'A minimalist hanging planter designed as a compact floating capsule for small indoor plants and trailing greens. Its clean suspended form blends into modern interiors while creating a lightweight, sculptural presence that turns unused vertical space into living decor. Soft geometry, simple suspension, effortless greenery.',
     photo: 'capsule-planter.png',
-    pricing: { abs: 449, asa: 649 },
+    pricing: { petg: 429, abs: 529, asa: 629 },
     status: 'available'
   },
   {
@@ -92,8 +94,7 @@ export const volumeOne = [
     category: 'planters',
     description: 'A self-contained glass garden designed to bring a living ecosystem into compact spaces. Layered planting structures support moss and small plants within a controlled environment, creating a slow-growing, low-maintenance display. Designed as a desk or shelf piece, it combines nature with form—quiet, contained, and constantly evolving.',
     photo: 'glass-garden.png',
-    pricing: { abs: 2689, asa: 2339 },
-    priceRange: { abs: '2,689 – 3,500', asa: '2,339 – 3,000' },
+    pricing: { petg: 2899, abs: 3500, asa: 4000 },
     status: 'available'
   },
 
@@ -124,7 +125,7 @@ export const volumeOne = [
     category: 'plant-support',
     description: 'A modular growth pole designed to support climbing plants as they mature. Interlocking extension sections allow the pole to scale with plant growth, while the open lattice structure helps roots grip naturally around moss or growing medium. Built for monstera, philodendron, pothos, and other climbing species.',
     photo: 'modular-moss-pole.png',
-    pricing: { abs: 1199, asa: 1849 },
+    pricing: { petg: 999, abs: 1199, asa: 1799 },
     status: 'available'
   },
   {
@@ -133,7 +134,7 @@ export const volumeOne = [
     category: 'plant-support',
     description: 'A slow-release water reservoir designed for modular moss poles. The Drip Cap attaches directly to the top of the pole, gradually releasing water to keep moss evenly hydrated over time. Helps maintain consistent moisture levels for healthier aerial roots and stronger climbing growth.',
     photo: 'moss-pole-dripper.png',
-    pricing: { abs: 549, asa: 849 },
+    pricing: { petg: 499, abs: 599, asa: 799 },
     status: 'available'
   },
 
@@ -147,7 +148,7 @@ export const volumeOne = [
     description: 'Minimal plant care markers designed to visually indicate sunlight and watering needs. Each tag uses simple shapes and fill levels to help identify care requirements at a glance—making plant care easier for beginners and collectors alike. Designed to blend naturally into modern plant setups.',
     photo: 'plant-care-tags.png',
     unit: '30 pieces',
-    pricing: { abs: 199, asa: 299 },
+    pricing: { petg: 149, abs: 199, asa: 299 },
     status: 'available'
   },
   {
@@ -156,7 +157,7 @@ export const volumeOne = [
     category: 'accessories',
     description: 'A slow-release watering ring designed to evenly hydrate larger indoor plants directly at the root zone. The circular system distributes water gradually around the base of the trunk, reducing runoff, dry spots, and overwatering while making plant care cleaner and more efficient. Simple watering, better absorption, healthier roots.',
     photo: 'watering-ring.png',
-    pricing: { abs: 119, asa: 179, 'petg-cf': 349 },
+    pricing: { petg: 129, abs: 149, asa: 199 },
     status: 'available'
   },
   {
@@ -187,7 +188,23 @@ export const volumeOne = [
     category: 'mounts',
     description: 'A clip-on railing planter system designed for balconies, window grills, and compact outdoor spaces. The detachable ring mount allows pots to securely hook onto railings without permanent installation, turning unused edges into functional growing space for herbs, flowers, and small plants. Flexible, space-saving, and made for urban gardening.',
     photo: 'hanging-garden-pot-mount.png',
-    pricing: { abs: 169, asa: 249, 'petg-cf': 499 },
+    variants: [
+      { id: 'small', name: 'Small', description: 'For smaller pots' },
+      { id: 'large', name: 'Large', description: 'For larger pots' }
+    ],
+    pricing: {
+      small: { petg: 159, abs: 189, asa: 269 },
+      large: { petg: 169, abs: 199, asa: 249 }
+    },
+    status: 'available'
+  },
+  {
+    sku: 'V1-ACC-005',
+    name: 'Bird Feeder',
+    category: 'accessories',
+    description: 'A minimalist bird feeder designed to attract small birds to your garden or balcony. Simple, functional design that blends into modern outdoor spaces while providing a reliable feeding station for local wildlife.',
+    photo: 'bird-feeder.png',
+    pricing: { petg: 399, abs: 499, asa: 599 },
     status: 'available'
   }
 ];
