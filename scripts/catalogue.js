@@ -10,6 +10,7 @@
 
 import { volumeOne, categories as v1Categories } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
+import { observeReveals } from './reveal.js';
 
 // ─── Tab switching ───
 function setActiveTab(volNum, isUserAction = false){
@@ -22,9 +23,16 @@ function setActiveTab(volNum, isUserAction = false){
     p.setAttribute('aria-selected', String(isActive));
   });
 
+  let activePanel = null;
   panels.forEach(p => {
-    p.hidden = p.dataset.vol !== String(volNum);
+    const shouldShow = p.dataset.vol === String(volNum);
+    p.hidden = !shouldShow;
+    if (shouldShow) activePanel = p;
   });
+
+  if (activePanel) {
+    requestAnimationFrame(() => observeReveals(activePanel));
+  }
 
   if (history.replaceState){
     history.replaceState(null, '', `#vol-${volNum}`);
