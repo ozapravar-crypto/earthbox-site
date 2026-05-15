@@ -87,7 +87,7 @@
 .about-steps .step-n{
   font-family:var(--serif);
   font-size:1.4rem;
-  color:var(--accent);
+  color:var(--accent-text);
   line-height:1;
 }
 .about-steps .step-text{
@@ -140,7 +140,7 @@
 .founder-role{
   font-size:.62rem;
   letter-spacing:.32em;
-  color:var(--accent);
+  color:var(--accent-text);
   margin-bottom:1.25rem;
 }
 .founder-bio{
