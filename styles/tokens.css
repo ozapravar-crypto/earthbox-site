@@ -13,6 +13,7 @@
   --mute:          #656565;
   --accent:        #B8A99A;
   --accent-dk:     #9A8A7B;
+  --accent-text:   #766A5E;
   --reverse:       #F8F7F5;
   --rule:          rgba(44,44,43,.12);
   --rule-stronger: rgba(44,44,43,.22);
@@ -52,6 +53,7 @@
   --mute:          #9A9896;
   --accent:        #C4B5A6;
   --accent-dk:     #D4C5B6;
+  --accent-text:   #C4B5A6;
   --reverse:       #1A1918;
   --rule:          rgba(240,237,232,.12);
   --rule-stronger: rgba(240,237,232,.22);

@@ -62,7 +62,8 @@ body.menu-open .hamburger span:nth-child(3){
   background:var(--bg);
   z-index:90;
   transform:translateX(100%);
-  transition:transform .4s var(--ease-archival);
+  visibility:hidden;
+  transition:transform .4s var(--ease-archival), visibility 0s .4s;
   display:flex;
   flex-direction:column;
   padding:5rem var(--pad) 3rem;
@@ -70,6 +71,8 @@ body.menu-open .hamburger span:nth-child(3){
 }
 .mobile-nav.is-open{
   transform:translateX(0);
+  visibility:visible;
+  transition:transform .4s var(--ease-archival), visibility 0s 0s;
 }
 
 .mobile-nav-close{

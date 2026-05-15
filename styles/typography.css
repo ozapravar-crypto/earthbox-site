@@ -30,7 +30,7 @@ h4{
   font-weight:400;
   letter-spacing:.44em;
   text-transform:uppercase;
-  color:var(--accent);
+  color:var(--accent-text);
   display:inline-block;
 }
 .caption{
