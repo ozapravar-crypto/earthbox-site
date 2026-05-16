@@ -1,0 +1,23 @@
+{
+  "name": "site",
+  "version": "1.0.0",
+  "description": "Editorial archival site for EarthBox. Three pages, four passes, no build step.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://ozapravar-crypto@github.com/ozapravar-crypto/earthbox-site.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ozapravar-crypto/earthbox-site/issues"
+  },
+  "homepage": "https://github.com/ozapravar-crypto/earthbox-site#readme",
+  "dependencies": {
+    "sharp": "^0.34.5"
+  }
+}

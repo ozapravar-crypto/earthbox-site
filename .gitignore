@@ -3,3 +3,14 @@
 .dolt/
 *.db
 .beads-credential-key
+
+# Node
+node_modules/
+package-lock.json
+
+# Image optimization backups
+assets-original/
+
+# Build scripts (dev only)
+scripts/optimize-images.cjs
+scripts/optimize-images.js

@@ -29,7 +29,7 @@ function renderSection(s){
     extra = `
       <div class="founder-split">
         <div class="founder-image">
-          <img src="assets/founder.jpg"
+          <img src="assets/founder.webp"
                alt="Aayush Lilani in his Kandivali studio with terrariums"
                loading="lazy"/>
         </div>

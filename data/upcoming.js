@@ -21,7 +21,7 @@ export const volumeTwo = {
         'Encased in a sharp, modern matte-black frame, the design balances natural elements with architectural form. Subtle aquatic life, textured stone, and controlled lighting come together to produce depth, contrast, and atmosphere in a compact footprint.',
         'Built as part of the EarthBox system, it transforms water from a background element into a visual experience — measured, intentional, and alive.'
       ],
-      illustration: 'water.svg', photo: 'water-main.jpg',
+      illustration: 'water.svg', photo: 'water-main.webp',
       size: '320 × 240 × 240 mm', weight: '4.5 kg',
       temp: '20 – 30 °C', humidity: '70 – 100 %',
       light: 'Aquatic LED · timer', power: '12 V',
@@ -37,7 +37,7 @@ export const volumeTwo = {
         'Inside, a raised micro-landscape sits in contrast — calm, composed, and intentionally sculpted. The result is a contained ecosystem that feels both engineered and organic, constantly evolving yet visually controlled.',
         'Moss Box isn\'t just a planter — it\'s a slow, living transformation.'
       ],
-      illustration: 'moss.svg', photo: 'moss-main.jpg',
+      illustration: 'moss.svg', photo: 'moss-main.webp',
       size: '300 × 220 × 220 mm', weight: '3.8 kg',
       temp: '18 – 28 °C', humidity: '80 – 100 %',
       light: 'Diffused LED', power: '12 V',
@@ -53,7 +53,7 @@ export const volumeTwo = {
         'Designed as both an object and an environment, FireBox uses embedded climate control, micro-irrigation, and subtle illumination to recreate conditions where only the toughest forms of life endure. What appears raw and volatile on the outside is, in reality, a carefully engineered system within.',
         'FireBox isn\'t just a planter — it\'s a contained landscape shaped by survival.'
       ],
-      illustration: 'fire.svg', photo: 'fire-main.jpg',
+      illustration: 'fire.svg', photo: 'fire-main.webp',
       size: '280 × 220 × 220 mm', weight: '2.8 kg',
       temp: '22 – 40 °C', humidity: '20 – 50 %',
       light: 'Strong warm LED', power: 'USB-C',
@@ -69,7 +69,7 @@ export const volumeTwo = {
         'In normal conditions, DarkBox appears calm and minimal. When activated, ultraviolet lighting reveals a completely different environment — highlighting veins, surfaces, and details that remain invisible in regular light.',
         'DarkBox is designed as a dual-state living system — subtle by day, luminous by design.'
       ],
-      illustration: 'dark.svg', photo: 'dark-main.jpg',
+      illustration: 'dark.svg', photo: 'dark-main.webp',
       size: '280 × 220 × 220 mm', weight: '3 kg',
       temp: '18 – 30 °C', humidity: '60 – 80 %',
       light: 'Low-intensity LED · UV mode', power: 'USB-C',
@@ -84,7 +84,7 @@ export const volumeTwo = {
         'A living system designed to grow, evolve, and transform over time. SporeBox creates a controlled environment where mycelium spreads, mushrooms emerge, and nature reveals its quiet intelligence. Encased in a sleek, lab-inspired form, it blends precision engineering with organic growth — turning every cycle into a visual experience.',
         'More than a planter, SporeBox is a window into the hidden world beneath the surface — where life builds, breaks down, and begins again.'
       ],
-      illustration: 'spore.svg', photo: 'spore-main.jpg',
+      illustration: 'spore.svg', photo: 'spore-main.webp',
       size: '260 × 220 × 220 mm', weight: '3.2 kg',
       temp: '18 – 26 °C', humidity: '80 – 95 %',
       light: 'Minimal LED', power: '12 V',
@@ -100,7 +100,7 @@ export const volumeTwo = {
         'A controlled balance of airflow, light, and gentle misting creates the ideal micro-environment, while the open architecture ensures plants remain the visual focus. Minimal, precise, and quietly dynamic — AeroBox brings movement and life into space without ever feeling heavy.',
         'It\'s not just a planter. It\'s a living display of air itself.'
       ],
-      illustration: 'aero.svg', photo: 'aero-main.jpg',
+      illustration: 'aero.svg', photo: 'aero-main.webp',
       size: '300 × 220 × 220 mm', weight: '3 kg',
       temp: '18 – 30 °C', humidity: '50 – 80 %',
       light: 'Neutral LED', power: '12 V',
@@ -115,7 +115,7 @@ export const volumeTwo = {
         'A minimal, self-contained ecosystem where plants grow suspended in air, nourished by a fine, oxygen-rich mist. The AirBox reveals the hidden beauty of roots in motion, turning plant growth into a living visual experience.',
         'Designed with a transparent enclosure and a soft overhead light, it creates a calm, atmospheric presence while supporting healthy, soil-free growth. Quiet, efficient, and low-maintenance, AirBox brings nature into focus — pure, floating, and alive.'
       ],
-      illustration: 'air.svg', photo: 'air-main.jpg',
+      illustration: 'air.svg', photo: 'air-main.webp',
       size: '300 × 220 × 220 mm', weight: '2.2 kg',
       temp: '18 – 32 °C', humidity: '40 – 70 %',
       light: 'Soft LED', power: 'USB-C',
@@ -131,7 +131,7 @@ export const volumeTwo = {
         'Encased in a minimal glass and matte-black frame, FrostBox transforms plant care into a visual experience — where condensation forms, droplets fall, and each plant becomes a living centerpiece.',
         'With its modular plant pod system, swapping plants takes seconds, making it easy to refresh your setup with curated seasonal selections delivered throughout the year. FrostBox isn\'t just a planter — it\'s a living system that evolves with time.'
       ],
-      illustration: 'frost.svg', photo: 'frost-main.jpg',
+      illustration: 'frost.svg', photo: 'frost-main.webp',
       size: '320 × 240 × 240 mm', weight: '5 kg',
       temp: '10 – 22 °C', humidity: '50 – 80 %',
       light: 'Bright white LED', power: '12 V',
@@ -147,7 +147,7 @@ export const volumeTwo = {
         'With exposed tubing, visible roots, and continuous circulation, the system reveals the inner workings of plant life instead of hiding them. Adjustable lighting and precise controls let you experiment in real time, shifting the experience from passive care to active exploration.',
         'LabBox isn\'t just a planter — it\'s a living system designed to be tested, understood, and evolved.'
       ],
-      illustration: 'lab.svg', photo: 'lab-main.jpg',
+      illustration: 'lab.svg', photo: 'lab-main.webp',
       size: '320 × 260 × 260 mm', weight: '5.5 kg',
       temp: 'Adjustable', humidity: 'Adjustable',
       light: 'Tunable LED · app control', power: '12 V',
@@ -164,7 +164,7 @@ export const volumeTwo = {
         'BiteBox is not just a display — it is a self-contained system where environmental control and natural behavior coexist.'
       ],
       illustration: null,            // no SVG provided · photo only
-      photo: 'bite-main.jpg',
+      photo: 'bite-main.webp',
       size: '280 × 220 × 220 mm', weight: '3.5 kg',
       temp: '20 – 30 °C', humidity: '60 – 90 %',
       light: 'High-intensity LED', power: '12 V',
