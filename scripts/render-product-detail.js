@@ -420,14 +420,7 @@ function initPrintedSelectors(p){
 // ─── V2 box detail layout · big photo + rich description + specs ───
 function renderBox(b){
   const desc = (b.description || []).map(p => `<p>${p}</p>`).join('');
-  const specs = [
-    ['Weight',   b.weight],
-    ['Light',    b.light],
-    ['Power',    b.power],
-    ['Capacity', b.capacity],
-    ['Edition',  b.edition],
-    ['Warranty', b.warranty]
-  ].filter(([_, v]) => v);
+  const specs = [];
 
   const related = volumeTwo.boxes.filter(o => o.sku !== b.sku).slice(0, 4);
 
@@ -454,14 +447,6 @@ function renderBox(b){
           </div>
         </div>
         <aside class="pd-body-side reveal" style="--d:120ms">
-          <dl class="pd-specs">
-            ${specs.map(([k, v]) => `
-              <div>
-                <dt class="caption">${k}</dt>
-                <dd>${v}</dd>
-              </div>
-            `).join('')}
-          </dl>
           <a class="cta magnetic pd-cta"
              href="${enquiryHref({ name: b.sku, sku: b.sku, volume: 2 })}"
              target="_blank" rel="noopener"
