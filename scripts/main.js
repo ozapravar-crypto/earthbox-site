@@ -31,13 +31,13 @@ const boot = () => {
   initTheme();
   initRunhead();
   initMenu();
+  initReveal();       // Must run before catalogue so observeReveals() works
   initProducts();
   initCatalogue();
   initProductDetail();
   initAbout();
   initBlog();
   initArticle();
-  initReveal();
   initManifesto();
   initParallax();
   initPin();

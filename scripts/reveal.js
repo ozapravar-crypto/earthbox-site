@@ -35,5 +35,8 @@ export function observeReveals(container){
   }
   if (io){
     container.querySelectorAll(sel).forEach(el => io.observe(el));
+  } else {
+    // Fallback: if called before initReveal, just show the content
+    container.querySelectorAll(sel).forEach(el => el.classList.add('in'));
   }
 }

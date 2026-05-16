@@ -74,12 +74,20 @@ function renderVolumeOne(){
     const hasComingSoon = comingSoon.length > 0;
 
     const renderCard = (p) => {
-      const imgPath = p.category === 'plant-packets' ? `assets/plants/${p.photo}` : `assets/v1/${p.photo}`;
+      const folder = p.category === 'plant-packets' ? 'assets/plants' : 'assets/v1';
+      const baseName = p.photo.replace('.webp', '');
       return `
       <article class="v1-card ${p.status === 'coming-soon' ? 'v1-card--soon' : ''}">
         <a class="v1-card-link" href="product.html#${encodeURIComponent(p.sku)}" data-cursor="VIEW">
           <div class="v1-card-img">
-            <img src="${imgPath}" alt="${p.name}" loading="lazy" onerror="this.parentElement.classList.add('v1-card-img--placeholder')"/>
+            <img
+              src="${folder}/${baseName}-600.webp"
+              srcset="${folder}/${baseName}-300.webp 300w, ${folder}/${baseName}-600.webp 600w, ${folder}/${p.photo} 1200w"
+              sizes="(max-width: 560px) 50vw, (max-width: 1100px) 33vw, 280px"
+              alt="${p.name}"
+              loading="lazy"
+              decoding="async"
+              onerror="this.parentElement.classList.add('v1-card-img--placeholder')"/>
           </div>
           <div class="v1-card-meta">
             <h4 class="v1-card-name">${p.name}</h4>
@@ -129,13 +137,26 @@ function renderVolumeTwo(){
     <div class="boxes-grid reveal">
       ${volumeTwo.boxes.map((b, i) => {
         const hasIllust = !!b.illustration;
+        const photoBase = b.photo.replace('.webp', '');
         const imageHTML = hasIllust
           ? `
-              <img class="box-art"   src="assets/boxes/${b.illustration}" alt="${b.sku} illustration" loading="lazy"/>
-              <img class="box-photo" src="assets/boxes/${b.photo}"        alt="${b.sku} product photograph" loading="lazy"/>
+              <img class="box-art" src="assets/boxes/${b.illustration}" alt="${b.sku} illustration" loading="lazy" decoding="async"/>
+              <img class="box-photo"
+                src="assets/boxes/${photoBase}-600.webp"
+                srcset="assets/boxes/${photoBase}-300.webp 300w, assets/boxes/${photoBase}-600.webp 600w, assets/boxes/${b.photo} 1200w"
+                sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 400px"
+                alt="${b.sku} product photograph"
+                loading="lazy"
+                decoding="async"/>
             `
           : `
-              <img class="box-photo box-photo--solo" src="assets/boxes/${b.photo}" alt="${b.sku} product photograph" loading="lazy"/>
+              <img class="box-photo box-photo--solo"
+                src="assets/boxes/${photoBase}-600.webp"
+                srcset="assets/boxes/${photoBase}-300.webp 300w, assets/boxes/${photoBase}-600.webp 600w, assets/boxes/${b.photo} 1200w"
+                sizes="(max-width: 560px) 100vw, (max-width: 1100px) 50vw, 400px"
+                alt="${b.sku} product photograph"
+                loading="lazy"
+                decoding="async"/>
             `;
         return `
         <article class="box-card">
