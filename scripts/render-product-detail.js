@@ -421,18 +421,12 @@ function initPrintedSelectors(p){
 function renderBox(b){
   const desc = (b.description || []).map(p => `<p>${p}</p>`).join('');
   const specs = [
-    ['Size',     b.size],
     ['Weight',   b.weight],
-    ['Temp',     b.temp],
-    ['Humidity', b.humidity],
     ['Light',    b.light],
     ['Power',    b.power],
     ['Capacity', b.capacity],
-    ['Plants',   b.plants],
     ['Edition',  b.edition],
-    ['Lead time',b.lead],
-    ['Warranty', b.warranty],
-    ['Price',    b.price]
+    ['Warranty', b.warranty]
   ].filter(([_, v]) => v);
 
   const related = volumeTwo.boxes.filter(o => o.sku !== b.sku).slice(0, 4);
