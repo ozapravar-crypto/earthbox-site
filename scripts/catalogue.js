@@ -10,7 +10,6 @@
 
 import { volumeOne, categories as v1Categories } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
-import { observeReveals } from './reveal.js';
 
 // ─── Tab switching ───
 function setActiveTab(volNum, isUserAction = false){
@@ -30,8 +29,14 @@ function setActiveTab(volNum, isUserAction = false){
     if (shouldShow) activePanel = p;
   });
 
+  // Force reveal animation for tab content - IntersectionObserver doesn't
+  // reliably fire for elements that are already in viewport when observed
   if (activePanel) {
-    requestAnimationFrame(() => observeReveals(activePanel));
+    requestAnimationFrame(() => {
+      activePanel.querySelectorAll('.reveal, .reveal-clip').forEach(el => {
+        el.classList.add('in');
+      });
+    });
   }
 
   if (history.replaceState){
