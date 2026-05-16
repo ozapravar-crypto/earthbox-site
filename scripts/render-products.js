@@ -8,6 +8,7 @@
 
 import { volumeOne, categories as v1Categories, materials } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
+import { observeReveals } from './reveal.js';
 
 const ENQUIRY_WHATSAPP = '918104811584';
 
@@ -125,6 +126,8 @@ function renderVolumeOne(){
       ` : ''}
     </section>
   `;}).join('');
+
+  observeReveals(host);
 }
 
 
@@ -175,6 +178,8 @@ function renderVolumeTwo(){
       `;}).join('')}
     </div>
   `;
+
+  observeReveals(host);
 }
 
 
@@ -200,6 +205,8 @@ function renderVolumeThree(){
       </a>
     </div>
   `;
+
+  observeReveals(host);
 }
 
 
