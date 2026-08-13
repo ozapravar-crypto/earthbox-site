@@ -379,26 +379,98 @@
 }
 
 
-/* ─── DESKTOP ENQUIRY FALLBACK ───
-   wa.me sends desktop visitors to WhatsApp Web, which is a dead end without an
-   active session. Shown above the mobile breakpoint (1000px) only — on mobile
-   the WhatsApp deep link opens the app directly and needs no fallback. */
-.enquiry-fallback{display:none}
+/* ─── DESKTOP ENQUIRY ROUTE ───
+   wa.me sends desktop visitors to WhatsApp Web, a dead end without an active
+   session. Shown above the mobile breakpoint (1000px) only — below it the deep
+   link opens the app directly and needs no alternative.
+   Collapsed by default so it never competes with the WhatsApp CTA. */
+.enquiry-alt{display:none}
 
 @media (min-width: 1001px){
-  .enquiry-fallback{
+  .enquiry-alt{
     display:block;
     margin-top:.9rem;
+    border-top:1px solid var(--rule);
+    padding-top:.9rem;
+  }
+
+  .enquiry-alt summary{
+    list-style:none;
+    cursor:pointer;
+    font-family:var(--sans);
+    font-size:.62rem;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    color:var(--mute);
     text-align:center;
+    transition:color var(--dur-fast) var(--ease-archival);
+  }
+  .enquiry-alt summary::-webkit-details-marker{display:none}
+  .enquiry-alt summary:hover,
+  .enquiry-alt[open] summary{color:var(--ink)}
+  .enquiry-alt summary:focus-visible{outline:1px solid var(--ink);outline-offset:4px}
+
+  .enquiry-form{
+    display:grid;
+    gap:.85rem;
+    margin-top:1.25rem;
+  }
+
+  .enquiry-field{display:grid;gap:.35rem}
+  .enquiry-field > span{
+    font-family:var(--sans);
+    font-size:.58rem;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--mute);
+  }
+  .enquiry-field input,
+  .enquiry-field textarea{
+    font-family:var(--body);
+    font-size:.9rem;
+    color:var(--ink);
+    background:var(--bg);
+    border:1px solid var(--rule);
+    border-radius:0;
+    padding:.6rem .7rem;
+    width:100%;
+    transition:border-color var(--dur-fast) var(--ease-archival);
+  }
+  .enquiry-field textarea{resize:vertical;line-height:1.5}
+  .enquiry-field input:focus,
+  .enquiry-field textarea:focus{outline:none;border-color:var(--ink)}
+  .enquiry-field input:user-invalid,
+  .enquiry-field textarea:user-invalid{border-color:var(--accent-dk)}
+
+  .enquiry-submit{width:100%;margin-top:.25rem}
+  .enquiry-submit:disabled{opacity:.5;cursor:wait}
+
+  /* Honeypot — off-screen rather than display:none, which some bots skip. */
+  .enquiry-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+
+  .enquiry-status{
+    font-family:var(--body);
+    font-size:.82rem;
+    line-height:1.6;
+    margin-top:.75rem;
+    color:var(--mute);
+  }
+  .enquiry-status:empty{display:none}
+  .enquiry-status[data-state="ok"]{color:var(--ink)}
+  .enquiry-status[data-state="error"]{color:var(--accent-text)}
+
+  .enquiry-direct{
     font-family:var(--body);
     font-size:.72rem;
     line-height:1.7;
+    text-align:center;
     color:var(--mute);
+    margin-top:1rem;
   }
-  .enquiry-fallback a{
+  .enquiry-direct a{
     color:var(--ink);
     border-bottom:1px solid var(--rule);
     white-space:nowrap;
   }
-  .enquiry-fallback a:hover{border-bottom-color:currentColor}
+  .enquiry-direct a:hover{border-bottom-color:currentColor}
 }

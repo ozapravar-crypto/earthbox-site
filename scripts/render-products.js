@@ -9,17 +9,9 @@
 import { volumeOne, categories as v1Categories, materials } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
 import { observeReveals } from './reveal.js';
+import { enquiryAltHTML } from './enquiry-form.js';
 
 const ENQUIRY_WHATSAPP = '918104811584';
-// Desktop wa.me links redirect to WhatsApp Web, which is a dead end for anyone
-// without an active session. Give desktop visitors a route that always works.
-const ENQUIRY_EMAIL = 'aayush.lilani@gmail.com';
-const ENQUIRY_PHONE_DISPLAY = '+91 81048 11584';
-const DESKTOP_FALLBACK = `
-      <p class="enquiry-fallback">Not on WhatsApp Web?
-        <a href="mailto:${ENQUIRY_EMAIL}" data-enquiry-fallback="email">${ENQUIRY_EMAIL}</a> &middot;
-        <a href="tel:+${ENQUIRY_WHATSAPP}" data-enquiry-fallback="phone">${ENQUIRY_PHONE_DISPLAY}</a>
-      </p>`;
 
 function formatPrice(pricing){
   if (!pricing) return 'Coming soon';
@@ -212,7 +204,7 @@ function renderVolumeThree(){
         Write in on WhatsApp
         <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
       </a>
-      ${DESKTOP_FALLBACK}
+      ${enquiryAltHTML('Digital Vivariums (Volume III)')}
     </div>
   `;
 
