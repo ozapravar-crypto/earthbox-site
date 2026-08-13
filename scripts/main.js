@@ -67,6 +67,18 @@ const boot = () => {
     });
   }
 
+  // GA4: Track desktop enquiry-fallback clicks (email / phone under the CTA).
+  // Delegated: the CTAs are rendered after this runs.
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-enquiry-fallback]');
+    if (el && typeof gtag === 'function') {
+      gtag('event', 'enquire_fallback_click', {
+        method: el.dataset.enquiryFallback,
+        page: window.location.pathname
+      });
+    }
+  });
+
   // GA4: Track manifesto CTA clicks
   const manifestoCta = document.querySelector('.manifesto-cta');
   if (manifestoCta) {

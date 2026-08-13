@@ -16,6 +16,15 @@ import { observeReveals } from './reveal.js';
 
 
 const ENQUIRY_WHATSAPP = '918104811584';
+// Desktop wa.me links redirect to WhatsApp Web, which is a dead end for anyone
+// without an active session. Give desktop visitors a route that always works.
+const ENQUIRY_EMAIL = 'aayush.lilani@gmail.com';
+const ENQUIRY_PHONE_DISPLAY = '+91 81048 11584';
+const DESKTOP_FALLBACK = `
+          <p class="enquiry-fallback">Not on WhatsApp Web?
+            <a href="mailto:${ENQUIRY_EMAIL}" data-enquiry-fallback="email">${ENQUIRY_EMAIL}</a> &middot;
+            <a href="tel:+${ENQUIRY_WHATSAPP}" data-enquiry-fallback="phone">${ENQUIRY_PHONE_DISPLAY}</a>
+          </p>`;
 const SITE_URL = 'https://earthbox.in';
 
 function enquiryHref(opts = {}){
@@ -286,6 +295,7 @@ function renderPrinted(p){
             Enquire on WhatsApp
             <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
           </a>
+          ${DESKTOP_FALLBACK}
 
           <!-- Trust signals -->
           <div class="pd-trust-signals">
@@ -454,6 +464,7 @@ function renderBox(b){
             Enquire on WhatsApp
             <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
           </a>
+          ${DESKTOP_FALLBACK}
           <p class="caption pd-note">Coming soon · register interest now</p>
         </aside>
       </section>

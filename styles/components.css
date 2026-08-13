@@ -377,3 +377,28 @@
 .input::placeholder{
   color:var(--mute);
 }
+
+
+/* ─── DESKTOP ENQUIRY FALLBACK ───
+   wa.me sends desktop visitors to WhatsApp Web, which is a dead end without an
+   active session. Shown above the mobile breakpoint (1000px) only — on mobile
+   the WhatsApp deep link opens the app directly and needs no fallback. */
+.enquiry-fallback{display:none}
+
+@media (min-width: 1001px){
+  .enquiry-fallback{
+    display:block;
+    margin-top:.9rem;
+    text-align:center;
+    font-family:var(--body);
+    font-size:.72rem;
+    line-height:1.7;
+    color:var(--mute);
+  }
+  .enquiry-fallback a{
+    color:var(--ink);
+    border-bottom:1px solid var(--rule);
+    white-space:nowrap;
+  }
+  .enquiry-fallback a:hover{border-bottom-color:currentColor}
+}
