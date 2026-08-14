@@ -22,7 +22,7 @@ export const ENQUIRY_PHONE_DISPLAY = '+91 81048 11584';
 // RECEIVE enquiries (Aayush's) and they email the key back. It is a delivery
 // label, not a secret: it is meant to sit in public page source.
 // Until it is filled in, the form tells the visitor to email instead.
-export const WEB3FORMS_ACCESS_KEY = 'PASTE_WEB3FORMS_ACCESS_KEY_HERE';
+export const WEB3FORMS_ACCESS_KEY = '3458b029-0772-4d14-8f56-af232841e025';
 
 const ENDPOINT = 'https://api.web3forms.com/submit';
 
