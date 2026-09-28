@@ -155,3 +155,82 @@ The five top-level pages were done properly. Everything below them was not.
 EarthBox is well built, fast, clean and correctly deployed — and its entire reason to be found is switched off, because the 23 articles that would earn the traffic do not exist until JavaScript runs.
 
 Fix the prerender and the hostname split. Everything else on this list is smaller than those two.
+
+---
+
+# Addendum — fixes applied, same day
+
+## Fixed
+
+**P0-1 · Prerender.** `scripts/prerender.mjs` bakes the article head, body, FAQ and
+related-articles markup into `blog/*.html` at build time, running the same logic as
+`render-article.js`. Measured on `anatomy-earthbox-cradle.html`:
+
+| | Before | After |
+|---|---:|---:|
+| Visible text without JS | 525 | **6,108** |
+| `<h1>` | 0 | 1 |
+| `<h2>` | 0 | 10 |
+| JSON-LD blocks | 0 | 2 |
+
+Average across all 23 articles: **6,714 characters** of readable text with JavaScript
+disabled. Every page now carries a unique `<title>`, canonical, Open Graph set,
+`Article` schema and `FAQPage` schema in the source.
+
+The client script still runs and re-renders over the top, so the scramble animation and
+every interaction are untouched. Two guards were needed to make that safe:
+`injectSchema()` now returns early when it sees a `data-prerendered` block (otherwise
+every page carried two identical `Article` nodes), and both the build and the client
+stop appending `| EarthBox` to a title that already contains it.
+
+**P0-2 · Hostname.** Everything now uses `https://www.earthbox.in` — canonicals,
+`og:url`, sitemap (28 URLs), `robots.txt`, and the URL builders inside
+`render-article.js`. Zero non-www references remain outside the audit file itself.
+
+**P1-1 · Security headers.** `vercel.json` created (the project had none) with HSTS +
+`includeSubDomains`, CSP, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`,
+`Permissions-Policy`, COOP, and a one-year immutable cache on `/assets/*`. The CSP
+allows `https://api.web3forms.com` in both `connect-src` and `form-action` — **test the
+enquiry form after deploying**, that is the one thing a CSP can silently break.
+
+**Every `og:image` on the site was a 404.** Not in the original audit — found while
+fixing P1-2. `og-home.jpg`, `og-journal.jpg`, `og-catalogue.jpg` and `og-about.jpg` were
+referenced everywhere and had never been generated from the templates in
+`assets/og-templates/`. All four rendered at 1200×630 from those templates and committed.
+An `og-journal.html` template was created, since only three existed.
+
+**P2 · `debug.html`** removed from the deploy via `.vercelignore`, and the `robots.txt`
+`Disallow` that advertised it removed with it. `robots.txt` also gained explicit allows
+for all major AI crawlers, and `max-image-preview:large` was added to the 8 pages that
+lacked a robots meta.
+
+## Corrected from the original audit
+
+**The 3 `catalogue/*.html` pages are dead, not under-optimised.** The original report
+recommended adding `Product` schema to them. On inspection they have **zero inbound
+links** anywhere in the site, and their `#categoryList` container has **no renderer at
+all** — nothing in `scripts/` targets that id, so it renders "02" and nothing else. They
+were superseded by the single-page `products.html` with its volume pills.
+
+Adding schema to permanently empty pages would have been worse than useless. They are
+now 308-redirected to `/products.html`, removed from the sitemap (31 → 28 URLs) and
+excluded from the deploy. The files stay in the repo.
+
+## Still open
+
+- **P1-3 · `Product` schema** — belongs on `products.html`, which actually renders the
+  32 SKUs. Prices are enquiry-only, so any `Offer` node must omit price rather than
+  invent one.
+- **Per-article `og:image`** — all 23 articles now share `og-journal.jpg` because no
+  article has a `featuredImage` and no per-article art exists. A real image, but a
+  shared one.
+- **16 stylesheets** on the homepage, still unconcatenated.
+- **No `llms.txt`** — now worth adding, since the Journal is finally readable.
+- **No IndexNow.**
+
+## The guard
+
+`npm run build` = prerender + check. `scripts/check-prerender.mjs` fails the build if any
+article page lacks an `<h1>`, a canonical, JSON-LD, an `og:image`, or has under 1,000
+characters of text without JavaScript. Nav and footer alone are ~525, so that threshold
+catches exactly the failure this audit found. `npm test` runs the same check.

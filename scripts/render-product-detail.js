@@ -17,7 +17,7 @@ import { enquiryAltHTML } from './enquiry-form.js';
 
 
 const ENQUIRY_WHATSAPP = '918104811584';
-const SITE_URL = 'https://earthbox.in';
+const SITE_URL = 'https://www.earthbox.in';
 
 function enquiryHref(opts = {}){
   const { name, sku, material, variant, price, volume = 1 } = opts;
@@ -580,7 +580,7 @@ function renderProduct(id){
   updateMeta('meta[name="description"]', description.slice(0, 160));
   updateMeta('meta[property="og:title"]', `EarthBox — ${name}`);
   updateMeta('meta[property="og:description"]', description.slice(0, 160));
-  updateMeta('meta[property="og:image"]', `https://earthbox.in/${photo}`);
+  updateMeta('meta[property="og:image"]', `https://www.earthbox.in/${photo}`);
   updateMeta('meta[name="twitter:title"]', `EarthBox — ${name}`);
   updateMeta('meta[name="twitter:description"]', description.slice(0, 160));
 

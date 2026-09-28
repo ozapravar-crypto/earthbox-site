@@ -76,7 +76,8 @@ function renderArticleBody(article) {
 
 function injectSeoMeta(article) {
   // Dynamic page title
-  document.title = `${article.metaTitle || article.title} | EarthBox`;
+  const rawTitle = article.metaTitle || article.title;
+  document.title = /\bEarthBox\b/i.test(rawTitle) ? rawTitle : `${rawTitle} | EarthBox`;
 
   // Helper to create or update meta tags
   const setMeta = (attr, key, content) => {
@@ -96,10 +97,10 @@ function injectSeoMeta(article) {
 
   // Open Graph tags (Facebook, LinkedIn, WhatsApp)
   setMeta('property', 'og:type', 'article');
-  setMeta('property', 'og:url', `https://earthbox.in/blog/${article.slug}`);
+  setMeta('property', 'og:url', `https://www.earthbox.in/blog/${article.slug}.html`);
   setMeta('property', 'og:title', article.title);
   setMeta('property', 'og:description', article.metaDescription);
-  setMeta('property', 'og:image', article.featuredImage || 'https://earthbox.in/assets/og-journal.jpg');
+  setMeta('property', 'og:image', article.featuredImage || 'https://www.earthbox.in/assets/og-journal.jpg');
   setMeta('property', 'og:site_name', 'EarthBox');
   setMeta('property', 'article:published_time', article.publishDate);
   setMeta('property', 'article:author', article.author);
@@ -108,7 +109,7 @@ function injectSeoMeta(article) {
   setMeta('name', 'twitter:card', 'summary_large_image');
   setMeta('name', 'twitter:title', article.title);
   setMeta('name', 'twitter:description', article.metaDescription);
-  setMeta('name', 'twitter:image', article.featuredImage || 'https://earthbox.in/assets/og-journal.jpg');
+  setMeta('name', 'twitter:image', article.featuredImage || 'https://www.earthbox.in/assets/og-journal.jpg');
 
   // Canonical URL
   let canonical = document.querySelector('link[rel="canonical"]');
@@ -117,10 +118,14 @@ function injectSeoMeta(article) {
     canonical.setAttribute('rel', 'canonical');
     document.head.appendChild(canonical);
   }
-  canonical.setAttribute('href', `https://earthbox.in/blog/${article.slug}`);
+  canonical.setAttribute('href', `https://www.earthbox.in/blog/${article.slug}.html`);
 }
 
 function injectSchema(article) {
+  // prerender.mjs already baked these into the HTML at build time — appending
+  // again would give every page two identical Article blocks.
+  if (document.querySelector('script[type="application/ld+json"][data-prerendered]')) return;
+
   const schema = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -129,15 +134,15 @@ function injectSchema(article) {
     "author": {
       "@type": "Person",
       "name": article.author,
-      "url": "https://earthbox.in/about"
+      "url": "https://www.earthbox.in/about.html"
     },
     "publisher": {
       "@type": "Organization",
       "name": "EarthBox",
-      "logo": { "@type": "ImageObject", "url": "https://earthbox.in/assets/logo.webp" }
+      "logo": { "@type": "ImageObject", "url": "https://www.earthbox.in/assets/logo.png" }
     },
     "datePublished": article.publishDate,
-    "mainEntityOfPage": `https://earthbox.in/blog/${article.slug}`
+    "mainEntityOfPage": `https://www.earthbox.in/blog/${article.slug}.html`
   };
 
   const faqSchema = article.faqs && article.faqs.length ? {

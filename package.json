@@ -1,10 +1,13 @@
 {
   "name": "site",
   "version": "1.0.0",
-  "description": "Editorial archival site for EarthBox. Three pages, four passes, no build step.",
+  "description": "Editorial archival site for EarthBox. Prerendered at build time so the Journal is readable without JavaScript.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prerender": "node scripts/prerender.mjs",
+    "check:prerender": "node scripts/check-prerender.mjs",
+    "build": "node scripts/prerender.mjs && node scripts/check-prerender.mjs",
+    "test": "node scripts/check-prerender.mjs"
   },
   "repository": {
     "type": "git",

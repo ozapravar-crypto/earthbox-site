@@ -1,0 +1,6 @@
+node_modules
+_audits
+debug.html
+assets/og-templates
+*.md
+catalogue/
