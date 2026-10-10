@@ -4,6 +4,7 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+dialog{margin:auto}   /* the * reset above removes the UA centring of modal dialogs */
 html{
   /* Native smooth scroll · for in-page anchor links (#purpose etc) */
   scroll-behavior:smooth;

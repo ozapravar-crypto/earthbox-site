@@ -161,3 +161,14 @@
   .magnetic{transform:none}
   body{cursor:auto !important}
 }
+
+/* Modal dialogs (guided search, cart) sit in the browser's top layer, above
+   the custom cursor (z-index can't reach it). Inside them, use the native
+   cursor and hide the custom one so there's never zero or two cursors. */
+@media (hover: hover) and (pointer: fine){
+  body.cursor-ready dialog[open],
+  body.cursor-ready dialog[open] *{cursor:auto}
+  body.cursor-ready dialog[open] :is(a, button, label, summary, select){cursor:pointer}
+  body.cursor-ready dialog[open] :is(input:not([type=radio]):not([type=checkbox]), textarea){cursor:text}
+  body:has(dialog[open]) :is(.cursor-ring, .cursor-dot){opacity:0}
+}
