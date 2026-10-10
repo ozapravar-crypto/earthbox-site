@@ -14,7 +14,7 @@
 
 // ─── Contact details ───
 // Contact details live in data/site.js; re-exported under the old names.
-export { EMAIL as ENQUIRY_EMAIL, PHONE as ENQUIRY_PHONE, PHONE_DISPLAY as ENQUIRY_PHONE_DISPLAY } from '../data/site.js';
+export { PHONE as ENQUIRY_PHONE } from '../data/site.js';
 import { EMAIL as ENQUIRY_EMAIL, PHONE as ENQUIRY_PHONE, PHONE_DISPLAY as ENQUIRY_PHONE_DISPLAY } from '../data/site.js';
 import { esc as escapeHTML, track } from './util.js';
 
@@ -23,7 +23,7 @@ import { esc as escapeHTML, track } from './util.js';
 // RECEIVE enquiries (Aayush's) and they email the key back. It is a delivery
 // label, not a secret: it is meant to sit in public page source.
 // Until it is filled in, the form tells the visitor to email instead.
-export const WEB3FORMS_ACCESS_KEY = '3458b029-0772-4d14-8f56-af232841e025';
+const WEB3FORMS_ACCESS_KEY = '3458b029-0772-4d14-8f56-af232841e025';
 
 const ENDPOINT = 'https://api.web3forms.com/submit';
 

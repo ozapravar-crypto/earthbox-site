@@ -16,7 +16,7 @@ export const SITE = 'https://www.earthbox.in';   // canonical host — the apex 
 export const EMAIL = 'aayush.lilani@gmail.com';
 export const PHONE = '918104811584';              // wa.me / tel: form
 export const PHONE_DISPLAY = '+91 81048 11584';
-export const ADDRESS = 'Kandivali, Mumbai 400101';
+const ADDRESS = 'Kandivali, Mumbai 400101';
 
 export const NAV = [
   { href: 'index.html',    label: 'Home' },
@@ -28,7 +28,7 @@ export const NAV = [
 
 // Confirmed by the owner's choice on 10 Oct 2026 (was two versions; site-h04
 // stays open until Aayush confirms the wording).
-export const REFUND = [
+const REFUND = [
   'Within 12 hours · full refund',
   '12–48 hours · 70% refund',
   'Before shipping · 50% refund',
@@ -36,7 +36,7 @@ export const REFUND = [
   'Replacement case-by-case'
 ];
 
-export const STUDIO = ['By enquiry only', 'Delivery within Mumbai'];
+const STUDIO = ['By enquiry only', 'Delivery within Mumbai'];
 
 const SOCIAL = [
   { href: 'https://www.instagram.com/earthbox_india', label: 'Instagram',

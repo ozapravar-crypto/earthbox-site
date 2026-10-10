@@ -354,4 +354,3 @@ export const volumeOne = [
   }
 ];
 
-export const enquiryWhatsApp = '918104811584';

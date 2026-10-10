@@ -108,3 +108,18 @@ All clones were shallow and read-only, outside the repo. Only `contrast-check.py
 - **E16** `theme.js` exports `createToggle`; the `window.__earthboxCreateThemeToggle` global is gone.
 - **Verification:** full-page before/after screenshots of 9 pages × (1440, 375, dark). The only pixel differences are the intended colour changes plus a video frame. All tests pass.
 - **Deferred:** E9 (inline `onerror`), because the CSP can't drop `'unsafe-inline'` until GA's inline snippet moves to a file, so there's no gain yet. Splitting `maker.js` waits until after the 3D branch merges.
+
+## Phase 4 · done (10 Oct)
+
+| Check | Command | Runs on deploy? | Guards |
+|---|---|---|---|
+| Unit tests (4 files) | `npm run test:unit` | yes | Maker rules, plant search, cart tallies, enquiry form |
+| **ESLint** (correctness only: unused/undefined names, no stray `console.log`) | `npm run lint` | yes | Found 5 on first run, all fixed: an empty `catch`, a useless assignment, two unused imports, a dead variable |
+| Header/footer in step | `includes --check` | yes | data/site.js is the only source |
+| Journal prerender | `check:prerender` | yes | h1, text, no duplicated sections |
+| Assets/links | `check:assets` | yes | every file referenced exists |
+| **Contrast** | `npm run check:contrast` | yes | 16 text/background token pairs ≥ 4.5:1, light + dark (fails on the old #766A5E) |
+| **Playwright smoke** (desktop + Pixel 7) | `npm run test:e2e` | no (Vercel has no browser): run before UI pushes | 30 tests: every page loads with no errors/4xx/sideways scroll; Journal images; review badge; cart tallies a fixed + enquiry + Maker line (₹12,429) with Remove → Undo; guided search centred and filters; 3D/SVG preview; mobile menu |
+| **knip** | `npm run check:unused` | no (advisory) | Found and removed `vol-index.js` (unused file), one more copy of the phone number (`enquiryWhatsApp`), and 12 needless exports |
+
+Mutation check: re-breaking the review-badge fix makes its Playwright test fail. The suite ran twice green (29 passed + 1 phone-only skip).

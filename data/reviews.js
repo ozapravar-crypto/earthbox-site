@@ -10,7 +10,7 @@
 //   - verified: boolean (purchased through EarthBox)
 // ─────────────────────────────────────────────────────────────────────
 
-export const reviews = {
+const reviews = {
   // ═══ Volume I · 3D Printed Products ═══
 
   'V1-PLT-005': [

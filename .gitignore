@@ -19,3 +19,7 @@ scripts/generate-responsive.cjs
 
 # Claude Code agent worktrees
 .claude/
+
+# Playwright output
+test-results/
+playwright-report/

@@ -607,7 +607,7 @@ export function initMaker(){
   const dialog = $('mkGuide');
 
   const save = () => {
-    try { localStorage.setItem(STORE, JSON.stringify({ code: encodeBuild(b), space: b.space, disc: ui.disc })); } catch {}
+    try { localStorage.setItem(STORE, JSON.stringify({ code: encodeBuild(b), space: b.space, disc: ui.disc })); } catch { /* private mode / full storage: the build lives for this page only */ }
   };
 
   // Search typing, view switch, chips: redraw only the results, so the

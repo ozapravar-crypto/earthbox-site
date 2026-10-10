@@ -2,7 +2,7 @@
 // Guards the Maker rules that can silently go wrong: what fits which
 // chamber, what a chamber swap keeps, and what a share link may carry.
 import assert from 'node:assert/strict';
-import { emptyBuild, capacity, chamberOf, togglePlant, swapChamber, done, canEnter,
+import { emptyBuild, capacity, togglePlant, swapChamber, done, canEnter,
          furthest, encodeBuild, decodeBuild, enquiryText, substrateSuits, previewSVG } from './maker.js';
 import { chambers, plants, substrates, recipes } from '../data/maker.js';
 import { sceneSpec } from './maker.js';

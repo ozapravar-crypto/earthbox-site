@@ -30,7 +30,6 @@ import { esc, rupees, track } from './util.js';
 const STORE = 'earthbox-cart';
 const MAX_QTY = 20;
 
-export { rupees };
 // "₹8,000 – ₹12,000" → [8000, 12000]
 export const parseRange = (s) => {
   const n = String(s || '').replace(/,/g, '').match(/\d+/g);
@@ -176,13 +175,13 @@ let dlg, tab = 'cart', lastFocus;
 // state, so Undo works the same for remove, clear and move.
 let notice = null;
 
-export function addLine(list, line, { open = true } = {}){
+function addLine(list, line, { open = true } = {}){
   state = add(state, list, line);
   write(); refresh();
   track(list === 'cart' ? 'cart_add' : 'saved_add', { kind: line.kind, sku: line.sku || 'build' });
   if (open) openDrawer(list);
 }
-export const has = (list, line) => state[list].some(l => keyOf(l) === keyOf(line));
+const has = (list, line) => state[list].some(l => keyOf(l) === keyOf(line));
 
 const arrow = '<svg viewBox="0 0 16 8" fill="none" aria-hidden="true"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>';
 
@@ -287,7 +286,7 @@ function sent(method){
   refresh();
 }
 
-export function openDrawer(which = 'cart'){
+function openDrawer(which = 'cart'){
   notice = null;
   tab = which; lastFocus = document.activeElement;
   dlg.innerHTML = drawerHTML();

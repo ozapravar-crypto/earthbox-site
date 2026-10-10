@@ -38,7 +38,7 @@ export const matchesQuery = (p, q) =>
   fold(q).trim().split(/\s+/).filter(Boolean).every(t => haystack.get(p.id).includes(t));
 
 // The active constraints, each removable on its own (`clear` names the state path).
-export function constraints(state, ctx = {}){
+function constraints(state, ctx = {}){
   const { q, f, g } = state;
   const out = [];
   if (q.trim()) out.push({ key: 'q', label: `“${q.trim()}”`, test: p => matchesQuery(p, q) });
@@ -62,7 +62,7 @@ function passes(p, list){
 }
 
 // Guided answers that never remove a plant, shown as chips so the visitor sees them.
-export function preferences(g, space = {}){
+function preferences(g, space = {}){
   const light = byId(guide.light, g.light);
   const care = byId(guide.care, space.care);
   return [

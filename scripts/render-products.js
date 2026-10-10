@@ -8,7 +8,7 @@
 
 import { PHONE } from '../data/site.js';
 import { track } from './util.js';
-import { volumeOne, categories as v1Categories, materials, photoPath } from '../data/volume-one.js';
+import { volumeOne, categories as v1Categories, photoPath } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
 import { observeReveals } from './reveal.js';
 import { enquiryAltHTML } from './enquiry-form.js';

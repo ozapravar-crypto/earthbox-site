@@ -24,7 +24,7 @@ function enquiryHref(opts = {}){
   const { name, sku, material, variant, price, volume = 1 } = opts;
   const productUrl = sku ? `${SITE}/product.html#${encodeURIComponent(sku)}` : '';
 
-  let text = '';
+  let text;
 
   if (volume === 1) {
     // V1: 3D Printed products — warm craftsman tone
@@ -419,7 +419,6 @@ function initPrintedSelectors(p){
 // ─── V2 box detail layout · big photo + rich description + specs ───
 function renderBox(b){
   const desc = (b.description || []).map(p => `<p>${p}</p>`).join('');
-  const specs = [];
 
   const related = volumeTwo.boxes.filter(o => o.sku !== b.sku).slice(0, 4);
 

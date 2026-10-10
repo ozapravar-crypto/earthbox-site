@@ -2,15 +2,18 @@
   "name": "site",
   "version": "1.0.0",
   "description": "Editorial archival site for EarthBox. Prerendered at build time so the Journal is readable without JavaScript.",
-  "main": "index.js",
   "scripts": {
     "prerender": "node scripts/prerender.mjs",
     "check:prerender": "node scripts/check-prerender.mjs",
     "check:assets": "node scripts/check-assets.mjs",
     "test:unit": "node --test scripts/*.test.mjs",
-    "test": "npm run test:unit && node scripts/includes.mjs --check && npm run check:prerender && npm run check:assets",
+    "test": "npm run test:unit && npm run lint && node scripts/includes.mjs --check && npm run check:prerender && npm run check:assets && npm run check:contrast",
     "build": "node scripts/includes.mjs && node scripts/prerender.mjs && npm test",
-    "includes": "node scripts/includes.mjs"
+    "includes": "node scripts/includes.mjs",
+    "test:e2e": "playwright test",
+    "lint": "eslint .",
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "check:unused": "knip"
   },
   "repository": {
     "type": "git",
@@ -25,6 +28,11 @@
   "homepage": "https://github.com/ozapravar-crypto/earthbox-site#readme",
   "type": "module",
   "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.58.2",
+    "eslint": "10.12.0",
+    "globals": "17.13.0",
+    "knip": "6.41.0",
     "sharp": "^0.34.5"
   }
 }
