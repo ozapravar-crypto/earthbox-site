@@ -22,11 +22,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SITE = 'https://www.earthbox.in';           // canonical host — the apex 307s here
+const { SITE } = await import(path.join(ROOT, 'data/site.js'));
 const { articles, categories } = await import(path.join(ROOT, 'data/articles.js'));
 
-const esc = (s) => String(s ?? '')
-  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const { esc } = await import(path.join(ROOT, 'scripts/util.js'));
 
 const catTitle = (slug) => (categories.find((c) => c.slug === slug)?.title) ?? slug;
 

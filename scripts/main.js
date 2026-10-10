@@ -15,6 +15,7 @@
 // codebase but un-imported, ready if we want to switch back.
 // ─────────────────────────────────────────────────────────────────────
 
+import { track } from './util.js';
 import { initTheme }         from './theme.js';
 import { initLoader }        from './loader.js';
 import { initRunhead }       from './runhead.js';
@@ -66,11 +67,9 @@ const boot = async () => {
   const floatingWa = document.querySelector('.floating-wa');
   if (floatingWa) {
     floatingWa.addEventListener('click', () => {
-      if (typeof gtag === 'function') {
-        gtag('event', 'floating_wa_click', {
+      track('floating_wa_click', {
           page: window.location.pathname
         });
-      }
     });
   }
 
@@ -78,9 +77,7 @@ const boot = async () => {
   const heroCta = document.querySelector('.hero-cta');
   if (heroCta) {
     heroCta.addEventListener('click', () => {
-      if (typeof gtag === 'function') {
-        gtag('event', 'hero_cta_click');
-      }
+      track('hero_cta_click');
     });
   }
 
@@ -88,21 +85,17 @@ const boot = async () => {
   // Delegated: the CTAs are rendered after this runs.
   document.addEventListener('click', (e) => {
     const el = e.target.closest('[data-enquiry-fallback]');
-    if (el && typeof gtag === 'function') {
-      gtag('event', 'enquire_fallback_click', {
+    if (el) track('enquire_fallback_click', {
         method: el.dataset.enquiryFallback,
         page: window.location.pathname
       });
-    }
   });
 
   // GA4: Track manifesto CTA clicks
   const manifestoCta = document.querySelector('.manifesto-cta');
   if (manifestoCta) {
     manifestoCta.addEventListener('click', () => {
-      if (typeof gtag === 'function') {
-        gtag('event', 'manifesto_cta_click');
-      }
+      track('manifesto_cta_click');
     });
   }
 };

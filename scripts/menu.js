@@ -8,20 +8,17 @@
 // Keeps the desktop nav (centred links in runhead) untouched.
 // ─────────────────────────────────────────────────────────────────────
 
-const NAV_LINKS = [
-  { href: 'index.html',    label: 'Home' },
-  { href: 'products.html', label: 'Catalogue' },
-  { href: 'maker.html',    label: 'Maker' },
-  { href: 'blog.html',     label: 'Journal' },
-  { href: 'about.html',    label: 'About' }
-];
+import { NAV } from '../data/site.js';      // same list as the desktop header
+import { createToggle } from './theme.js';
 
 export function initMenu(){
   const runhead = document.querySelector('.runhead');
   if (!runhead) return;
 
   // Determine current page so we mark the active link
-  const path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  // Articles count as the Journal, like the desktop header.
+  const path = location.pathname.includes('/blog/') ? 'blog.html'
+    : (location.pathname.split('/').pop() || 'index.html').toLowerCase();
 
   // ─── Hamburger button (lives inside runhead-right column) ───
   const ham = document.createElement('button');
@@ -49,7 +46,7 @@ export function initMenu(){
     <button class="mobile-nav-close" type="button" aria-label="Close menu">×</button>
     <nav>
       <ul>
-        ${NAV_LINKS.map(l => {
+        ${NAV.map(l => {
           const active = l.href.toLowerCase() === path;
           return `<li><a href="/${l.href}"${active ? ' aria-current="page"' : ''}>${l.label}</a></li>`;
         }).join('')}
@@ -65,8 +62,8 @@ export function initMenu(){
   // Add theme toggle to mobile menu (after theme.js has initialized)
   setTimeout(() => {
     const themeContainer = panel.querySelector('.mobile-nav-theme');
-    if (themeContainer && window.__earthboxCreateThemeToggle) {
-      const mobileToggle = window.__earthboxCreateThemeToggle();
+    if (themeContainer) {
+      const mobileToggle = createToggle(document.documentElement.getAttribute('data-theme') || 'light');
       mobileToggle.classList.add('theme-toggle-mobile');
 
       const label = document.createElement('span');

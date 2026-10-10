@@ -8,6 +8,7 @@
 // No-op on pages without .vol-pills.
 // ─────────────────────────────────────────────────────────────────────
 
+import { track } from './util.js';
 import { volumeOne, categories as v1Categories } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
 
@@ -44,9 +45,9 @@ function setActiveTab(volNum, isUserAction = false){
   }
 
   // GA4: Track volume switches (only user-initiated, not initial load)
-  if (isUserAction && typeof gtag === 'function') {
+  if (isUserAction) {
     const volNames = { 1: 'Volume I - Now', 2: 'Volume II - Next', 3: 'Volume III - Horizon' };
-    gtag('event', 'volume_switch', {
+    track('volume_switch', {
       volume_number: volNum,
       volume_name: volNames[volNum] || `Volume ${volNum}`
     });

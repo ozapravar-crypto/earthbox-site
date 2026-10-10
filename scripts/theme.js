@@ -47,7 +47,7 @@ function toggleTheme() {
   setStoredTheme(next);
 }
 
-function createToggle(theme) {
+export function createToggle(theme) {
   const toggle = document.createElement('button');
   toggle.className = 'theme-toggle' + (theme === 'dark' ? ' is-dark' : '');
   toggle.type = 'button';
@@ -85,11 +85,7 @@ export function initTheme() {
     runhead.appendChild(toggle);
   }
 
-  // Mobile toggle will be added by menu.js after panel is created
-  // We expose a helper function for it
-  window.__earthboxCreateThemeToggle = () => createToggle(
-    document.documentElement.getAttribute('data-theme') || 'light'
-  );
+  // menu.js imports createToggle for the mobile panel.
 
   // Listen for system preference changes
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {

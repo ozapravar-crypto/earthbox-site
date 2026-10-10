@@ -91,7 +91,7 @@
   transition:color .25s ease;
 }
 .article-card:hover h3{
-  color:var(--accent);
+  color:var(--accent-text);
 }
 .article-excerpt{
   font-family:var(--body);
@@ -219,34 +219,6 @@
 }
 
 /* Definitions block */
-.definitions{
-  background:var(--bg);
-  border:1px solid var(--rule);
-  padding:1.5rem 2rem;
-  margin:2rem 0;
-}
-.definitions h3{
-  font-family:var(--sans);
-  font-size:.72rem;
-  letter-spacing:.2em;
-  text-transform:uppercase;
-  color:var(--mute);
-  margin:0 0 1rem;
-}
-.definitions dl{
-  margin:0;
-}
-.definitions dt{
-  font-family:var(--serif);
-  font-weight:400;
-  color:var(--ink);
-}
-.definitions dd{
-  font-family:var(--body);
-  font-size:.95rem;
-  color:var(--ink-soft);
-  margin:0 0 1rem 0;
-}
 
 /* Article images */
 .article-body figure{
@@ -290,7 +262,7 @@
   font-size:.72rem;
   letter-spacing:.15em;
   text-transform:uppercase;
-  color:var(--accent);
+  color:var(--accent-text);
   margin-bottom:.75rem;
 }
 

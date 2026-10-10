@@ -6,12 +6,13 @@
 // Volume III = Digital Vivariums, research note.
 // ─────────────────────────────────────────────────────────────────────
 
+import { PHONE } from '../data/site.js';
+import { track } from './util.js';
 import { volumeOne, categories as v1Categories, materials, photoPath } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
 import { observeReveals } from './reveal.js';
 import { enquiryAltHTML } from './enquiry-form.js';
 
-const ENQUIRY_WHATSAPP = '918104811584';
 
 function formatPrice(pricing){
   if (!pricing) return 'Coming soon';
@@ -54,7 +55,7 @@ function sortByAvailability(products){
 
 function enquiryHref(itemName){
   const text = `Hi Aayush, I'm interested in ${itemName}. Could you share availability, customisation, and pricing?`;
-  return `https://wa.me/${ENQUIRY_WHATSAPP}?text=${encodeURIComponent(text)}`;
+  return `https://wa.me/${PHONE}?text=${encodeURIComponent(text)}`;
 }
 
 
@@ -218,13 +219,11 @@ export function initProducts(){
   // GA4: Track enquiry clicks on catalogue page
   document.querySelectorAll('a[href*="wa.me"]').forEach(link => {
     link.addEventListener('click', () => {
-      if (typeof gtag === 'function') {
-        gtag('event', 'enquire_click', {
+      track('enquire_click', {
           product_name: 'Digital Vivariums',
           product_volume: 3,
           source: 'catalogue'
         });
-      }
     });
   });
 }

@@ -16,30 +16,6 @@ body::before{
 }
 
 /* Watcher · tiny specimen frame in bottom-right, present on every page */
-.watcher{
-  position:fixed;
-  bottom:2rem;
-  right:2rem;
-  width:70px;
-  height:98px;
-  z-index:70;
-  pointer-events:none;
-  opacity:0;
-  animation:watcherFade 1s ease 3.5s forwards;
-}
-.watcher svg{
-  width:100%;
-  height:100%;
-  overflow:visible;
-}
-.watcher .wfill{fill:var(--bg);opacity:.85}
-.watcher .wstroke{stroke:var(--ink-soft);fill:none;stroke-width:1.2}
-.watcher .winner{stroke:var(--ink-soft);fill:none;stroke-width:.6}
-.watcher .wdot{fill:var(--accent)}
-.watcher .wpulse{
-  transform-origin:center;
-  animation:pulse 4s ease-in-out infinite;
-}
 
 @keyframes watcherFade{to{opacity:1}}
 @keyframes pulse{
@@ -48,12 +24,7 @@ body::before{
 }
 
 /* Hide watcher on mobile · breathing room on small screens */
-@media (max-width: 1000px){
-  .watcher{display:none}
-}
 
 @media (prefers-reduced-motion: reduce){
   body::before{opacity:.25}
-  .watcher{animation:none;opacity:1}
-  .watcher .wpulse{animation:none}
 }

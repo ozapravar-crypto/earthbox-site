@@ -13,7 +13,6 @@
    6. Form Elements (inputs, selectors)
    ═══════════════════════════════════════════════════════════════════════ */
 
-
 /* ═══════════════════════════════════════════════════════════════════════
    1. BUTTONS
    Base: .cta
@@ -109,7 +108,6 @@
   }
 }
 
-
 /* ═══════════════════════════════════════════════════════════════════════
    2. CARDS
    Base: .card
@@ -133,67 +131,10 @@
   border-color:var(--rule-stronger);
 }
 
-.card-elevated:hover{
-  transform:translateY(-2px);
-  box-shadow:0 4px 12px rgba(0,0,0,.06);
-}
-
-.card-img{
-  aspect-ratio:1 / 1;
-  overflow:hidden;
-  background:var(--ink);
-}
-.card-img img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-  transition:transform .5s var(--ease-archival);
-}
-.card:hover .card-img img{
-  transform:scale(1.04);
-}
-
-.card-body{
-  padding:1rem;
-}
-
-
 /* ═══════════════════════════════════════════════════════════════════════
    3. BADGES
    Status indicators, labels, tags
    ═══════════════════════════════════════════════════════════════════════ */
-
-.badge{
-  display:inline-flex;
-  align-items:center;
-  gap:.35rem;
-  font-family:var(--sans);
-  font-size:.55rem;
-  letter-spacing:.2em;
-  text-transform:uppercase;
-  color:var(--mute);
-  padding:.4rem .7rem;
-  border:1px solid var(--rule);
-  background:var(--bg);
-}
-
-.badge-accent{
-  border-color:var(--accent);
-  color:var(--accent-dk);
-}
-
-.badge-solid{
-  background:var(--ink);
-  border-color:var(--ink);
-  color:var(--reverse);
-}
-
-.badge svg{
-  width:10px;
-  height:10px;
-}
-
 
 /* ═══════════════════════════════════════════════════════════════════════
    4. TRUST SIGNALS
@@ -251,26 +192,10 @@
   .trust-divider{width:3rem;height:1px}
 }
 
-
 /* ═══════════════════════════════════════════════════════════════════════
    5. FLOATING ACTIONS
    Fixed position action buttons (WhatsApp, scroll-to-top, etc.)
    ═══════════════════════════════════════════════════════════════════════ */
-
-.floating-action{
-  position:fixed;
-  z-index:90;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:50%;
-  transition:transform .2s ease, box-shadow .2s ease;
-  box-shadow:0 4px 12px rgba(0,0,0,.15);
-}
-.floating-action:hover{
-  transform:scale(1.08);
-  box-shadow:0 6px 20px rgba(0,0,0,.2);
-}
 
 /* WhatsApp specific */
 .floating-wa{
@@ -308,32 +233,12 @@
   .floating-wa svg{width:24px;height:24px}
 }
 
-
 /* ═══════════════════════════════════════════════════════════════════════
    6. FORM ELEMENTS
    Inputs, selectors, chips
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* Selector buttons (material, variant pickers) */
-.selector-btn{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-start;
-  padding:.75rem 1rem;
-  background:var(--bg);
-  border:1px solid var(--rule);
-  cursor:pointer;
-  transition:all .25s ease;
-  text-align:left;
-}
-.selector-btn:hover{
-  border-color:var(--rule-stronger);
-  background:var(--bg-tint);
-}
-.selector-btn.active{
-  border-color:var(--accent);
-  background:var(--bg);
-}
 
 /* Chip variant (inline, compact) */
 .selector-chip{
@@ -377,7 +282,6 @@
 .input::placeholder{
   color:var(--mute);
 }
-
 
 /* ─── DESKTOP ENQUIRY ROUTE ───
    wa.me sends desktop visitors to WhatsApp Web, a dead end without an active
@@ -474,7 +378,6 @@
   }
   .enquiry-direct a:hover{border-bottom-color:currentColor}
 }
-
 
 /* ═══════════════════════════════════════════════════════════════════════
    Cart + saved list (scripts/cart.js) · header buttons + side drawer
@@ -578,3 +481,17 @@
 .ct-notice{display:flex;flex-wrap:wrap;align-items:center;gap:0 1rem;margin:1rem 0 0;padding:.75rem 1rem;border:1px solid var(--rule-stronger);background:var(--bg-tint);font-size:.88rem;color:var(--ink)}
 .ct-notice:empty{display:none}
 .ct-notice .ct-link{min-height:36px;color:var(--ink)}
+
+
+/* Visually hidden, still read by screen readers (was utilities.css; the
+   other 85 utility classes there were never used). */
+.u-sr-only{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  border:0;
+}

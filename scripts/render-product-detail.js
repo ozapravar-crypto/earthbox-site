@@ -9,6 +9,8 @@
 // V3 (Digital Vivariums): Concept page
 // ─────────────────────────────────────────────────────────────────────
 
+import { SITE, PHONE } from '../data/site.js';
+import { rupees, track } from './util.js';
 import { volumeOne as v1Products, categories as v1Categories, materials, photoPath } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
 import { getReviews, getAverageRating } from '../data/reviews.js';
@@ -17,12 +19,10 @@ import { enquiryAltHTML } from './enquiry-form.js';
 import { syncCartButtons } from './cart.js';
 
 
-const ENQUIRY_WHATSAPP = '918104811584';
-const SITE_URL = 'https://www.earthbox.in';
 
 function enquiryHref(opts = {}){
   const { name, sku, material, variant, price, volume = 1 } = opts;
-  const productUrl = sku ? `${SITE_URL}/product.html#${encodeURIComponent(sku)}` : '';
+  const productUrl = sku ? `${SITE}/product.html#${encodeURIComponent(sku)}` : '';
 
   let text = '';
 
@@ -58,7 +58,7 @@ function enquiryHref(opts = {}){
     if (productUrl) text += `\n\n${productUrl}`;
   }
 
-  return `https://wa.me/${ENQUIRY_WHATSAPP}?text=${encodeURIComponent(text)}`;
+  return `https://wa.me/${PHONE}?text=${encodeURIComponent(text)}`;
 }
 
 // Add to cart + Save, then WhatsApp as the quieter route. `line` is a cart
@@ -78,10 +78,7 @@ const mobileBuyHTML = (line) => `
       <button type="button" class="cta" data-add-line="${attr(line)}">Add to cart ${ARROW}</button>
     </div>`;
 
-function formatPrice(price){
-  if (!price) return null;
-  return `₹${price.toLocaleString('en-IN')}`;
-}
+const formatPrice = (price) => (price ? rupees(price) : null);
 
 function formatReviewDate(isoDate){
   const date = new Date(isoDate);
@@ -595,25 +592,21 @@ function renderProduct(id){
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   // GA4: Track product view
-  if (typeof gtag === 'function') {
-    gtag('event', 'product_view', {
+  track('product_view', {
       product_name: name,
       product_sku: id,
       product_volume: found.volume,
       product_type: found.kind
     });
-  }
 
   // GA4: Track enquiry clicks
   host.querySelectorAll('a[href*="wa.me"]').forEach(link => {
     link.addEventListener('click', () => {
-      if (typeof gtag === 'function') {
-        gtag('event', 'enquire_click', {
+      track('enquire_click', {
           product_name: name,
           product_sku: id,
           product_volume: found.volume
         });
-      }
     });
   });
 }

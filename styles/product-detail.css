@@ -18,7 +18,6 @@
 
 .pd-page{display:contents}
 
-
 /* ─── BREADCRUMB ─── */
 .pd-breadcrumb{
   display:flex;
@@ -53,7 +52,6 @@
     gap:.35rem;
   }
 }
-
 
 /* ─── HEADER ─── */
 .pd-head{
@@ -103,7 +101,6 @@
   margin-top:1.25rem;
 }
 
-
 /* ─── INTRO · description text above the showcase ─── */
 .pd-intro{
   margin-bottom:clamp(2rem,4vh,3rem);
@@ -123,7 +120,6 @@
   font-size:1.1rem;
 }
 
-
 /* ─── SHOWCASE · image + specs side-by-side ─── */
 .pd-showcase{
   display:grid;
@@ -135,7 +131,6 @@
 .pd-showcase .pd-hero{
   margin:0;
 }
-
 
 /* ─── HERO IMAGE ─── */
 .pd-hero{
@@ -166,20 +161,6 @@
   object-fit:cover;
   display:block;
 }
-.pd-hero-frame--illust{
-  background:var(--bg-tint);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:clamp(2rem,5vw,5rem);
-}
-.pd-hero-frame--illust svg{
-  width:60%;
-  max-width:280px;
-  height:auto;
-  color:var(--ink);
-}
-
 
 /* ─── BODY · description (left) + side panel (right) ─── */
 .pd-body{
@@ -209,7 +190,6 @@
   font-size:1.1rem;
 }
 
-
 /* ─── SIDE PANEL · specs + CTA ─── */
 .pd-body-side{
   position:sticky;
@@ -217,30 +197,6 @@
   background:var(--bg-tint);
   padding:clamp(1.5rem,3vw,2rem);
   border:1px solid var(--rule);
-}
-.pd-specs{
-  display:grid;
-  gap:.85rem;
-  margin-bottom:1.5rem;
-}
-.pd-specs > div{
-  display:grid;
-  grid-template-columns:90px 1fr;
-  gap:1rem;
-  align-items:baseline;
-  padding-bottom:.6rem;
-  border-bottom:1px solid var(--rule);
-}
-.pd-specs > div:last-of-type{border-bottom:0}
-.pd-specs dt{
-  font-size:.55rem;
-  letter-spacing:.28em;
-}
-.pd-specs dd{
-  font-family:var(--serif);
-  font-size:.92rem;
-  color:var(--ink);
-  line-height:1.3;
 }
 .pd-cta{
   width:100%;
@@ -260,7 +216,6 @@
   text-align:center;
 }
 
-
 /* ─── SHORT DESCRIPTION ─── */
 .pd-short-desc{
   font-family:var(--body);
@@ -271,7 +226,6 @@
   padding-bottom:1.25rem;
   border-bottom:1px solid var(--rule);
 }
-
 
 /* ─── TRUST SIGNALS ─── */
 .pd-trust-signals{
@@ -318,7 +272,6 @@
   height:14px;
   color:var(--accent);
 }
-
 
 /* ═══════════════════════════════════════════════════════════════════════
    REVIEWS SECTION · Quiet, archival presentation
@@ -482,7 +435,6 @@
   }
 }
 
-
 /* ─── RELATED STRIP ─── */
 .pd-related{
   border-top:1px solid var(--rule);
@@ -526,7 +478,7 @@
 .pd-related-meta .caption{
   font-size:.5rem;
   letter-spacing:.32em;
-  color:var(--accent);
+  color:var(--accent-text);
 }
 .pd-related-meta h3{
   font-family:var(--serif);
@@ -542,8 +494,6 @@
   margin-top:.25rem;
   line-height:1.4;
 }
-.pd-related-card--text .pd-related-meta{padding:1.5rem}
-
 
 /* ─── BACK LINK · top-left ─── */
 .back-link{
@@ -558,7 +508,6 @@
   color:var(--ink);
   padding-left:.5rem;
 }
-
 
 /* ═══════════════════════════════════════════════════════════════════════
    V1 3D PRINTED PRODUCTS · Material & Variant Selectors
@@ -697,7 +646,6 @@
   display:none;
 }
 
-
 /* ═══════════════════════════════════════════════════════════════════════
    MOBILE STICKY CTA · Fixed bottom bar on mobile, hidden on desktop
    ═══════════════════════════════════════════════════════════════════════ */
@@ -729,7 +677,6 @@
     padding-bottom:calc(5rem + env(safe-area-inset-bottom, 0px));
   }
 }
-
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 1000px){

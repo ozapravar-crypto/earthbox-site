@@ -13,7 +13,7 @@
   --mute:          #656565;
   --accent:        #B8A99A;
   --accent-dk:     #9A8A7B;
-  --accent-text:   #766A5E;
+  --accent-text:   #736759;   /* ≥4.5:1 on --bg and --bg-tint (was #766A5E, 4.46 on tint) */
   --reverse:       #F8F7F5;
   --rule:          rgba(44,44,43,.12);
   --rule-stronger: rgba(44,44,43,.22);

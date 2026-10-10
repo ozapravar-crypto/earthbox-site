@@ -13,9 +13,10 @@
 // ─────────────────────────────────────────────────────────────────────
 
 // ─── Contact details ───
-export const ENQUIRY_EMAIL = 'aayush.lilani@gmail.com';
-export const ENQUIRY_PHONE = '918104811584';
-export const ENQUIRY_PHONE_DISPLAY = '+91 81048 11584';
+// Contact details live in data/site.js; re-exported under the old names.
+export { EMAIL as ENQUIRY_EMAIL, PHONE as ENQUIRY_PHONE, PHONE_DISPLAY as ENQUIRY_PHONE_DISPLAY } from '../data/site.js';
+import { EMAIL as ENQUIRY_EMAIL, PHONE as ENQUIRY_PHONE, PHONE_DISPLAY as ENQUIRY_PHONE_DISPLAY } from '../data/site.js';
+import { esc as escapeHTML, track } from './util.js';
 
 // ─── Form service ───
 // Free access key from https://web3forms.com — enter the address that should
@@ -28,9 +29,6 @@ const ENDPOINT = 'https://api.web3forms.com/submit';
 
 const isConfigured = () => !WEB3FORMS_ACCESS_KEY.startsWith('PASTE_');
 
-const escapeHTML = (s) => String(s).replace(/[&<>"]/g, c => (
-  { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]
-));
 
 
 // ─── Markup ───
@@ -136,12 +134,10 @@ export function initEnquiryForm(){
       say('ok', 'Thank you — your enquiry is with us. We usually reply within a day.');
       wrap.dispatchEvent(new CustomEvent('enquiry:sent', { bubbles: true }));   // cart.js listens
 
-      if (typeof gtag === 'function'){
-        gtag('event', 'enquire_form_submit', {
+      track('enquire_form_submit', {
           product_name: fields.product || '(general)',
           page: location.pathname
         });
-      }
     } catch (err) {
       button.disabled = false;
       say('error', `Couldn’t send that — please email ${ENQUIRY_EMAIL} instead.`);

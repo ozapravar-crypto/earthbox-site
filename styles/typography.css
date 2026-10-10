@@ -49,8 +49,3 @@ h4{
 .italic{font-style:italic}
 
 /* Roman-numeral year stamp — used on /about colophon and product editions */
-.roman{
-  font-family:var(--serif);
-  letter-spacing:.04em;
-  font-feature-settings:"lnum";
-}

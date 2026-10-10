@@ -24,15 +24,13 @@ import { volumeTwo } from '../data/upcoming.js';
 import { substrates } from '../data/maker.js';
 import { decodeBuild, encodeBuild, chamberOf, plantOf, isSoilless } from './build-codec.js';
 import { enquiryAltHTML, ENQUIRY_PHONE } from './enquiry-form.js';
+import { SITE } from '../data/site.js';
+import { esc, rupees, track } from './util.js';
 
 const STORE = 'earthbox-cart';
-const SITE = 'https://www.earthbox.in';
 const MAX_QTY = 20;
 
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => (
-  { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
-));
-export const rupees = (n) => `₹${n.toLocaleString('en-IN')}`;
+export { rupees };
 // "₹8,000 – ₹12,000" → [8000, 12000]
 export const parseRange = (s) => {
   const n = String(s || '').replace(/,/g, '').match(/\d+/g);
@@ -172,7 +170,6 @@ export function orderText(lines){
 let state = emptyCart();
 const read = () => { try { state = clean(JSON.parse(localStorage.getItem(STORE) || 'null')); } catch { state = emptyCart(); } };
 const write = () => { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch { /* private mode: lives for this page only */ } };
-const track = (name, params = {}) => { if (typeof gtag === 'function') gtag('event', name, params); };
 
 let dlg, tab = 'cart', lastFocus;
 // One-line status at the top of the drawer. `undo` holds the whole previous
