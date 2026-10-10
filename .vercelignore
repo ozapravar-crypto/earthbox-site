@@ -2,3 +2,5 @@ node_modules
 _audits
 assets/og-templates
 *.md
+# …except the 3D model credits: the CC BY licence needs the linked file live
+!assets/plants3d/CREDITS.md
