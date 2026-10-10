@@ -190,7 +190,7 @@ async function run(route, theme, vpName){
         const targets = await page.evaluate(interactiveSignatures, {});
         for (const t of targets) {
           const loc = page.locator(`[data-cq-target="${t.i}"]`).first();
-          for (const mode of ['hover', 'focus']) {
+          for (const mode of t.offscreen ? ['focus'] : ['hover', 'focus']) {   // off-screen until focused: hover is meaningless
             try {
               await loc.scrollIntoViewIfNeeded({ timeout: 2000 });
               if (mode === 'hover') await loc.hover({ timeout: 2000, force: true }); else { await page.mouse.move(0, 0); await page.keyboard.press('Shift'); await loc.focus(); }
@@ -252,7 +252,7 @@ const uniq = (list) => [...new Map(list.map(r => [[r.selector, r.theme, r.viewpo
 const report = {
   generated: new Date().toISOString(), base: BASE, quick: QUICK, seconds: Math.round((Date.now() - started) / 1000),
   wcag: 'AA: 4.5:1 normal text, 3:1 large text (≥24px or ≥18.66px bold), 3:1 icons and focus rings (1.4.11); disabled controls exempt (1.4.3)',
-  totals: Object.fromEntries(['pass', 'fail', 'review', 'accepted', 'exempt-disabled'].map(s => [s, results.filter(r => r.status === s).length])),
+  totals: Object.fromEntries(['pass', 'fail', 'review', 'accepted', 'exempt-disabled', 'covered'].map(s => [s, results.filter(r => r.status === s).length])),
   coverage: { scanned: coverage.filter(c => c.scanned).length, notScanned: coverage.filter(c => !c.scanned) },
   axe: { violations: axeFindings.filter(a => a.axe === 'violation').length, incomplete: axeFindings.filter(a => a.axe === 'incomplete').length,
     unresolved: axeFindings.filter(a => /review|DISAGREE/.test(a.resolution)) },

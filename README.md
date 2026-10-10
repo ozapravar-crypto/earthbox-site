@@ -75,6 +75,8 @@ Feature docs: **`MAKER.md`** (terrarium Maker, discovery, 3D) · **`CART.md`** (
 | `npm run check:contrast` | ✓ | A text colour token falls below 4.5:1 on `--bg` or `--bg-tint`, light or dark |
 | `npm run test:e2e` | — (no browser on Vercel) | A page errors, 404s or scrolls sideways; a fixed bug comes back |
 | `npm run check:unused` | — (advisory) | Unused files, exports or dependencies |
+| `npm run qa:contrast` | CI (GitHub Actions) | Any text, placeholder, icon or focus ring under WCAG AA on any page × theme × size × state, measured from real pixels (see `qa/CONTRAST.md`) |
+| `.github/workflows/qa.yml` | every push / PR | Runs `npm test`, the Playwright suite (incl. `tests/contrast.spec.mjs`) and the full contrast audit; reports are uploaded as artifacts |
 
 ## How to…
 

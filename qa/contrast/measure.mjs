@@ -24,6 +24,7 @@ const HIDE = `[data-cq-hide], [data-cq-hide] * { color: transparent !important; 
 html.cq-shot .floating-wa:not(:has([data-cq-hide], [data-cq-hide-mark])) { visibility: hidden !important; }`;
 
 export async function resolveWithPixels(page, item){
+  if (item.kind === 'focus-ring') return ringPixels(page, item);
   const el = page.locator(`[data-cq="${item.cq}"]`).first();
   if (!(await el.count())) return { ...item, status: 'review', note: 'element gone before pixel check' };
   if (!(await page.locator('#cq-hide').count())) await page.addStyleTag({ content: HIDE }).then(h => h.evaluate(e => { e.id = 'cq-hide'; }));
@@ -32,10 +33,16 @@ export async function resolveWithPixels(page, item){
   await page.evaluate(() => document.documentElement.classList.add('cq-shot'));
   let buf, inked;
   try {
+    // Shoot the element's screen area, not the element: a hidden icon can't be
+    // screenshotted by locator (it waits for visibility and times out).
     await el.evaluate((e, a) => e.removeAttribute(a), attr);
-    inked = await el.screenshot({ animations: 'disabled', timeout: 5000 });
+    await el.scrollIntoViewIfNeeded({ timeout: 3000 }).catch(() => {});
+    const box = await el.boundingBox();
+    if (!box || box.width < 1 || box.height < 1) throw new Error('no box');
+    const clip = { x: box.x, y: box.y, width: box.width, height: box.height };
+    inked = await page.screenshot({ clip, animations: 'disabled', timeout: 5000 });
     await el.evaluate((e, a) => e.setAttribute(a, ''), attr);
-    buf = await el.screenshot({ animations: 'disabled', timeout: 5000 });
+    buf = await page.screenshot({ clip, animations: 'disabled', timeout: 5000 });
   }
   catch (e) { return { ...item, status: 'review', note: `screenshot failed: ${e.message.split('\n')[0]}` }; }
   finally {
@@ -72,7 +79,7 @@ export async function resolveBatch(page, items){
   }), items.map(i => i.cq));
 
   const out = [], loose = [];
-  items.forEach((it, k) => { const g = geo[k]; if (!g || g.pinned || g.h > 600) out.push(null), loose.push(it); else it._g = g; });
+  items.forEach((it, k) => { const g = geo[k]; if (!g || g.pinned || g.h > 600 || it.kind === 'focus-ring') out.push(null), loose.push(it); else it._g = g; });
   const flowing = items.filter(i => i._g).sort((a, b) => a._g.top - b._g.top);
 
   const startY = await page.evaluate(() => scrollY);
@@ -130,6 +137,9 @@ export function fromPixels(item, { px, w, h }, ink = null){
   const [fr, fg, fb] = hexToRgb(item.fg);
   const a = item.fg.includes('@') ? parseFloat(item.fg.split('@')[1]) : 1;
   const blend = item.flags.find(f => f.startsWith('blend:'))?.slice(6);
+  const op = item.opAbove ?? 1;
+  const ink0 = item.inkCss ? hexToRgb(item.inkCss).map(v => v * (item.grain ?? 1)) : [fr, fg, fb];
+  const bg0 = item.bgCss ? hexToRgb(item.bgCss).map(v => v * (item.grain ?? 1)) : [0, 0, 0];
   const ratios = new Float32Array(px.length / 3);
   let nr = 0;
   let dk = [255, 255, 255, 2], lt = [0, 0, 0, -1];
@@ -148,7 +158,14 @@ export function fromPixels(item, { px, w, h }, ink = null){
     if (L > lt[3]) lt = [r, g, b, L];
     let [ir, ig, ib] = blend === 'difference' ? [Math.abs(r - fr), Math.abs(g - fg), Math.abs(b - fb)] : [fr, fg, fb];
     const gk = item.grain ?? 1;                          // the grain darkens the ink as it darkens the backdrop
-    ir = ir * gk * a + r * (1 - a); ig = ig * gk * a + g * (1 - a); ib = ib * gk * a + b * (1 - a);
+    if (op < .999) {
+      // Ancestor opacity over the background box: this pixel P = op·bg + (1−op)·B,
+      // and the ink there = op·ink + (1−op)·B, so ink = P + op·(ink − bg).
+      ir = r + op * (ink0[0] - bg0[0]); ig = g + op * (ink0[1] - bg0[1]); ib = b + op * (ink0[2] - bg0[2]);
+    } else {
+      ir = ir * gk * a + r * (1 - a); ig = ig * gk * a + g * (1 - a); ib = ib * gk * a + b * (1 - a);
+    }
+    ir = Math.min(255, Math.max(0, ir)); ig = Math.min(255, Math.max(0, ig)); ib = Math.min(255, Math.max(0, ib));
     ratios[nr++] = contrast(luminance(ir, ig, ib), L);
   }
   if (!nr) return { ...item, status: 'review', note: 'no pixels captured' };
@@ -157,5 +174,36 @@ export function fromPixels(item, { px, w, h }, ink = null){
   const odd = blend && !['normal', 'difference'].includes(blend);
   return { ...item, method: 'pixels', ratio: Math.round(p10 * 100) / 100, ratioMin: Math.round(sorted[0] * 100) / 100,
     bg: `${hex(...dk)}…${hex(...lt)} (measured under ${mask ? 'glyphs' : 'whole box'}, ${w}×${h}px)`,
-    status: odd ? 'review' : p10 >= item.threshold ? 'pass' : 'fail', note: odd ? `blend mode ${blend} not modelled` : undefined };
+    status: odd ? 'review' : p10 >= item.threshold ? 'pass' : mask ? 'fail' : 'review',
+    note: odd ? `blend mode ${blend} not modelled` : !mask && p10 < item.threshold ? 'glyphs could not be isolated; whole-box measurement is not conclusive' : undefined };
+}
+
+// Focus ring: shoot the control's box plus the ring area with the ring drawn
+// and with it transparent; the pixels that differ are the ring, measured
+// against whatever is really behind them (photo, band, page).
+async function ringPixels(page, item){
+  const el = page.locator(`[data-cq-ring="${item.cq}"]`).first();
+  if (!(await el.count())) return { ...item, status: 'review', note: 'focused element gone' };
+  await el.evaluate(e => e.scrollIntoView({ block: 'center', behavior: 'instant' }));   // the scan restores scroll; bring the ring back on screen
+  await page.waitForTimeout(100);
+  const box = await el.boundingBox();
+  const pad = await el.evaluate(e => { const c = getComputedStyle(e); return parseFloat(c.outlineOffset) + parseFloat(c.outlineWidth) + 2; });
+  const vp = page.viewportSize();
+  const x = Math.max(0, box.x - pad), y = Math.max(0, box.y - pad);
+  const clip = { x, y, width: Math.min(vp.width - x, box.width + 2 * pad), height: Math.min(vp.height - y, box.height + 2 * pad) };
+  await page.evaluate(() => document.documentElement.classList.add('cq-shot'));
+  try {
+    const inked = await page.screenshot({ clip, animations: 'disabled' });
+    await el.evaluate(e => e.style.setProperty('outline-color', 'transparent', 'important'));
+    const bare = await page.screenshot({ clip, animations: 'disabled' });
+    const A = await sharp(inked).raw().toBuffer({ resolveWithObject: true });
+    const B = await sharp(bare).raw().toBuffer({ resolveWithObject: true });
+    const all = { x: 0, y: 0, w: B.info.width, h: B.info.height };
+    return fromPixels(item, crop(B, all), crop(A, all));
+  } catch (e) {
+    return { ...item, status: 'review', note: `ring screenshot failed: ${e.message.split('\n')[0]}` };
+  } finally {
+    await el.evaluate(e => e.style.removeProperty('outline-color')).catch(() => {});
+    await page.evaluate(() => document.documentElement.classList.remove('cq-shot')).catch(() => {});
+  }
 }

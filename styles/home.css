@@ -263,6 +263,10 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
   letter-spacing:-.01em;
 }
 .manifesto-text .accented{color:var(--accent)}   /* on the dark band: 6:1 here; --accent-text would fail */
+[data-theme="dark"] .manifesto-text .accented{color:#736759}
+/* Rings on the manifesto band: currentColor would be ink on the ink band
+   (1:1). --bg is the opposite of the band in both themes. */
+.manifesto :focus-visible{outline-color:var(--bg)}   /* the band is light in dark mode: --accent measured 1.57:1 */
 .manifesto-mid{
   display:block;
   width:56px;height:1px;
@@ -476,7 +480,7 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
   color:var(--ink-soft);
   transition:color .3s ease;
 }
-.colo-col a:hover{color:var(--accent-dk)}
+.colo-col a:hover{color:var(--ink)}   /* --accent-dk measured 3.10:1 */
 
 .colo-social{
   display:flex;

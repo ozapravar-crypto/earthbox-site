@@ -727,7 +727,7 @@
   transition:background .3s ease;
 }
 .v1-card:hover{background:var(--bg-tint)}
-.v1-card--soon{opacity:.85}
+.v1-card--soon .v1-card-img{opacity:.85}   /* fade the photo, not the text (whole-card .85 took the badge to 3.88:1) */
 
 .v1-card-link{
   display:flex;

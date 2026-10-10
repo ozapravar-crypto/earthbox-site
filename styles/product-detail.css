@@ -522,7 +522,7 @@
   text-align:center;
 }
 .pd-coming-soon .eyebrow{
-  color:var(--accent-dk);
+  color:var(--accent-text);   /* --accent-dk measured 3.10:1 */
 }
 
 /* ─── Unit label (e.g., "30 pieces") ─── */

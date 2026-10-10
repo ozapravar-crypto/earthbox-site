@@ -12,7 +12,7 @@
 // Self-contained on purpose: Playwright serialises this function.
 // ─────────────────────────────────────────────────────────────────────
 
-export function scanPage({ scope = null, state = 'default', base = 0 } = {}){
+export function scanPage({ scope = null, state = 'default', base = null } = {}){
   const parse = (c) => {
     if (!c || c === 'transparent') return { r: 0, g: 0, b: 0, a: 0 };
     let m = c.match(/^rgba?\(([^)]+)\)/);
@@ -62,6 +62,11 @@ export function scanPage({ scope = null, state = 'default', base = 0 } = {}){
       // both colours below (GRAIN), because on borderline pairs it decides
       // pass/fail (the "Coming soon" badge: 4.67 without it, 4.42 under it).
       for (const pseudo of (n === document.body || n === document.documentElement) ? [] : ['::before', '::after']) {
+        if (n === el) {                                  // the control's own fill layer (e.g. .cta hover sweep)
+          const ps = getComputedStyle(n, pseudo);
+          if (ps.content && ps.content !== 'none' && ((ps.backgroundImage && ps.backgroundImage !== 'none') || (parse(ps.backgroundColor)?.a > 0))) flags.add('own-pseudo-fill');
+          continue;
+        }
         const ps = getComputedStyle(n, pseudo);
         if (ps.content && ps.content !== 'none' && ps.position !== 'static' && ((ps.backgroundImage && ps.backgroundImage !== 'none') || (parse(ps.backgroundColor)?.a > 0))) {
           if (n !== el) flags.add('pseudo-overlay');
@@ -74,6 +79,7 @@ export function scanPage({ scope = null, state = 'default', base = 0 } = {}){
       if (found && n.tagName === 'DIALOG') break;
     }
     if (opacityAbove < .999) flags.add('opacity-on-background');
+    flags.opAbove = opacityAbove;
     let bg = found ? { ...layers.pop(), a: 1 } : pageBg();
     for (let i = layers.length - 1; i >= 0; i--) bg = over(layers[i], bg);
     return { bg, flags, fgOpacity: opacityBelowBg };
@@ -89,6 +95,7 @@ export function scanPage({ scope = null, state = 'default', base = 0 } = {}){
       if (x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) { flags.add('offscreen-unverified'); continue; }
       const stack = document.elementsFromPoint(x, y);
       const i = stack.findIndex(s => s === el || el.contains(s));
+      if (x === pts[0][0] && stack[0] && i !== 0 && !el.contains(stack[0])) flags.add('covered');   // something sits on top (overlay, sticky bar)
       for (const s of stack.slice(Math.max(i, 0) + 1)) {
         if (s.contains(el)) continue;                    // an ancestor: already counted
         if (/^(IMG|VIDEO|CANVAS|PICTURE)$/.test(s.tagName)) flags.add('over-' + s.tagName.toLowerCase());
@@ -112,7 +119,10 @@ export function scanPage({ scope = null, state = 'default', base = 0 } = {}){
     return true;
   };
 
-  let uid = base;                       // ids stay unique across scans, so axe findings can be linked back
+  // Ids must stay unique across every scan of this page (axe links, repeated
+  // scans in tests): continue from the page's own counter unless told a base.
+  let uid = Math.max(base ?? 0, window.__cqNext ?? 0);
+  document.querySelectorAll('[data-cq-ring]').forEach(e => e.removeAttribute('data-cq-ring'));
   const selectorOf = (el) => {
     if (el.id) return '#' + CSS.escape(el.id);
     const parts = [];
@@ -138,7 +148,14 @@ export function scanPage({ scope = null, state = 'default', base = 0 } = {}){
   const out = [];
   function record(el, kind, fgRaw, extra = {}){
     const { bg, flags, fgOpacity } = background(el);
-    for (const f of behind(el)) flags.add(f);
+    const opAbove = flags.opAbove ?? 1;
+    // A ring is drawn around the focused control, over its container: test what
+    // lies behind the CONTROL (a photo, a band), but "covered" doesn't apply.
+    for (const f of behind(extra.ringOf || el)) if (!(extra.ringOf && f === 'covered')) flags.add(f);
+    if (flags.has('covered')) {                          // not visible to anyone: report, don't measure
+      out.push({ cq: null, state, kind, selector: selectorOf(el), text: (extra.text ?? el.innerText ?? '').replace(/\s+/g, ' ').trim().slice(0, 60), status: 'covered', flags: [...flags] });
+      return;
+    }
     const fg0 = parse(fgRaw);
     if (!fg0) return;
     const fg = { ...fg0, a: fg0.a * fgOpacity };
@@ -159,7 +176,10 @@ export function scanPage({ scope = null, state = 'default', base = 0 } = {}){
       text: (extra.text ?? el.innerText ?? '').replace(/\s+/g, ' ').trim().slice(0, 60),
       fg: hex(fg0) + (fg.a < .999 ? ` @${fg.a.toFixed(2)}` : ''), fgComposited: hex(shown), bg: hex(bg),
       ratio: Math.round(r * 100) / 100, threshold, large, fontSize: size, fontWeight: weight,
-      flags: [...flags], status, grain: el.closest('dialog[open]') ? 1 : GRAIN
+      flags: [...flags], status, grain: el.closest('dialog[open]') ? 1 : GRAIN,
+      // Opacity on the box that owns the background fades text AND background
+      // together; the pixel step needs both to model the ink correctly.
+      opAbove: Math.round(opAbove * 1000) / 1000, bgCss: hex(bg), inkCss: hex(shownRaw)
     });
   }
 
@@ -201,10 +221,12 @@ export function scanPage({ scope = null, state = 'default', base = 0 } = {}){
     const cs = getComputedStyle(f);
     if (cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0) {
       // The ring is drawn around the control, so it sits on the parent's background.
-      record(f.parentElement || f, 'focus-ring', cs.outlineColor, { text: `outline of ${f.tagName.toLowerCase()} "${(f.innerText || f.getAttribute('aria-label') || '').trim().slice(0, 30)}"` });
+      f.setAttribute('data-cq-ring', String(uid + 1));     // the pixel step hides this ring, not the text
+      record(f.parentElement || f, 'focus-ring', cs.outlineColor, { ringOf: f, text: `outline of ${f.tagName.toLowerCase()} "${(f.innerText || f.getAttribute('aria-label') || '').trim().slice(0, 30)}"` });
     }
   }
   scrollTo({ top: startY, behavior: 'instant' });
+  window.__cqNext = uid + 1;
   return out;
 }
 
@@ -220,7 +242,8 @@ export function interactiveSignatures({ limit = 60 } = {}){
     if (seen.has(sig)) continue;
     seen.add(sig);
     el.setAttribute('data-cq-target', String(list.length));
-    list.push({ i: list.length, sig, label: (el.innerText || el.getAttribute('aria-label') || el.placeholder || '').trim().slice(0, 30) });
+    const off = r.right < 0 || r.bottom < 0 || r.left > innerWidth + scrollX + 4000;   // e.g. the skip link waits off-screen until focused
+    list.push({ i: list.length, sig, offscreen: off, label: (el.innerText || el.getAttribute('aria-label') || el.placeholder || '').trim().slice(0, 30) });
     if (list.length >= limit) break;
   }
   return list;

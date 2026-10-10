@@ -58,7 +58,7 @@ section{
 }
 
 :focus-visible{
-  outline:2px solid var(--accent);
+  outline:2px solid currentColor;   /* text colour already passes 4.5:1 here, so the ring passes 3:1 (accent ring measured 1.9:1) */
   outline-offset:3px;
 }
 a:focus:not(:focus-visible),

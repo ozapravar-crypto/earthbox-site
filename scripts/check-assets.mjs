@@ -75,8 +75,20 @@ for (const f of await readdir(path.join(ROOT, 'data/article-bodies')))
   scanMarkup(`data/article-bodies/${f}`, 'blog', await readFile(path.join(ROOT, 'data/article-bodies', f), 'utf8'));
 
 // Report once per missing file.
+// A file that exists here but is excluded from the Vercel upload is missing
+// on the live site (10 Oct 2026: CREDITS.md, dropped by '*.md'). Treat it as
+// missing. Supports the .vercelignore forms in use: name, dir/, *.ext, !negation.
+const rules = (await readFile(path.join(ROOT, '.vercelignore'), 'utf8').catch(() => ''))
+  .split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+const toRe = (g) => new RegExp('^(?:.*/)?' + g.replace(/\/$/, '').replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*') + '(?:/.*)?$');
+const ignored = (p) => {
+  let out = false;
+  for (const r of rules) { const neg = r.startsWith('!'); if (toRe(neg ? r.slice(1) : r).test(p)) out = !neg; }
+  return out;
+};
+
 const missing = new Map();
-for (const r of refs) if (!(await exists(r.path))) (missing.get(r.path) || missing.set(r.path, new Set()).get(r.path)).add(r.file);
+for (const r of refs) if (!(await exists(r.path)) || ignored(r.path)) (missing.get(r.path) || missing.set(r.path, new Set()).get(r.path)).add(r.file);
 
 let fail = 0;
 for (const [p, from] of missing) {

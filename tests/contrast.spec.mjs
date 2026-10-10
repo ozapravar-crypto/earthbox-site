@@ -70,6 +70,8 @@ for (const theme of THEMES) {
 
 // CQ-004 · "Coming soon" badge: --accent-text on --bg-tint under the paper
 // grain = 4.42:1 (the token check, which ignored the grain, said 4.67).
+// Also: the coming-soon card faded the WHOLE card to .85 → 3.88:1 (axe caught
+// it; the first pixel model missed ancestor opacity). Now only the photo fades.
 for (const theme of THEMES) {
   test(`CQ-004 "Coming soon" badges pass (${theme})`, async ({ page }) => {
     await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
@@ -86,4 +88,71 @@ test('CQ-005/006 product page captions, breadcrumb separators and badges pass', 
   await page.goto('/product.html#V1-PLT-005');
   await page.waitForSelector('#productDetail article');
   expect(await failures(page, '#productDetail', 'default')).toEqual([]);
+});
+
+// CQ-007 · Focus rings were 2px --accent = 1.9–2.2:1 (rings need 3:1).
+// Now currentColor. Checked on a light page, the dark manifesto band, and dark mode.
+for (const theme of THEMES) {
+  test(`CQ-007 keyboard focus rings ≥ 3:1 (${theme})`, async ({ page }) => {
+    await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
+    await page.goto('/index.html');
+    // Scroll reveals start at opacity 0; finish them, as a scrolled visitor would see.
+    await page.evaluate(() => document.querySelectorAll('.reveal,.reveal-line').forEach(e => e.classList.add('in')));
+    await page.addStyleTag({ content: '*{transition:none!important;animation-duration:0s!important;animation-delay:0s!important}' });
+    const bad = [];
+    for (const sel of ['.runhead-nav a', '.manifesto-inner a.cta', '#catalogue-tease a.cta', 'footer .colo-col a']) {
+      const el = page.locator(sel).first();
+      await el.scrollIntoViewIfNeeded();
+      await page.keyboard.press('Shift');                     // make focus "keyboard" focus
+      await el.focus();
+      const rings = (await page.evaluate(scanPage, { scope: sel, state: 'focus' })).filter(r => r.kind === 'focus-ring');
+      expect(rings.length, `no focus ring measured on ${sel}`).toBeGreaterThan(0);
+      const found = [...rings.filter(r => r.status !== 'review'), ...await resolveBatch(page, rings.filter(r => r.status === 'review'))];
+      bad.push(...found.filter(r => r.status !== 'pass').map(r => `${r.status} ${r.ratio}:1 ${r.fg} on ${r.bg} — ${sel}`));
+    }
+    expect(bad).toEqual([]);
+  });
+}
+
+// CQ-008 · Placeholders used the browser default #757575 = 3.74:1.
+test('CQ-008 Maker placeholders pass', async ({ page }) => {
+  await page.goto('/maker.html');
+  await page.locator('[data-act=recipe]').first().click();
+  await page.locator('.mk-step[data-to=plants]').click();
+  expect(await failures(page, '.mk-search', 'plants')).toEqual([]);
+  await page.locator('.mk-step[data-to=space]').click();
+  expect(await failures(page, '.mk-space', 'space')).toEqual([]);
+});
+
+// CQ-009 · Map view: empty regions at opacity .5 (2.07–2.91:1), and the
+// light "your chamber" plate kept dark-mode tokens in dark mode (1.72–2.47:1).
+for (const theme of THEMES) {
+  test(`CQ-009 Maker map + pin card pass (${theme})`, async ({ page }) => {
+    await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
+    await page.goto('/maker.html');
+    await page.locator('[data-act=recipe]').first().click();
+    await page.locator('.mk-step[data-to=plants]').click();
+    await page.locator('[data-act=view][data-id=map]').click();
+    await page.locator('[data-act=pin]').first().click();
+    expect(await failures(page, '.mk-map', 'map-pin')).toEqual([]);
+  });
+}
+
+// CQ-010 · Dark mode: manifesto highlighted words kept --accent on the light band = 1.57:1.
+test('CQ-010 manifesto highlights pass in dark mode', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('earthbox-theme', 'dark'));
+  await page.goto('/index.html');
+  expect(await failures(page, '.manifesto-text', 'default')).toEqual([]);
+});
+
+// CQ-011 · Product "Coming soon" label (--accent-dk, 3.10:1) and footer link
+// hover (--accent-dk, 3.10:1).
+test('CQ-011 coming-soon label and footer link hover pass', async ({ page }) => {
+  await page.goto('/product.html#V1-PP-001');
+  await page.waitForSelector('#productDetail article');
+  expect(await failures(page, '.pd-coming-soon', 'default')).toEqual([]);
+  const link = page.locator('footer .colo-col a').first();
+  await link.scrollIntoViewIfNeeded();
+  await link.hover();
+  expect(await failures(page, 'footer .colo-col', 'hover')).toEqual([]);
 });
