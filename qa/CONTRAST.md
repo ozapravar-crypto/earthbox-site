@@ -98,3 +98,11 @@ Add `{ "key": "<route> | <theme> | <viewport> | <state> | <selector>", "reason":
 - **Batch failures:** any FAIL from a batch shot is re-measured with a per-element shot before it counts.
 
 Found on the way (not contrast): the catalogue showed **"From ₹[object Object]"** for products with sizes. Fixed in `render-products.js`; `tests/smoke.spec.mjs` now fails on any `[object`, `undefined` or `NaN` text on a page.
+
+**Fifth run (CI, 10 Oct 18:21):** 6 failures, all audit artefacts (the per-element shot scrolled hovered buttons out from under the pointer). The hover is now held across the scroll.
+
+## Current status (CI run 38075663247, 10 Oct 2026 18:51)
+- **0 failures · 0 needing review · 0 unresolved axe findings · 0 states not scanned**
+- 23,340 measurements passed across 808 states (34 pages × light/dark × desktop/phone × interactive states)
+- 1,167 items were behind an open overlay, reported as `covered`; 10 disabled controls are exempt
+- Report: `qa/reports/contrast-report.md` and `contrast-summary.json`. The full per-element JSON is the CI artifact.
