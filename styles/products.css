@@ -292,6 +292,7 @@
 .vol-pill{
   display:flex;
   align-items:center;
+  min-height:44px;   /* tap target (super-ux audit 10 Oct) */
   gap:.35rem;
   padding:0 1rem;
   background:transparent;
@@ -337,6 +338,9 @@
   display:flex;
   align-items:center;
   gap:.4rem;
+  min-height:44px;
+  min-width:44px;
+  justify-content:flex-end;
   padding:.5rem 0;
   background:transparent;
   border:0;
@@ -564,7 +568,9 @@
   .search-result-vol{font-size:.5rem}
   .search-result-cta{margin-top:.5rem}
   .vol-pill{
-    padding:0 .5rem;
+    padding:0 .75rem;
+    min-width:44px;
+    justify-content:center;
   }
   .vol-pill:first-child{padding-left:0}
   .pill-label{display:none}

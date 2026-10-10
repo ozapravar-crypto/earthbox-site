@@ -7,7 +7,7 @@ export const plantFundamentalsArticles = {
     <p>Light is the engine of plant life—the energy source that drives photosynthesis and determines whether your plants merely survive or genuinely thrive. Yet light is also the most misunderstood aspect of indoor plant care. Terms like "bright indirect light" appear everywhere but mean different things to different people. This guide cuts through the confusion with practical, measurable approaches to lighting your indoor plants.</p>
 
     <figure>
-      <img src="assets/blog/light-zones-diagram.svg" alt="Diagram showing light intensity zones in a typical room from bright window area to low light far corners, measured in foot-candles" width="650" height="450" loading="lazy">
+      <img src="/assets/blog/light-zones-diagram.svg" alt="Diagram showing light intensity zones in a typical room from bright window area to low light far corners, measured in foot-candles" width="650" height="450" loading="lazy">
       <figcaption>Light intensity varies dramatically across a single room</figcaption>
     </figure>
 
@@ -60,7 +60,7 @@ export const plantFundamentalsArticles = {
     <p><strong>East-facing windows</strong> get gentle morning sun, which is less intense than afternoon sun. Excellent for medium-light plants that want brightness without scorching. Our recommended orientation for most terrariums.</p>
 
     <figure>
-      <img src="assets/blog/window-compass-diagram.svg" alt="Compass diagram showing light quality by window orientation for Northern Hemisphere: north provides consistent low light, east gentle morning light, south intense all-day light, west hot afternoon light" width="600" height="600" loading="lazy">
+      <img src="/assets/blog/window-compass-diagram.svg" alt="Compass diagram showing light quality by window orientation for Northern Hemisphere: north provides consistent low light, east gentle morning light, south intense all-day light, west hot afternoon light" width="600" height="600" loading="lazy">
       <figcaption>Window orientation guide for Indian homes</figcaption>
     </figure>
 
@@ -152,7 +152,7 @@ export const plantFundamentalsArticles = {
     <p>The substrate in your terrarium isn't just dirt—it's the foundation of an entire ecosystem. It anchors roots, stores moisture, hosts beneficial microbes, and determines drainage. Get it wrong, and you'll fight persistent problems. Get it right, and the system largely takes care of itself. This guide explains what makes terrarium substrate different from ordinary potting soil and how to create the perfect mix.</p>
 
     <figure>
-      <img src="assets/blog/terrarium-layers-diagram.svg" alt="Cross-section of terrarium showing distinct substrate layers: drainage, charcoal, mesh barrier, and growing medium" width="600" height="520" loading="lazy">
+      <img src="/assets/blog/terrarium-layers-diagram.svg" alt="Cross-section of terrarium showing distinct substrate layers: drainage, charcoal, mesh barrier, and growing medium" width="600" height="520" loading="lazy">
       <figcaption>Proper terrarium substrate is built in layers, each with a purpose</figcaption>
     </figure>
 
@@ -279,7 +279,7 @@ export const plantFundamentalsArticles = {
     <p><strong>Fern terrariums:</strong> Add extra perlite and charcoal. Fern roots need exceptional aeration and are sensitive to stagnant conditions.</p>
 
     <figure>
-      <img src="assets/blog/substrate-mixes-diagram.svg" alt="Comparison chart showing substrate mix ratios for different plant types: tropical, succulents, moss terrariums, and orchids with component percentages" width="700" height="450" loading="lazy">
+      <img src="/assets/blog/substrate-mixes-diagram.svg" alt="Comparison chart showing substrate mix ratios for different plant types: tropical, succulents, moss terrariums, and orchids with component percentages" width="700" height="450" loading="lazy">
       <figcaption>Subtle adjustments optimise substrate for specific plants</figcaption>
     </figure>
 
@@ -467,7 +467,7 @@ export const plantFundamentalsArticles = {
     </ol>
 
     <figure>
-      <img src="assets/blog/plant-diagnostic-flowchart.svg" alt="Flowchart for diagnosing common plant problems: yellow leaves, brown tips, leggy growth, wilting, and pest indicators with solutions for each" width="700" height="600" loading="lazy">
+      <img src="/assets/blog/plant-diagnostic-flowchart.svg" alt="Flowchart for diagnosing common plant problems: yellow leaves, brown tips, leggy growth, wilting, and pest indicators with solutions for each" width="700" height="600" loading="lazy">
       <figcaption>Systematic diagnosis prevents misidentification</figcaption>
     </figure>
 

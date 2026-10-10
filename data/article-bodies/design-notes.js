@@ -383,7 +383,7 @@ export const designNotesArticles = {
     <p><strong>Standard parts.</strong> Where we use hardware, we use common specifications. If you need a replacement screw in 2040, you should be able to find one.</p>
 
     <figure>
-      <img src="assets/blog/accessible-design-exploded.svg" alt="Exploded view showing modular terrarium components: removable lid, inner pot with handles, drainage tray, and parabolic cradle designed for easy maintenance" width="700" height="500" loading="lazy">
+      <img src="/assets/blog/accessible-design-exploded.svg" alt="Exploded view showing modular terrarium components: removable lid, inner pot with handles, drainage tray, and parabolic cradle designed for easy maintenance" width="700" height="500" loading="lazy">
       <figcaption>Components designed for eventual serviceability</figcaption>
     </figure>
 

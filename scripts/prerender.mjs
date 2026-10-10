@@ -91,7 +91,7 @@ function meta(a) {
     image: img,
     author: { '@type': 'Person', name: a.author, url: `${SITE}/about.html` },
     publisher: { '@type': 'Organization', name: 'EarthBox',
-      logo: { '@type': 'ImageObject', url: `${SITE}/assets/logo.png` } },
+      logo: { '@type': 'ImageObject', url: `${SITE}/assets/logo.webp` } },
     datePublished: a.publishDate, dateModified: a.updatedDate ?? a.publishDate,
     mainEntityOfPage: url
   };

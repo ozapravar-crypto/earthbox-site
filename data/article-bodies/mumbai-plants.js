@@ -12,7 +12,7 @@ export const mumbaiPlantsArticles = {
 <p>Normal Mumbai humidity hovers around 60-70%. During monsoon, this jumps to 85-95%. Your terrarium's internal environment—typically 75-90%—is no longer dramatically different from the air outside.</p>
 
 <figure>
-  <img src="assets/blog/mumbai-climate-chart.svg" alt="Chart showing Mumbai monthly humidity levels with monsoon months June through September highlighted at 85-95% humidity" width="700" height="420" loading="lazy">
+  <img src="/assets/blog/mumbai-climate-chart.svg" alt="Chart showing Mumbai monthly humidity levels with monsoon months June through September highlighted at 85-95% humidity" width="700" height="420" loading="lazy">
   <figcaption>Monthly humidity variation in Mumbai. Monsoon months (June-September) show sustained 85-95% levels.</figcaption>
 </figure>
 
@@ -89,7 +89,7 @@ export const mumbaiPlantsArticles = {
 </ul>
 
 <figure>
-  <img src="assets/blog/terrarium-placement-guide.svg" alt="Diagram showing ideal terrarium placements like north-facing windows and shaded shelves versus problematic locations like direct sunlight, AC vents, and dark corners" width="700" height="420" loading="lazy">
+  <img src="/assets/blog/terrarium-placement-guide.svg" alt="Diagram showing ideal terrarium placements like north-facing windows and shaded shelves versus problematic locations like direct sunlight, AC vents, and dark corners" width="700" height="420" loading="lazy">
   <figcaption>Green zones: interior placement with air circulation. Red zones: near windows, doors, AC vents.</figcaption>
 </figure>
 
@@ -315,7 +315,7 @@ export const mumbaiPlantsArticles = {
 </ul>
 
 <figure>
-  <img src="assets/blog/mumbai-climate-chart.svg" alt="Chart showing Mumbai temperature peaking in May at 35-40°C while humidity drops to 40-60%, creating challenging conditions for plants" width="700" height="420" loading="lazy">
+  <img src="/assets/blog/mumbai-climate-chart.svg" alt="Chart showing Mumbai temperature peaking in May at 35-40°C while humidity drops to 40-60%, creating challenging conditions for plants" width="700" height="420" loading="lazy">
   <figcaption>Temperature peaks in May while humidity reaches annual low—the toughest combination for plants.</figcaption>
 </figure>
 
@@ -389,7 +389,7 @@ export const mumbaiPlantsArticles = {
 </ul>
 
 <figure>
-  <img src="assets/blog/plant-placement-seasons.svg" alt="Diagram comparing seasonal plant placement: summer shows plants pulled back from windows with sheer curtains, winter shows plants moved closer to maximize available light" width="700" height="400" loading="lazy">
+  <img src="/assets/blog/plant-placement-seasons.svg" alt="Diagram comparing seasonal plant placement: summer shows plants pulled back from windows with sheer curtains, winter shows plants moved closer to maximize available light" width="700" height="400" loading="lazy">
   <figcaption>Seasonal repositioning: plants move away from intense windows in summer.</figcaption>
 </figure>
 

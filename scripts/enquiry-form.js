@@ -134,6 +134,7 @@ export function initEnquiryForm(){
 
       form.hidden = true;
       say('ok', 'Thank you — your enquiry is with us. We usually reply within a day.');
+      wrap.dispatchEvent(new CustomEvent('enquiry:sent', { bubbles: true }));   // cart.js listens
 
       if (typeof gtag === 'function'){
         gtag('event', 'enquire_form_submit', {

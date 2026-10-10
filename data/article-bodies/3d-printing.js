@@ -127,7 +127,7 @@ export const printingArticles = {
 <p>3D printing filaments are thermoplastics—polymers that soften when heated and solidify when cooled. Different polymers have different properties that matter for plant accessories:</p>
 
 <figure>
-  <img src="assets/blog/material-comparison-chart.svg" alt="Comparison chart showing PLA, ABS, ASA, and PETG properties including UV resistance, moisture tolerance, heat resistance, and print difficulty" width="700" height="400" loading="lazy">
+  <img src="/assets/blog/material-comparison-chart.svg" alt="Comparison chart showing PLA, ABS, ASA, and PETG properties including UV resistance, moisture tolerance, heat resistance, and print difficulty" width="700" height="400" loading="lazy">
   <figcaption>Material comparison: strength, UV resistance, moisture tolerance, print difficulty.</figcaption>
 </figure>
 
@@ -272,7 +272,7 @@ export const printingArticles = {
 <p>Plant roots need both water and oxygen. When soil stays saturated, air pockets fill with water, suffocating roots. The result is root rot—the leading cause of houseplant death.</p>
 
 <figure>
-  <img src="assets/blog/roots-comparison-diagram.svg" alt="Diagram comparing healthy white roots with air pockets versus brown waterlogged roots suffocating in saturated soil" width="650" height="400" loading="lazy">
+  <img src="/assets/blog/roots-comparison-diagram.svg" alt="Diagram comparing healthy white roots with air pockets versus brown waterlogged roots suffocating in saturated soil" width="650" height="400" loading="lazy">
   <figcaption>Left: Healthy roots with air pockets between soil particles. Right: Waterlogged soil with no oxygen—roots begin rotting.</figcaption>
 </figure>
 
@@ -311,7 +311,7 @@ export const printingArticles = {
 <p>Traditional pots have a hole. Our planters have systems. Internal channels printed into the structure guide water from any point in the soil to the drainage exits.</p>
 
 <figure>
-  <img src="assets/blog/internal-drainage-detail.svg" alt="Cross-section diagram showing internal drainage channel design with substrate layers, water flow paths, and reservoir system" width="700" height="450" loading="lazy">
+  <img src="/assets/blog/internal-drainage-detail.svg" alt="Cross-section diagram showing internal drainage channel design with substrate layers, water flow paths, and reservoir system" width="700" height="450" loading="lazy">
   <figcaption>Cross-section showing radial channels converging at central drainage point.</figcaption>
 </figure>
 
@@ -359,7 +359,7 @@ export const printingArticles = {
 </ul>
 
 <figure>
-  <img src="assets/blog/internal-drainage-detail.svg" alt="Cross-section diagram of self-watering planter showing water reservoir, wicking channels, drainage system, and overflow mechanism" width="700" height="450" loading="lazy">
+  <img src="/assets/blog/internal-drainage-detail.svg" alt="Cross-section diagram of self-watering planter showing water reservoir, wicking channels, drainage system, and overflow mechanism" width="700" height="450" loading="lazy">
   <figcaption>Self-watering system: reservoir below, wicking channel center, overflow at side.</figcaption>
 </figure>
 
@@ -436,7 +436,7 @@ export const printingArticles = {
 </ul>
 
 <figure>
-  <img src="assets/blog/stress-distribution-diagram.svg" alt="Diagram comparing stress distribution between parabolic cradle profile showing even load distribution versus circular profile with stress concentration at contact points" width="700" height="380" loading="lazy">
+  <img src="/assets/blog/stress-distribution-diagram.svg" alt="Diagram comparing stress distribution between parabolic cradle profile showing even load distribution versus circular profile with stress concentration at contact points" width="700" height="380" loading="lazy">
   <figcaption>Stress distribution: parabolic curve (left) shows even loading, circular (right) shows concentration points.</figcaption>
 </figure>
 

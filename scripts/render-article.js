@@ -139,7 +139,7 @@ function injectSchema(article) {
     "publisher": {
       "@type": "Organization",
       "name": "EarthBox",
-      "logo": { "@type": "ImageObject", "url": "https://www.earthbox.in/assets/logo.png" }
+      "logo": { "@type": "ImageObject", "url": "https://www.earthbox.in/assets/logo.webp" }
     },
     "datePublished": article.publishDate,
     "mainEntityOfPage": `https://www.earthbox.in/blog/${article.slug}.html`

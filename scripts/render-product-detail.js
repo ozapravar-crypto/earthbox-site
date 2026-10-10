@@ -635,6 +635,11 @@ export function initProductDetail(){
   const host = document.getElementById('productDetail');
   if (!host) return;
 
+  // The URL hash is the product id, so the skip link must not change it.
+  document.querySelector('.skip-link')?.addEventListener('click', (e) => {
+    e.preventDefault(); host.tabIndex = -1; host.focus();
+  });
+
   // Initial render
   renderProduct(getProductId());
 

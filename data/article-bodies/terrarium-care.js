@@ -12,7 +12,7 @@ export const terrariumCareArticles = {
 <p>Plants absorb water through their roots and release it as vapor through tiny pores called stomata on their leaves. This process, called transpiration, is how plants regulate temperature and transport nutrients. In an open environment, this moisture escapes into the atmosphere. In a closed terrarium, it has nowhere to go.</p>
 
 <figure>
-  <img src="assets/blog/water-cycle-diagram.svg" alt="Diagram illustrating the closed terrarium water cycle showing evaporation, transpiration, condensation, and precipitation stages" width="600" height="500" loading="lazy">
+  <img src="/assets/blog/water-cycle-diagram.svg" alt="Diagram illustrating the closed terrarium water cycle showing evaporation, transpiration, condensation, and precipitation stages" width="600" height="500" loading="lazy">
   <figcaption>The terrarium water cycle: evaporation from soil, transpiration from leaves, condensation on glass, return to soil.</figcaption>
 </figure>
 
@@ -178,7 +178,7 @@ export const terrariumCareArticles = {
 </ul>
 
 <figure>
-  <img src="assets/blog/terrarium-layers-diagram.svg" alt="Cross-section diagram showing proper terrarium layering: drainage stones at bottom, charcoal layer, mesh barrier, substrate, and plants on top" width="600" height="520" loading="lazy">
+  <img src="/assets/blog/terrarium-layers-diagram.svg" alt="Cross-section diagram showing proper terrarium layering: drainage stones at bottom, charcoal layer, mesh barrier, substrate, and plants on top" width="600" height="520" loading="lazy">
   <figcaption>Correct layering prevents waterlogging: drainage stones, charcoal, mesh barrier, soil, plants.</figcaption>
 </figure>
 
@@ -210,7 +210,7 @@ export const terrariumCareArticles = {
 <p>The presence or absence of a lid creates entirely different environments. A closed terrarium traps moisture, creating 70-90% humidity—similar to a tropical forest floor. An open terrarium has ambient room humidity, typically 30-50% in most homes.</p>
 
 <figure>
-  <img src="assets/blog/open-vs-closed-terrarium.svg" alt="Side-by-side comparison showing open terrarium with succulents suited for low humidity versus closed terrarium with tropical plants suited for high humidity" width="700" height="450" loading="lazy">
+  <img src="/assets/blog/open-vs-closed-terrarium.svg" alt="Side-by-side comparison showing open terrarium with succulents suited for low humidity versus closed terrarium with tropical plants suited for high humidity" width="700" height="450" loading="lazy">
   <figcaption>Left: Open terrarium with succulents and sand. Right: Closed terrarium with ferns and moss.</figcaption>
 </figure>
 

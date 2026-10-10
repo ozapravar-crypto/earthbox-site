@@ -175,6 +175,9 @@ const write = () => { try { localStorage.setItem(STORE, JSON.stringify(state)); 
 const track = (name, params = {}) => { if (typeof gtag === 'function') gtag('event', name, params); };
 
 let dlg, tab = 'cart', lastFocus;
+// One-line status at the top of the drawer. `undo` holds the whole previous
+// state, so Undo works the same for remove, clear and move.
+let notice = null;
 
 export function addLine(list, line, { open = true } = {}){
   state = add(state, list, line);
@@ -253,6 +256,9 @@ function drawerHTML(){
     </header>
     <div class="ct-tabs" role="tablist" aria-labelledby="ct-title">${tabBtn('cart', 'Cart')}${tabBtn('saved', 'Saved')}</div>
     <div class="ct-panel" id="ct-panel" role="tabpanel" aria-labelledby="ct-tab-${tab}">
+      <p class="ct-notice" role="status">${notice ? `${esc(notice.text)}
+        ${notice.undo ? '<button type="button" class="ct-link" data-ct="undo">Undo</button>' : ''}
+        ${notice.clear ? '<button type="button" class="ct-link" data-ct="clear">Clear cart</button>' : ''}` : ''}</p>
       ${list.length ? `<ul class="ct-lines">${list.map(r => lineHTML(r, tab)).join('')}</ul>` : empty}
       ${tab === 'cart' && list.length ? summaryHTML(list) : ''}
     </div>`;
@@ -270,11 +276,22 @@ function refresh(){
     const focusKey = document.activeElement?.closest('[data-ct]') && [document.activeElement.dataset.ct, document.activeElement.dataset.k, document.activeElement.dataset.d, document.activeElement.dataset.tab].join();
     dlg.innerHTML = drawerHTML();
     const back = focusKey && [...dlg.querySelectorAll('[data-ct]')].find(el => [el.dataset.ct, el.dataset.k, el.dataset.d, el.dataset.tab].join() === focusKey && !el.disabled);
-    (back || dlg.querySelector('[role=tab][aria-selected=true]')).focus();
+    (back || dlg.querySelector('.ct-notice button') || dlg.querySelector('[role=tab][aria-selected=true]')).focus();
   }
 }
 
+let lastUndo = null;
+// After sending, the order is with the studio but the cart stays until the
+// visitor clears it, in case WhatsApp didn't open or they want to resend.
+function sent(method){
+  track('cart_send', { method, items: state.cart.length });
+  notice = { text: method === 'whatsapp' ? 'WhatsApp opened with your order. Once the studio replies, you can clear your cart.'
+    : 'Thank you, your order is with the studio. We usually reply within a day. You can clear your cart now.', clear: true };
+  refresh();
+}
+
 export function openDrawer(which = 'cart'){
+  notice = null;
   tab = which; lastFocus = document.activeElement;
   dlg.innerHTML = drawerHTML();
   if (!dlg.open) dlg.showModal();
@@ -310,11 +327,16 @@ export function initCart(){
     if (!b) return;
     const { ct, k, from } = b.dataset;
     if (ct === 'close') return dlg.close();
-    if (ct === 'send') return track('cart_send', { method: 'whatsapp', items: state.cart.length });
-    if (ct === 'tab') { tab = b.dataset.tab; return refresh(); }
+    if (ct === 'send') { sent('whatsapp'); return; }   // let the link open
+    if (ct === 'tab') { tab = b.dataset.tab; notice = null; return refresh(); }
+    const before = state, title = k && resolve(state[from || 'cart'].find(x => keyOf(x) === k))?.title;
+    notice = null;
     if (ct === 'qty') { const l = state.cart.find(x => keyOf(x) === k); state = setQty(state, k, l.qty + +b.dataset.d); }
-    if (ct === 'remove') state = remove(state, from, k);
-    if (ct === 'move') state = move(state, from, k);
+    if (ct === 'remove') { state = remove(state, from, k); notice = { text: `Removed ${title}.`, undo: before }; }
+    if (ct === 'move') { state = move(state, from, k); notice = { text: `${title} moved to ${from === 'cart' ? 'Saved' : 'your cart'}.`, undo: before }; }
+    if (ct === 'clear') { state = { ...state, cart: [] }; notice = { text: 'Cart cleared.', undo: before }; }
+    if (ct === 'undo') state = lastUndo || state;
+    lastUndo = notice?.undo || null;
     write(); refresh();
   });
   // Arrow keys between the two tabs (WAI-ARIA tabs pattern).
@@ -322,7 +344,7 @@ export function initCart(){
     if (!e.target.matches('[role=tab]') || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
     tab = tab === 'cart' ? 'saved' : 'cart'; refresh();
   });
-  dlg.addEventListener('submit', (e) => { if (e.target.closest('.enquiry-form')) track('cart_send', { method: 'form', items: state.cart.length }); });
+  dlg.addEventListener('enquiry:sent', () => sent('form'));
   dlg.addEventListener('close', () => lastFocus?.focus?.());
 
   // Any page can carry add/save buttons: data-add-line / data-save-line = JSON line.
