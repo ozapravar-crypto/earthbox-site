@@ -112,7 +112,7 @@ const OUTER = 'M 282 131 L 463 131 L 493 161 L 493 585 L 463 615 L 282 615 L 252
 const INNER = 'M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z';
 
 // Tiny deterministic random so pebbles don't reshuffle on every render.
-const rng = (seed) => () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+export const rng = (seed) => () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
 
 function fernFrond(x2, y2, sign){
   let d = `M0 0 Q${x2 / 2 + sign * 6} ${y2 / 2} ${x2} ${y2}`;
@@ -188,8 +188,42 @@ export function previewSVG(b, { fresh = null, label = '' } = {}){
   </svg>`;
 }
 
-const glyphThumb = (p) =>
-  `<svg class="mk-thumb" viewBox="-36 -86 72 92" aria-hidden="true"><g class="mk-plant">${GLYPH[p.form]}</g></svg>`;
+// 3D thumbnail once maker-3d.js has drawn it; the line drawing until then (or without WebGL).
+const glyphThumb = (p) => {
+  const src = view3d?.thumb(p.id);
+  return src ? `<img class="mk-thumb" src="${src}" alt="" width="56" height="64">`
+    : `<svg class="mk-thumb" viewBox="-36 -86 72 92" aria-hidden="true" data-thumb="${p.id}"><g class="mk-plant">${GLYPH[p.form]}</g></svg>`;
+};
+
+
+// ═══ PREVIEW (3D) ═════════════════════════════════════════════════════
+// scripts/maker-3d.js draws the same build in low-poly 3D. It's loaded only
+// on this page, only with WebGL, and it reads THIS spec on every commit,
+// so the build stays the one source of truth. Until it loads, or if WebGL
+// fails, everything above is the fallback.
+
+let view3d = null;
+
+const plantSpec = (p) => ({ id: p.id, form: p.form, element: p.element, name: p.name });
+
+// What the 3D view draws: the same facts previewSVG reads, nothing more.
+export function sceneSpec(b){
+  const ch = chamberOf(b), sub = find(substrates, b.substrate);
+  return {
+    chamber: ch ? { sku: ch.sku, name: ch.name, size: ch.size, temp: ch.temp, humidity: ch.humidity, light: ch.light } : null,
+    soilless: !!ch && isSoilless(ch.sku),
+    substrate: ch && !isSoilless(ch.sku) && sub ? sub.look : null,
+    plants: b.plants.map(id => plantSpec(plantOf(id)))
+  };
+}
+
+function webglOK(){
+  try {
+    const gl = document.createElement('canvas').getContext('webgl2');
+    gl?.getExtension('WEBGL_lose_context')?.loseContext();
+    return !!gl;
+  } catch { return false; }
+}
 
 
 // ═══ VIEW ═════════════════════════════════════════════════════════════
@@ -245,6 +279,8 @@ function chamberPanel(b){
 }
 
 function swatch(look){
+  const src = view3d?.swatch(look);
+  if (src) return `<img class="mk-swatch" src="${src}" alt="" width="96" height="44">`;
   return `<svg class="mk-swatch" viewBox="250 530 250 80" aria-hidden="true">${bands(look)}</svg>`;
 }
 
@@ -613,8 +649,12 @@ export function initMaker(){
 
     $('mkSteps').innerHTML = stepsHTML(b, stage);
     const ch = chamberOf(b);
-    $('mkPreview').innerHTML = previewSVG(b, { fresh: ui.fresh, label: describe(b) })
-      + `<figcaption class="caption">${ch ? `${ch.name} · indicative. The studio places every specimen by hand.` : 'Choose a chamber to begin'}</figcaption>`;
+    const caption = ch ? `${ch.name} · indicative. The studio places every specimen by hand.` : 'Choose a chamber to begin';
+    const fig = $('mkPreview');
+    if (view3d){
+      view3d.show(fig, sceneSpec(b), { fresh: ui.fresh, label: describe(b) });
+      fig.append(Object.assign(fig.querySelector('figcaption') || document.createElement('figcaption'), { className: 'caption', textContent: caption }));
+    } else fig.innerHTML = previewSVG(b, { fresh: ui.fresh, label: describe(b) }) + `<figcaption class="caption">${caption}</figcaption>`;
     const panel = { chamber: chamberPanel, foundation: foundationPanel, plants: plantsPanel, space: spacePanel, review: reviewPanel }[stage];
     const notice = ui.notice ? `<div class="mk-notice" role="status"><p>${ui.notice.text}</p>
       ${ui.notice.undo ? '<button type="button" class="cta cta-secondary cta-small" data-act="undo" data-key="undo">Undo</button>' : ''}</div>` : '';
@@ -631,17 +671,18 @@ export function initMaker(){
     $('mkBegin').hidden = !!b.chamber;
     $('mkRecipes').innerHTML = recipes.map(r => {
       const rb = { ...emptyBuild(), chamber: r.chamber, substrate: r.substrate, plants: r.plants };
+      const still = view3d?.still(r.id, sceneSpec(rb), 300, 440);
       return `<li><button type="button" class="mk-recipe" data-act="recipe" data-id="${r.id}" data-key="rc-${r.id}">
-        <span class="mk-recipe-art">${previewSVG(rb, { label: describe(rb) })}</span>
+        <span class="mk-recipe-art">${still ? `<img src="${still}" alt="${esc(describe(rb))}" width="150" height="220">` : previewSVG(rb, { label: describe(rb) })}</span>
         <span class="mk-card-name">${r.name}</span>
         <span class="mk-card-desc">${r.line}</span>
         <span class="mk-card-meta">${chamberOf(rb).name} chamber · ${r.plants.length} plants</span>
       </button></li>`;
     }).join('');
     const hero = recipes[0];
-    $('mkHeroArt').innerHTML = previewSVG(
-      { ...emptyBuild(), chamber: hero.chamber, substrate: hero.substrate, plants: hero.plants },
-      { label: 'A finished Moss chamber with three mosses' });
+    const hb = { ...emptyBuild(), chamber: hero.chamber, substrate: hero.substrate, plants: hero.plants };
+    if (view3d) view3d.show($('mkHeroArt'), sceneSpec(hb), { label: 'A finished Moss chamber with three mosses.' });
+    else $('mkHeroArt').innerHTML = previewSVG(hb, { label: 'A finished Moss chamber with three mosses' });
   }
 
   // Every state change goes through here.
@@ -819,4 +860,21 @@ export function initMaker(){
   }
   if (restored?.shared) { stage = furthest(b); track('maker_open_shared'); }
   render();
+  load3D();
+
+  // The 3D view arrives after first paint; the line drawings show until then.
+  function load3D(){
+    if (!webglOK()) return;
+    import('./maker-3d.js').then(({ create3D }) => {
+      view3d = create3D({ onLost(){ view3d = null; render(); } });
+      if (!view3d) return;
+      render();
+      view3d.thumbs(plants.map(plantSpec), () => {
+        root.querySelectorAll('svg.mk-thumb[data-thumb]').forEach(svg => {
+          const src = view3d?.thumb(svg.dataset.thumb);
+          if (src) svg.outerHTML = `<img class="mk-thumb" src="${src}" alt="" width="56" height="64">`;
+        });
+      });
+    }).catch(() => { view3d = null; });
+  }
 }

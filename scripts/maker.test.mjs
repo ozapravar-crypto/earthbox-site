@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { emptyBuild, capacity, chamberOf, togglePlant, swapChamber, done, canEnter,
          furthest, encodeBuild, decodeBuild, enquiryText, substrateSuits, previewSVG } from './maker.js';
 import { chambers, plants, substrates, recipes } from '../data/maker.js';
+import { sceneSpec } from './maker.js';
 
 const box = (sku) => chambers.find(c => c.sku === sku);
 const aroid = substrates.find(s => s.id === 'SOIL-001');
@@ -67,5 +68,14 @@ assert.doesNotMatch(text, /Maturity/);
 // Preview renders for every chamber, including the one without a drawing.
 for (const c of chambers) assert.match(previewSVG({ ...emptyBuild(), chamber: c.sku }), /<svg/);
 assert.equal(plants.length, 45);
+
+// 3D scene spec: same facts as the SVG. Soil-free chambers never carry a foundation.
+let sp = sceneSpec({ ...emptyBuild(), chamber: 'DarkBox', substrate: 'SOIL-001', plants: ['PLT-041', 'PLT-045'] });
+assert.equal(sp.substrate, 'aroid');
+assert.deepEqual(sp.plants.map(p => [p.id, p.form]), [['PLT-041', 'leaf'], ['PLT-045', 'leaf']]);
+sp = sceneSpec({ ...emptyBuild(), chamber: 'AeroBox', substrate: 'studio', plants: ['PLT-021'] });
+assert.equal(sp.soilless, true);
+assert.equal(sp.substrate, null);
+assert.equal(sceneSpec(emptyBuild()).chamber, null);
 
 console.log('maker: all checks passed');
