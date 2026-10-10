@@ -340,6 +340,55 @@
 
 
 <!-- ═══════════════════════════════════════════════════════════════════
+     THE MAKER · invitation to build-your-own (maker.html)
+     Motion spec: MOTION.md § Maker invite. Image is a stand-in crop from
+     the reference mockup — replace with the transparent chamber photo.
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="maker-invite" id="maker-invite" aria-labelledby="makerInviteTitle">
+  <svg class="mi-leaves" viewBox="0 0 400 520" aria-hidden="true">
+    <path d="M40 520 C90 380 150 260 260 40" />
+    <ellipse cx="120" cy="380" rx="16" ry="70" transform="rotate(-38 120 380)"/>
+    <ellipse cx="170" cy="300" rx="15" ry="66" transform="rotate(32 170 300)"/>
+    <ellipse cx="190" cy="220" rx="14" ry="62" transform="rotate(-42 190 220)"/>
+    <ellipse cx="235" cy="150" rx="13" ry="58" transform="rotate(28 235 150)"/>
+    <ellipse cx="88" cy="455" rx="15" ry="64" transform="rotate(30 88 455)"/>
+  </svg>
+
+  <div class="mi-inner">
+    <div class="mi-text">
+      <span class="mi-num reveal">02<span class="mi-rule"></span></span>
+      <h2 class="mi-title reveal" id="makerInviteTitle">
+        <span class="reveal-line"><span>Build</span></span>
+        <span class="reveal-line" style="--d:120ms"><span>your little</span></span>
+        <span class="reveal-line" style="--d:240ms"><span>world</span></span>
+      </h2>
+      <p class="mi-lede reveal" style="--d:400ms">
+        Design your own terrarium<br>with real plants and materials.<br>We&rsquo;ll bring it to life for you.
+      </p>
+      <a class="cta magnetic mi-cta reveal" style="--d:520ms" href="maker.html" data-cursor="MAKE">
+        Start creating
+        <svg viewBox="0 0 16 8" fill="none" aria-hidden="true"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
+      </a>
+    </div>
+
+    <figure class="mi-art reveal" style="--d:150ms">
+      <img src="assets/home/maker-terrarium.webp"
+           srcset="assets/home/maker-terrarium-600.webp 600w, assets/home/maker-terrarium.webp 835w"
+           sizes="(max-width: 900px) 92vw, 46vw"
+           alt="A planted terrarium with ferns, moss and stones, resting on a stone slab in warm daylight"
+           width="835" height="750" loading="lazy" decoding="async">
+    </figure>
+
+    <dl class="mi-spec">
+      <div class="reveal" style="--d:200ms"><dt>Chambers</dt><dd>Ten climates</dd></div>
+      <div class="reveal" style="--d:320ms"><dt>Plants</dt><dd>Forty-five species</dd></div>
+      <div class="reveal" style="--d:440ms"><dt>Disposition</dt><dd class="small">Quoted by the studio</dd></div>
+    </dl>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
      VOLUME I PREVIEW
      The renderer fills #volumeOneList from data/products.js
      ═══════════════════════════════════════════════════════════════════ -->

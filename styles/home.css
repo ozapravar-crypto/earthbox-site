@@ -663,6 +663,92 @@
 @media (max-width:560px){.hero-actions{align-items:flex-start}}
 
 
+/* ─── MAKER INVITE ───
+   Fixed warm paper in both themes: it matches the photo's own background
+   (#F6F3ED), so the image sits in it instead of floating on a box. */
+.maker-invite{
+  --mi-paper:#F6F3ED; --mi-ink:#232720; --mi-soft:#55574F; --mi-mute:#6E6B63;
+  position:relative;
+  overflow:hidden;
+  background:var(--mi-paper);
+  color:var(--mi-ink);
+  padding-block:clamp(4rem,10vh,8rem);
+}
+.mi-inner{
+  position:relative;
+  max-width:var(--max);
+  margin:0 auto;
+  padding-inline:var(--pad);
+  display:grid;
+  grid-template-columns:minmax(0,.9fr) minmax(0,1.25fr) minmax(0,.55fr);
+  gap:2rem;
+  align-items:center;
+}
+.mi-num{
+  display:flex;align-items:center;gap:1.25rem;
+  font-family:var(--serif);font-size:1.4rem;color:var(--mi-mute);
+}
+.mi-rule{display:inline-block;width:90px;height:1px;background:var(--mi-mute);opacity:.5}
+.mi-title{
+  font-family:var(--serif);font-weight:400;color:var(--mi-ink);
+  font-size:clamp(3.2rem,6.4vw,6.4rem);line-height:.95;letter-spacing:-.02em;
+  margin:2.25rem 0 2rem;
+}
+.mi-lede{
+  font-family:var(--body);font-style:italic;color:var(--mi-soft);
+  font-size:clamp(1rem,1.25vw,1.2rem);line-height:1.6;
+}
+.maker-invite .mi-cta{
+  --cta-bg:transparent; --cta-color:var(--mi-ink); --cta-border:var(--mi-ink);
+  --cta-hover-bg:var(--mi-ink); --cta-hover-color:var(--mi-paper);
+  margin-top:2.5rem;
+}
+.mi-art{margin:0}
+.mi-art img{
+  width:100%;height:auto;display:block;
+  /* feather the crop's edges into the paper */
+  --mi-fade-x:linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+  --mi-fade-y:linear-gradient(to bottom, transparent, #000 6%, #000 80%, transparent);
+  -webkit-mask-image:var(--mi-fade-x), var(--mi-fade-y);
+  -webkit-mask-composite:source-in;
+          mask-image:var(--mi-fade-x), var(--mi-fade-y);
+          mask-composite:intersect;
+}
+.mi-spec{display:grid;gap:1.75rem;text-align:right}
+.mi-spec > div + div{padding-top:1.75rem;border-top:1px solid rgba(35,39,32,.16)}
+.mi-spec dt{font-family:var(--sans);font-size:.6rem;letter-spacing:.34em;text-transform:uppercase;color:var(--mi-mute);margin-bottom:.5rem}
+.mi-spec dd{font-family:var(--serif);font-size:1.2rem;color:var(--mi-ink)}
+.mi-spec dd.small{font-family:var(--body);font-style:italic;font-size:1rem}
+
+/* Idle: a leaf shadow drifting across the light. Procedural, decorative. */
+.mi-leaves{
+  position:absolute;left:-60px;top:-40px;width:min(36vw,420px);height:auto;
+  fill:#4c5a3e;stroke:#4c5a3e;stroke-width:3;
+  opacity:.13;filter:blur(7px);
+  transform-origin:10% 100%;
+  animation:mi-sway 14s ease-in-out infinite alternate;
+  pointer-events:none;
+}
+@keyframes mi-sway{
+  from{transform:rotate(-2deg) translate3d(0,0,0)}
+  to  {transform:rotate(2.5deg) translate3d(14px,6px,0)}
+}
+
+@media (max-width:1000px){
+  .mi-inner{grid-template-columns:1fr 1fr}
+  .mi-spec{grid-column:1 / -1;grid-template-columns:repeat(3,1fr);text-align:left}
+  .mi-spec > div + div{padding-top:0;border-top:0;padding-left:1.25rem;border-left:1px solid rgba(35,39,32,.16)}
+}
+@media (max-width:640px){
+  .mi-inner{grid-template-columns:1fr}
+  .mi-art{order:-1;margin-inline:-.5rem}
+  .mi-title{margin:1.5rem 0 1.25rem}
+  .mi-spec{grid-template-columns:1fr;gap:1rem}
+  .mi-spec > div + div{padding:1rem 0 0;border-left:0;border-top:1px solid rgba(35,39,32,.16)}
+  .mi-leaves{width:60vw}
+}
+@media (prefers-reduced-motion:reduce){ .mi-leaves{animation:none} }
+
 /* Trust strip & floating-wa styles moved to components.css */
 
 /* ─── PAGE-SPECIFIC OVERRIDES ─── */
