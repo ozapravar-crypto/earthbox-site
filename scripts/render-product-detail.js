@@ -14,6 +14,7 @@ import { volumeTwo, volumeThree } from '../data/upcoming.js';
 import { getReviews, getAverageRating } from '../data/reviews.js';
 import { observeReveals } from './reveal.js';
 import { enquiryAltHTML } from './enquiry-form.js';
+import { syncCartButtons } from './cart.js';
 
 
 const ENQUIRY_WHATSAPP = '918104811584';
@@ -59,6 +60,23 @@ function enquiryHref(opts = {}){
 
   return `https://wa.me/${ENQUIRY_WHATSAPP}?text=${encodeURIComponent(text)}`;
 }
+
+// Add to cart + Save, then WhatsApp as the quieter route. `line` is a cart
+// line (cart.js); the selectors rewrite it when size or material changes.
+const attr = (o) => JSON.stringify(o).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+const ARROW = '<svg viewBox="0 0 16 8" fill="none" aria-hidden="true"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>';
+function buyHTML(line, waHref, name){
+  return `
+    <div class="pd-buy">
+      <button type="button" class="cta magnetic pd-cta" data-add-line="${attr(line)}" data-cursor="ADD">Add to cart ${ARROW}</button>
+      <button type="button" class="cta cta-secondary save-btn" data-save-line="${attr(line)}" aria-pressed="false"><span>Save</span><span class="u-sr-only"> ${name}</span></button>
+    </div>
+    <a class="pd-alt-wa" id="pdEnquiryCta" href="${waHref}" target="_blank" rel="noopener">Or ask on WhatsApp</a>`;
+}
+const mobileBuyHTML = (line) => `
+    <div class="pd-mobile-cta" id="pdMobileCta">
+      <button type="button" class="cta" data-add-line="${attr(line)}">Add to cart ${ARROW}</button>
+    </div>`;
 
 function formatPrice(price){
   if (!price) return null;
@@ -190,6 +208,9 @@ function renderPrinted(p){
   const avgRating = getAverageRating(p.sku);
   const reviewCount = reviews.length;
 
+  const line = { kind: 'product', sku: p.sku, variant: hasVariants ? p.variants[0].id : null,
+                 material: availableMaterials[0] || null, qty: 1 };
+
   // Extract key points from description (first sentence or up to 100 chars)
   const shortDesc = p.description.split('.')[0] + '.';
 
@@ -273,20 +294,14 @@ function renderPrinted(p){
             `}
           </div>
 
-          <a class="cta magnetic pd-cta" id="pdEnquiryCta"
-             href="${enquiryHref({
+          ${buyHTML(line, enquiryHref({
                name: p.name,
                sku: p.sku,
                material: availableMaterials[0],
                variant: hasVariants ? p.variants[0].name : null,
                price: hasPricing ? formatPrice(hasVariants ? p.pricing[p.variants[0].id][availableMaterials[0]] : p.pricing[availableMaterials[0]]) : null,
                volume: 1
-             })}"
-             target="_blank" rel="noopener"
-             data-cursor="ASK">
-            Enquire on WhatsApp
-            <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
-          </a>
+             }), p.name)}
           ${enquiryAltHTML(p.name)}
 
           <!-- Trust signals -->
@@ -342,22 +357,7 @@ function renderPrinted(p){
     </article>
 
     <!-- Mobile sticky CTA -->
-    <div class="pd-mobile-cta" id="pdMobileCta">
-      <a class="cta magnetic" id="pdMobileCtaBtn"
-         href="${enquiryHref({
-           name: p.name,
-           sku: p.sku,
-           material: availableMaterials[0],
-           variant: hasVariants ? p.variants[0].name : null,
-           price: hasPricing ? formatPrice(hasVariants ? p.pricing[p.variants[0].id][availableMaterials[0]] : p.pricing[availableMaterials[0]]) : null,
-           volume: 1
-         })}"
-         target="_blank" rel="noopener"
-         data-cursor="ASK">
-        Enquire on WhatsApp
-        <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
-      </a>
-    </div>
+    ${mobileBuyHTML(line)}
   `;
 }
 
@@ -370,7 +370,6 @@ function initPrintedSelectors(p){
 
   const priceEl = document.getElementById('pdPrice');
   const ctaEl = document.getElementById('pdEnquiryCta');
-  const mobileCtaEl = document.getElementById('pdMobileCtaBtn');
   if (!priceEl || !ctaEl) return;
 
   let currentVariant = hasVariants ? p.variants[0].id : null;
@@ -394,7 +393,11 @@ function initPrintedSelectors(p){
       volume: 1
     });
     ctaEl.href = href;
-    if (mobileCtaEl) mobileCtaEl.href = href;
+    const line = JSON.stringify({ kind: 'product', sku: p.sku, variant: currentVariant, material: currentMaterial, qty: 1 });
+    document.querySelectorAll('#productDetail [data-add-line], #productDetail [data-save-line]').forEach(b => {
+      b.dataset[b.hasAttribute('data-add-line') ? 'addLine' : 'saveLine'] = line;
+    });
+    syncCartButtons();
   }
 
   // Variant selector
@@ -449,13 +452,7 @@ function renderBox(b){
           </div>
         </div>
         <aside class="pd-body-side reveal" style="--d:120ms">
-          <a class="cta magnetic pd-cta"
-             href="${enquiryHref({ name: b.sku, sku: b.sku, volume: 2 })}"
-             target="_blank" rel="noopener"
-             data-cursor="ASK">
-            Enquire on WhatsApp
-            <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
-          </a>
+          ${buyHTML({ kind: 'product', sku: b.sku, qty: 1 }, enquiryHref({ name: b.sku, sku: b.sku, volume: 2 }), b.sku)}
           ${enquiryAltHTML(b.sku)}
           <p class="caption pd-note">Coming soon · register interest now</p>
           <a class="caption pd-maker-link" href="maker.html?box=${b.sku}">Design yours in the Maker &rarr;</a>
@@ -486,15 +483,7 @@ function renderBox(b){
     </article>
 
     <!-- Mobile sticky CTA -->
-    <div class="pd-mobile-cta">
-      <a class="cta magnetic"
-         href="${enquiryHref({ name: b.sku, sku: b.sku, volume: 2 })}"
-         target="_blank" rel="noopener"
-         data-cursor="ASK">
-        Enquire on WhatsApp
-        <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
-      </a>
-    </div>
+    ${mobileBuyHTML({ kind: 'product', sku: b.sku, qty: 1 })}
   `;
 }
 
@@ -547,8 +536,8 @@ function renderProduct(id){
   if (!host) return;
 
   // Clear previous content (keep loading/notfound placeholders if they exist)
-  const existingArticle = host.querySelector('article');
-  if (existingArticle) existingArticle.remove();
+  // The article and its mobile sticky CTA are siblings: remove both.
+  host.querySelectorAll('article, .pd-mobile-cta').forEach(el => el.remove());
 
   if (!id){
     document.getElementById('pdLoading')?.setAttribute('hidden', 'true');
@@ -596,6 +585,8 @@ function renderProduct(id){
 
   // Initialize reveals for dynamically added content
   observeReveals(host);
+
+  syncCartButtons();
 
   // Initialize selectors for V1 products
   if (found.kind === 'printed') {

@@ -8,13 +8,14 @@
 // The pure rules (compatibility, capacity, chamber swap, enquiry text,
 // share-link codec) are exported and checked by maker.test.mjs.
 //
-// There is no cart on this site. The last step sends the design as an
-// enquiry: WhatsApp deep link + the desktop email form (enquiry-form.js).
+// The last step adds the design to the cart (cart.js), where it's tallied
+// with anything else, or sends it alone: WhatsApp + the email form.
 // ─────────────────────────────────────────────────────────────────────
 
 import { chambers, plants, substrates, elements, recipes,
          chamberElements, SOILLESS, spaceQuestions, forms, guide } from '../data/maker.js';
 import { enquiryAltHTML, ENQUIRY_PHONE } from './enquiry-form.js';
+import { syncCartButtons } from './cart.js';
 import { emptyDiscovery, searchPlants, dropChip, clearGuided, climateOrder } from './plant-search.js';
 
 export const STAGES = ['start', 'chamber', 'foundation', 'plants', 'space', 'review'];
@@ -140,6 +141,9 @@ export function enquiryText(b){
     'Could you share a quote and lead time?'
   ].filter(x => x !== null).join('\n');
 }
+
+// The cart keeps the composition only (same as the share link).
+export const cartLine = (b) => ({ kind: 'build', code: encodeBuild(b) });
 
 export const whatsappHref = (b) =>
   `https://wa.me/${ENQUIRY_PHONE}?text=${encodeURIComponent(enquiryText(b))}`;
@@ -538,7 +542,12 @@ function reviewPanel(b){
     <p class="mk-sub">Chamber range ${ch.price}. Plants and foundation are quoted with you. Nothing is charged on this page.</p>
   </div>
   <div class="mk-send">
-    <a class="cta cta-block" href="${whatsappHref(b)}" target="_blank" rel="noopener" data-act="send" data-key="send">Send this design on WhatsApp ${arrow}</a>
+    <div class="pd-buy">
+      <button type="button" class="cta" data-add-line="${esc(JSON.stringify(cartLine(b)))}" data-key="cart">Add to cart ${arrow}</button>
+      <button type="button" class="cta cta-secondary save-btn" data-save-line="${esc(JSON.stringify(cartLine(b)))}" aria-pressed="false" data-key="save"><span>Save</span><span class="u-sr-only"> design</span></button>
+    </div>
+    <p class="mk-sub">The cart tallies this build with anything else you add. Or send just this design:</p>
+    <a class="cta cta-secondary cta-block" href="${whatsappHref(b)}" target="_blank" rel="noopener" data-act="send" data-key="send">Send this design on WhatsApp ${arrow}</a>
     ${enquiryAltHTML(b.name || `Maker · ${ch.name}`, enquiryText(b))}
     <p class="mk-sent" role="status"></p>
     <div class="mk-secondary">
@@ -659,6 +668,7 @@ export function initMaker(){
     $('mkPanelBody').innerHTML = notice + panel(b, ui);
     $('mkBar').innerHTML = barHTML(b, stage, ui.error);
     ui.fresh = null;
+    syncCartButtons();
 
     if (key) document.querySelector(`[data-key="${key}"]:not([disabled])`)?.focus({ preventScroll: true });
   }
@@ -835,6 +845,10 @@ export function initMaker(){
   function refreshSend(){
     const a = root.querySelector('[data-act="send"]');
     if (a) a.href = whatsappHref(b);
+    const line = JSON.stringify(cartLine(b));
+    root.querySelectorAll('[data-add-line]').forEach(x => { x.dataset.addLine = line; });
+    root.querySelectorAll('[data-save-line]').forEach(x => { x.dataset.saveLine = line; });
+    syncCartButtons();
     const msg = root.querySelector('.enquiry-form textarea[name="message"]');
     if (msg) msg.value = enquiryText(b);
   }

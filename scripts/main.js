@@ -28,10 +28,12 @@ import { initMagnetic }   from './magnetic.js';
 import { initScramble }   from './scramble.js';
 import { initEnquiryForm } from './enquiry-form.js';
 import { initMaker }       from './maker.js';
+import { initCart }        from './cart.js';
 
 const boot = () => {
   initTheme();
   initRunhead();
+  initCart();         // after initTheme: wraps the desktop toggle
   initMenu();
   initReveal();       // Must run before catalogue so observeReveals() works
   initProducts();

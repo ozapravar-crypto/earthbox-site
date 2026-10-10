@@ -1,6 +1,6 @@
 # The Maker · build-your-own terrarium
 
-**TL;DR:** `maker.html` lets a visitor design a terrarium (chamber → foundation → plants → their space) and **send it to the studio as an enquiry**. There is no cart, because the site sells by enquiry only. Every item shown is real EarthBox data, and nothing is priced except the chamber's published range.
+**TL;DR:** `maker.html` lets a visitor design a terrarium (chamber → foundation → plants → their space), then **add it to the cart** (tallied with anything else, see `CART.md`) or send it alone as an enquiry. Every item shown is real EarthBox data, and nothing is priced except the chamber's published range.
 
 Source brief: `Downloads/terrarium_maker_ux_brief_for_fable.md`. Adapted to the site, not copied.
 
@@ -8,13 +8,13 @@ Source brief: `Downloads/terrarium_maker_ux_brief_for_fable.md`. Adapted to the 
 
 - **Role:** the hands-on front end of the "Order Your Custom One" flow (Requirements workbook, tab 06). The design itself becomes the brief Aayush quotes from.
 - **Entry points:** nav "Maker" (all pages + footer) · home hero "Or design your own" · each Elemental Box page "Design yours in the Maker" (`maker.html?box=FireBox`).
-- **Exit:** WhatsApp message carrying the full build + a link to it, or the existing desktop email form (Web3Forms) prefilled with the same text.
+- **Exit:** Add to cart / Save (cart.js), or a WhatsApp message carrying the full build + a link to it, or the desktop email form (Web3Forms) prefilled with the same text.
 
 ## Decisions taken (10 Oct 2026)
 
 | Brief said | Built instead | Why |
 |---|---|---|
-| Add to cart → checkout | Send design on WhatsApp / email form | No cart exists; site is enquiry-only |
+| Add to cart → checkout | Add to cart (10 Oct) → order sent to the studio, which replies with a payment link | No payment gateway yet; see CART.md |
 | Itemised prices + total | Chamber range + "plants & foundation quoted on enquiry" | 0 of 55 plants and 0 boxes have a fixed price in the workbook |
 | Step 4 "Details" (stones, driftwood) | Step 4 "Your space" (room, pets/kids, maturity, mood) | No hardscape items exist; these questions come from tab 06 |
 | Rounded corners, new palette | Site tokens, sharp edges | EarthBox design rules |

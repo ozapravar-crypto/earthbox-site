@@ -11,6 +11,7 @@
 const NAV_LINKS = [
   { href: 'index.html',    label: 'Home' },
   { href: 'products.html', label: 'Catalogue' },
+  { href: 'maker.html',    label: 'Maker' },
   { href: 'blog.html',     label: 'Journal' },
   { href: 'about.html',    label: 'About' }
 ];
@@ -50,7 +51,7 @@ export function initMenu(){
       <ul>
         ${NAV_LINKS.map(l => {
           const active = l.href.toLowerCase() === path;
-          return `<li><a href="${l.href}"${active ? ' aria-current="page"' : ''}>${l.label}</a></li>`;
+          return `<li><a href="/${l.href}"${active ? ' aria-current="page"' : ''}>${l.label}</a></li>`;
         }).join('')}
       </ul>
     </nav>
