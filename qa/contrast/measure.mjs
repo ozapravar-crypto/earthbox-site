@@ -37,7 +37,11 @@ export async function resolveWithPixels(page, item){
     // screenshotted by locator (it waits for visibility and times out).
     await el.evaluate((e, a) => e.removeAttribute(a), attr);
     // Centre it (not just "into view"), so bottom bars don't sit over it.
+    // Scrolling moves it out from under the pointer, so a hovered control is
+    // hovered again (its fill sweep would otherwise vanish before the shot).
+    const hovered = await el.evaluate(e => !!e.closest(':hover') && e.closest('a,button,summary,label')?.matches(':hover')).catch(() => false);
     await el.evaluate(e => { if (!e.closest('[style*="position: fixed"]')) e.scrollIntoView({ block: 'center', behavior: 'instant' }); }).catch(() => {});
+    if (hovered) await el.hover({ force: true, timeout: 2000 }).catch(() => {});
     await page.waitForTimeout(80);
     const box = await el.boundingBox();
     if (!box || box.width < 1 || box.height < 1) throw new Error('no box');

@@ -224,3 +224,17 @@ test('Maker review step on a phone measures with no review/fail items', async ({
   expect(await failures(page, '#mkPanelBody', 'review-step')).toEqual([]);
   await page.close();
 });
+
+// Audit regression · hovered primary buttons were reported 1:1 because the
+// per-element shot scrolled the button out from under the pointer (fill gone).
+for (const theme of THEMES) {
+  test(`hovered primary button measures with its fill (${theme})`, async ({ page }) => {
+    await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
+    await page.goto('/product.html#V1-PLT-005');
+    await page.addStyleTag({ content: '.cursor-ring,.cursor-dot{display:none!important} *,*::before,*::after{transition:none!important}' });
+    const b = page.locator('.pd-buy [data-add-line]');
+    await b.scrollIntoViewIfNeeded();
+    await b.hover({ force: true });
+    expect(await failures(page, '.pd-buy [data-add-line]', 'hover')).toEqual([]);
+  });
+}
