@@ -662,6 +662,7 @@ export function initMaker(){
     $('mkBar').innerHTML = barHTML(b, stage, ui.error);
     ui.fresh = null;
     syncCartButtons();
+    if (stage === 'plants') startThumbs();
 
     if (key) document.querySelector(`[data-key="${key}"]:not([disabled])`)?.focus({ preventScroll: true });
   }
@@ -671,7 +672,11 @@ export function initMaker(){
     $('mkBegin').hidden = !!b.chamber;
     $('mkRecipes').innerHTML = recipes.map(r => {
       const rb = { ...emptyBuild(), chamber: r.chamber, substrate: r.substrate, plants: r.plants };
-      const still = view3d?.still(r.id, sceneSpec(rb), 300, 440);
+      // A 3D still; it's redrawn once its plant models arrive.
+      const still = view3d?.still(r.id, sceneSpec(rb), 300, 440, (src) => {
+        const img = $('mkRecipes').querySelector(`[data-id="${r.id}"] img`);
+        if (img && src) img.src = src;
+      });
       return `<li><button type="button" class="mk-recipe" data-act="recipe" data-id="${r.id}" data-key="rc-${r.id}">
         <span class="mk-recipe-art">${still ? `<img src="${still}" alt="${esc(describe(rb))}" width="150" height="220">` : previewSVG(rb, { label: describe(rb) })}</span>
         <span class="mk-card-name">${r.name}</span>
@@ -869,12 +874,20 @@ export function initMaker(){
       view3d = create3D({ onLost(){ view3d = null; render(); } });
       if (!view3d) return;
       render();
-      view3d.thumbs(plants.map(plantSpec), () => {
-        root.querySelectorAll('svg.mk-thumb[data-thumb]').forEach(svg => {
-          const src = view3d?.thumb(svg.dataset.thumb);
-          if (src) svg.outerHTML = `<img class="mk-thumb" src="${src}" alt="" width="56" height="64">`;
-        });
-      });
     }).catch(() => { view3d = null; });
+  }
+
+  // Plant thumbnails are drawn the first time the Plants step shows, so
+  // their 3D models load only then (line drawings until each is ready).
+  let thumbsStarted = false;
+  function startThumbs(){
+    if (thumbsStarted || !view3d) return;
+    thumbsStarted = true;
+    view3d.thumbs(plants.map(plantSpec), () => {
+      root.querySelectorAll('svg.mk-thumb[data-thumb]').forEach(svg => {
+        const src = view3d?.thumb(svg.dataset.thumb);
+        if (src) svg.outerHTML = `<img class="mk-thumb" src="${src}" alt="" width="56" height="64">`;
+      });
+    });
   }
 }

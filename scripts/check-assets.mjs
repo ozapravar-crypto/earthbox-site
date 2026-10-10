@@ -11,7 +11,7 @@
  *
  * Checks: src / href / srcset in every deployed .html, product photos in
  * data/ (+ the -300/-600 sizes the catalogue asks for), images inside
- * article bodies. Skips external URLs and template placeholders.
+ * article bodies, Maker 3D plant models. Skips external URLs and template placeholders.
  * Run: node scripts/check-assets.mjs   (part of npm test)
  */
 import { readFile, readdir, access } from 'node:fs/promises';
@@ -64,7 +64,13 @@ for (const b of volumeTwo.boxes) {
   if (b.illustration) refs.push({ file: `data/upcoming.js (${b.sku})`, path: `assets/boxes/${b.illustration}` });
 }
 
-// 3 · Article bodies render inside /blog/.
+// 3 · Maker 3D plant models (data/maker.js → models), plus their credits file.
+const { models } = await import(path.join(ROOT, 'data/maker.js'));
+for (const [kind, table] of [['forms', models.forms], ['plants', models.plants]])
+  for (const [k, m] of Object.entries(table)) if (m) refs.push({ file: `data/maker.js (models.${kind}.${k})`, path: models.base + m.file });
+refs.push({ file: 'data/maker.js (models)', path: models.base + 'CREDITS.md' });
+
+// 4 · Article bodies render inside /blog/.
 for (const f of await readdir(path.join(ROOT, 'data/article-bodies')))
   scanMarkup(`data/article-bodies/${f}`, 'blog', await readFile(path.join(ROOT, 'data/article-bodies', f), 'utf8'));
 
