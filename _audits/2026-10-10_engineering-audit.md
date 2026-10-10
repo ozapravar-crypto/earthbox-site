@@ -81,3 +81,19 @@ All clones were shallow and read-only, outside the repo. Only `contrast-check.py
 - **E15** `"type": "module"` (no more Node warnings). **E13** `sharp` moved to devDependencies.
 - Removed 3 debug `console.log`s from render-product-detail.js.
 - Committed the regenerated Journal HTML: the files in git were missing the "Continue Reading" block that Vercel's build already serves.
+
+## Phase 2 · done (10 Oct)
+
+- **E3** `main.js` loads shared modules (theme, header, menu, cart, motion) everywhere, and page modules via `import()` only when their root element exists. A failing page module is logged and skipped. Renderers still run before the motion primitives.
+
+  | Page | JS before | After |
+  |---|---|---|
+  | Journal article | 33 files / 413 KB | 18 / ~40 KB |
+  | Home | 33 / ~413 KB | 19 / ~31 KB |
+  | Product | 33 / ~413 KB | 20 / ~80 KB |
+
+  The Maker UI loads only on maker.html. Article bodies load only on blog.html, where the card grid needs them (splitting metadata from bodies is a Phase 3 candidate).
+- **E4** One article renderer: `prerender.mjs`. The client copy (`render-article.js`) is deleted; article pages ship finished HTML.
+  - **Found on the way:** prerender's section matcher stopped at the FAQ's `</section>`, so **every build appended another "Continue Reading" block**: 3 per article in git, 4 live (crawlers saw them all; visitors didn't, because the client re-rendered). Fixed so the build gives the same output every time (verified: two runs, identical bytes). `check-prerender` now fails on more than one related or FAQ section.
+- **E10** `scripts/build-codec.js` holds the build shape + share-link codec. cart.js imports it instead of maker.js, so the circular import is gone. maker.js re-exports it, so its API and tests are unchanged.
+- **E8** covered by Phase 1's anchor fix. Verified again: the cart, undo, Maker discovery, catalogue search and tabs, Journal filters, About and product walks all pass with no console errors (only the known Bird Feeder 404).

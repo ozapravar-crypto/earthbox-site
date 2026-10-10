@@ -28,6 +28,11 @@ for (const f of files.sort()) {
   const problems = [];
   if (!/<h1[\s>]/.test(html)) problems.push('no <h1>');
   if (strip(html).length < MIN_TEXT) problems.push(`only ${strip(html).length} chars of text`);
+  // prerender once appended a copy of these on every build (10 Oct 2026).
+  for (const c of ['related-section', 'faq-section']) {
+    const n = (html.match(new RegExp(`class="${c}"`, 'g')) || []).length;
+    if (n > 1) problems.push(`${n} × .${c} (prerender is duplicating)`);
+  }
   if (!/rel="canonical"/.test(html)) problems.push('no canonical');
   if (!/application\/ld\+json/.test(html)) problems.push('no JSON-LD');
   if (!/property="og:image"/.test(html)) problems.push('no og:image');

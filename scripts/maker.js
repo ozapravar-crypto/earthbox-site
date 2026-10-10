@@ -13,7 +13,7 @@
 // ─────────────────────────────────────────────────────────────────────
 
 import { chambers, plants, substrates, elements, recipes,
-         chamberElements, SOILLESS, spaceQuestions, forms, guide } from '../data/maker.js';
+         chamberElements, spaceQuestions, forms, guide } from '../data/maker.js';
 import { enquiryAltHTML, ENQUIRY_PHONE } from './enquiry-form.js';
 import { syncCartButtons } from './cart.js';
 import { emptyDiscovery, searchPlants, dropChip, clearGuided, climateOrder } from './plant-search.js';
@@ -32,33 +32,9 @@ const find = (list, id, key = 'id') => list.find(x => x[key] === id);
 
 // ═══ RULES (pure) ═════════════════════════════════════════════════════
 
-export const emptyBuild = () => ({
-  name: '', chamber: null, substrate: null, plants: [],
-  space: { room: '', household: [], maturity: '', note: '', care: '' }
-});
-
-export const chamberOf = (b) => find(chambers, b.chamber, 'sku');
-export const plantOf   = (id) => find(plants, id);
-export const isSoilless = (sku) => SOILLESS.includes(sku);
-
-export function suitedElements(sku){
-  const e = chamberElements[sku];
-  return e === 'all' ? elements.map(x => x.id) : (e || []);
-}
-export const isSuited = (plant, sku) => !!plant && suitedElements(sku).includes(plant.element);
-
-// "3 – 6 plants" → 6. Specs without a number ("Dense coverage", "Variable")
-// fall back to 5, one elemental group's worth.
-// ponytail: parsed from display text; add a numeric `maxPlants` to upcoming.js if a spec ever reads "up to 6".
-export function capacity(chamber){
-  const m = String(chamber?.capacity || '').match(/(\d+)\s*plants/);
-  return m ? +m[1] : 5;
-}
-
-export function substrateSuits(sub, sku){
-  if (!sub || !sku || isSoilless(sku)) return false;
-  return !sub.suits || sub.suits.some(el => suitedElements(sku).includes(el));
-}
+// Build shape, lookups and share-link codec live in build-codec.js.
+import { emptyBuild, chamberOf, plantOf, isSoilless, suitedElements, isSuited, capacity, substrateSuits, encodeBuild, decodeBuild } from './build-codec.js';
+export { emptyBuild, chamberOf, plantOf, isSoilless, suitedElements, isSuited, capacity, substrateSuits, encodeBuild, decodeBuild };
 
 // Is a stage's required choice made?
 export function done(b, stage){
@@ -93,29 +69,6 @@ export function togglePlant(b, id){
   return { build: { ...b, plants: [...b.plants, id] } };
 }
 
-// Share link · composition only. "Your space" answers are personal and stay out.
-export function encodeBuild(b){
-  const q = new URLSearchParams();
-  if (b.chamber)   q.set('c', b.chamber);
-  if (b.substrate) q.set('s', b.substrate);
-  if (b.plants.length) q.set('p', b.plants.join(','));
-  if (b.name)      q.set('n', b.name);
-  return q.toString();
-}
-
-// Untrusted input (URL hash, localStorage): keep only ids we know and that fit.
-export function decodeBuild(str){
-  const q = new URLSearchParams(String(str || '').replace(/^#/, ''));
-  const b = emptyBuild();
-  if (!find(chambers, q.get('c'), 'sku')) return null;
-  b.chamber = q.get('c');
-  if (substrateSuits(find(substrates, q.get('s')), b.chamber)) b.substrate = q.get('s');
-  b.plants = [...new Set((q.get('p') || '').split(','))]
-    .filter(id => isSuited(plantOf(id), b.chamber))
-    .slice(0, capacity(chamberOf(b)));
-  b.name = (q.get('n') || '').slice(0, 60);
-  return b;
-}
 
 export const shareUrl = (b) => `${SITE}/maker.html#${encodeBuild(b)}`;
 

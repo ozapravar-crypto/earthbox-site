@@ -22,7 +22,7 @@
 import { volumeOne, materials, photoPath } from '../data/volume-one.js';
 import { volumeTwo } from '../data/upcoming.js';
 import { substrates } from '../data/maker.js';
-import { decodeBuild, encodeBuild, chamberOf, plantOf, isSoilless } from './maker.js';
+import { decodeBuild, encodeBuild, chamberOf, plantOf, isSoilless } from './build-codec.js';
 import { enquiryAltHTML, ENQUIRY_PHONE } from './enquiry-form.js';
 
 const STORE = 'earthbox-cart';

@@ -1,8 +1,14 @@
 // ─────────────────────────────────────────────────────────────────────
-// main.js · entry · imports + boots each motion primitive
-// One entry shared across all 3 pages. Each init() is a no-op if
-// its target isn't on the current page. Renderers run first so the
-// DOM exists for primitives to find.
+// main.js · entry on every page
+//
+// Shared modules (header, theme, cart, motion) load everywhere. Page
+// modules load only when their root element is on the page, via import():
+// an article page no longer downloads the Maker, the catalogue or the
+// product renderer. A page module that fails is logged and skipped; the
+// rest of the page keeps working.
+//
+// Order is unchanged: renderers run first, then the motion primitives,
+// so scramble / magnetic / reveal find the rendered DOM.
 //
 // NOTE: Lenis smooth scroll is currently disabled — using native
 // browser scroll. lenis.js + the CDN <script> are still in the
@@ -13,12 +19,6 @@ import { initTheme }         from './theme.js';
 import { initLoader }        from './loader.js';
 import { initRunhead }       from './runhead.js';
 import { initMenu }          from './menu.js';
-import { initProducts }      from './render-products.js';
-import { initCatalogue }     from './catalogue.js';
-import { initProductDetail } from './render-product-detail.js';
-import { initAbout }         from './render-about.js';
-import { initBlog }          from './render-blog.js';
-import { initArticle }       from './render-article.js';
 import { initReveal }        from './reveal.js';
 import { initManifesto }  from './manifesto-spotlight.js';
 import { initParallax }   from './parallax.js';
@@ -27,21 +27,33 @@ import { initCursor }     from './cursor.js';
 import { initMagnetic }   from './magnetic.js';
 import { initScramble }   from './scramble.js';
 import { initEnquiryForm } from './enquiry-form.js';
-import { initMaker }       from './maker.js';
 import { initCart }        from './cart.js';
 
-const boot = () => {
+// [root selector, loader] · run in this order (catalogue reads what products rendered).
+const PAGE_MODULES = [
+  ['#volumeOneList, #volumeTwoList, #volumeThreeBlock', () => import('./render-products.js').then(m => m.initProducts())],
+  ['.vol-pills',                                        () => import('./catalogue.js').then(m => m.initCatalogue())],
+  ['#productDetail',                                    () => import('./render-product-detail.js').then(m => m.initProductDetail())],
+  ['#aboutSections',                                    () => import('./render-about.js').then(m => m.initAbout())],
+  ['#journalGrid, #journalFilters',                     () => import('./render-blog.js').then(m => m.initBlog())],
+  ['#maker',                                            () => import('./maker.js').then(m => m.initMaker())]
+];
+
+async function initPage(){
+  for (const [sel, load] of PAGE_MODULES) {
+    if (!document.querySelector(sel)) continue;
+    try { await load(); }
+    catch (err) { console.error(`[earthbox] ${sel} failed to load`, err); }
+  }
+}
+
+const boot = async () => {
   initTheme();
   initRunhead();
   initCart();         // after initTheme: wraps the desktop toggle
   initMenu();
   initReveal();       // Must run before catalogue so observeReveals() works
-  initProducts();
-  initCatalogue();
-  initProductDetail();
-  initAbout();
-  initBlog();
-  initArticle();
+  await initPage();
   initManifesto();
   initParallax();
   initPin();
@@ -49,7 +61,6 @@ const boot = () => {
   initMagnetic();
   initScramble();
   initEnquiryForm();
-  initMaker();
 
   // GA4: Track floating WhatsApp clicks
   const floatingWa = document.querySelector('.floating-wa');

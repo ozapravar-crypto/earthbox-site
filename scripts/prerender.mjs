@@ -9,9 +9,9 @@
  * only thing on this site an answer engine would ever cite — was invisible to
  * them.
  *
- * This runs the SAME logic as render-article.js, at build time, and writes the
- * result into the file. The client script still runs and re-renders the same
- * markup, so the scramble animation and every interaction are untouched.
+ * This is the ONLY article renderer: the client used to re-render the same
+ * markup (render-article.js, removed 10 Oct 2026) — a second copy that drifted.
+ * Article pages now ship finished HTML; scramble/reveal run on it as usual.
  *
  * Run:  npm run prerender    (or: node scripts/prerender.mjs)
  * Check: npm run check:prerender  — fails if any article page has no <h1>.
@@ -140,9 +140,15 @@ function injectHead(html, block) {
   return html.replace('</head>', `  ${START}\n${block}\n  ${END}\n</head>`);
 }
 
-const fill = (html, id, inner) =>
-  html.replace(new RegExp(`(<section[^>]*id="${id}"[^>]*>)[\\s\\S]*?(</section>)`),
-               (_m, open, close) => `${open}${inner}${close}`);
+// Replace a section's contents. The body holds nested <section>s (FAQ,
+// related), so a lazy match to the first </section> stops inside it and every
+// build appended another copy. The body section is always the last thing in
+// <main>, so it ends at </main>; the head has no nested sections.
+const fill = (html, id, inner) => id === 'articleBody'
+  ? html.replace(/(<section[^>]*id="articleBody"[^>]*>)[\s\S]*?<\/main>/,
+                 (_m, open) => `${open}${inner}</section>\n</main>`)
+  : html.replace(new RegExp(`(<section[^>]*id="${id}"[^>]*>)[\\s\\S]*?(</section>)`),
+                 (_m, open, close) => `${open}${inner}${close}`);
 
 const files = (await readdir(path.join(ROOT, 'blog'))).filter((f) => f.endsWith('.html'));
 let done = 0, skipped = [];

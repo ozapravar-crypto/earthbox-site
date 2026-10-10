@@ -25,7 +25,8 @@ Source brief: `Downloads/terrarium_maker_ux_brief_for_fable.md`. Adapted to the 
 | File | Owns |
 |---|---|
 | `data/maker.js` | Catalogue: chambers (re-exported from `upcoming.js`), 45 plants, substrates, recipes, which plant groups each chamber suits |
-| `scripts/maker.js` | Rules (pure, exported) + SVG preview + panels + controller. One `build` object; every change goes through `commit()` |
+| `scripts/build-codec.js` | What a build *is*: shape, lookups, capacity, share-link codec (pure). Shared with the cart; re-exported by maker.js |
+| `scripts/maker.js` | Rules (pure, exported) + SVG preview + panels + controller. One `build` object; every change goes through `commit()`. Loaded only on maker.html |
 | `styles/maker.css` | Page styles |
 | `scripts/plant-search.js` | Discovery rules (search, filters, guided, relax) · `node scripts/plant-search.test.mjs` |
 | `scripts/maker.test.mjs` | `node scripts/maker.test.mjs`: compatibility, capacity, chamber swap, share-link safety, recipes, enquiry text |

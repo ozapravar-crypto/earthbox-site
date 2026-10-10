@@ -2,7 +2,7 @@
 // Guards the cart: three line kinds, tallies, untrusted storage, order text.
 import assert from 'node:assert/strict';
 import { resolve, totals, clean, add, remove, setQty, move, orderText, keyOf, emptyCart, parseRange, buildTotal } from './cart.js';
-import { encodeBuild, emptyBuild } from './maker.js';
+import { encodeBuild, emptyBuild } from './build-codec.js';
 
 const capsule = { kind: 'product', sku: 'V1-PLT-006', material: 'abs', qty: 1 };          // ₹529
 const stack   = { kind: 'product', sku: 'V1-PLT-005', variant: 'big', material: 'asa', qty: 1 }; // ₹1,799
