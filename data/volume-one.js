@@ -27,6 +27,23 @@ export const materials = [
   { id: 'asa',  name: 'ASA',  description: 'Outdoor pro, UV resistant, weatherproof' }
 ];
 
+/**
+ * @typedef {'petg'|'abs'|'asa'} Material
+ * @typedef {Partial<Record<Material, number>>} PriceTable   whole rupees, e.g. { petg: 429, abs: 529 }
+ * @typedef {Object} Product
+ * @property {string} sku         unique, e.g. 'V1-PLT-006'
+ * @property {string} name
+ * @property {string} category    a categories[].slug
+ * @property {string} description
+ * @property {string} photo       file name; photoPath() picks the folder, -300/-600 sizes must exist
+ * @property {'available'|'coming-soon'} status
+ * @property {{id:string,name:string,description:string}[]} [variants]
+ * @property {null|PriceTable|Record<string, PriceTable>} pricing
+ *   null = price on enquiry; with variants, one PriceTable per variant id.
+ * Checked by scripts/data.test.mjs.
+ */
+
+/** @type {Product[]} */
 export const volumeOne = [
   // ═══════════════════════════════════════════════════════════════════
   // PLANTERS

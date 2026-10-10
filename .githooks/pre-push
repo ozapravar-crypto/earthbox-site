@@ -1,0 +1,6 @@
+#!/bin/sh
+# Runs the same checks as the Vercel build before anything leaves this
+# machine. Enabled by `npm install` (the prepare script sets core.hooksPath).
+# Skip once, knowingly: git push --no-verify
+echo "pre-push: npm test"
+npm test --silent || { echo "pre-push: checks failed — push stopped (see above)."; exit 1; }

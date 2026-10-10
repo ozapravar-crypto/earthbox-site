@@ -40,6 +40,12 @@ export const chamberElements = {
 export const SOILLESS = ['AirBox', 'AeroBox'];
 
 // `form` only picks the line-drawing used in the preview. It is not a care claim.
+/**
+ * Plant row: [id, group, name, shape, botanical] → { id, element, name, form, botanical }.
+ * id 'PLT-nnn' unique · element ∈ elements[].id · form ∈ keys of forms.
+ * Optional later: price (whole rupees), light, care, humidity, photo — see the note below.
+ * Checked by scripts/data.test.mjs.
+ */
 export const plants = [
   ['PLT-001', 'Earth', 'Syngonium Neon Pink', 'leaf', "Syngonium podophyllum 'Neon'"],
   ['PLT-002', 'Earth', 'Syngonium Albo Variegata', 'leaf', "Syngonium podophyllum 'Albo Variegatum'"],

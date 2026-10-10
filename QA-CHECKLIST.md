@@ -1,7 +1,7 @@
 # EarthBox Site QA Checklist
 
 ## Overview
-Static marketing site for EarthBox - Mumbai-based studio selling terrariums and 3D-printed plant accessories. No backend, JS-rendered content from data files.
+Static marketing site for EarthBox - Mumbai-based studio selling terrariums and 3D-printed plant accessories. No backend; content comes from `data/`. Automated checks (`npm test`, `npm run test:e2e`) are listed in README.md; this list is for what still needs a human eye.
 
 **Live URL:** https://www.earthbox.in/
 **Repo:** github.com/ozapravar-crypto/earthbox-site
@@ -16,8 +16,10 @@ Static marketing site for EarthBox - Mumbai-based studio selling terrariums and 
 | Catalogue | `/products.html` | Vol tabs (I/II/III), product grids, search |
 | Product Detail | `/product.html#SKU` | Dynamic from hash, specs, enquiry CTA |
 | Journal | `/blog.html` | Article grid, category filters |
-| Article | `/blog/[slug].html` | Dynamic from hash |
+| Article | `/blog/[slug].html` | Static HTML written at build (prerender.mjs) |
 | About | `/about.html` | Founder, materials, method |
+| Maker | `/maker.html` | Chamber → foundation → plants (search, map, guided) → your space → review; 3D preview with drawing fallback |
+| Cart / Saved | header on every page | Drawer: fixed-price, on-enquiry and custom-build lines; send order on WhatsApp/email |
 
 ---
 

@@ -13,7 +13,8 @@
     "test:e2e": "playwright test",
     "lint": "eslint .",
     "check:contrast": "node scripts/check-contrast.mjs",
-    "check:unused": "knip"
+    "check:unused": "knip",
+    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true"
   },
   "repository": {
     "type": "git",

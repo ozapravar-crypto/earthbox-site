@@ -6,6 +6,11 @@
 // Bite has photo only (no illustration provided).
 // ─────────────────────────────────────────────────────────────────────
 
+/**
+ * Each box: sku (unique, also the key in data/maker.js chamberElements), name,
+ * price as a '₹a – ₹b' range (the cart parses it), lead, capacity, photo.
+ * Checked by scripts/data.test.mjs.
+ */
 export const volumeTwo = {
   title:       'Elemental Boxes',
   subtitle:    'Climate-controlled vitrines',

@@ -123,3 +123,47 @@ All clones were shallow and read-only, outside the repo. Only `contrast-check.py
 | **knip** | `npm run check:unused` | no (advisory) | Found and removed `vol-index.js` (unused file), one more copy of the phone number (`enquiryWhatsApp`), and 12 needless exports |
 
 Mutation check: re-breaking the review-badge fix makes its Playwright test fail. The suite ran twice green (29 passed + 1 phone-only skip).
+
+## Phase 5 · done (10 Oct)
+
+- **README.md** rewritten:
+  - an architecture map (mermaid) and a layer table (what each layer owns and never does)
+  - every check, and whether it runs on deploy
+  - "how to" steps: product, plant, article, nav/contact/refund, page, colour
+  - the standards, each tied to the check that enforces it
+- **`scripts/data.test.mjs`** (in `npm test`) checks:
+  - unique ids
+  - categories, materials, groups and shapes exist
+  - prices are whole rupees
+  - chamber prices parse as ranges
+  - every recipe survives the share-link codec
+  - every article has its page and valid related links
+  - every NAV page exists
+
+  Mutation-checked: a plant in the wrong chamber, and a price written as text, each fail with a plain message.
+- **JSDoc shapes** at the top of `volume-one.js`, `maker.js` (plants) and `upcoming.js`.
+- **`.githooks/pre-push`** runs `npm test`. `npm install` turns it on (`prepare` → `core.hooksPath`; a no-op on Vercel).
+- **QA-CHECKLIST.md** points to the automated checks and lists the Maker and cart; the stale "articles are dynamic" line is fixed.
+
+### All phases
+
+| Finding | Status |
+|---|---|
+| E1 blank product page | fixed + e2e test |
+| E2 no deploy gate | fixed: `npm run build` runs 7 checks |
+| E3 every page loads every module | fixed: page-scoped `import()` (413 → ~40 KB on articles) |
+| E4 two article renderers | fixed: one, idempotent, guarded |
+| E5 header/footer ×29 | fixed: `data/site.js` + includes |
+| E6 duplicated constants/helpers | fixed (maker.js keeps a local `esc`/`SITE`: low risk, next touch) |
+| E7 asset drift | fixed: check-assets (found the plant photo bug) |
+| E8 hash routing | fixed with E1 |
+| E9 inline `onerror` / CSP | **deferred**: only pays off once GA's inline snippet moves to a file |
+| E10 cart ⇄ maker cycle | fixed: build-codec.js |
+| E11 oversized files / dead CSS | dead CSS + debug logs removed; splitting maker.js **deferred** (no current pain) |
+| E12 dead files | fixed |
+| E13 sharp in deps | fixed |
+| E14 contrast | fixed + check-contrast |
+| E15 module type | fixed |
+| E16 window global | fixed |
+| E17 no data types | fixed: JSDoc + data.test |
+| E18 stale docs | fixed: README, QA-CHECKLIST |
