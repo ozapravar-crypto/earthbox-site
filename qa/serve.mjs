@@ -1,0 +1,32 @@
+// Tiny static file server for the QA runs: in-process (nothing to kill
+// afterwards), parallel-safe, and supports byte ranges for the home film.
+// Python's http.server (listen backlog 5) stalled under parallel browsers.
+import http from 'node:http';
+import { createReadStream, statSync } from 'node:fs';
+import path from 'node:path';
+
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css',
+  '.json': 'application/json', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.png': 'image/png',
+  '.mp4': 'video/mp4', '.glb': 'model/gltf-binary', '.xml': 'application/xml', '.txt': 'text/plain', '.ico': 'image/x-icon' };
+
+export function serve(root, port){
+  const server = http.createServer((req, res) => {
+    const rel = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+    let file = path.join(root, rel.endsWith('/') ? rel + 'index.html' : rel);
+    if (!file.startsWith(root)) { res.writeHead(403).end(); return; }
+    let st;
+    try { st = statSync(file); if (st.isDirectory()) { file = path.join(file, 'index.html'); st = statSync(file); } }
+    catch { res.writeHead(404, { 'content-type': 'text/plain' }).end('not found'); return; }
+    const type = TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream';
+    const m = /bytes=(\d*)-(\d*)/.exec(req.headers.range || '');
+    if (m) {
+      const start = m[1] ? +m[1] : 0, end = m[2] ? Math.min(+m[2], st.size - 1) : st.size - 1;
+      res.writeHead(206, { 'content-type': type, 'content-range': `bytes ${start}-${end}/${st.size}`, 'accept-ranges': 'bytes', 'content-length': end - start + 1 });
+      createReadStream(file, { start, end }).on('error', () => res.destroy()).pipe(res);
+    } else {
+      res.writeHead(200, { 'content-type': type, 'content-length': st.size, 'accept-ranges': 'bytes' });
+      createReadStream(file).on('error', () => res.destroy()).pipe(res);   // a failed read drops one response, not the server
+    }
+  });
+  return new Promise(r => server.listen(port, () => r(server)));
+}

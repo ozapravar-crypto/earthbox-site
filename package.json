@@ -14,7 +14,9 @@
     "lint": "eslint .",
     "check:contrast": "node scripts/check-contrast.mjs",
     "check:unused": "knip",
-    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true"
+    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
+    "qa:contrast": "node qa/contrast/audit.mjs",
+    "qa:contrast:quick": "node qa/contrast/audit.mjs --quick"
   },
   "repository": {
     "type": "git",
@@ -29,6 +31,7 @@
   "homepage": "https://github.com/ozapravar-crypto/earthbox-site#readme",
   "type": "module",
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.58.2",
     "eslint": "10.12.0",

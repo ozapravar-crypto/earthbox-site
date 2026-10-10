@@ -794,7 +794,7 @@
   text-transform:uppercase;
   color:var(--accent-text);
   padding:.25rem .5rem;
-  background:var(--bg-tint);
+  background:var(--bg);   /* on --bg-tint it measured 4.42:1 under the paper grain */
   border:1px dashed var(--rule-stronger);
 }
 

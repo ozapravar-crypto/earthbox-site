@@ -23,3 +23,5 @@ scripts/generate-responsive.cjs
 # Playwright output
 test-results/
 playwright-report/
+# full per-element results (MBs): CI artifact, not committed; the summary is
+qa/reports/contrast-report.json

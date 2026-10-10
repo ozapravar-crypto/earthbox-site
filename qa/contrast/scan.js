@@ -1,0 +1,227 @@
+// ─────────────────────────────────────────────────────────────────────
+// qa/contrast/scan.js · runs INSIDE the browser (page.evaluate)
+//
+// Finds every visible piece of text, placeholder, icon-only control and
+// focus ring, and works out the colour it is drawn in and the colour it is
+// drawn on, from computed styles — including alpha, ancestor opacity and
+// stacked semi-transparent backgrounds. Anything a stylesheet can't answer
+// (photo or gradient behind it, blend modes, overlapping layers, opacity on
+// the background itself) comes back as status "review" with the reason; the
+// Node side then measures those against real screenshot pixels.
+//
+// Self-contained on purpose: Playwright serialises this function.
+// ─────────────────────────────────────────────────────────────────────
+
+export function scanPage({ scope = null, state = 'default', base = 0 } = {}){
+  const parse = (c) => {
+    if (!c || c === 'transparent') return { r: 0, g: 0, b: 0, a: 0 };
+    let m = c.match(/^rgba?\(([^)]+)\)/);
+    if (m) {
+      const p = m[1].split(/[\s,/]+/).filter(Boolean).map(parseFloat);
+      return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 };
+    }
+    m = c.match(/^color\(srgb ([^)]+)\)/);
+    if (m) {
+      const p = m[1].split(/[\s/]+/).filter(Boolean).map(parseFloat);
+      return { r: p[0] * 255, g: p[1] * 255, b: p[2] * 255, a: p.length > 3 ? p[3] : 1 };
+    }
+    return null;
+  };
+  const over = (top, bot) => {                         // alpha-composite top over bottom (bottom opaque)
+    const a = top.a;
+    return { r: top.r * a + bot.r * (1 - a), g: top.g * a + bot.g * (1 - a), b: top.b * a + bot.b * (1 - a), a: 1 };
+  };
+  const lum = ({ r, g, b }) => {
+    const f = (v) => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; };
+    return .2126 * f(r) + .7152 * f(g) + .0722 * f(b);
+  };
+  const ratio = (x, y) => { const [a, b] = [lum(x), lum(y)].sort((p, q) => q - p); return (a + .05) / (b + .05); };
+  const hex = ({ r, g, b }) => '#' + [r, g, b].map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
+
+  const pageBg = () => {
+    const h = parse(getComputedStyle(document.documentElement).backgroundColor);
+    const b = parse(getComputedStyle(document.body).backgroundColor);
+    if (b && b.a >= .999) return b;
+    if (h && h.a >= .999) return h;
+    return { r: 255, g: 255, b: 255, a: 1 };
+  };
+
+  // Effective background: walk ancestors compositing translucent colours.
+  // Flags anything that makes a CSS-only answer unreliable.
+  function background(el){
+    const flags = new Set(), layers = [];
+    let opacityAbove = 1, opacityBelowBg = 1, found = false;
+    for (let n = el; n && n.nodeType === 1; n = n.parentElement) {
+      const cs = getComputedStyle(n);
+      const op = parseFloat(cs.opacity);
+      if (!found) opacityBelowBg *= op; else opacityAbove *= op;
+      if (cs.mixBlendMode && cs.mixBlendMode !== 'normal') flags.add('blend:' + cs.mixBlendMode);
+      if (cs.backgroundImage && cs.backgroundImage !== 'none') flags.add('background-image');
+      // body::before is the site-wide paper grain (atmosphere.css). It is not
+      // flagged per element; instead its worst-case darkening is applied to
+      // both colours below (GRAIN), because on borderline pairs it decides
+      // pass/fail (the "Coming soon" badge: 4.67 without it, 4.42 under it).
+      for (const pseudo of (n === document.body || n === document.documentElement) ? [] : ['::before', '::after']) {
+        const ps = getComputedStyle(n, pseudo);
+        if (ps.content && ps.content !== 'none' && ps.position !== 'static' && ((ps.backgroundImage && ps.backgroundImage !== 'none') || (parse(ps.backgroundColor)?.a > 0))) {
+          if (n !== el) flags.add('pseudo-overlay');
+        }
+      }
+      if (!found) {
+        const bg = parse(cs.backgroundColor);
+        if (bg && bg.a > 0) { layers.push(bg); if (bg.a >= .999) found = true; }
+      }
+      if (found && n.tagName === 'DIALOG') break;
+    }
+    if (opacityAbove < .999) flags.add('opacity-on-background');
+    let bg = found ? { ...layers.pop(), a: 1 } : pageBg();
+    for (let i = layers.length - 1; i >= 0; i--) bg = over(layers[i], bg);
+    return { bg, flags, fgOpacity: opacityBelowBg };
+  }
+
+  // Is anything painted between the element and its CSS background? (a
+  // positioned photo, canvas, video or another box sitting behind it)
+  function behind(el){
+    el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+    const r = el.getBoundingClientRect(), flags = new Set();
+    const pts = [[r.left + r.width / 2, r.top + r.height / 2], [r.left + 2, r.top + r.height / 2], [r.right - 2, r.top + r.height / 2]];
+    for (const [x, y] of pts) {
+      if (x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) { flags.add('offscreen-unverified'); continue; }
+      const stack = document.elementsFromPoint(x, y);
+      const i = stack.findIndex(s => s === el || el.contains(s));
+      for (const s of stack.slice(Math.max(i, 0) + 1)) {
+        if (s.contains(el)) continue;                    // an ancestor: already counted
+        if (/^(IMG|VIDEO|CANVAS|PICTURE)$/.test(s.tagName)) flags.add('over-' + s.tagName.toLowerCase());
+        else {
+          const cs = getComputedStyle(s);
+          if (cs.backgroundImage !== 'none') flags.add('over-background-image');
+          else if ((parse(cs.backgroundColor)?.a ?? 0) > 0) flags.add('over-other-box');
+        }
+      }
+    }
+    return flags;
+  }
+
+  const visible = (el) => {
+    if (!el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) return false;
+    const r = el.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2) return false;
+    const cs = getComputedStyle(el);
+    if (cs.clip && cs.clip !== 'auto' && /rect\(0/.test(cs.clip)) return false;     // .u-sr-only
+    if (cs.clipPath && /inset\(50%|circle\(0/.test(cs.clipPath)) return false;
+    return true;
+  };
+
+  let uid = base;                       // ids stay unique across scans, so axe findings can be linked back
+  const selectorOf = (el) => {
+    if (el.id) return '#' + CSS.escape(el.id);
+    const parts = [];
+    for (let n = el; n && n.nodeType === 1 && parts.length < 5; n = n.parentElement) {
+      if (n.id) { parts.unshift('#' + CSS.escape(n.id)); break; }
+      let s = n.tagName.toLowerCase();
+      const cls = [...n.classList].filter(c => !/^(in|is-|active|reveal)/.test(c)).slice(0, 2);
+      if (cls.length) s += '.' + cls.map(c => CSS.escape(c)).join('.');
+      const sib = n.parentElement ? [...n.parentElement.children].filter(c => c.tagName === n.tagName) : [];
+      if (sib.length > 1) s += `:nth-of-type(${sib.indexOf(n) + 1})`;
+      parts.unshift(s);
+    }
+    return parts.join(' > ');
+  };
+
+  // Paper grain: multiply with rgb(.17) at alpha ≤ .06 × opacity .35 → each
+  // channel × (1 − .83 × .021) at worst. Dialogs sit above it (top layer).
+  const bodyBefore = getComputedStyle(document.body, '::before');
+  const GRAIN = bodyBefore.content !== 'none' && bodyBefore.backgroundImage !== 'none'
+    ? 1 - (1 - .17) * .06 * parseFloat(bodyBefore.opacity || '1') : 1;
+  const grain = (c, el) => (GRAIN === 1 || el.closest('dialog[open]') ? c : { ...c, r: c.r * GRAIN, g: c.g * GRAIN, b: c.b * GRAIN });
+
+  const out = [];
+  function record(el, kind, fgRaw, extra = {}){
+    const { bg, flags, fgOpacity } = background(el);
+    for (const f of behind(el)) flags.add(f);
+    const fg0 = parse(fgRaw);
+    if (!fg0) return;
+    const fg = { ...fg0, a: fg0.a * fgOpacity };
+    if (fg.a < .02) return;                             // fully transparent ink: nothing drawn
+    const shownRaw = over(fg, bg);
+    const shown = grain(shownRaw, el), bgG = grain(bg, el);
+    const cs = getComputedStyle(el);
+    const size = parseFloat(cs.fontSize), weight = parseInt(cs.fontWeight, 10) || 400;
+    const large = kind === 'text' && (size >= 24 || (size >= 18.66 && weight >= 700));
+    const threshold = kind === 'icon' || kind === 'focus-ring' ? 3 : large ? 3 : 4.5;
+    const r = ratio(shown, bgG);
+    const disabled = el.closest(':disabled, [aria-disabled="true"]') !== null;
+    const review = [...flags].filter(f => f !== 'offscreen-unverified');
+    let status = disabled ? 'exempt-disabled' : review.length ? 'review' : r >= threshold ? 'pass' : 'fail';
+    el.setAttribute('data-cq', String(++uid));
+    out.push({
+      cq: uid, state, kind, selector: selectorOf(el),
+      text: (extra.text ?? el.innerText ?? '').replace(/\s+/g, ' ').trim().slice(0, 60),
+      fg: hex(fg0) + (fg.a < .999 ? ` @${fg.a.toFixed(2)}` : ''), fgComposited: hex(shown), bg: hex(bg),
+      ratio: Math.round(r * 100) / 100, threshold, large, fontSize: size, fontWeight: weight,
+      flags: [...flags], status, grain: el.closest('dialog[open]') ? 1 : GRAIN
+    });
+  }
+
+  const root = scope ? document.querySelector(scope) : document.body;
+  if (!root) return [];
+  // behind() scrolls elements into view; put the page back afterwards so the
+  // state being measured (e.g. the header's scrolled look) doesn't drift.
+  const startY = scrollY;
+
+  // 1 · Text: every element that directly owns visible text.
+  const owners = new Set();
+  const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: (t) => t.nodeValue.trim() && !t.parentElement.closest('script,style,noscript,template,svg') ? 1 : 2
+  });
+  for (let t = tw.nextNode(); t; t = tw.nextNode()) owners.add(t.parentElement);
+  for (const el of owners) if (visible(el)) record(el, 'text', getComputedStyle(el).color);
+
+  // 2 · Placeholders.
+  for (const el of root.querySelectorAll('input[placeholder], textarea[placeholder]'))
+    if (visible(el) && !el.value) record(el, 'placeholder', getComputedStyle(el, '::placeholder').color, { text: el.placeholder });
+
+  // 3 · Icon-only controls (non-text contrast, 3:1): svg/span marks inside
+  //     links and buttons that have no visible text of their own.
+  const CONTROLS = 'a, button, [role=button], summary';
+  for (const c of [root, ...root.querySelectorAll(CONTROLS)].filter(n => n.matches(CONTROLS))) {   // root too: a scope can be the control itself
+    if (!visible(c) || c.innerText.trim()) continue;
+    const mark = c.querySelector('svg') || c.querySelector('span');
+    if (!mark || !visible(mark)) continue;
+    const cs = getComputedStyle(mark);
+    const fg = mark.tagName === 'svg' || mark.tagName === 'SVG'
+      ? (cs.stroke && cs.stroke !== 'none' && !cs.stroke.startsWith('url') ? cs.stroke : cs.color)
+      : (parse(cs.backgroundColor)?.a > 0 ? cs.backgroundColor : cs.color);
+    record(mark, 'icon', fg, { text: c.getAttribute('aria-label') || '(icon)' });
+  }
+
+  // 4 · Focus ring of the focused element, if any (3:1 against what's behind it).
+  const f = document.activeElement;
+  if (f && f !== document.body && root.contains(f) && visible(f)) {
+    const cs = getComputedStyle(f);
+    if (cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0) {
+      // The ring is drawn around the control, so it sits on the parent's background.
+      record(f.parentElement || f, 'focus-ring', cs.outlineColor, { text: `outline of ${f.tagName.toLowerCase()} "${(f.innerText || f.getAttribute('aria-label') || '').trim().slice(0, 30)}"` });
+    }
+  }
+  scrollTo({ top: startY, behavior: 'instant' });
+  return out;
+}
+
+// Hover/focus targets: one element per distinct look (tag + classes), so a
+// list of 45 identical buttons is checked once, not 45 times.
+export function interactiveSignatures({ limit = 60 } = {}){
+  const seen = new Set(), list = [];
+  for (const el of document.querySelectorAll('a[href], button, summary, [role=tab], label.mk-choice, label.mk-gd-opt, input, select, textarea')) {
+    if (!el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) continue;
+    const r = el.getBoundingClientRect();
+    if (r.width < 4 || r.height < 4) continue;
+    const sig = el.tagName + '.' + [...el.classList].filter(c => !/^(in|is-|active)/.test(c)).sort().join('.') + (el.closest('.runhead') ? '@head' : el.closest('footer') ? '@foot' : el.closest('dialog') ? '@dialog' : '');
+    if (seen.has(sig)) continue;
+    seen.add(sig);
+    el.setAttribute('data-cq-target', String(list.length));
+    list.push({ i: list.length, sig, label: (el.innerText || el.getAttribute('aria-label') || el.placeholder || '').trim().slice(0, 30) });
+    if (list.length >= limit) break;
+  }
+  return list;
+}

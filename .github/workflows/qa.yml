@@ -1,0 +1,57 @@
+# QA on every push and pull request. Vercel's build already runs `npm test`
+# (no browser there); this adds the browser checks on a clean Linux machine.
+name: QA
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Unit, lint, build checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+
+  browser:
+    name: Smoke + contrast regressions (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: playwright-results, path: test-results, retention-days: 14 }
+
+  contrast:
+    name: Full contrast audit (every route × theme × viewport × state)
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      # Exits 1 on any confirmed failure not accepted (with a written reason)
+      # in qa/contrast/baseline.json. The report is uploaded either way.
+      - run: npm run qa:contrast
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: contrast-report, path: qa/reports, retention-days: 30 }

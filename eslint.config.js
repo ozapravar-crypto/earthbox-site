@@ -4,7 +4,7 @@ import js from '@eslint/js';
 import globals from 'globals';
 
 export default [
-  { ignores: ['node_modules/**', 'scripts/vendor/**', 'assets/**', '.claude/**', '_audits/**',
+  { ignores: ['node_modules/**', 'scripts/vendor/**', 'assets/**', '.claude/**', '_audits/**', 'qa/reports/**',
     // local-only image tools (gitignored)
     'scripts/optimize-images.*', 'scripts/generate-responsive.cjs'] },
   js.configs.recommended,
@@ -22,5 +22,5 @@ export default [
   },
   { files: ['scripts/**/*.cjs'], languageOptions: { sourceType: 'commonjs' } },
   // Playwright callbacks passed to page.evaluate() run in the browser.
-  { files: ['tests/**/*.mjs'], languageOptions: { globals: { ...globals.node, ...globals.browser } } }
+  { files: ['tests/**/*.mjs', 'qa/**/*.{js,mjs}'], languageOptions: { ecmaVersion: 2024, sourceType: 'module', globals: { ...globals.node, ...globals.browser } } }
 ];

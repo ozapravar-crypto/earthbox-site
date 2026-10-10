@@ -21,15 +21,18 @@
   isolation:isolate;
 }
 .hero-bg,.hero-bg img{position:absolute;inset:0;width:100%;height:100%}
-.hero-bg{z-index:-1}
+.hero-bg{z-index:-2}   /* below the ::before scrim (-1); at equal z the photo painted over it */
 .hero-bg img{object-fit:cover;object-position:62% 50%}
 .hero::before{               /* scrim: left for the copy, bottom for the proof row */
   content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  /* Each band sits behind one group of text. Strengths are set by measurement
+     (qa/contrast: every glyph ≥ 4.5:1, title ≥ 3:1 at 1280–1920 px), not by eye. */
+  --s-top:.66; --s-left:.62; --s-right:.62; --s-bot:.62;
   background:
-    radial-gradient(ellipse 34% 22% at 88% 0%,rgba(24,20,14,.55),rgba(24,20,14,0)),
-    linear-gradient(180deg,rgba(24,20,14,.55) 0%,rgba(24,20,14,0) 18%),
-    linear-gradient(90deg,rgba(24,20,14,.66) 0%,rgba(24,20,14,.45) 40%,rgba(24,20,14,0) 68%),
-    linear-gradient(0deg,rgba(18,15,10,.55) 0%,rgba(18,15,10,0) 22%);
+    linear-gradient(180deg,rgba(20,16,10,var(--s-top)) 0,rgba(20,16,10,var(--s-top)) 4.5rem,rgba(20,16,10,0) 10rem),
+    linear-gradient(90deg,rgba(20,16,10,var(--s-left)) 0,rgba(20,16,10,var(--s-left)) 40%,rgba(20,16,10,0) 64%),
+    linear-gradient(270deg,rgba(20,16,10,var(--s-right)) 0,rgba(20,16,10,var(--s-right)) 14%,rgba(20,16,10,0) 28%),
+    linear-gradient(0deg,rgba(18,15,10,var(--s-bot)) 0,rgba(18,15,10,0) 9rem);
 }
 
 .hero-copy{align-self:center;max-width:36rem;opacity:0;animation:fadeInHero 1.2s ease 2.6s forwards}
@@ -108,7 +111,7 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
   .hero{display:block;min-height:0;padding:0 var(--pad)}
   .hero-bg{position:relative;display:block;width:auto;height:58svh;margin:0 calc(var(--pad) * -1)}
   .hero-bg img{object-position:50% 38%}
-  .hero::before{background:linear-gradient(180deg,rgba(24,20,14,.5) 0%,rgba(24,20,14,0) 18%);bottom:auto;height:58svh}
+  .hero::before{background:linear-gradient(180deg,rgba(20,16,10,var(--s-top)) 0,rgba(20,16,10,var(--s-top)) 4.5rem,rgba(20,16,10,0) 9rem);bottom:auto;height:58svh}
   .hero-copy{padding-top:2.25rem}
   .hero-title{font-size:clamp(3.5rem,18vw,4.75rem)}
   .hero-sub{letter-spacing:.16em}
@@ -270,14 +273,14 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
 .manifesto-tail{
   font-family:var(--body);
   font-style:italic;
-  color:rgba(248,247,245,.55);
+  color:rgba(248,247,245,.7);   /* .55 measured 4.27:1 on the lit band; .7 ≥ 6:1 */
   font-size:1rem;
   line-height:1.7;
   max-width:40ch;
   margin:2rem auto 0;
 }
 [data-theme="dark"] .manifesto-tail{
-  color:rgba(26,25,24,.6);
+  color:rgba(26,25,24,.75);   /* dark mode band is light: .6 measured 4.23:1, .75 ≥ 6:1 */
 }
 
 /* ─── BRAND CONTEXT (spread) ─── */

@@ -26,6 +26,10 @@ const lum = (hex) => {
   return .2126 * r + .7152 * g + .0722 * b;
 };
 export const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + .05) / (y + .05); };
+// The site-wide paper grain (atmosphere.css body::before) multiplies every
+// pixel by up to (1 − .83 × .06 × .35). Check pairs under that worst case.
+const GRAIN = 1 - .83 * .06 * .35;
+const grained = (hex) => '#' + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * GRAIN).toString(16).padStart(2, '0')).join('');
 
 // Every text token × every surface it appears on. --accent is decorative
 // (rules, borders, icons) and deliberately not in this list.
@@ -36,7 +40,7 @@ let fail = 0;
 for (const [mode, t] of [['light', light], ['dark', dark]])
   for (const fg of TEXT) for (const bg of SURFACES) {
     if (!t[fg] || !t[bg]) { console.error(`missing token --${!t[fg] ? fg : bg} (${mode})`); fail++; continue; }
-    const r = ratio(t[fg], t[bg]);
+    const r = ratio(grained(t[fg]), grained(t[bg]));
     if (r < 4.5) { fail++; console.error(`FAIL ${mode}: --${fg} ${t[fg]} on --${bg} ${t[bg]} = ${r.toFixed(2)}:1 (needs 4.5)`); }
   }
 if (fail) { console.error(`check-contrast FAILED — ${fail} pair(s)`); process.exit(1); }

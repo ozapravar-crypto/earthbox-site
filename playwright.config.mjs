@@ -11,7 +11,7 @@ export default defineConfig({
   fullyParallel: true,
   reporter: [['list']],
   use: { baseURL: process.env.BASE_URL || 'http://localhost:4173', reducedMotion: 'reduce' },
-  webServer: { command: 'python3 -m http.server 4173', port: 4173, reuseExistingServer: true, stdout: 'ignore', stderr: 'ignore' },
+  webServer: { command: 'node qa/serve-cli.mjs 4173', port: 4173, reuseExistingServer: true, stdout: 'ignore', stderr: 'ignore' },
   projects: [
     { name: 'desktop', use: { viewport: { width: 1440, height: 900 } } },
     { name: 'phone', use: { ...devices['Pixel 7'], browserName: 'chromium' } }

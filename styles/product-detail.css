@@ -39,7 +39,7 @@
   color:var(--ink);
 }
 .pd-breadcrumb-sep{
-  color:var(--rule);
+  color:var(--mute);   /* was --rule (12 % ink, 1.25:1): the › is text, so it needs 4.5:1 */
   font-size:.7rem;
 }
 .pd-breadcrumb-current{
