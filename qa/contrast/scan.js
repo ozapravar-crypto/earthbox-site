@@ -64,7 +64,12 @@ export function scanPage({ scope = null, state = 'default', base = null } = {}){
       for (const pseudo of (n === document.body || n === document.documentElement) ? [] : ['::before', '::after']) {
         if (n === el) {                                  // the control's own fill layer (e.g. .cta hover sweep)
           const ps = getComputedStyle(n, pseudo);
-          if (ps.content && ps.content !== 'none' && ((ps.backgroundImage && ps.backgroundImage !== 'none') || (parse(ps.backgroundColor)?.a > 0))) flags.add('own-pseudo-fill');
+          // Only a fill that is actually showing: not display:none (secondary
+          // buttons) and not parked outside the box (the .cta sweep at rest is
+          // translateY(101%) behind overflow:hidden).
+          const m = (ps.transform || 'none').match(/matrix\(([^)]+)\)/);
+          const parked = m && Math.abs(parseFloat(m[1].split(',')[5])) >= n.getBoundingClientRect().height * .5;
+          if (ps.display !== 'none' && !parked && ps.content && ps.content !== 'none' && ((ps.backgroundImage && ps.backgroundImage !== 'none') || (parse(ps.backgroundColor)?.a > 0))) flags.add('own-pseudo-fill');
           continue;
         }
         const ps = getComputedStyle(n, pseudo);
@@ -153,7 +158,8 @@ export function scanPage({ scope = null, state = 'default', base = null } = {}){
     // lies behind the CONTROL (a photo, a band), but "covered" doesn't apply.
     for (const f of behind(extra.ringOf || el)) if (!(extra.ringOf && f === 'covered')) flags.add(f);
     if (flags.has('covered')) {                          // not visible to anyone: report, don't measure
-      out.push({ cq: null, state, kind, selector: selectorOf(el), text: (extra.text ?? el.innerText ?? '').replace(/\s+/g, ' ').trim().slice(0, 60), status: 'covered', flags: [...flags] });
+      el.setAttribute('data-cq', String(++uid));         // id kept so axe findings on it can be settled as "covered"
+      out.push({ cq: uid, state, kind, selector: selectorOf(el), text: (extra.text ?? el.innerText ?? '').replace(/\s+/g, ' ').trim().slice(0, 60), status: 'covered', flags: [...flags] });
       return;
     }
     const fg0 = parse(fgRaw);

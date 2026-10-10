@@ -539,6 +539,7 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
   overflow:hidden;
   background:var(--mi-paper);
   color:var(--mi-ink);
+  --ink:var(--mi-ink);   /* paper band stays light in dark mode: rings and ink-based text must stay dark (ink ring measured 1.05:1) */
   padding-block:clamp(4rem,10vh,8rem);
 }
 .mi-inner{

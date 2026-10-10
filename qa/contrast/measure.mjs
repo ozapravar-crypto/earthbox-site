@@ -36,7 +36,9 @@ export async function resolveWithPixels(page, item){
     // Shoot the element's screen area, not the element: a hidden icon can't be
     // screenshotted by locator (it waits for visibility and times out).
     await el.evaluate((e, a) => e.removeAttribute(a), attr);
-    await el.scrollIntoViewIfNeeded({ timeout: 3000 }).catch(() => {});
+    // Centre it (not just "into view"), so bottom bars don't sit over it.
+    await el.evaluate(e => { if (!e.closest('[style*="position: fixed"]')) e.scrollIntoView({ block: 'center', behavior: 'instant' }); }).catch(() => {});
+    await page.waitForTimeout(80);
     const box = await el.boundingBox();
     if (!box || box.width < 1 || box.height < 1) throw new Error('no box');
     const clip = { x: box.x, y: box.y, width: box.width, height: box.height };
@@ -88,7 +90,17 @@ export async function resolveBatch(page, items){
   // "is-scrolled" toggle catch up) before anything pinned is measured.
   const restore = async () => { await page.evaluate((y) => scrollTo({ top: y, behavior: 'instant' }), startY); await page.waitForTimeout(150); };
   if (flowing.length) {
-    const { vh, head } = await page.evaluate(() => ({ vh: innerHeight, head: Math.ceil(document.querySelector('.runhead')?.getBoundingClientRect().bottom || 0) }));
+    // Usable band of the viewport: below the fixed header and above any fixed or
+    // sticky bar along the bottom (the Maker's action bar covered buttons on phones).
+    const { vh, head } = await page.evaluate(() => {
+      let foot = innerHeight;
+      for (const x of [innerWidth * .25, innerWidth * .5, innerWidth * .75])
+        for (const e of document.elementsFromPoint(x, innerHeight - 4)) {
+          const p = getComputedStyle(e).position;
+          if ((p === 'fixed' || p === 'sticky') && !e.classList.contains('floating-wa')) { foot = Math.min(foot, e.getBoundingClientRect().top); break; }
+        }
+      return { vh: Math.floor(foot), head: Math.ceil(document.querySelector('.runhead')?.getBoundingClientRect().bottom || 0) };
+    });
     if (!(await page.locator('#cq-all').count())) await page.addStyleTag({ content: HIDE_ALL }).then(h => h.evaluate(e => { e.id = 'cq-all'; }));
     await page.evaluate((icons) => { document.documentElement.classList.add('cq-all', 'cq-shot'); for (const id of icons) document.querySelector(`[data-cq="${id}"]`)?.setAttribute('data-cq-icon', ''); },
       flowing.filter(i => i.kind === 'icon').map(i => i.cq));

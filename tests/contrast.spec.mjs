@@ -194,3 +194,33 @@ for (const theme of THEMES) {
     expect(bad).toEqual([]);
   });
 }
+
+// CQ-014 · "Build your little world" keeps its light paper in dark mode, but
+// dark mode's --ink is light: its focus ring measured 1.05:1. --ink is now
+// set to the section's own ink.
+test('CQ-014 Maker-invite ring passes in dark mode', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('earthbox-theme', 'dark'));
+  await page.goto('/index.html');
+  await page.evaluate(() => document.querySelectorAll('.reveal,.reveal-line').forEach(e => e.classList.add('in')));
+  await page.addStyleTag({ content: '*{transition:none!important;animation-duration:0s!important;animation-delay:0s!important}' });
+  const el = page.locator('.mi-cta').first();
+  await el.scrollIntoViewIfNeeded();
+  await page.keyboard.press('Shift');
+  await el.focus();
+  const rings = (await page.evaluate(scanPage, { scope: '.mi-cta', state: 'focus' })).filter(r => r.kind === 'focus-ring');
+  expect(rings.length).toBeGreaterThan(0);
+  const found = [...rings.filter(r => r.status !== 'review'), ...await resolveBatch(page, rings.filter(r => r.status === 'review'))];
+  expect(found.filter(r => r.status !== 'pass').map(r => `${r.ratio}:1 ${r.fg} on ${r.bg}`)).toEqual([]);
+});
+
+// Audit regression · Maker buttons on phones were measured under the sticky
+// action bar (11 'review' items). The review step must measure cleanly.
+test('Maker review step on a phone measures with no review/fail items', async ({ browser }) => {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
+  await page.addInitScript(() => sessionStorage.setItem('earthbox-loader-seen', '1'));
+  await page.goto('/maker.html');
+  await page.locator('[data-act=recipe]').first().click();
+  await page.locator('.mk-step[data-to=review]').click();
+  expect(await failures(page, '#mkPanelBody', 'review-step')).toEqual([]);
+  await page.close();
+});
