@@ -4,192 +4,121 @@
    notice, colophon. The catalogue + elemental sections live on /products.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ─── HERO ─── */
+/* ─── HERO · full-bleed photograph (owner's reference, 10 Oct 2026) ───
+   Photo: assets/home/hero*.webp (owner-supplied). Text sits on the calm wall
+   at left; a soft scrim keeps it ≥4.5:1. Same reveal timing as before so the
+   intro loader finishes first. */
 .hero{
-  min-height:100vh;
-  display:grid;
-  grid-template-rows:auto 1fr auto;
-  padding-block:2rem 3rem;
   position:relative;
+  min-height:100vh;min-height:100svh;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-rows:1fr auto;
+  padding:clamp(7rem,16vh,10rem) var(--pad) 0;
   overflow:hidden;
+  color:#F6F1E8;
+  background:#2A241C;
+  isolation:isolate;
+}
+.hero-bg,.hero-bg img{position:absolute;inset:0;width:100%;height:100%}
+.hero-bg{z-index:-1}
+.hero-bg img{object-fit:cover;object-position:62% 50%}
+.hero::before{               /* scrim: left for the copy, bottom for the proof row */
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(ellipse 34% 22% at 88% 0%,rgba(24,20,14,.55),rgba(24,20,14,0)),
+    linear-gradient(180deg,rgba(24,20,14,.55) 0%,rgba(24,20,14,0) 18%),
+    linear-gradient(90deg,rgba(24,20,14,.66) 0%,rgba(24,20,14,.45) 40%,rgba(24,20,14,0) 68%),
+    linear-gradient(0deg,rgba(18,15,10,.55) 0%,rgba(18,15,10,0) 22%);
 }
 
-.hero-stage{
-  display:grid;
-  grid-template-columns:1fr auto 1fr;
-  align-items:center;
-  gap:clamp(1rem,4vw,5rem);
-  padding-inline:var(--pad);
-  position:relative;
+.hero-copy{align-self:center;max-width:36rem;opacity:0;animation:fadeInHero 1.2s ease 2.6s forwards}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:.9rem;
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.36em;text-transform:uppercase;color:rgba(246,241,232,.82);
 }
-/* Subtle connecting lines to unify hero elements */
-.hero-stage::before,
-.hero-stage::after{
-  content:"";
-  position:absolute;
-  top:50%;
-  height:1px;
-  background:var(--rule);
-  opacity:0;
-  animation:heroLineReveal 1.2s ease 3.4s forwards;
+.hero-eyebrow::before{content:"";width:.5rem;height:1px;background:currentColor}
+.hero-eyebrow::after{content:"";width:3.5rem;height:1px;background:currentColor;opacity:.6}
+.hero-title{
+  margin:1.25rem 0 .5rem;
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(4.25rem,10.5vw,9.75rem);line-height:.92;letter-spacing:-.02em;
+  color:#FBF8F2;
 }
-.hero-stage::before{
-  left:calc(var(--pad) + 220px + 1rem);
-  width:clamp(2rem,6vw,5rem);
-}
-.hero-stage::after{
-  right:calc(var(--pad) + 240px + 1rem);
-  width:clamp(2rem,6vw,5rem);
-}
-@keyframes heroLineReveal{to{opacity:1}}
-@media (max-width: 900px){
-  .hero-stage::before,
-  .hero-stage::after{display:none}
-}
+.hero-sub{font-family:var(--body);font-size:clamp(1.05rem,1.7vw,1.45rem);letter-spacing:.22em;color:rgba(251,248,242,.92)}
+.hero-lede{margin-top:2rem;max-width:24rem;font-family:var(--body);font-style:italic;font-size:1rem;line-height:1.6;color:rgba(246,241,232,.86)}
 
-.hero-left{
-  justify-self:start;
-  max-width:220px;
-  opacity:0;
-  animation:fadeInHero 1.2s ease 2.8s forwards;
+.hero-cta{
+  display:inline-flex;align-items:center;gap:1.6rem;margin-top:2.5rem;
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.32em;text-transform:uppercase;color:#FBF8F2;
 }
-.hero-left .num{
-  font-family:var(--serif);
-  font-size:3rem;
-  color:var(--accent-text);
-  line-height:1;
-  display:block;
-  margin-bottom:.75rem;
+.hero-cta-ring{                 /* circle per the reference — the one round CTA on the site */
+  display:grid;place-items:center;width:58px;height:58px;border-radius:50%;
+  border:1px solid rgba(251,248,242,.75);transition:background .35s var(--ease-archival),color .35s ease,border-color .35s ease;
 }
-.hero-left p{
-  font-family:var(--body);
-  font-style:italic;
-  font-size:.88rem;
-  color:var(--mute);
-  line-height:1.55;
-}
+.hero-cta-ring svg{width:18px;height:9px;transition:transform .35s ease}
+.hero-cta:hover .hero-cta-ring,.hero-cta:focus-visible .hero-cta-ring{background:#FBF8F2;color:#2A241C;border-color:#FBF8F2}
+.hero-cta:hover .hero-cta-ring svg{transform:translateX(3px)}
 
-.logo-stage{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  position:relative;
+.hero-aside{
+  grid-column:2;grid-row:1;align-self:center;
+  display:grid;justify-items:end;gap:.55rem;padding-right:3.25rem;position:relative;
+  font-family:var(--sans);font-size:.6rem;letter-spacing:.36em;text-transform:uppercase;color:rgba(251,248,242,.8);
+  opacity:0;animation:fadeInHero 1.2s ease 3s forwards;
 }
-/* ─── New colored logo (PNG · pixel-perfect) ─── */
-.logo-img{
-  width:clamp(160px,22vw,280px);
-  height:auto;
-  display:block;
-  opacity:0;
-  transform:scale(0.96);
-  animation:logoEnter 1.4s var(--ease-archival) .3s forwards;
+.hero-aside::before{content:"";position:absolute;right:0;top:-.5rem;width:2rem;height:1px;background:currentColor}
+.hero-aside::after{content:"";position:absolute;right:.9rem;top:1rem;bottom:0;width:1px;background:currentColor}
+
+.hero-proof{
+  grid-column:1;grid-row:2;align-self:end;
+  display:flex;flex-wrap:wrap;align-items:center;gap:1rem 0;
+  list-style:none;margin:0;padding:1.75rem 0 2.25rem;
+  font-family:var(--sans);font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(251,248,242,.86);
+  opacity:0;animation:fadeInHero 1s ease 3.2s forwards;
 }
-@keyframes logoEnter{
-  to{opacity:1;transform:scale(1)}
+.hero-proof li{display:inline-flex;align-items:center;gap:.75rem;padding-right:1.75rem;margin-right:1.75rem;border-right:1px solid rgba(251,248,242,.35)}
+.hero-proof li:last-child{border-right:0}
+.hero-proof svg{width:15px;height:15px;flex:none}
+
+.hero-card{
+  grid-column:2;grid-row:2;align-self:end;
+  display:flex;align-items:center;gap:1.25rem;
+  margin-right:calc(var(--pad) * -1);padding:1.25rem calc(var(--pad) + 4.5rem) 2rem 2rem;   /* clears the floating WhatsApp button */
+  border-left:1px solid rgba(251,248,242,.35);
+  font-family:var(--sans);font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:#FBF8F2;
+  opacity:0;animation:fadeInHero 1s ease 3.3s forwards;
 }
+.hero-card img{width:42px;height:auto;border:1px solid rgba(251,248,242,.3)}
+.hero-card svg{width:16px;height:8px;transition:transform .35s ease}
+.hero-card:hover svg{transform:translateX(4px)}
+.hero a:focus-visible{outline:1px solid #FBF8F2;outline-offset:6px}
+
+/* Header reads as light text over the photo until the page scrolls. */
+body:has(.hero-bg) .runhead:not(.is-scrolled){mix-blend-mode:normal;text-shadow:0 1px 10px rgba(20,16,10,.45)}
+body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
+
 @media (prefers-reduced-motion: reduce){
-  .logo-img{opacity:1;transform:none;animation:none}
+  .hero-copy,.hero-aside,.hero-proof,.hero-card{opacity:1;animation:none}
+}
+@media (max-width:900px){
+  .hero-aside{display:none}
+}
+@media (max-width:640px){
+  /* Phones: photo on top, words below on the dark band, so nothing sits on the terrarium. */
+  .hero{display:block;min-height:0;padding:0 var(--pad)}
+  .hero-bg{position:relative;display:block;width:auto;height:58svh;margin:0 calc(var(--pad) * -1)}
+  .hero-bg img{object-position:50% 38%}
+  .hero::before{background:linear-gradient(180deg,rgba(24,20,14,.5) 0%,rgba(24,20,14,0) 18%);bottom:auto;height:58svh}
+  .hero-copy{padding-top:2.25rem}
+  .hero-title{font-size:clamp(3.5rem,18vw,4.75rem)}
+  .hero-sub{letter-spacing:.16em}
+  .hero-lede{margin-top:1.25rem}
+  .hero-cta{margin-top:1.75rem}
+  .hero-card{margin:2rem 0 0;padding:1.1rem 0;border-left:0;border-top:1px solid rgba(251,248,242,.25)}
+  .hero-proof{flex-direction:column;align-items:flex-start;gap:.9rem;padding:1.25rem 0 2.5rem;border-top:1px solid rgba(251,248,242,.25)}
+  .hero-proof li{border-right:0;padding:0;margin:0}
 }
 
-.wordmark{
-  margin-top:2.5rem;
-  font-family:var(--serif);
-  font-size:clamp(3.5rem,9vw,7.5rem);
-  font-weight:400;
-  letter-spacing:-.015em;
-  line-height:1;
-  color:var(--ink);
-  display:flex;
-  overflow:hidden;
-}
-.wordmark span{
-  display:inline-block;
-  transform:translateY(110%);
-  animation:riseLetter .9s var(--ease-rise) forwards;
-}
-@keyframes riseLetter{to{transform:translateY(0)}}
-
-.hero-right{
-  justify-self:end;
-  text-align:right;
-  max-width:240px;
-  opacity:0;
-  animation:fadeInHero 1.2s ease 3s forwards;
-}
-.hero-right dl{display:grid;gap:1.25rem}
-.hero-right dt{
-  font-family:var(--sans);
-  font-size:.6rem;
-  letter-spacing:.32em;
-  text-transform:uppercase;
-  color:var(--mute);
-  margin-bottom:.25rem;
-}
-.hero-right dd{
-  font-family:var(--serif);
-  font-size:1.05rem;
-  color:var(--ink);
-}
-.hero-right dd.small{
-  font-family:var(--body);
-  font-size:.82rem;
-  color:var(--ink-soft);
-  font-style:italic;
-}
-
-.hero-bottom{
-  padding-inline:var(--pad);
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-end;
-  gap:2rem;
-  opacity:0;
-  animation:fadeInHero 1s ease 3.2s forwards;
-}
-.hero-bottom .tagline{
-  max-width:32ch;
-  font-family:var(--body);
-  font-style:italic;
-  color:var(--ink-soft);
-  font-size:.95rem;
-  line-height:1.6;
-}
-.hero-bottom .tagline::before{
-  content:"";
-  display:block;
-  width:40px;height:1px;
-  background:var(--accent);
-  margin-bottom:1rem;
-}
-.scroll-cue{
-  display:flex;
-  align-items:center;
-  gap:1rem;
-  font-family:var(--sans);
-  font-size:.62rem;
-  letter-spacing:.34em;
-  text-transform:uppercase;
-  color:var(--mute);
-}
-.scroll-cue .line{
-  display:inline-block;
-  width:48px;height:1px;
-  background:var(--mute);
-  position:relative;
-  overflow:hidden;
-}
-.scroll-cue .line::after{
-  content:"";
-  position:absolute;
-  left:-50%;top:0;
-  width:50%;height:100%;
-  background:var(--ink);
-  animation:scrollLine 2.2s ease-in-out infinite;
-}
-@keyframes scrollLine{
-  0%{left:-50%}
-  100%{left:100%}
-}
 @keyframes fadeInHero{to{opacity:1}}
 
 /* ─── SPECIMEN REEL · featured image of an EarthBox in setting ─── */
@@ -594,19 +523,6 @@
   color:var(--ink-soft);
 }
 
-/* ─── HERO CTA ─── */
-.hero-cta{
-  margin-top:2rem;
-  margin-bottom:1.5rem;
-}
-.hero-actions{display:flex;flex-direction:column;align-items:center}
-.hero-maker{
-  font-family:var(--sans);font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;
-  color:var(--ink-soft);border-bottom:1px solid var(--rule);padding-bottom:.2rem;margin-bottom:1.5rem;
-}
-.hero-maker:hover{color:var(--ink);border-bottom-color:currentColor}
-@media (max-width:560px){.hero-actions{align-items:flex-start}}
-
 /* ─── MAKER INVITE ───
    Fixed warm paper in both themes: it matches the photo's own background
    (#F6F3ED), so the image sits in it instead of floating on a box. */
@@ -702,8 +618,6 @@
 
 /* ─── RESPONSIVE ─── */
 @media (max-width:1000px){
-  .hero-stage{grid-template-columns:1fr}
-  .hero-left,.hero-right{display:none}
   .spread{grid-template-columns:1fr;gap:2.5rem}
   .principles{grid-template-columns:repeat(2,1fr);gap:3rem}
   .purpose-inner{grid-template-columns:1fr;gap:2rem}
@@ -712,6 +626,5 @@
   .colo-bar{flex-direction:column;gap:1rem;text-align:center}
 }
 @media (max-width:560px){
-  .hero-bottom{flex-direction:column;align-items:flex-start;gap:2.5rem}
   .principles{grid-template-columns:1fr}
 }

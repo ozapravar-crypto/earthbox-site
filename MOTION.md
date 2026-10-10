@@ -50,7 +50,7 @@ Template: `Downloads/NCERT Complete/product_motion_director_agent.md` (skill: `p
 
 | # | Section | First thing to notice | Motion (intensity) | Status |
 |---|---|---|---|---|
-| 1 | Hero | EarthBox mark | Loader → logo fade-scale, wordmark letters, side stamps fade, logo `data-parallax` (3) | Existing |
+| 1 | Hero | The terrarium photo, then "EarthBox" | Full-bleed photo (owner-supplied, 10 Oct); after the loader the copy, side line, proof row and card fade in 2.6–3.3 s (1). No parallax | Updated 10 Oct |
 | 2 | Trust strip | Proof points | None (0). It's reassurance, not a moment. | Existing |
 | 3 | Film | The video | Plays muted, inline. No extra motion (0). | Existing |
 | 4 | Principles | One commitment at a time | Hover highlight; title `scramble` (2) | Existing |

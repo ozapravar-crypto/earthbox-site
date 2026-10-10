@@ -152,63 +152,40 @@
      Ayush's note. Same draw animation, same --len values; visual
      change only.
      ═══════════════════════════════════════════════════════════════════ -->
-<section class="hero" id="top">
+<section class="hero" id="top" aria-labelledby="heroTitle">
 
-  <div class="hero-stage">
+  <picture class="hero-bg">
+    <source media="(max-width: 640px)" srcset="assets/home/hero-portrait.webp">
+    <img src="assets/home/hero.webp"
+         srcset="assets/home/hero-800.webp 800w, assets/home/hero-1200.webp 1200w, assets/home/hero.webp 1744w"
+         sizes="100vw" width="1744" height="902" fetchpriority="high"
+         alt="A glass terrarium with fern, moss and driftwood on a stone ledge in late sunlight"/>
+  </picture>
 
-    <aside class="hero-left">
-      <span class="num">01</span>
-      <p>A study in calm, intentional design for contained living ecosystems. Crafted in Mumbai, by enquiry.</p>
-    </aside>
-
-    <div class="logo-stage" data-parallax="0.75">
-
-      <!-- Pixel-perfect colored EarthBox logo · uses the source PNG directly.
-           Fades + scales in subtly on first paint instead of stroke-drawing. -->
-      <img class="logo-img" src="assets/logo.webp" alt="EarthBox" width="280" height="320"/>
-
-      <h1 class="wordmark">
-        <span style="animation-delay:2.6s">E</span><span style="animation-delay:2.65s">a</span><span style="animation-delay:2.7s">r</span><span style="animation-delay:2.75s">t</span><span style="animation-delay:2.8s">h</span><span style="animation-delay:2.85s">B</span><span style="animation-delay:2.9s">o</span><span style="animation-delay:2.95s">x</span>
-      </h1>
-
-    </div>
-
-    <aside class="hero-right">
-      <dl>
-        <div>
-          <dt>Classification</dt>
-          <dd>Contained Ecosystem</dd>
-        </div>
-        <div>
-          <dt>Discipline</dt>
-          <dd>Object Design · Horticulture</dd>
-        </div>
-        <div>
-          <dt>Disposition</dt>
-          <dd class="small">Quiet, archival, enduring</dd>
-        </div>
-      </dl>
-    </aside>
-
-  </div>
-
-  <div class="hero-bottom">
-    <p class="tagline">
-      Crafted terrariums, treated as design objects.<br>
-      Each piece, a self&#8209;contained world.
-    </p>
-    <div class="hero-actions">
-    <a class="cta magnetic hero-cta" href="products.html" data-cursor="VIEW">
-      Browse the Catalogue
-      <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
+  <div class="hero-copy">
+    <span class="hero-eyebrow">Living ecosystems</span>
+    <h1 class="hero-title" id="heroTitle">EarthBox</h1>
+    <p class="hero-sub">Small worlds. Real life.</p>
+    <p class="hero-lede">Handcrafted terrariums, designed for modern spaces. Bring nature closer — one world at a time.</p>
+    <a class="hero-cta" href="products.html" data-cursor="VIEW">
+      <span class="hero-cta-ring" aria-hidden="true"><svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg></span>
+      <span>Explore our terrariums</span>
     </a>
-    <a class="hero-maker" href="maker.html" data-cursor="MAKE">Or design your own &rarr;</a>
-    </div>
-    <div class="scroll-cue">
-      <span>Or scroll to explore</span>
-      <span class="line"></span>
-    </div>
   </div>
+
+  <p class="hero-aside" aria-hidden="true"><span>Nature</span><span>in</span><span>your</span><span>space</span></p>
+
+  <ul class="hero-proof" aria-label="How we work">
+    <li><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 14V6M8 6c0-2.5 1.8-4 4-4 0 2.5-1.8 4-4 4ZM8 9C8 7 6.5 5.5 4 5.5 4 7.5 5.5 9 8 9Z" stroke="currentColor" stroke-width="1.1"/></svg>Handcrafted in Mumbai</li>
+    <li><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.1"/><path d="M8 4.5V8l2.3 1.4" stroke="currentColor" stroke-width="1.1"/></svg>Made to order</li>
+    <li><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 7.5 8 3l5.5 4.5V13h-11Z" stroke="currentColor" stroke-width="1.1"/><path d="M6.5 13V9.5h3V13" stroke="currentColor" stroke-width="1.1"/></svg>Delivered within Mumbai</li>
+  </ul>
+
+  <a class="hero-card" href="maker.html" data-cursor="MAKE">
+    <img src="assets/home/hero-thumb.webp" alt="" width="60" height="86" loading="lazy"/>
+    <span>Or design your own</span>
+    <svg viewBox="0 0 16 8" fill="none" aria-hidden="true"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
+  </a>
 
 </section>
 
