@@ -19,6 +19,7 @@ Source brief: `Downloads/terrarium_maker_ux_brief_for_fable.md`. Adapted to the 
 | Step 4 "Details" (stones, driftwood) | Step 4 "Your space" (room, pets/kids, maturity, mood) | No hardscape items exist; these questions come from tab 06 |
 | Rounded corners, new palette | Site tokens, sharp edges | EarthBox design rules |
 | Product photos in the preview | Line-drawn "specimen plate" built on the box drawings | Photos already contain plants; drawings share one chamber outline, so scale never jumps |
+| (10 Oct) Illustrated preview | Low-poly 3D preview, thumbnails and recipe stills; line drawings kept as the fallback | Owner asked for the whole maker in low-poly 3D, not illustration |
 
 ## How it works
 
@@ -38,6 +39,21 @@ Source brief: `Downloads/terrarium_maker_ux_brief_for_fable.md`. Adapted to the 
 - Switching chamber keeps what still fits, names what was removed, and offers **Undo**.
 
 **State:** the build is saved in the browser (localStorage), so a refresh doesn't lose it. The share link (`#c=…&s=…&p=…&n=…`) carries the composition only, never the "Your space" answers, and it's validated on load.
+
+## 3D preview (added 10 Oct 2026)
+
+| Piece | Where | Does |
+|---|---|---|
+| Scene + builders | `scripts/maker-3d.js` | Chamber (the SVG's chamfered octagon, extruded; depth from the chamber's `size`), foundation layers, one plant builder per `form`, light rig, render loop, drag/arrow-key turning |
+| Spec | `sceneSpec(b)` in `scripts/maker.js` (tested) | The only input the 3D view gets: chamber, soil-free, substrate look, plants. Same facts `previewSVG` reads |
+| three.js | `scripts/vendor/three.module.min.js` r160 (MIT, see `scripts/vendor/README.md`) | Vendored: the CSP allows no script CDN. ~655 KB raw, ~165 KB gzip |
+
+- **Loading:** maker.js checks for WebGL2, then `import('./maker-3d.js')`. No WebGL (or a lost context) = the SVG line drawings, unchanged. three.js is never downloaded on other pages, or here without WebGL.
+- **One WebGL context.** Its canvas is the live view: the landing hero, then the build preview. Plant thumbnails (list + map), recipe cards and foundation swatches are drawn once with the same renderer and cached as `data:` images (CSP allows `data:`, not `blob:`).
+- **Motion (MOTION.md):** one idle motion, a slow 18 s sway; a new plant grows in over 600 ms (ease-out, no overshoot); foundation layers rise in when chosen. Reduced motion = no sway, no growth, still renders on change. The loop pauses when the view is off screen or the tab is hidden; pixel ratio capped at 2.
+- **Access:** the canvas is focusable, labelled with the build description, and turns with the arrow keys (Home resets) as well as drag. The "indicative" caption stays.
+- **What's data and what's ours:** chamber light colour/strength comes from its `light` and `temp` specs (warm, white, UV mode…), glass fog from `humidity`. **Plant colours are inferred** from the plant group plus colour words in the plant's name ("Pink Princess", "Black Velvet"): no colour data exists. Plant shapes are procedural per `form`, varied per plant id; they're indicative, like the drawings were. The plinth and the soil-free mist rail/floor plate are presentation, not products.
+- **Plate stays paper in dark mode**, as before, so the scene's light reads the same in both themes.
 
 ## Plants step: discovery (added 10 Oct 2026)
 
@@ -73,11 +89,12 @@ Search, **List / Map** views and **Guided search** live inside the Plants step, 
 1. **Plant + soil prices.** Fill the workbook Price column, add `price` in `data/maker.js`, then sum it in `reviewPanel` / `barHTML`.
 2. **More substrates.** Only SOIL-001 (Aroid Atelier) is filled. The other boxes use "Studio's choice" until then.
 3. **Hardscape items** (stones, driftwood). Once they exist, add a "Details" step.
-4. **Plant photos.** 2 of 45 exist, so every plant uses a line-drawn thumbnail for consistency.
+4. **Plant photos.** 2 of 45 exist, so every plant uses a generated 3D thumbnail (line drawing without WebGL) for consistency.
 5. **Data clash:** the workbook says the Aroid mix suits "Air" plants, but the Air *box* is aeroponic (soil-free). The maker follows the box spec.
 6. **Availability:** Elemental chambers are "Coming soon". The maker says so above the chamber cards.
 7. **Per-plant Light, Care, Humidity, Description (tab 04, 0 of 45 filled).** Once they're filled, add the fields to the plant rows (the schema is noted in `data/maker.js`), then turn on real light/care filters in `plant-search.js`.
 8. **Toxicity data.** Pets/children answers are passed to the studio, not used to filter (no toxicity column filled yet).
+9. **Plant colours** in the 3D view are inferred (group + name). A per-plant colour or photo column would replace the guess.
 
 ## Analytics (GA4)
 
