@@ -178,7 +178,8 @@ async function run(route, theme, vpName){
     const ctx = { route: route.path, theme, viewport: vpName };
     const cov = { ...ctx, state: st.name, scanned: false, items: 0 };
     try {
-      await page.goto(BASE + route.path, { waitUntil: 'load' });
+      // One retry: a cold CI runner occasionally stalls a first load.
+      await page.goto(BASE + route.path, { waitUntil: 'load' }).catch(() => page.goto(BASE + route.path, { waitUntil: 'load', timeout: 60000 }));
       await page.waitForTimeout(700);                   // renderers + fonts settle (networkidle never fires with the home film streaming)
       await prepare(page);
       if (st.setup) { await st.setup(page); await prepare(page); }

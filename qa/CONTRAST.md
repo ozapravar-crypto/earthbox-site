@@ -81,3 +81,10 @@ Add `{ "key": "<route> | <theme> | <viewport> | <state> | <selector>", "reason":
 - **Focus rings** are measured from pixels around the focused control (ring on vs off), against whatever is behind them, including the hero photo.
 - **Ids:** these continue across every scan of a page; a reused id had made one test measure the wrong element.
 - **Off-screen focus-only controls** (the skip link) get a focus check, not a hover check.
+| CQ-012 | Secondary buttons (Save, outlined CTAs) on hover | 1.0:1, label invisible | `.cta:hover` sets text to `--cta-hover-color` (= `--bg`) expecting the ink fill sweep, but secondary buttons have no sweep | `.cta-secondary { --cta-hover-color: var(--ink) }` |
+| CQ-013 | Focus rings on the WhatsApp button, selected material chip, header theme toggle | 1.07 / 1.10 / 1.56:1 | `currentColor` rings fail on filled controls with light text | Ink rings sitewide; `--bg` on the manifesto band; header rings use its own light text colour (ink once scrolled) |
+
+**Second full run (CI, 10 Oct 16:37):** 441 → 40 failures, 0 axe violations. Of the 40, two groups were real (CQ-012, CQ-013). The rest were audit artefacts, now fixed:
+- **Hover lost during measurement:** scrolling moved the control off the pointer. The batch now measures in place when the items are already on screen.
+- **The WhatsApp button inside a batch shot:** it's now hidden in batch shots too.
+- **Three pages that timed out on a cold runner:** they now get one retry.

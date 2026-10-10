@@ -78,6 +78,7 @@
 .cta-secondary{
   --cta-border: var(--rule-stronger);
   --cta-color: var(--ink-soft);
+  --cta-hover-color: var(--ink);   /* no fill sweep here, so hover text must stay ink (it turned --bg: invisible) */
 }
 .cta-secondary:hover{
   --cta-color: var(--ink);

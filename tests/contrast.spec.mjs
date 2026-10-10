@@ -156,3 +156,41 @@ test('CQ-011 coming-soon label and footer link hover pass', async ({ page }) => 
   await link.hover();
   expect(await failures(page, 'footer .colo-col', 'hover')).toEqual([]);
 });
+
+// CQ-012 · Secondary buttons (Save, outlined CTAs): on hover the text turned
+// --bg with no fill behind it — the label vanished (1.0:1).
+for (const theme of THEMES) {
+  test(`CQ-012 secondary button keeps its label on hover (${theme})`, async ({ page }) => {
+    await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
+    await page.goto('/product.html#V1-PLT-005');
+    const btn = page.locator('.pd-buy .save-btn');
+    await btn.scrollIntoViewIfNeeded();
+    await page.addStyleTag({ content: '*{transition:none!important} .cursor-ring,.cursor-dot{display:none!important}' });
+    await btn.hover();
+    expect(await failures(page, '.pd-buy .save-btn', 'hover')).toEqual([]);
+  });
+}
+
+// CQ-013 · Focus rings that currentColor got wrong: the WhatsApp button
+// (white ring on the page, 1.07:1), the selected material chip (light ring
+// outside a dark chip, 1.10:1) and the header theme toggle (1.56:1).
+for (const theme of THEMES) {
+  test(`CQ-013 rings on filled controls and in the header pass (${theme})`, async ({ page }) => {
+    await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
+    const bad = [];
+    for (const [url, sel] of [['/about.html', '.floating-wa'], ['/product.html#V1-PLT-005', '.pd-selector-btn.active[data-material]'], ['/product.html#V1-PLT-005', '.runhead .theme-toggle']]) {
+      await page.goto(url);
+      await page.waitForLoadState('load');
+      await page.addStyleTag({ content: '*{transition:none!important;animation-duration:0s!important}' });
+      const el = page.locator(sel).first();
+      await el.scrollIntoViewIfNeeded();
+      await page.keyboard.press('Shift');
+      await el.focus();
+      const rings = (await page.evaluate(scanPage, { scope: sel, state: 'focus' })).filter(r => r.kind === 'focus-ring');
+      expect(rings.length, `no focus ring measured on ${sel}`).toBeGreaterThan(0);
+      const found = [...rings.filter(r => r.status !== 'review'), ...await resolveBatch(page, rings.filter(r => r.status === 'review'))];
+      bad.push(...found.filter(r => r.status !== 'pass').map(r => `${r.status} ${r.ratio}:1 ${r.fg} on ${r.bg} — ${sel}`));
+    }
+    expect(bad).toEqual([]);
+  });
+}

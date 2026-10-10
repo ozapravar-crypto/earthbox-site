@@ -62,7 +62,8 @@ export async function resolveWithPixels(page, item){
 // position changes with scrolling) go through resolveWithPixels one by one.
 const HIDE_ALL = `html.cq-all body * { color: transparent !important; -webkit-text-fill-color: transparent !important; text-shadow: none !important; }
 html.cq-all body *::placeholder { color: transparent !important; }
-html.cq-all [data-cq-icon] { visibility: hidden !important; }`;
+html.cq-all [data-cq-icon] { visibility: hidden !important; }
+html.cq-shot .floating-wa:not(:has([data-cq-hide], [data-cq-hide-mark])) { visibility: hidden !important; }`;
 
 export async function resolveBatch(page, items){
   if (!items.length) return [];
@@ -93,8 +94,12 @@ export async function resolveBatch(page, items){
       flowing.filter(i => i.kind === 'icon').map(i => i.cq));
     let i = 0;
     while (i < flowing.length) {
-      const y = Math.max(0, Math.floor(flowing[i]._g.top - head - 8));
-      const sy = await page.evaluate((y) => { scrollTo({ top: y, behavior: 'instant' }); return scrollY; }, y);
+      // Already fully on screen? Measure in place: scrolling would end a hover
+      // (the pointer stops being over the control) and change what's measured.
+      const cur = await page.evaluate(() => scrollY), g0 = flowing[i]._g;
+      const onScreen = g0.top - cur >= (cur > 0 ? head : 0) && g0.top - cur + g0.h <= vh - 2;
+      const y = onScreen ? cur : Math.max(0, Math.floor(g0.top - head - 8));
+      const sy = onScreen ? cur : await page.evaluate((y) => { scrollTo({ top: y, behavior: 'instant' }); return scrollY; }, y);
       await page.evaluate(() => document.documentElement.classList.remove('cq-all'));
       const inked = await sharp(await page.screenshot({ animations: 'disabled' })).raw().toBuffer({ resolveWithObject: true });
       await page.evaluate(() => document.documentElement.classList.add('cq-all'));

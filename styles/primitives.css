@@ -58,9 +58,17 @@ section{
 }
 
 :focus-visible{
-  outline:2px solid currentColor;   /* text colour already passes 4.5:1 here, so the ring passes 3:1 (accent ring measured 1.9:1) */
+  /* Ink ring: ≥ 3:1 on every page surface, light and dark (--accent measured
+     1.9:1; currentColor failed on filled controls with light text, 1.1:1).
+     Exceptions for dark bands and the header follow. */
+  outline:2px solid var(--ink);
   outline-offset:3px;
 }
+/* The header sits over photos (home) or blends with the page (difference):
+   its own light text colour is what reads there; plain ink once scrolled. */
+.runhead :focus-visible{outline-color:rgba(248,247,245,.98)}
+.runhead.is-scrolled :focus-visible{outline-color:var(--ink)}
+
 a:focus:not(:focus-visible),
 button:focus:not(:focus-visible){
   outline:none;
