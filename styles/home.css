@@ -654,6 +654,13 @@
   margin-top:2rem;
   margin-bottom:1.5rem;
 }
+.hero-actions{display:flex;flex-direction:column;align-items:center}
+.hero-maker{
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--ink-soft);border-bottom:1px solid var(--rule);padding-bottom:.2rem;margin-bottom:1.5rem;
+}
+.hero-maker:hover{color:var(--ink);border-bottom-color:currentColor}
+@media (max-width:560px){.hero-actions{align-items:flex-start}}
 
 
 /* Trust strip & floating-wa styles moved to components.css */

@@ -27,6 +27,7 @@ import { initCursor }     from './cursor.js';
 import { initMagnetic }   from './magnetic.js';
 import { initScramble }   from './scramble.js';
 import { initEnquiryForm } from './enquiry-form.js';
+import { initMaker }       from './maker.js';
 
 const boot = () => {
   initTheme();
@@ -46,6 +47,7 @@ const boot = () => {
   initMagnetic();
   initScramble();
   initEnquiryForm();
+  initMaker();
 
   // GA4: Track floating WhatsApp clicks
   const floatingWa = document.querySelector('.floating-wa');

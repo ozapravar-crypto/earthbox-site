@@ -458,6 +458,7 @@ function renderBox(b){
           </a>
           ${enquiryAltHTML(b.sku)}
           <p class="caption pd-note">Coming soon · register interest now</p>
+          <a class="caption pd-maker-link" href="maker.html?box=${b.sku}">Design yours in the Maker &rarr;</a>
         </aside>
       </section>
 

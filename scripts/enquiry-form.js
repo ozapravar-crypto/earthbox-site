@@ -36,9 +36,10 @@ const escapeHTML = (s) => String(s).replace(/[&<>"]/g, c => (
 // ─── Markup ───
 // `product` is the thing being enquired about, used to prefill the message
 // and to label the email subject. Pass '' for a general enquiry.
-export function enquiryAltHTML(product = ''){
+// `message` overrides the prefill (the Maker sends the whole design).
+export function enquiryAltHTML(product = '', message = ''){
   const p = escapeHTML(product);
-  const prefill = p ? `I'd like to know more about ${p}.` : '';
+  const prefill = message || (p ? `I'd like to know more about ${product}.` : '');
 
   return `
     <details class="enquiry-alt">
@@ -59,7 +60,7 @@ export function enquiryAltHTML(product = ''){
         </label>
         <label class="enquiry-field">
           <span>Message</span>
-          <textarea name="message" rows="3" required>${escapeHTML(prefill)}</textarea>
+          <textarea name="message" rows="${message ? 8 : 3}" required>${escapeHTML(prefill)}</textarea>
         </label>
 
         <button type="submit" class="cta enquiry-submit">Send enquiry</button>
