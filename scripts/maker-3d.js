@@ -5,11 +5,14 @@
 // previewSVG stays the fallback. This module never keeps its own copy of
 // the design: it draws whatever sceneSpec(build) hands it on each commit.
 //
-// Everything is built in code (no model files): the chamber is the SVG
-// drawing's chamfered octagon, extruded; plants have one builder per
-// `form`, varied per plant id by a seeded rng. Flat-shaded, matte, warm
-// daylight from the left. Per-chamber light and glass fog come from the
-// chamber's own specs (light, temp, humidity), nothing invented.
+// The chamber is built in code: the SVG drawing's chamfered octagon,
+// extruded. Plants are low-poly models (assets/plants3d/*.glb, mapped in
+// data/maker.js → models) where a good licensed one exists, else one
+// procedural builder per `form`; both are varied per plant id by a seeded
+// rng. Models load only when a plant using them is drawn; the procedural
+// plant stands in until then, or for good if the file fails. Flat-shaded,
+// matte, warm daylight from the left. Per-chamber light and glass fog come
+// from the chamber's own specs (light, temp, humidity), nothing invented.
 //
 // One WebGLRenderer. Its canvas is the live view (hero or preview, never
 // both). Plant thumbnails, recipe cards and foundation swatches are drawn
@@ -19,6 +22,7 @@
 
 import * as THREE from './vendor/three.module.min.js';
 import { rng } from './maker.js';
+import { models as MODELS } from '../data/maker.js';
 
 // 1 unit = 100 px of the SVG drawing, floor of the chamber at y = 0.
 const sx = (x) => (x - 372.5) / 100;
@@ -306,14 +310,109 @@ function trapPlant(r, pal, name){
 
 const BUILD = { leaf: leafPlant, trail: trailPlant, rosette: rosettePlant, air: airPlant, fern: fernPlant, moss: mossPlant, trap: trapPlant };
 
-const plantGeos = new Map();
-function plantGeo(p){
-  if (!plantGeos.has(p.id)){
-    const r = rng(+p.id.replace(/\D/g, '') * 7919 + 17);
-    r(); r(); r();                                     // let the seed settle
-    plantGeos.set(p.id, merge((BUILD[p.form] || leafPlant)(r, paletteOf(p), p.name)));
+const seeded = (p, salt = 0) => {
+  const r = rng(+p.id.replace(/\D/g, '') * 7919 + 17 + salt);
+  r(); r(); r();                                       // let the seed settle
+  return r;
+};
+
+
+// ═══ PLANT MODELS · data/maker.js → models ════════════════════════════
+// One fetch + parse per file, cached. Each file becomes one non-indexed,
+// position + colour geometry, base on y = 0, centred. Plants share its
+// positions and normals; each gets its own colours (group tint).
+
+const modelOf = (p) => (Object.hasOwn(MODELS.plants, p.id) ? MODELS.plants[p.id] : MODELS.forms[p.form]) || null;
+const files = new Map();                               // file → { state: loading|ready|failed, geo, promise }
+let loader = null;
+
+function toGeo(scene){
+  scene.updateMatrixWorld(true);
+  const parts = [];
+  scene.traverse(o => {
+    if (!o.isMesh) return;
+    const src = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry;
+    const P = src.attributes.position, C = src.attributes.color, n = P.count;
+    const pos = new Float32Array(n * 3), c = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++){                         // getX/Y/Z undo the file's quantization
+      pos.set([P.getX(i), P.getY(i), P.getZ(i)], i * 3);
+      c.set(C ? [C.getX(i), C.getY(i), C.getZ(i)] : [1, 1, 1], i * 3);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    g.setAttribute('color', new THREE.BufferAttribute(c, 3));
+    parts.push(g.applyMatrix4(o.matrixWorld));
+    if (src !== o.geometry) src.dispose();
+  });
+  scene.traverse(o => { if (o.isMesh){ o.geometry.dispose(); o.material.dispose?.(); } });
+  if (!parts.length) throw new Error('empty model');
+  const geo = merge(parts);
+  geo.computeBoundingBox();
+  const b = geo.boundingBox;
+  return geo.translate(-(b.min.x + b.max.x) / 2, -b.min.y, -(b.min.z + b.max.z) / 2);
+}
+
+// Resolves once the file is ready or has failed (never rejects).
+function loadModel(file){
+  if (!files.has(file)){
+    const rec = { state: 'loading', geo: null };
+    loader ||= import('./vendor/GLTFLoader.js').then(m => new m.GLTFLoader());
+    rec.promise = Promise.all([loader, fetch(MODELS.base + file).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })])
+      .then(([l, buf]) => l.parseAsync(buf, ''))
+      .then(gltf => { rec.geo = toGeo(gltf.scene); rec.state = 'ready'; })
+      .catch(() => { rec.state = 'failed'; });
+    files.set(file, rec);
   }
-  return plantGeos.get(p.id);
+  return files.get(file).promise;
+}
+const modelReady = (p) => { const m = modelOf(p); return m && files.get(m.file)?.state === 'ready' ? m : null; };
+// Files a set of plants still waits for (starts loading them).
+const pendingFor = (list) => [...new Set(list.map(modelOf).filter(Boolean).map(m => m.file))]
+  .filter(f => (files.get(f)?.state ?? 'loading') === 'loading').map(loadModel);
+
+// Foliage (the model's greens) takes the plant's palette, one colour per
+// face like the procedural plants, keeping the model's own light and dark;
+// anything else (red traps, a bloom) keeps its colour.
+const _c = new THREE.Color(), _hsl = {};
+function tinted(base, p, m){
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', base.attributes.position);
+  g.setAttribute('normal', base.attributes.normal);
+  const src = base.attributes.color.array;
+  if (m.tint === false){ g.setAttribute('color', base.attributes.color); return g; }
+  const lum = (i) => .2126 * src[i] + .7152 * src[i + 1] + .0722 * src[i + 2];
+  const leafy = [];
+  let sum = 0, n = 0;
+  for (let i = 0; i < src.length; i += 9){
+    _c.setRGB((src[i] + src[i + 3] + src[i + 6]) / 3, (src[i + 1] + src[i + 4] + src[i + 7]) / 3, (src[i + 2] + src[i + 5] + src[i + 8]) / 3).getHSL(_hsl);
+    const leaf = _hsl.h > .12 && _hsl.h < .55 && _hsl.s > .1;
+    leafy.push(leaf);
+    if (leaf){ sum += lum(i); n++; }
+  }
+  const mean = n ? sum / n : 1, pal = paletteOf(p), r = seeded(p, 1), out = new Float32Array(src.length);
+  for (let f = 0, i = 0; i < src.length; f++, i += 9){
+    if (!leafy[f]){ out.set(src.subarray(i, i + 9), i); continue; }
+    const base = pal.leaf(r), k = clamp(lum(i) / mean, .55, 1.45) * (1 + (r() - .5) * .1);
+    for (let j = 0; j < 9; j += 3) out.set([base.r * k, base.g * k, base.b * k], i + j);
+  }
+  g.setAttribute('color', new THREE.BufferAttribute(out, 3));
+  return g;
+}
+
+// Per-plant variety for shared models: a turn and a slight size change.
+function turnOf(p){
+  const m = modelReady(p);
+  if (!m) return { yaw: 0, k: 1 };
+  const r = seeded(p, 2);
+  return { yaw: r() * Math.PI * 2 + (m.yaw || 0), k: (m.scale || 1) * (.92 + r() * .14) };
+}
+
+const plantGeos = new Map();                           // 'm:id' (model) or 'p:id' (procedural)
+function plantGeo(p){
+  const m = modelReady(p), key = `${m ? 'm' : 'p'}:${p.id}`;
+  if (!plantGeos.has(key))
+    plantGeos.set(key, m ? tinted(files.get(m.file).geo, p, m) : merge((BUILD[p.form] || leafPlant)(seeded(p), paletteOf(p), p.name)));
+  return plantGeos.get(key);
 }
 function plantMesh(p){
   const m = new THREE.Mesh(plantGeo(p), mat);
@@ -456,15 +555,34 @@ const SIZE = {
   leaf: { h: 3.5, r: 1.7 }, trail: { h: 1.9, r: 1.35 }, rosette: { h: 2.1, r: 1.35 }, air: { h: 2.0, r: 1.3 },
   fern: { h: 3.1, r: 1.6 }, moss: { h: .65, r: 1.05 }, trap: { h: 2.7, r: 1.15 }
 };
-const sizes = new Map();
+const sizes = new WeakMap();                          // by position data: models share theirs
 function sizeOf(p){
-  if (!sizes.has(p.id)){
-    const a = plantGeo(p).attributes.position;
+  const a = plantGeo(p).attributes.position;
+  if (!sizes.has(a)){
     let h = 0, r = 0;
     for (let i = 0; i < a.count; i++){ h = Math.max(h, a.getY(i)); r = Math.max(r, Math.hypot(a.getX(i), a.getZ(i))); }
-    sizes.set(p.id, { h: h || 1, r: r || 1 });
+    sizes.set(a, { h: h || 1, r: r || 1 });
   }
-  return sizes.get(p.id);
+  return sizes.get(a);
+}
+
+// How far a model reaches along x and z once turned by `yaw` (models only:
+// their footprints are uneven, so the wall check uses the real one).
+const reach = new WeakMap();
+function extentOf(a, yaw){
+  const key = Math.round(yaw * 100);
+  if (!reach.has(a)) reach.set(a, new Map());
+  const memo = reach.get(a);
+  if (!memo.has(key)){
+    const c = Math.cos(yaw), s = Math.sin(yaw);
+    let rx = 0, rz = 0;
+    for (let i = 0; i < a.count; i++){
+      const x = a.getX(i), z = a.getZ(i);
+      rx = Math.max(rx, Math.abs(x * c + z * s)); rz = Math.max(rz, Math.abs(-x * s + z * c));
+    }
+    memo.set(key, { rx: rx || 1, rz: rz || 1 });
+  }
+  return memo.get(key);
 }
 
 // Plants spaced evenly like the SVG, alternating front and back rows,
@@ -475,15 +593,30 @@ function layout(spec, base, D){
   return spec.plants.map((p, i) => {
     const back = i % 2 === 1, rail = spec.soilless;
     const x = -span / 2 + (i + .5) * (span / n), z = rail ? (back ? -.08 : .08) : (back ? -D * .16 : D * .12);
-    const { h, r } = sizeOf(p);
-    const t = SIZE[p.form] || SIZE.leaf, k = crowd * (back ? .92 : 1);
-    const room = Math.max(.5, Math.min(HALF_W - Math.abs(x), D / 2 - Math.abs(z)) + .05);
+    const { h, r } = sizeOf(p), turn = turnOf(p);
+    const t0 = SIZE[p.form] || SIZE.leaf, t = { h: t0.h * turn.k, r: t0.r * turn.k }, k = crowd * (back ? .92 : 1);
+    const roomX = HALF_W - Math.abs(x) + .05, roomZ = D / 2 - Math.abs(z) + .05;
+    const room = Math.max(.5, Math.min(roomX, roomZ));
     const moss = p.form === 'moss';
+    let yaw = i * 1.7 + turn.yaw;
+    let sy = moss ? t.h * k / h : Math.min(t.h / h, 1.6 * t.r / r) * k;
+    if (moss) return { p, pos: [x, base, z], s: [Math.min(room, t.r * k) / r, sy, Math.min(room, t.r * k) / r], yaw };
+    if (modelReady(p)){
+      // A model keeps its proportions (squeezed to 60 % at most) and turns
+      // its narrow side to the near wall; where the wall is still close it
+      // is drawn smaller, so nothing pokes through the glass.
+      const pos = plantGeo(p).attributes.position;
+      const fit = (y) => { const e = extentOf(pos, y); return Math.min(roomX / e.rx, roomZ / e.rz); };
+      if (fit(yaw + Math.PI / 2) > fit(yaw)) yaw += Math.PI / 2;
+      const wide = fit(yaw);
+      sy = Math.min(sy, wide / .6);
+      const sxz = Math.max(Math.min(sy, wide), sy * .6);
+      return { p, pos: [x, base, z], s: [sxz, sy, sxz], yaw };
+    }
     // Height leads, so plants climb the glass; width follows, slimmed (to
     // 45 % at most) where a wall is close, so nothing pokes through.
-    const sy = moss ? t.h * k / h : Math.min(t.h / h, 1.6 * t.r / r) * k;
-    const sxz = moss ? Math.min(room, t.r * k) / r : Math.max(Math.min(sy, room / r), sy * .45);
-    return { p, pos: [x, base, z], s: [sxz, sy, sxz], yaw: i * 1.7 };
+    const sxz = Math.max(Math.min(sy, room / r), sy * .45);
+    return { p, pos: [x, base, z], s: [sxz, sy, sxz], yaw };
   });
 }
 
@@ -569,7 +702,7 @@ export function create3D({ onLost } = {}){
   const view = { yaw: -.55, pitch: .2 };
   const t0 = performance.now();
   let host = null, onScreen = true, raf = 0, size = [0, 0], drag = null, lost = false;
-  let parts = null, keys = {};
+  let parts = null, keys = {}, shown = null;          // shown: the spec on screen now
   const anims = [];
 
   // ─── render loop · runs only while something moves and the view is on screen
@@ -667,18 +800,25 @@ export function create3D({ onLost } = {}){
     }
     keys = { ck, fk };
     // Plants: cheap to re-place every time, so the layout always matches the build.
+    // A model that has just arrived replaces its stand-in and grows in.
     const byId = new Map(parts.plantsG.children.map(m => [m.userData.pid, m]));
     parts.plantsG.clear();
     for (const it of layout(spec, parts.floor.userData.base, D)){
-      const m = byId.get(it.p.id) || Object.assign(plantMesh(it.p), { userData: { pid: it.p.id } });
+      const geo = plantGeo(it.p);
+      let m = byId.get(it.p.id), swapped = false;
+      if (!m) m = Object.assign(plantMesh(it.p), { userData: { pid: it.p.id } });
+      else if (m.geometry !== geo){ m.geometry = geo; swapped = true; }
       m.position.set(...it.pos);
       m.rotation.y = it.yaw;
       m.scale.set(...it.s);
       const running = anims.find(a => a.obj === m);
       if (running) running.to.set(...it.s);
-      else if (animate && it.p.id === fresh) grow(m, new THREE.Vector3(...it.s).multiplyScalar(.15));
+      else if ((animate && it.p.id === fresh) || swapped) grow(m, new THREE.Vector3(...it.s).multiplyScalar(.15));
       parts.plantsG.add(m);
     }
+    // Fetch any models this build still lacks, then redraw it.
+    const waiting = pendingFor(spec.plants);
+    if (waiting.length) Promise.all(waiting).then(() => { if (spec === shown && host && !lost){ apply(spec, null, false); draw(); schedule(); } });
   }
 
   // Render once at w×h with the shared renderer, return a data URL.
@@ -699,7 +839,19 @@ export function create3D({ onLost } = {}){
     if (size[0]) { renderer.setSize(size[0], size[1], false); if (host && onScreen) draw(); }
   }
 
-  const thumbCache = new Map(), shotCache = new Map();
+  const thumbCache = new Map(), shotCache = new Map(), stillWait = new Map();
+  function drawStill(spec, w, h){
+    const d = diorama(spec);
+    studio.pivot.add(d.chamber, d.floor, d.plantsG);
+    studio.pivot.rotation.y = -.55;
+    aim(studio.camera, w / h, FRAME_STILL, .2);
+    const url = snap(studio.scene, studio.camera, w, h);
+    studio.pivot.clear();
+    studio.pivot.rotation.y = 0;
+    [d.chamber, d.floor].forEach(disposeTree);
+    restore();
+    return url;
+  }
   const studioFit = (obj, aspect, pitch = .32, pad = 1.08) => {
     const box = new THREE.Box3().setFromObject(obj), c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3());
     aim(studio.camera, aspect, { y: c.y, h: s.y * pad, w: Math.max(s.x, s.z) * pad, r: Math.max(s.x, s.z) * .3 }, pitch);
@@ -716,6 +868,7 @@ export function create3D({ onLost } = {}){
       if (moved){ el.replaceChildren(canvas); keys = {}; }
       canvas.setAttribute('aria-label', `${label} Drag, or use the arrow keys, to turn it.`);
       host = el;
+      shown = spec;
       apply(spec, fresh, !moved);
       resize();
       draw();
@@ -724,6 +877,7 @@ export function create3D({ onLost } = {}){
     // Plant thumbnail (data URL) or undefined until it's drawn.
     thumb: (id) => thumbCache.get(id),
     // Draw every thumbnail a few per frame; `done` runs after each batch.
+    // Waits for the plants' models first (the line drawings show meanwhile).
     thumbs(list, done){
       const todo = list.filter(p => !thumbCache.has(p.id));
       const step = () => {
@@ -733,6 +887,7 @@ export function create3D({ onLost } = {}){
           const g = new THREE.Group(), m = plantMesh(p), { h, r } = sizeOf(p);
           const disc = puck.clone();
           disc.scale.set(r * 1.6, Math.max(h, r) * .5, r * 1.6);
+          m.rotation.y = turnOf(p).yaw;
           g.add(disc, m);
           g.rotation.y = -.5;
           studio.pivot.add(g);
@@ -744,22 +899,21 @@ export function create3D({ onLost } = {}){
         if (batch.length) done();
         if (todo.length) requestAnimationFrame(step);
       };
-      requestAnimationFrame(step);
+      Promise.all(pendingFor(todo)).then(() => requestAnimationFrame(step));
     },
     // A finished terrarium as an image (recipe cards). Cached by `key`.
-    still(key, spec, w, h){
+    // While its models load it returns the procedural version (not cached),
+    // then calls onUpdate(url) once with the finished one.
+    still(key, spec, w, h, onUpdate){
       if (lost) return '';
-      if (!shotCache.has(key)){
-        const d = diorama(spec);
-        studio.pivot.add(d.chamber, d.floor, d.plantsG);
-        studio.pivot.rotation.y = -.55;
-        aim(studio.camera, w / h, FRAME_STILL, .2);
-        shotCache.set(key, snap(studio.scene, studio.camera, w, h));
-        studio.pivot.clear();
-        studio.pivot.rotation.y = 0;
-        [d.chamber, d.floor].forEach(disposeTree);
-        restore();
+      if (shotCache.has(key)) return shotCache.get(key);
+      const waiting = pendingFor(spec.plants);
+      if (waiting.length){
+        if (!stillWait.has(key)) Promise.all(waiting).then(() => { const cb = stillWait.get(key); stillWait.delete(key); if (!lost) cb?.(this.still(key, spec, w, h)); });
+        stillWait.set(key, onUpdate);
+        return drawStill(spec, w, h);
       }
+      shotCache.set(key, drawStill(spec, w, h));
       return shotCache.get(key);
     },
     // A cut block of a foundation (Foundation step swatches).

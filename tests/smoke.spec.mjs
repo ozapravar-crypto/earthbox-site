@@ -22,13 +22,15 @@ test.beforeEach(async ({ page }) => {
 
 for (const path of PAGES) {
   test(`loads clean: ${path}`, async ({ page }) => {
-    const problems = watch(page);
+    const problems = watch(page), heavy = [];
+    page.on('request', r => { if (/plants3d\/|GLTFLoader|three\.module/.test(r.url())) heavy.push(r.url()); });
     await page.goto(path);
     await expect(page.locator('h1:visible').first()).toBeVisible();
     await expect(page.locator('.runhead-bag')).toBeVisible();          // cart reached every page
     await page.waitForLoadState('networkidle');
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth), 'no sideways scroll').toBeLessThanOrEqual(0);
     expect(problems).toEqual([]);
+    if (!path.startsWith('/maker')) expect(heavy, 'three.js and plant models load on the Maker only').toEqual([]);
   });
 }
 
@@ -97,6 +99,18 @@ test('Maker preview renders (3D, or the drawing without WebGL)', async ({ page }
   await page.goto('/maker.html#c=DarkBox&s=SOIL-001&p=PLT-041');
   await page.locator('.mk-step[data-to=plants]').click();
   await expect(page.locator('#mkPreview canvas, #mkPreview svg').first()).toBeVisible();
+});
+
+test('Maker 3D preview loads its plant models (.glb), no errors', async ({ page }) => {
+  const problems = watch(page), glbs = [];
+  page.on('response', r => { if (r.url().endsWith('.glb')) glbs.push(r.status()); });
+  await page.goto('/maker.html#c=DarkBox&s=SOIL-001&p=PLT-041,PLT-042');
+  test.skip(!(await page.evaluate(() => !!document.createElement('canvas').getContext('webgl2'))), 'no WebGL here: the drawings are the fallback');
+  await expect(page.locator('#mkPreview canvas')).toBeVisible();
+  await expect.poll(() => glbs.length, { timeout: 15_000 }).toBeGreaterThan(0);
+  await page.waitForLoadState('networkidle');
+  expect(glbs.every(s => s === 200), 'every model file loads').toBe(true);
+  expect(problems).toEqual([]);
 });
 
 test('mobile menu lists the Maker and marks Journal on articles', async ({ page, isMobile }) => {

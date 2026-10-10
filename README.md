@@ -39,6 +39,7 @@ flowchart LR
     MAIN[main.js] --> SHARED[theme · header · menu · cart · motion]
     MAIN -.import() only if root exists.-> PAGE[render-products · catalogue · render-product-detail · render-about · render-blog · maker]
     PAGE -. maker only, WebGL only .-> M3D[maker-3d.js + vendor/three]
+    M3D -. when a plant needs one .-> GLB[vendor/GLTFLoader + assets/plants3d/*.glb]
   end
 
   SITE --> INC
@@ -70,7 +71,7 @@ Feature docs: **`MAKER.md`** (terrarium Maker, discovery, 3D) · **`CART.md`** (
 | `npm run lint` | ✓ | Unused/undefined names, stray `console.log` (correctness only, no style rules) |
 | `node scripts/includes.mjs --check` | ✓ | A page's header/footer differs from `data/site.js` |
 | `npm run check:prerender` | ✓ | An article page has no `<h1>`, too little text, or duplicated sections |
-| `npm run check:assets` | ✓ | Any `src`/`href`/product photo points at a missing file |
+| `npm run check:assets` | ✓ | Any `src`/`href`/product photo/Maker plant model points at a missing file |
 | `npm run check:contrast` | ✓ | A text colour token falls below 4.5:1 on `--bg` or `--bg-tint`, light or dark |
 | `npm run test:e2e` | — (no browser on Vercel) | A page errors, 404s or scrolls sideways; a fixed bug comes back |
 | `npm run check:unused` | — (advisory) | Unused files, exports or dependencies |
@@ -86,6 +87,11 @@ Feature docs: **`MAKER.md`** (terrarium Maker, discovery, 3D) · **`CART.md`** (
 1. Add a row `['PLT-046', group, name, shape, botanical]`. The group must be in `elements` and the shape in `forms`.
 2. Add `price` when there is one; the cart picks it up with no other change.
 3. Run `npm test`. Recipes are re-checked so every plant still fits its chamber.
+
+**Give a plant (or a whole shape) a 3D model in the Maker** (`data/maker.js` → `models`)
+1. Put a CC0/CC BY `.glb` (vertex colours, no textures, ≤ ~5k triangles) in `assets/plants3d/` under a new name, and credit it in `assets/plants3d/CREDITS.md` (CC BY also on `maker.html`).
+2. Map it: `models.forms.<form>` for every plant of that shape, or `models.plants['PLT-0nn']` for one plant (`null` = keep the procedural plant).
+3. Run `npm test` (the file must exist, the keys must be real) and look at it in the Maker. Details: `MAKER.md` → Plant models.
 
 **Add a Journal article**
 1. Add its body to the right `data/article-bodies/*.js` and its entry to `data/articles.js`.

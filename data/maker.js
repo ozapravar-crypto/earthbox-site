@@ -143,6 +143,45 @@ export const forms = {
   fern: 'Fern', moss: 'Moss carpet', trap: 'Pitcher / trap'
 };
 
+// 3D plant models for the Maker's preview (scripts/maker-3d.js). Presentation
+// only, like `form`: indicative shapes, not photos of our stock.
+// Files live in assets/plants3d/ (sources + licences: assets/plants3d/CREDITS.md).
+// A plant uses `plants[id]` if it has an entry, else `forms[form]`; `null` or
+// no entry = the procedural low-poly plant. Options per model:
+//   scale  multiplies the fitted size (1 = fill the chamber like the others)
+//   yaw    extra turn in radians, to show the model's best side
+//   tint   false keeps the model's own colours (default: foliage takes the
+//          plant group's colour + any colour its name states, like the procedural plants)
+// Changing a model's look? Give the file a new name: /assets is cached for a year.
+/**
+ * @typedef {{ file: string, scale?: number, yaw?: number, tint?: boolean }} PlantModel
+ * @type {{ base: string, forms: Record<string, PlantModel|null>, plants: Record<string, PlantModel|null> }}
+ */
+export const models = {
+  base: 'assets/plants3d/',
+  forms: {
+    leaf:    { file: 'leaf-heart.glb' },              // heart/arrow leaves: Syngonium, Anthurium, Alocasia…
+    trail:   { file: 'trail-pothos.glb' },
+    rosette: { file: 'rosette-echeveria.glb' },
+    air:     { file: 'air-bromeliad.glb' },
+    fern:    { file: 'fern-clump.glb' },
+    moss:    { file: 'moss-cushion.glb' },
+    trap:    null                                     // no licensed sundew/pitcher models found: procedural
+  },
+  plants: {
+    'PLT-018': { file: 'leaf-monstera.glb' },         // Monstera
+    'PLT-019': { file: 'leaf-monstera.glb', scale: .9 },   // Rhaphidophora (split leaves)
+    'PLT-026': { file: 'leaf-monstera.glb' },         // Umbrella Plant
+    'PLT-028': { file: 'leaf-monstera.glb' },         // Fatsia 'Spider's Web'
+    'PLT-009': { file: 'rosette-upright.glb' },       // Haworthia
+    'PLT-027': { file: 'rosette-flat.glb' },          // Strawberry Begonia
+    'PLT-034': { file: 'rosette-flat.glb' },          // Butterwort
+    'PLT-031': { file: 'trap-flytrap.glb' },          // Venus Flytrap (its red traps aren't foliage, so they stay red)
+    'PLT-015': null,                                  // Java Fern: strap leaves, procedural reads truer
+    'PLT-029': null                                   // Bird's Nest Fern: same
+  }
+};
+
 // Guided search answers → the real fields they act on.
 // looks: studio mapping from each group's heading + the Maker recipes
 // (Misty Forest = Moss, Zen Minimal = Fire, Tiny Jungle = Dark). To confirm with Aayush.

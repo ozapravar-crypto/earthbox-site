@@ -410,3 +410,4 @@ img.mk-thumb,img.mk-swatch{display:block;object-fit:contain}
 }
 @media (max-width:380px){ .mk-map{grid-template-columns:1fr} }
 .mk-found:focus{outline:none}
+.mk-credit{max-width:none;margin:2.5rem 0 0;font-size:.78rem}.mk-credit a{color:inherit;text-decoration:underline;text-underline-offset:2px}

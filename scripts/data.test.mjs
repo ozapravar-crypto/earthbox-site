@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { volumeOne, categories, materials } from '../data/volume-one.js';
 import { volumeTwo } from '../data/upcoming.js';
-import { plants, elements, chamberElements, substrates, recipes, forms, SOILLESS } from '../data/maker.js';
+import { plants, elements, chamberElements, substrates, recipes, forms, SOILLESS, models } from '../data/maker.js';
 import { articles, categories as articleCats } from '../data/articles.js';
 import { NAV } from '../data/site.js';
 import { decodeBuild, encodeBuild } from './build-codec.js';
@@ -74,6 +74,20 @@ for (const r of recipes) {
   assert.ok(b, `recipe ${r.id}: chamber "${r.chamber}"`);
   assert.deepEqual(b.plants, r.plants, `recipe ${r.id}: a plant doesn't fit ${r.chamber} or the chamber is over capacity`);
 }
+
+// Plant models: keys are real forms / plant ids; entries well formed (files: check-assets).
+assert.ok(typeof models.base === 'string' && models.base.endsWith('/'), 'models.base ends in /');
+const checkModel = (at, m) => {
+  if (m === null) return;                                              // null = procedural plant
+  assert.match(m.file, /^[a-z0-9-]+\.glb$/, `${at}: file is a .glb name`);
+  if ('scale' in m) assert.ok(m.scale > 0 && m.scale <= 2, `${at}: scale`);
+  if ('yaw' in m) assert.ok(Number.isFinite(m.yaw), `${at}: yaw`);
+  if ('tint' in m) assert.equal(typeof m.tint, 'boolean', `${at}: tint`);
+  for (const k of Object.keys(m)) assert.ok(['file', 'scale', 'yaw', 'tint'].includes(k), `${at}: unknown option "${k}"`);
+};
+for (const [f, m] of Object.entries(models.forms)) { assert.ok(forms[f], `models.forms: "${f}" is not a form`); checkModel(`models.forms.${f}`, m); }
+const PIDS = new Set(plants.map(p => p.id));
+for (const [id, m] of Object.entries(models.plants)) { assert.ok(PIDS.has(id), `models.plants: "${id}" is not a plant`); checkModel(`models.plants.${id}`, m); }
 
 // ── Journal ──────────────────────────────────────────────────────────
 unique(articles, 'slug', 'articles');
