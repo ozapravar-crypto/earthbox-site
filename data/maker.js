@@ -16,15 +16,15 @@ export const chambers = volumeTwo.boxes;
 
 // The nine elemental plant groups · `focus` is the list's own wording.
 export const elements = [
-  { id: 'Earth', focus: 'Robust growth, diverse variegation' },
-  { id: 'Fire',  focus: 'Heat-tolerant, water-storing' },
-  { id: 'Water', focus: 'Thrives in moisture-rich air' },
-  { id: 'Air',   focus: 'Grows on surfaces, loves airflow' },
-  { id: 'Aero',  focus: 'No soil · fed by mist' },
-  { id: 'Frost', focus: 'Prefers cooler temperatures' },
-  { id: 'Bite',  focus: 'Carnivorous · humidity-dependent' },
-  { id: 'Moss',  focus: 'Carpet species for the floor' },
-  { id: 'Dark',  focus: 'Low light, deep colour' }
+  { id: 'Earth', focus: 'Robust growth, diverse variegation', heading: 'Soil-based classics' },
+  { id: 'Fire',  focus: 'Heat-tolerant, water-storing', heading: 'High light & succulents' },
+  { id: 'Water', focus: 'Thrives in moisture-rich air', heading: 'High humidity & aquatic-leaning' },
+  { id: 'Air',   focus: 'Grows on surfaces, loves airflow', heading: 'The epiphyte collection' },
+  { id: 'Aero',  focus: 'No soil · fed by mist', heading: 'Tillandsia & air-feeders' },
+  { id: 'Frost', focus: 'Prefers cooler temperatures', heading: 'Cold-tolerant & high-altitude' },
+  { id: 'Bite',  focus: 'Carnivorous · humidity-dependent', heading: 'Carnivorous & unique mechanisms' },
+  { id: 'Moss',  focus: 'Carpet species for the floor', heading: 'The carpet collection' },
+  { id: 'Dark',  focus: 'Low light, deep colour', heading: 'Low light & glowing veins' }
 ];
 
 // Which plant groups each chamber's climate suits.
@@ -41,52 +41,52 @@ export const SOILLESS = ['AirBox', 'AeroBox'];
 
 // `form` only picks the line-drawing used in the preview. It is not a care claim.
 export const plants = [
-  ['PLT-001', 'Earth', 'Syngonium Neon Pink', 'leaf'],
-  ['PLT-002', 'Earth', 'Syngonium Albo Variegata', 'leaf'],
-  ['PLT-003', 'Earth', 'Philodendron Pink Princess', 'leaf'],
-  ['PLT-004', 'Earth', 'Pothos Marble Queen', 'trail'],
-  ['PLT-005', 'Earth', 'Tradescantia Nanouk', 'trail'],
-  ['PLT-006', 'Fire',  'Jewel Alocasia', 'leaf'],
-  ['PLT-007', 'Fire',  'Tradescantia Pink Fury', 'trail'],
-  ['PLT-008', 'Fire',  "Echeveria 'Perle von Nürnberg'", 'rosette'],
-  ['PLT-009', 'Fire',  'Haworthia Fasciata', 'rosette'],
-  ['PLT-010', 'Fire',  "Burro's Tail", 'trail'],
-  ['PLT-011', 'Water', 'Syngonium Gold Allusion', 'leaf'],
-  ['PLT-012', 'Water', 'Anthurium Scandens', 'leaf'],
-  ['PLT-013', 'Water', 'Peace Lily (petite)', 'leaf'],
-  ['PLT-014', 'Water', 'Frosty Fern', 'fern'],
-  ['PLT-015', 'Water', 'Java Fern', 'fern'],
-  ['PLT-016', 'Air',   'Philodendron Brasil', 'trail'],
-  ['PLT-017', 'Air',   'Philodendron Birkin', 'leaf'],
-  ['PLT-018', 'Air',   'Monstera Deliciosa (small form)', 'leaf'],
-  ['PLT-019', 'Air',   'Rhaphidophora Tetrasperma', 'leaf'],
-  ['PLT-020', 'Air',   'Alocasia Zebrina', 'leaf'],
-  ['PLT-021', 'Aero',  'Tillandsia Xerographica', 'air'],
-  ['PLT-022', 'Aero',  'Tillandsia Ionantha', 'air'],
-  ['PLT-023', 'Aero',  'Tillandsia Bulbosa', 'air'],
-  ['PLT-024', 'Aero',  'Scindapsus Pictus Exotica', 'trail'],
-  ['PLT-025', 'Aero',  'String of Hearts', 'trail'],
-  ['PLT-026', 'Frost', 'Umbrella Plant', 'leaf'],
-  ['PLT-027', 'Frost', 'Strawberry Begonia', 'rosette'],
-  ['PLT-028', 'Frost', "Fatsia 'Spider's Web'", 'leaf'],
-  ['PLT-029', 'Frost', "Bird's Nest Fern", 'fern'],
-  ['PLT-030', 'Frost', 'Variegated English Ivy', 'trail'],
-  ['PLT-031', 'Bite',  'Venus Flytrap', 'trap'],
-  ['PLT-032', 'Bite',  'Cape Sundew', 'trap'],
-  ['PLT-033', 'Bite',  'Pitcher Plant (Nepenthes)', 'trap'],
-  ['PLT-034', 'Bite',  'Butterwort', 'rosette'],
-  ['PLT-035', 'Bite',  'North American Pitcher Plant', 'trap'],
-  ['PLT-036', 'Moss',  'Pillow Moss', 'moss'],
-  ['PLT-037', 'Moss',  'Java Moss', 'moss'],
-  ['PLT-038', 'Moss',  'Sheet Moss', 'moss'],
-  ['PLT-039', 'Moss',  'Phoenix Moss', 'moss'],
-  ['PLT-040', 'Moss',  'Mood Moss', 'moss'],
-  ['PLT-041', 'Dark',  'Syngonium Dark Maria', 'leaf'],
-  ['PLT-042', 'Dark',  'Philodendron Micans', 'trail'],
-  ['PLT-043', 'Dark',  'Anthurium Crystallinum', 'leaf'],
-  ['PLT-044', 'Dark',  'Alocasia Black Velvet', 'leaf'],
-  ['PLT-045', 'Dark',  'Jewel Orchid', 'leaf']
-].map(([id, element, name, form]) => ({ id, element, name, form }));
+  ['PLT-001', 'Earth', 'Syngonium Neon Pink', 'leaf', "Syngonium podophyllum 'Neon'"],
+  ['PLT-002', 'Earth', 'Syngonium Albo Variegata', 'leaf', "Syngonium podophyllum 'Albo Variegatum'"],
+  ['PLT-003', 'Earth', 'Philodendron Pink Princess', 'leaf', "Philodendron erubescens 'Pink Princess'"],
+  ['PLT-004', 'Earth', 'Pothos Marble Queen', 'trail', "Epipremnum aureum 'Marble Queen'"],
+  ['PLT-005', 'Earth', 'Tradescantia Nanouk', 'trail', "Tradescantia albiflora 'Nanouk'"],
+  ['PLT-006', 'Fire',  'Jewel Alocasia', 'leaf', "Alocasia cuprea"],
+  ['PLT-007', 'Fire',  'Tradescantia Pink Fury', 'trail', "Tradescantia 'Pink Fury'"],
+  ['PLT-008', 'Fire',  "Echeveria 'Perle von Nürnberg'", 'rosette', "Echeveria 'Perle von Nürnberg'"],
+  ['PLT-009', 'Fire',  'Haworthia Fasciata', 'rosette', "Haworthiopsis fasciata"],
+  ['PLT-010', 'Fire',  "Burro's Tail", 'trail', "Sedum morganianum"],
+  ['PLT-011', 'Water', 'Syngonium Gold Allusion', 'leaf', "Syngonium podophyllum 'Gold Allusion'"],
+  ['PLT-012', 'Water', 'Anthurium Scandens', 'leaf', "Anthurium scandens"],
+  ['PLT-013', 'Water', 'Peace Lily (petite)', 'leaf', "Spathiphyllum wallisii (compact)"],
+  ['PLT-014', 'Water', 'Frosty Fern', 'fern', "Selaginella kraussiana 'Variegata'"],
+  ['PLT-015', 'Water', 'Java Fern', 'fern', "Microsorum pteropus"],
+  ['PLT-016', 'Air',   'Philodendron Brasil', 'trail', "Philodendron hederaceum 'Brasil'"],
+  ['PLT-017', 'Air',   'Philodendron Birkin', 'leaf', "Philodendron 'Birkin'"],
+  ['PLT-018', 'Air',   'Monstera Deliciosa (small form)', 'leaf', "Monstera deliciosa (compact)"],
+  ['PLT-019', 'Air',   'Rhaphidophora Tetrasperma', 'leaf', "Rhaphidophora tetrasperma"],
+  ['PLT-020', 'Air',   'Alocasia Zebrina', 'leaf', "Alocasia zebrina"],
+  ['PLT-021', 'Aero',  'Tillandsia Xerographica', 'air', "Tillandsia xerographica"],
+  ['PLT-022', 'Aero',  'Tillandsia Ionantha', 'air', "Tillandsia ionantha"],
+  ['PLT-023', 'Aero',  'Tillandsia Bulbosa', 'air', "Tillandsia bulbosa"],
+  ['PLT-024', 'Aero',  'Scindapsus Pictus Exotica', 'trail', "Scindapsus pictus 'Exotica'"],
+  ['PLT-025', 'Aero',  'String of Hearts', 'trail', "Ceropegia woodii"],
+  ['PLT-026', 'Frost', 'Umbrella Plant', 'leaf', "Darmera peltata"],
+  ['PLT-027', 'Frost', 'Strawberry Begonia', 'rosette', "Saxifraga stolonifera"],
+  ['PLT-028', 'Frost', "Fatsia 'Spider's Web'", 'leaf', "Fatsia japonica 'Spider's Web'"],
+  ['PLT-029', 'Frost', "Bird's Nest Fern", 'fern', "Asplenium nidus"],
+  ['PLT-030', 'Frost', 'Variegated English Ivy', 'trail', "Hedera helix variegata"],
+  ['PLT-031', 'Bite',  'Venus Flytrap', 'trap', "Dionaea muscipula"],
+  ['PLT-032', 'Bite',  'Cape Sundew', 'trap', "Drosera capensis"],
+  ['PLT-033', 'Bite',  'Pitcher Plant (Nepenthes)', 'trap', "Nepenthes alata"],
+  ['PLT-034', 'Bite',  'Butterwort', 'rosette', "Pinguicula spp."],
+  ['PLT-035', 'Bite',  'North American Pitcher Plant', 'trap', "Sarracenia spp."],
+  ['PLT-036', 'Moss',  'Pillow Moss', 'moss', "Leucobryum glaucum"],
+  ['PLT-037', 'Moss',  'Java Moss', 'moss', "Taxiphyllum barbieri"],
+  ['PLT-038', 'Moss',  'Sheet Moss', 'moss', "Hypnum cupressiforme"],
+  ['PLT-039', 'Moss',  'Phoenix Moss', 'moss', "Fissidens fontanus"],
+  ['PLT-040', 'Moss',  'Mood Moss', 'moss', "Dicranum scoparium"],
+  ['PLT-041', 'Dark',  'Syngonium Dark Maria', 'leaf', "Syngonium 'Dark Maria'"],
+  ['PLT-042', 'Dark',  'Philodendron Micans', 'trail', "Philodendron hederaceum 'Micans'"],
+  ['PLT-043', 'Dark',  'Anthurium Crystallinum', 'leaf', "Anthurium crystallinum"],
+  ['PLT-044', 'Dark',  'Alocasia Black Velvet', 'leaf', "Alocasia reginula 'Black Velvet'"],
+  ['PLT-045', 'Dark',  'Jewel Orchid', 'leaf', "Ludisia discolor"]
+].map(([id, element, name, form, botanical]) => ({ id, element, name, form, botanical }));
 
 // Only SOIL-001 is filled in the workbook (tab 07). "Studio's choice" is the
 // honest default until the other mixes exist. `suits` = plant groups.
@@ -121,4 +121,49 @@ export const spaceQuestions = {
   room:      ['Living room', 'Study', 'Foyer', 'Bedroom', 'Office', 'Gallery', 'Other'],
   household: ['Pets', 'Young children', 'Neither'],
   maturity:  ['Established — full piece on day one', 'Growing — we plant young, you watch it fill in']
+};
+
+// ── Discovery (search, map, guided search) ─────────────────────────────
+// The workbook's per-plant Light, Care, Humidity, Price and Photo columns are
+// all empty (tab 04, 0 of 45). So discovery filters on what IS known: the
+// plant group, its chamber's climate and its shape. When a column is filled,
+// add the field to the plant row above and a filter in scripts/plant-search.js.
+// Schema extension, one per plant:  light: 'low'|'indirect'|'bright',
+// care: 'easy'|'moderate'|'high', humidity: '60–80 %', price: 1200, photo: 'x.webp'.
+
+// Shape labels for `form` (assigned per species from its growth habit).
+export const forms = {
+  leaf: 'Broad leaf', trail: 'Trailing', rosette: 'Rosette', air: 'Air plant',
+  fern: 'Fern', moss: 'Moss carpet', trap: 'Pitcher / trap'
+};
+
+// Guided search answers → the real fields they act on.
+// looks: studio mapping from each group's heading + the Maker recipes
+// (Misty Forest = Moss, Zen Minimal = Fire, Tiny Jungle = Dark). To confirm with Aayush.
+export const guide = {
+  looks: [
+    { id: 'woodland',  label: 'Woodland',  line: 'Lush, layered, forest-like',          groups: ['Moss', 'Frost', 'Water'] },
+    { id: 'minimal',   label: 'Minimal',   line: 'Clean, sculptural, understated',      groups: ['Fire', 'Aero'] },
+    { id: 'tropical',  label: 'Tropical',  line: 'Abundant, vibrant, leafy',            groups: ['Earth', 'Air', 'Dark'] },
+    { id: 'colourful', label: 'Colourful', line: 'Patterned leaves, contrasting colour', groups: ['Earth', 'Dark'] }
+  ],
+  // Every chamber has its own grow light, so room light only nudges the order.
+  light: [
+    { id: 'low',      label: 'Low light',              prefers: ['Dark'] },
+    { id: 'indirect', label: 'Bright, indirect light', prefers: [] },
+    { id: 'bright',   label: 'Bright light',           prefers: ['Fire'] },
+    { id: 'unsure',   label: 'I’m not sure',           prefers: [] }
+  ],
+  // No plant has a care rating yet: the answer goes to the studio with the enquiry.
+  care: [
+    { id: 'Easy',     label: 'Easy care',     line: 'Something forgiving' },
+    { id: 'Moderate', label: 'Moderate care', line: 'A little regular attention is fine' },
+    { id: 'High',     label: 'High care',     line: 'Happy to tend it often' }
+  ],
+  roles: [
+    { id: 'foliage', label: 'Lush foliage',       forms: ['leaf', 'fern'] },
+    { id: 'ground',  label: 'Ground cover',       forms: ['moss'] },
+    { id: 'trail',   label: 'Trailing stems',     forms: ['trail'] },
+    { id: 'sculpt',  label: 'A sculptural accent', forms: ['rosette', 'air', 'trap'] }
+  ]
 };

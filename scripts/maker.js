@@ -13,8 +13,9 @@
 // ─────────────────────────────────────────────────────────────────────
 
 import { chambers, plants, substrates, elements, recipes,
-         chamberElements, SOILLESS, spaceQuestions } from '../data/maker.js';
+         chamberElements, SOILLESS, spaceQuestions, forms, guide } from '../data/maker.js';
 import { enquiryAltHTML, ENQUIRY_PHONE } from './enquiry-form.js';
+import { emptyDiscovery, searchPlants, dropChip, clearGuided, climateOrder } from './plant-search.js';
 
 export const STAGES = ['start', 'chamber', 'foundation', 'plants', 'space', 'review'];
 const STEPS = ['chamber', 'foundation', 'plants', 'space'];   // the numbered ones
@@ -32,7 +33,7 @@ const find = (list, id, key = 'id') => list.find(x => x[key] === id);
 
 export const emptyBuild = () => ({
   name: '', chamber: null, substrate: null, plants: [],
-  space: { room: '', household: [], maturity: '', note: '' }
+  space: { room: '', household: [], maturity: '', note: '', care: '' }
 });
 
 export const chamberOf = (b) => find(chambers, b.chamber, 'sku');
@@ -131,6 +132,7 @@ export function enquiryText(b){
     line('Lives in', s.room),
     line('Household', s.household.join(', ')),
     line('Maturity', s.maturity.split(' —')[0]),
+    line('Care wanted', s.care),
     line('Note', s.note.trim()),
     '',
     `Design: ${shareUrl(b)}`,
@@ -310,47 +312,188 @@ function foundationPanel(b){
   }).join('')}</div>`;
 }
 
-function plantRow(b, p, ch){
+// ─── Plants step: discovery (search · list/map · guided) ──────────────
+// Rules live in plant-search.js; this only draws its output. List and map
+// render the same `results`, so a view switch never changes what is shown.
+
+// A plant's own chamber (one group), else Lab, which takes every group.
+const homeOf = (p) => chambers.find(c => chamberElements[c.sku]?.length === 1 && chamberElements[c.sku][0] === p.element)
+  || find(chambers, 'LabBox', 'sku');
+const fitsIn = (p) => chambers.filter(c => isSuited(p, c.sku)).map(c => c.name);
+
+function plantAction(b, p, ch){
   const on = b.plants.includes(p.id);
-  const ok = isSuited(p, ch.sku);
+  if (!isSuited(p, ch.sku)) {
+    const home = homeOf(p);
+    return `<button type="button" class="mk-add mk-switch" data-act="switch" data-id="${p.id}" data-key="sw-${p.id}"
+      aria-label="Switch to the ${home.name} chamber and add ${esc(p.name)}">Use ${home.name}</button>`;
+  }
   const full = !on && b.plants.length >= capacity(ch);
-  const el = find(elements, p.element);
+  return `<button type="button" class="mk-add${on ? ' is-on' : ''}" data-act="plant" data-id="${p.id}" data-key="pl-${p.id}"
+    aria-pressed="${on}" ${full ? 'disabled' : ''} aria-label="${on ? 'Remove' : 'Add'} ${esc(p.name)}">
+    ${on ? 'Added ✓' : full ? 'Full' : 'Add'}</button>`;
+}
+
+// Only what the studio has published. Empty workbook columns say so, never guess.
+function plantDetail(p){
+  const el = find(elements, p.element), home = homeOf(p);
+  const own = home.sku !== 'LabBox';
+  return `<dl class="mk-dl">
+    <div><dt>Group</dt><dd>${p.element} · ${el.heading}</dd></div>
+    <div><dt>Shape</dt><dd>${forms[p.form]}</dd></div>
+    <div><dt>Climate</dt><dd>${own ? `${home.temp} · ${home.humidity} humidity (${home.name} chamber)` : 'Set by hand in the Lab chamber'}</dd></div>
+    <div><dt>Grows in</dt><dd>${fitsIn(p).join(', ')}</dd></div>
+    <div><dt>Light · care</dt><dd>Not rated yet. The studio advises with your quote.</dd></div>
+    <div><dt>Price</dt><dd>Quoted on enquiry</dd></div>
+  </dl>`;
+}
+
+function plantRow(b, p, ch){
+  const on = b.plants.includes(p.id), ok = isSuited(p, ch.sku);
   return `<li class="mk-plant-row${on ? ' is-on' : ''}${ok ? '' : ' is-off'}">
     ${glyphThumb(p)}
     <span class="mk-card-body">
       <span class="mk-card-name">${esc(p.name)}</span>
-      <span class="mk-card-desc">${p.element} · ${el.focus}</span>
-      ${ok ? '' : `<span class="mk-why">Needs a ${p.element} chamber’s climate</span>`}
+      <span class="mk-bot">${esc(p.botanical)}</span>
+      <span class="mk-card-meta">${p.element} · ${forms[p.form]}</span>
+      ${ok ? '' : `<span class="mk-why">Needs the ${homeOf(p).name} chamber’s climate</span>`}
     </span>
-    ${ok ? `<button type="button" class="mk-add${on ? ' is-on' : ''}" data-act="plant" data-id="${p.id}" data-key="pl-${p.id}"
-      aria-pressed="${on}" ${full ? 'disabled' : ''} aria-label="${on ? 'Remove' : 'Add'} ${esc(p.name)}">
-      ${on ? 'Added ✓' : full ? 'Full' : 'Add'}</button>` : ''}
+    ${plantAction(b, p, ch)}
+    <details class="mk-detail"><summary>Details<span class="u-sr-only"> for ${esc(p.name)}</span></summary>${plantDetail(p)}</details>
   </li>`;
+}
+
+const climateLine = (c) => (c ? `${c.humidity} · ${c.temp}` : 'Lab chamber only');
+
+function mapHTML(b, ch, results, ui){
+  const fits = suitedElements(ch.sku);
+  return `<p class="mk-map-key caption">Mapped by climate, driest to most humid. Tap a plant.</p>
+  <ol class="mk-map">${climateOrder(chambers, chamberElements).map(({ id, chamber }) => {
+    const here = results.filter(p => p.element === id);
+    const pin = here.find(p => p.id === ui.pin);
+    return `<li class="mk-region${fits.includes(id) ? ' is-fit' : ''}${here.length ? '' : ' is-empty'}">
+      <p class="mk-region-head"><span class="mk-region-name">${id}</span>${fits.includes(id) ? '<span class="mk-tag">Your chamber</span>' : ''}</p>
+      <p class="mk-card-meta">${climateLine(chamber)}</p>
+      ${here.length ? `<div class="mk-pins">${here.map(p => `<button type="button" class="mk-pin${b.plants.includes(p.id) ? ' is-on' : ''}"
+          data-act="pin" data-id="${p.id}" data-key="pin-${p.id}" aria-pressed="${p.id === ui.pin}"
+          aria-label="${esc(p.name)}${b.plants.includes(p.id) ? ', added' : ''}" title="${esc(p.name)}">${glyphThumb(p)}</button>`).join('')}</div>`
+        : '<p class="mk-region-none">No matches</p>'}
+      ${pin ? `<div class="mk-pin-card">
+          <p class="mk-card-name">${esc(pin.name)}</p><p class="mk-bot">${esc(pin.botanical)}</p>
+          ${isSuited(pin, ch.sku) ? '' : `<p class="mk-why">Needs the ${homeOf(pin).name} chamber’s climate</p>`}
+          ${plantAction(b, pin, ch)}
+          <details class="mk-detail"><summary>Details</summary>${plantDetail(pin)}</details>
+        </div>` : ''}
+    </li>`;
+  }).join('')}</ol>`;
+}
+
+const disCtx = (b) => {
+  const ch = chamberOf(b);
+  return { suited: suitedElements(ch.sku), chamber: ch.name, space: b.space };
+};
+
+function resultsHTML(b, ui){
+  const ch = chamberOf(b), d = ui.disc;
+  const { results, constraints: cs, preferences: prefs, relax } = searchPlants(d, disCtx(b));
+  const look = find(guide.looks, d.g.look);
+  const guided = cs.some(c => c.guided) || prefs.length > 0;
+  const chip = (c) => `<button type="button" class="mk-chip${c.guided || !('test' in c) ? ' is-guided' : ''}" data-act="chip" data-id="${esc(c.key)}"
+    data-key="chip-${esc(c.key)}" aria-label="Remove ${esc(c.label)}">${esc(c.label)} <span aria-hidden="true">×</span></button>`;
+  const head = `<p class="mk-found" aria-live="polite" tabindex="-1">${look ? `Showing ${results.length} plant${results.length === 1 ? '' : 's'} for your ${look.label.toLowerCase()} terrarium`
+      : `${results.length} of ${plants.length} plants`}</p>
+    ${cs.length || prefs.length ? `<div class="mk-chips" role="group" aria-label="Active filters">${[...cs, ...prefs].map(chip).join('')}
+      ${guided ? '<button type="button" class="mk-clear" data-act="clear-guided" data-key="clear-guided">Clear guided filters</button>' : ''}
+      ${cs.length + prefs.length > 1 ? '<button type="button" class="mk-clear" data-act="clear-all" data-key="clear-all">Clear all</button>' : ''}</div>` : ''}
+    ${prefs.some(x => x.key === 'light') ? '<p class="mk-hint">Every chamber has its own grow light, so room light only changes the order.</p>' : ''}`;
+  if (!results.length) return head + `<div class="mk-empty mk-none">
+    <p>No plant matches all of these together.</p>
+    ${relax.length ? `<p class="mk-sub">Loosen one:</p><ul class="mk-relax">${relax.map(r => `<li><button type="button" class="cta cta-secondary cta-small"
+      data-act="chip" data-id="${esc(r.key)}" data-key="rx-${esc(r.key)}">Remove ${esc(r.label)} · ${r.count} plant${r.count === 1 ? '' : 's'}</button></li>`).join('')}</ul>` : ''}
+  </div>`;
+  return head + (d.view === 'map' ? mapHTML(b, ch, results, ui)
+    : `<ul class="mk-plants">${results.map(p => plantRow(b, p, ch)).join('')}</ul>`);
+}
+
+function refineHTML(d, ui){
+  const chipBtn = (kind, id, label, on) => `<button type="button" class="selector-chip${on ? ' active' : ''}" data-act="refine"
+    data-id="${kind}:${id}" data-key="rf-${kind}-${id}" aria-pressed="${on}">${label}</button>`;
+  return `<details class="mk-refine"${ui.refineOpen ? ' open' : ''}><summary>Filter &amp; sort</summary>
+    <div class="mk-refine-body">
+      <label class="mk-check-row"><input type="checkbox" data-act="fit" data-key="fit" ${d.f.fit ? 'checked' : ''}> Only plants that fit my chamber</label>
+      <fieldset><legend class="caption">Plant group</legend><div class="mk-filter">${elements.map(e => chipBtn('group', e.id, e.id, d.f.groups.includes(e.id))).join('')}</div></fieldset>
+      <fieldset><legend class="caption">Shape</legend><div class="mk-filter">${Object.entries(forms).map(([id, l]) => chipBtn('form', id, l, d.f.forms.includes(id))).join('')}</div></fieldset>
+      <label class="mk-sort caption">Sort <select name="sort" data-key="sort">${[['recommended', 'Recommended'], ['name', 'Name A–Z'], ['group', 'Plant group']]
+        .map(([v, l]) => `<option value="${v}"${d.sort === v ? ' selected' : ''}>${l}</option>`).join('')}</select></label>
+    </div></details>`;
 }
 
 function plantsPanel(b, ui){
   const ch = chamberOf(b);
-  const suited = suitedElements(ch.sku);
-  if (!suited.length) return head('Plants', '')
+  if (!suitedElements(ch.sku).length) return head('Plants', '')
     + `<div class="mk-empty"><p>The ${ch.name} chamber grows mushroom cultures, which aren’t on our plant list.</p>
        <p>The studio chooses the strain with you. Continue to tell us about your space.</p></div>`;
 
-  const max = capacity(ch);
-  const many = suited.length > 1;   // Lab: filter by group instead of one long list
-  const shown = plants.filter(p => suited.includes(p.element) && (!many || ui.filter === 'All' || p.element === ui.filter));
-  const others = plants.filter(p => !suited.includes(p.element));
-
-  return head('Add plants', `Chosen for the ${ch.name} chamber’s climate.`)
-  + `<p class="mk-count" aria-live="polite"><strong>${b.plants.length}</strong> of ${max} plants${b.plants.length >= max ? ' · chamber full' : ''}</p>
+  const max = capacity(ch), d = ui.disc;
+  return head('Add plants', `Search all ${plants.length}, or let us guide you. Each one shows whether it suits the ${ch.name} chamber.`)
+  + `<p class="mk-count"><strong>${b.plants.length}</strong> of ${max} plants${b.plants.length >= max ? ' · chamber full' : ''}</p>
   ${b.plants.length ? `<ul class="mk-tray" aria-label="Selected plants">${b.plants.map(id => `<li>
       <span>${esc(plantOf(id).name)}</span>
       <button type="button" data-act="plant" data-id="${id}" data-key="tray-${id}" aria-label="Remove ${esc(plantOf(id).name)}">×</button></li>`).join('')}</ul>` : ''}
-  ${many ? `<div class="mk-filter" role="group" aria-label="Plant group">${['All', ...suited].map(f =>
-      `<button type="button" class="selector-chip${ui.filter === f ? ' active' : ''}" data-act="filter" data-id="${f}"
-        data-key="f-${f}" aria-pressed="${ui.filter === f}">${f}</button>`).join('')}</div>` : ''}
-  <ul class="mk-plants">${shown.map(p => plantRow(b, p, ch)).join('')}</ul>
-  ${others.length ? `<details class="mk-more"><summary>View all plants (${others.length} for other climates)</summary>
-     <ul class="mk-plants">${others.map(p => plantRow(b, p, ch)).join('')}</ul></details>` : ''}`;
+  <div class="mk-disc" role="search">
+    <label class="mk-search"><span class="u-sr-only">Search plants</span>
+      <input type="search" name="q" value="${esc(d.q)}" placeholder="Search plants, groups or shapes…" autocomplete="off" data-key="q"></label>
+    <button type="button" class="mk-guide-btn" data-act="guide" data-key="guide" aria-haspopup="dialog">Guided search</button>
+  </div>
+  <div class="mk-disc-tools">
+    <div class="mk-views" role="group" aria-label="View">${['list', 'map'].map(v =>
+      `<button type="button" data-act="view" data-id="${v}" data-key="view-${v}" aria-pressed="${d.view === v}">${v === 'list' ? 'List' : 'Map'}</button>`).join('')}</div>
+    ${refineHTML(d, ui)}
+  </div>
+  <div id="mkResults">${resultsHTML(b, ui)}</div>`;
+}
+
+// ─── Guided search (native <dialog>: focus trap + Esc for free) ──────
+const GD = [
+  { id: 'look',  q: 'What kind of world are you imagining?', line: 'This chooses the plant groups we show.' },
+  { id: 'room',  q: 'Where will your terrarium live?',       line: 'Passed to the studio with your design. It doesn’t hide plants.' },
+  { id: 'light', q: 'What light does the space get?',        line: 'Every EarthBox chamber has its own grow light, so this only changes the order. Low light still means some light.' },
+  { id: 'care',  q: 'How much care are you happy to give?',  line: 'We haven’t rated care per plant yet. The studio uses this when it quotes.' },
+  { id: 'roles', q: 'What should the plants add?',           line: 'Optional. Pick any.' }
+];
+
+function guideOptions(step, a){
+  const opt = (name, value, label, line, type = 'radio') => `<label class="mk-gd-opt">
+    <input type="${type}" name="gd-${name}" value="${esc(value)}" data-key="gd-${name}-${esc(value)}" ${(type === 'radio' ? a[name] === value : a[name].includes(value)) ? 'checked' : ''}>
+    <span><strong>${esc(label)}</strong>${line ? `<em>${esc(line)}</em>` : ''}</span></label>`;
+  if (step === 'look')  return guide.looks.map(o => opt('look', o.id, o.label, o.line)).join('');
+  if (step === 'room')  return spaceQuestions.room.map(v => opt('room', v, v, '')).join('');
+  if (step === 'light') return guide.light.map(o => opt('light', o.id, o.label, '')).join('');
+  if (step === 'care')  return guide.care.map(o => opt('care', o.id, o.label, o.line)).join('');
+  return guide.roles.map(o => opt('roles', o.id, o.label, '', 'checkbox')).join('');
+}
+
+function guideHTML(b, ui){
+  const { step, a } = ui.gd, i = step, cur = GD[i];
+  const answered = (s) => (s.id === 'roles' ? a.roles.length > 0 : !!a[s.id]);
+  const last = i === GD.length - 1;
+  const n = searchPlants({ ...ui.disc, g: { look: a.look, light: a.light, roles: a.roles } }, disCtx(b)).results.length;
+  return `<form class="mk-gd" method="dialog">
+    <header class="mk-gd-head"><p class="caption">Guided search · Step ${i + 1} of ${GD.length}</p>
+      <button type="button" class="mk-gd-x" data-act="gd-close" data-key="gd-close" aria-label="Close guided search">×</button></header>
+    <ol class="mk-gd-steps">${GD.map((s, k) => `<li><button type="button" data-act="gd-step" data-id="${k}" data-key="gd-s${k}"
+      class="${k === i ? 'is-current' : ''}${answered(s) ? ' is-done' : ''}" ${k === i ? 'aria-current="step"' : ''}
+      aria-label="Step ${k + 1}${answered(s) ? ', answered' : ''}"></button></li>`).join('')}</ol>
+    <h2 class="mk-title" id="mkGuideTitle" tabindex="-1">${cur.q}</h2>
+    <p class="mk-line">${cur.line}</p>
+    <fieldset class="mk-gd-opts${cur.id === 'room' ? ' is-compact' : ''}"><legend class="u-sr-only">${cur.q}</legend>${guideOptions(cur.id, a)}</fieldset>
+    <footer class="mk-gd-foot">
+      ${i ? '<button type="button" class="cta cta-secondary" data-act="gd-back" data-key="gd-back">Back</button>' : '<span></span>'}
+      ${last ? `<button type="button" class="cta" data-act="gd-apply" data-key="gd-apply"${n ? '' : ' aria-describedby="gdNone"'}>Show ${n} plant${n === 1 ? '' : 's'} ${arrow}</button>`
+             : `<button type="button" class="cta" data-act="gd-next" data-key="gd-next">${answered(cur) ? 'Continue' : 'Skip'} ${arrow}</button>`}
+    </footer>
+    ${last && !n ? '<p class="mk-hint" id="gdNone">No plant matches every answer with your current search. You can still apply and loosen one on the page.</p>' : ''}
+  </form>`;
 }
 
 function choice(name, value, type, checked){
@@ -378,7 +521,7 @@ function reviewPanel(b){
   const ch = chamberOf(b), sub = find(substrates, b.substrate), s = b.space;
   const group = (title, stage, body) => `<section class="mk-group">
     <header><h3 class="caption">${title}</h3><button type="button" class="mk-edit" data-act="goto" data-to="${stage}" data-key="edit-${stage}">Edit<span class="u-sr-only"> ${title}</span></button></header>${body}</section>`;
-  const spaceBits = [s.room, s.household.join(', '), s.maturity.split(' —')[0], s.note && `“${s.note}”`].filter(Boolean).map(esc);
+  const spaceBits = [s.room, s.household.join(', '), s.maturity.split(' —')[0], s.care && `${s.care} care`, s.note && `“${s.note}”`].filter(Boolean).map(esc);
   return head('Your world', '')
   + `<label class="mk-field mk-name"><span>Name it</span>
       <input type="text" name="name" maxlength="60" value="${esc(b.name)}" placeholder="Untitled world" autocomplete="off"></label>
@@ -426,13 +569,29 @@ function barHTML(b, stage, error){
 
 const track = (name, params = {}) => { if (typeof gtag === 'function') gtag('event', name, params); };
 
+// Saved discovery state is untrusted: keep only values we know.
+function cleanDisc(d){
+  const e = emptyDiscovery();
+  if (!d || typeof d !== 'object') return e;
+  const ids = (list, key = 'id') => list.map(x => x[key]);
+  const pick = (v, ok) => (ok.includes(v) ? v : '');
+  const many = (v, ok) => (Array.isArray(v) ? v.filter(x => ok.includes(x)) : []);
+  return {
+    q: String(d.q || '').slice(0, 80),
+    sort: pick(d.sort, ['name', 'group']) || 'recommended',
+    view: d.view === 'map' ? 'map' : 'list',
+    f: { groups: many(d.f?.groups, ids(elements)), forms: many(d.f?.forms, Object.keys(forms)), fit: d.f?.fit !== false },
+    g: { look: pick(d.g?.look, ids(guide.looks)), light: pick(d.g?.light, ids(guide.light)), roles: many(d.g?.roles, ids(guide.roles)) }
+  };
+}
+
 function load(){
   const fromHash = location.hash.length > 3 ? decodeBuild(location.hash) : null;
   if (fromHash) return { build: fromHash, shared: true };
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || 'null');
     const b = saved && decodeBuild(saved.code);
-    if (b) return { build: { ...b, space: { ...emptyBuild().space, ...saved.space } } };
+    if (b) return { build: { ...b, space: { ...emptyBuild().space, ...saved.space } }, disc: cleanDisc(saved.disc) };
   } catch { /* private mode / corrupt — start clean */ }
   return null;
 }
@@ -446,11 +605,41 @@ export function initMaker(){
   const restored = load();
   let b = restored?.build || emptyBuild();
   let stage = 'start';
-  let ui = { filter: 'All', fresh: null, error: '', notice: null };
+  let ui = { fresh: null, error: '', notice: null, disc: restored?.disc || emptyDiscovery(), pin: null, refineOpen: false, gd: null };
+  const dialog = $('mkGuide');
 
   const save = () => {
-    try { localStorage.setItem(STORE, JSON.stringify({ code: encodeBuild(b), space: b.space })); } catch {}
+    try { localStorage.setItem(STORE, JSON.stringify({ code: encodeBuild(b), space: b.space, disc: ui.disc })); } catch {}
   };
+
+  // Search typing, view switch, chips: redraw only the results, so the
+  // search box keeps its caret and the page keeps its scroll.
+  function renderResults(){
+    const key = document.activeElement?.dataset?.key;
+    const box = $('mkResults');
+    if (!box) return render();
+    box.innerHTML = resultsHTML(b, ui);
+    root.querySelectorAll('.mk-views [data-act=view]').forEach(x => x.setAttribute('aria-pressed', x.dataset.id === ui.disc.view));
+    save();
+    // The clicked chip may be gone: land on the result count instead of <body>.
+    if (key && !root.contains(document.activeElement)) (box.querySelector(`[data-key="${key}"]`) || box.querySelector('.mk-found'))?.focus({ preventScroll: true });
+  }
+  const setDisc = (d) => { ui.disc = d; renderResults(); };
+
+  function renderGuide(){
+    const key = document.activeElement?.dataset?.key;
+    dialog.innerHTML = guideHTML(b, ui);
+    (key && dialog.querySelector(`[data-key="${key}"]`) || dialog.querySelector('.mk-title')).focus({ preventScroll: true });
+  }
+  function openGuide(){
+    const { look, light, roles } = ui.disc.g;
+    ui.gd = { step: 0, a: { look, light, roles: [...roles], room: b.space.room, care: b.space.care } };   // reopen = prefilled
+    dialog.showModal();
+    renderGuide();
+    track('maker_guided_open');
+  }
+  function closeGuide(){ ui.gd = null; if (dialog.open) dialog.close(); }   // the draft is dropped; search + plants untouched
+  dialog?.addEventListener('close', () => { ui.gd = null; root.querySelector('[data-key="guide"]')?.focus({ preventScroll: true }); });
 
   function render(){
     const key = document.activeElement?.dataset?.key;
@@ -533,13 +722,42 @@ export function initMaker(){
     if (act === 'goto' && canEnter(b, to)) go(to);
     if (act === 'chamber')   pickChamber(id);
     if (act === 'substrate') commit({ ...b, substrate: id });
-    if (act === 'filter')    { ui.filter = id; render(); }
     if (act === 'plant') {
       const res = togglePlant(b, id);
       if (res.error) { ui.error = res.error; render(); }
       else commit(res.build, { fresh: res.build.plants.includes(id) ? id : null });
     }
     if (act === 'undo' && ui.notice?.undo) commit(ui.notice.undo);
+    // Discovery
+    if (act === 'view')  { ui.disc = { ...ui.disc, view: id }; renderResults(); }
+    if (act === 'pin')   { ui.pin = ui.pin === id ? null : id; renderResults(); }
+    if (act === 'chip') {
+      if (id === 'room' || id === 'care') commit({ ...b, space: { ...b.space, [id]: '' } });
+      else setDisc(dropChip(ui.disc, id));
+    }
+    if (act === 'clear-guided') { ui.disc = clearGuided(ui.disc); commit({ ...b, space: { ...b.space, room: '', care: '' } }); }
+    if (act === 'clear-all') { ui.disc = { ...emptyDiscovery(), view: ui.disc.view, sort: ui.disc.sort, f: { ...emptyDiscovery().f, fit: false } };
+      commit({ ...b, space: { ...b.space, room: '', care: '' } }); }
+    if (act === 'refine') {
+      const [kind, v] = id.split(':'), k = kind === 'group' ? 'groups' : 'forms', list = ui.disc.f[k];
+      ui.disc = { ...ui.disc, f: { ...ui.disc.f, [k]: list.includes(v) ? list.filter(x => x !== v) : [...list, v] } };
+      render(); save();
+    }
+    if (act === 'switch') switchFor(id);
+    if (act === 'guide') openGuide();
+    if (act === 'gd-close') closeGuide();
+    if (act === 'gd-step') { ui.gd.step = +id; renderGuide(); }
+    if (act === 'gd-back') { ui.gd.step--; renderGuide(); }
+    if (act === 'gd-next') { ui.gd.step++; renderGuide(); }
+    if (act === 'gd-apply') {
+      const { look, light, roles, room, care } = ui.gd.a;
+      ui.disc = { ...ui.disc, g: { look, light, roles } };
+      ui.pin = null;
+      track('maker_guided_apply', { look, light, care });
+      closeGuide();
+      commit({ ...b, space: { ...b.space, room, care } });
+      root.querySelector('.mk-found')?.scrollIntoView({ block: 'nearest' });
+    }
     if (act === 'back')  go(STAGES[STAGES.indexOf(stage) - 1]);
     if (act === 'next') {
       if (!done(b, stage)) { ui.error = NEED[stage]; render(); return; }
@@ -556,6 +774,22 @@ export function initMaker(){
     }
   });
 
+  // A plant from another climate: move to its chamber (keeping what fits,
+  // with Undo), then add it. A new chamber may need a new foundation first.
+  function switchFor(id){
+    const p = plantOf(id), home = homeOf(p), before = b;
+    const { build: nb, removed, clearedSubstrate } = swapChamber(b, home.sku);
+    const res = togglePlant(nb, id);
+    const next = res.build || nb;
+    const bits = [`Switched to the ${home.name} chamber${res.build ? ` and added ${p.name}` : ''}.`];
+    if (res.error) bits.push(res.error);
+    if (removed.length) bits.push(`Removed ${removed.join(', ')}: ${removed.length > 1 ? 'they don’t' : 'it doesn’t'} fit.`);
+    if (clearedSubstrate) bits.push('Your foundation doesn’t suit it, so choose one again.');
+    const notice = { text: bits.join(' '), undo: before };
+    if (!done(next, 'foundation')) commit(next, { notice, stage: 'foundation' });
+    else commit(next, { notice, fresh: res.build ? id : null });
+  }
+
   async function copyLink(){
     const url = shareUrl(b);
     const out = root.querySelector('.mk-copied');
@@ -568,9 +802,20 @@ export function initMaker(){
     }
   }
 
+  root.addEventListener('toggle', (e) => { if (e.target.classList?.contains('mk-refine')) ui.refineOpen = e.target.open; }, true);
+
   // "Your space" + name: plain inputs, saved as typed.
   root.addEventListener('input', (e) => {
     const t = e.target;
+    if (t.name === 'q') { ui.disc = { ...ui.disc, q: t.value.slice(0, 80) }; renderResults(); return; }
+    if (t.name === 'sort') { ui.disc = { ...ui.disc, sort: t.value }; renderResults(); return; }
+    if (t.dataset.act === 'fit') { ui.disc = { ...ui.disc, f: { ...ui.disc.f, fit: t.checked } }; renderResults(); return; }
+    if (t.name?.startsWith('gd-') && ui.gd) {
+      const k = t.name.slice(3);
+      ui.gd.a[k] = k === 'roles' ? [...dialog.querySelectorAll('[name=gd-roles]:checked')].map(x => x.value) : t.value;
+      renderGuide();
+      return;
+    }
     if (t.name === 'name') { b = { ...b, name: t.value.slice(0, 60) }; save(); refreshSend(); return; }
     if (!t.closest('.mk-space')) return;
     const s = { ...b.space };

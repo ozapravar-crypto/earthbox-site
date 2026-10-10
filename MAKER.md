@@ -27,6 +27,7 @@ Source brief: `Downloads/terrarium_maker_ux_brief_for_fable.md`. Adapted to the 
 | `data/maker.js` | Catalogue: chambers (re-exported from `upcoming.js`), 45 plants, substrates, recipes, which plant groups each chamber suits |
 | `scripts/maker.js` | Rules (pure, exported) + SVG preview + panels + controller. One `build` object; every change goes through `commit()` |
 | `styles/maker.css` | Page styles |
+| `scripts/plant-search.js` | Discovery rules (search, filters, guided, relax) · `node scripts/plant-search.test.mjs` |
 | `scripts/maker.test.mjs` | `node scripts/maker.test.mjs`: compatibility, capacity, chamber swap, share-link safety, recipes, enquiry text |
 
 **Rules:**
@@ -37,6 +38,35 @@ Source brief: `Downloads/terrarium_maker_ux_brief_for_fable.md`. Adapted to the 
 
 **State:** the build is saved in the browser (localStorage), so a refresh doesn't lose it. The share link (`#c=…&s=…&p=…&n=…`) carries the composition only, never the "Your space" answers, and it's validated on load.
 
+## Plants step: discovery (added 10 Oct 2026)
+
+Search, **List / Map** views and **Guided search** live inside the Plants step, not on a separate page, so there's one flow and one `build`.
+
+| Piece | Where | Does |
+|---|---|---|
+| Rules | `scripts/plant-search.js` (+ `.test.mjs`) | `searchPlants(state, ctx)` → results, chips, "loosen one" list. List, map and guided all read this one output |
+| Taxonomy | `data/maker.js` → `forms`, `guide` | Shape labels; what each guided answer acts on |
+| UI | `scripts/maker.js` (plants panel + `<dialog id="mkGuide">`) | Search box, Guided search button, view toggle, Filter & sort, chips |
+
+- **Search** matches name, botanical name, plant group and the list's own group wording ("low light", "carnivorous"), plus shape. It ignores case, accents and extra spaces, and every word must match.
+- **Filters:** plant group, shape, and "fits my chamber" (on by default). Chips of the same kind widen the results (Fern *or* Moss); different kinds narrow them.
+- **Map view:** the nine plant groups as regions, ordered driest → most humid by their chamber's humidity spec. Same results as the list, drawn as specimens per climate. Earth plants have no chamber of their own (Lab only), so they sit last. *Not* a geographic map: there's no origin data.
+- **Guided search:** five questions in a native `<dialog>` (full-screen on phones).
+
+  | Question | Acts on | Effect |
+  |---|---|---|
+  | World (look) | plant groups | filter |
+  | Where it lives | `build.space.room` (same as the Your space step) | goes into the enquiry only |
+  | Light | group heading (Dark = low light, Fire = high light) | reorders only, because every chamber has its own grow light |
+  | Care | `build.space.care` | goes into the enquiry only (no care ratings exist yet) |
+  | What plants add | shapes | filter |
+
+  Reopening the dialog shows the previous answers. Closing it changes nothing. No matches shows "Remove X · N plants" for each chip.
+- **Other climates:** a plant outside your chamber shows "Use <chamber>". That switches chamber (keeping what fits, with Undo) and adds the plant. If the new chamber needs a foundation, it goes there first.
+- **Saved:** search, filters, view and guided answers are saved with the build (validated on load).
+
+**Look → groups is a studio guess for Aayush to confirm.** It's built from the group headings and the recipes: Woodland = Moss/Frost/Water, Minimal = Fire/Aero, Tropical = Earth/Air/Dark, Colourful = Earth/Dark. Shapes (`form`) were also assigned per species by us, not taken from the workbook.
+
 ## Open gaps (need data from Aayush)
 
 1. **Plant + soil prices.** Fill the workbook Price column, add `price` in `data/maker.js`, then sum it in `reviewPanel` / `barHTML`.
@@ -45,8 +75,9 @@ Source brief: `Downloads/terrarium_maker_ux_brief_for_fable.md`. Adapted to the 
 4. **Plant photos.** 2 of 45 exist, so every plant uses a line-drawn thumbnail for consistency.
 5. **Data clash:** the workbook says the Aroid mix suits "Air" plants, but the Air *box* is aeroponic (soil-free). The maker follows the box spec.
 6. **Availability:** Elemental chambers are "Coming soon". The maker says so above the chamber cards.
-7. **Toxicity data.** Pets/children answers are passed to the studio, not used to filter (no toxicity column filled yet).
+7. **Per-plant Light, Care, Humidity, Description (tab 04, 0 of 45 filled).** Once they're filled, add the fields to the plant rows (the schema is noted in `data/maker.js`), then turn on real light/care filters in `plant-search.js`.
+8. **Toxicity data.** Pets/children answers are passed to the studio, not used to filter (no toxicity column filled yet).
 
 ## Analytics (GA4)
 
-`maker_start` · `maker_recipe` · `maker_send` (method whatsapp|form) · `maker_copy_link` · `maker_open_shared`
+`maker_start` · `maker_recipe` · `maker_send` (method whatsapp|form) · `maker_copy_link` · `maker_open_shared` · `maker_guided_open` · `maker_guided_apply`
