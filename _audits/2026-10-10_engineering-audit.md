@@ -69,3 +69,15 @@ Not proposed: a framework, a bundler, TypeScript, or a component system. The sit
 | github/spec-kit | Skip | Spec-driven process for larger teams/apps; our beads + MD docs cover it |
 
 All clones were shallow and read-only, outside the repo. Only `contrast-check.py` was run (standard library only, read before running).
+
+---
+
+## Phase 1 · done (10 Oct)
+
+- **E1** fixed. In-page `#links` on product.html scroll without touching the hash, and "not found" is hidden instead of deleted, so a later bad id still shows it.
+- **E2** `npm test` = every `scripts/*.test.mjs` (node --test) + prerender check + asset check. `npm run build` (what Vercel runs) runs `npm test`, so a failure blocks the deploy. Verified: a throwing test and a bad image path each make the build exit 1.
+- **E7** `scripts/check-assets.mjs` (1,135 references). Known client gaps are listed with their issue (Bird Feeder → site-tue) and fail the check if they go stale.
+  - **Its first run found a live bug:** the 15 Plant Packet product pages and their cart thumbnails looked in `assets/v1/`, but the photos are in `assets/plants/`. Fixed with one `photoPath(p, size)` in `data/volume-one.js`, now used by the catalogue, product page, cart and the checker.
+- **E15** `"type": "module"` (no more Node warnings). **E13** `sharp` moved to devDependencies.
+- Removed 3 debug `console.log`s from render-product-detail.js.
+- Committed the regenerated Journal HTML: the files in git were missing the "Continue Reading" block that Vercel's build already serves.

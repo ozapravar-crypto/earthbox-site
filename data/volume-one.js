@@ -16,6 +16,11 @@ export const categories = [
   { slug: 'plant-packets', title: 'Plant Packets',  description: 'Live plants and cuttings to start or expand your collection.' }
 ];
 
+// Where a product's photo lives: plants have their own folder. Every
+// renderer and the cart use this, so the path is decided once.
+export const photoPath = (p, size = '') =>
+  `${p.category === 'plant-packets' ? 'assets/plants' : 'assets/v1'}/${size ? p.photo.replace('.webp', `-${size}.webp`) : p.photo}`;
+
 export const materials = [
   { id: 'petg', name: 'PETG', description: 'Standard indoor, glossy finish' },
   { id: 'abs',  name: 'ABS',  description: 'High strength, matte, heat resistant' },

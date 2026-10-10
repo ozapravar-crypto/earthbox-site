@@ -6,8 +6,10 @@
   "scripts": {
     "prerender": "node scripts/prerender.mjs",
     "check:prerender": "node scripts/check-prerender.mjs",
-    "build": "node scripts/prerender.mjs && node scripts/check-prerender.mjs",
-    "test": "node scripts/check-prerender.mjs"
+    "check:assets": "node scripts/check-assets.mjs",
+    "test:unit": "node --test scripts/*.test.mjs",
+    "test": "npm run test:unit && npm run check:prerender && npm run check:assets",
+    "build": "node scripts/prerender.mjs && npm test"
   },
   "repository": {
     "type": "git",
@@ -20,7 +22,8 @@
     "url": "https://github.com/ozapravar-crypto/earthbox-site/issues"
   },
   "homepage": "https://github.com/ozapravar-crypto/earthbox-site#readme",
-  "dependencies": {
+  "type": "module",
+  "devDependencies": {
     "sharp": "^0.34.5"
   }
 }

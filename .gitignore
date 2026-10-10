@@ -16,3 +16,6 @@ scripts/optimize-images.cjs
 scripts/optimize-images.js
 scripts/generate-responsive.cjs
 .vercel
+
+# Claude Code agent worktrees
+.claude/

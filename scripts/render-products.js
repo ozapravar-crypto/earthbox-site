@@ -6,7 +6,7 @@
 // Volume III = Digital Vivariums, research note.
 // ─────────────────────────────────────────────────────────────────────
 
-import { volumeOne, categories as v1Categories, materials } from '../data/volume-one.js';
+import { volumeOne, categories as v1Categories, materials, photoPath } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
 import { observeReveals } from './reveal.js';
 import { enquiryAltHTML } from './enquiry-form.js';
@@ -76,15 +76,13 @@ function renderVolumeOne(){
     const hasComingSoon = comingSoon.length > 0;
 
     const renderCard = (p) => {
-      const folder = p.category === 'plant-packets' ? 'assets/plants' : 'assets/v1';
-      const baseName = p.photo.replace('.webp', '');
       return `
       <article class="v1-card ${p.status === 'coming-soon' ? 'v1-card--soon' : ''}">
         <a class="v1-card-link" href="product.html#${encodeURIComponent(p.sku)}" data-cursor="VIEW">
           <div class="v1-card-img">
             <img
-              src="${folder}/${baseName}-600.webp"
-              srcset="${folder}/${baseName}-300.webp 300w, ${folder}/${baseName}-600.webp 600w, ${folder}/${p.photo} 1200w"
+              src="${photoPath(p, '600')}"
+              srcset="${photoPath(p, '300')} 300w, ${photoPath(p, '600')} 600w, ${photoPath(p)} 1200w"
               sizes="(max-width: 560px) 50vw, (max-width: 1100px) 33vw, 280px"
               alt="${p.name}"
               loading="lazy"

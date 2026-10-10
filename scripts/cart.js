@@ -19,7 +19,7 @@
 // cart.test.mjs.
 // ─────────────────────────────────────────────────────────────────────
 
-import { volumeOne, materials } from '../data/volume-one.js';
+import { volumeOne, materials, photoPath } from '../data/volume-one.js';
 import { volumeTwo } from '../data/upcoming.js';
 import { substrates } from '../data/maker.js';
 import { decodeBuild, encodeBuild, chamberOf, plantOf, isSoilless } from './maker.js';
@@ -72,7 +72,7 @@ export function resolve(l){
     const mat = materials.find(m => m.id === l.material);
     return { kind: table ? 'fixed' : 'enquiry', key: keyOf(l), qty: l.qty, title: p.name,
       sub: [variant?.name, mat?.name].filter(Boolean).join(' · ') || 'Volume I',
-      href: `product.html#${encodeURIComponent(p.sku)}`, img: p.photo ? `assets/v1/${p.photo}` : null,
+      href: `product.html#${encodeURIComponent(p.sku)}`, img: p.photo ? photoPath(p, '300') : null,
       unit: table ? table[l.material] : null,
       status: p.status === 'coming-soon' ? 'Coming soon' : 'Made to order · about 1 week' };
   }

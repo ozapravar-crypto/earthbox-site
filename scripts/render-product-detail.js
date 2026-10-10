@@ -9,7 +9,7 @@
 // V3 (Digital Vivariums): Concept page
 // ─────────────────────────────────────────────────────────────────────
 
-import { volumeOne as v1Products, categories as v1Categories, materials } from '../data/volume-one.js';
+import { volumeOne as v1Products, categories as v1Categories, materials, photoPath } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
 import { getReviews, getAverageRating } from '../data/reviews.js';
 import { observeReveals } from './reveal.js';
@@ -165,12 +165,9 @@ function renderReviewsSection(sku){
 
 // ─── Find a product by ID across all volumes ───
 function findProduct(id){
-  console.log('[DEBUG] findProduct called with id:', id);
-  console.log('[DEBUG] v1Products count:', v1Products?.length);
 
   // V1 — 3D Printed products (new)
   const v1 = v1Products.find(p => p.sku === id);
-  console.log('[DEBUG] V1 match:', v1 ? v1.name : 'NOT FOUND');
   if (v1) return { volume: 1, kind: 'printed', data: v1 };
 
   // V2 — Elemental Boxes
@@ -236,7 +233,7 @@ function renderPrinted(p){
       <section class="pd-showcase">
         <div class="pd-hero reveal">
           <div class="pd-hero-frame">
-            <img src="assets/v1/${p.photo}" alt="${p.name}" width="1200" height="900" onerror="this.parentElement.classList.add('pd-hero-frame--placeholder')"/>
+            <img src="${photoPath(p)}" alt="${p.name}" width="1200" height="900" onerror="this.parentElement.classList.add('pd-hero-frame--placeholder')"/>
           </div>
         </div>
         <aside class="pd-body-side reveal" style="--d:120ms">
@@ -341,7 +338,7 @@ function renderPrinted(p){
             ${related.map(o => `
               <a class="pd-related-card" href="product.html#${encodeURIComponent(o.sku)}" data-cursor="VIEW">
                 <div class="pd-related-img">
-                  <img src="assets/v1/${o.photo}" alt="${o.name}" loading="lazy" onerror="this.style.display='none'"/>
+                  <img src="${photoPath(o, '600')}" alt="${o.name}" loading="lazy" onerror="this.style.display='none'"/>
                 </div>
                 <div class="pd-related-meta">
                   <span class="caption">Volume I</span>
@@ -556,7 +553,7 @@ function renderProduct(id){
              : found.kind === 'printed' ? found.data.name
              : found.data.title;
   const description = found.data.description || found.data.tagline || '';
-  const photo = found.kind === 'printed' ? `assets/v1/${found.data.photo}`
+  const photo = found.kind === 'printed' ? photoPath(found.data)
               : found.kind === 'box' ? `assets/boxes/${found.data.photo}`
               : 'assets/og-home.jpg';
 
@@ -579,8 +576,9 @@ function renderProduct(id){
   else if (found.kind === 'box')   html = renderBox(found.data);
   else                             html = renderVivarium(found.data);
 
-  document.getElementById('pdLoading')?.remove();
-  document.getElementById('pdNotFound')?.remove();
+  // Hide, don't remove: a later bad id must still be able to show "not found".
+  document.getElementById('pdLoading')?.setAttribute('hidden', 'true');
+  document.getElementById('pdNotFound')?.setAttribute('hidden', 'true');
   host.insertAdjacentHTML('beforeend', html);
 
   // Initialize reveals for dynamically added content
@@ -644,6 +642,16 @@ export function initProductDetail(){
   renderProduct(getProductId());
 
   // Re-render on hash change (for related product links)
+  // The hash is the product id, so in-page links (#reviews) must scroll
+  // without touching it, or the page re-renders as product "reviews".
+  host.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    const target = a && document.getElementById(a.getAttribute('href').slice(1));
+    if (!target || findProduct(a.getAttribute('href').slice(1))) return;
+    e.preventDefault();
+    target.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  });
+
   window.addEventListener('hashchange', () => {
     renderProduct(getProductId());
   });
