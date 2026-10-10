@@ -74,7 +74,9 @@ export function scanPage({ scope = null, state = 'default', base = null } = {}){
         }
         const ps = getComputedStyle(n, pseudo);
         if (ps.content && ps.content !== 'none' && ps.position !== 'static' && ((ps.backgroundImage && ps.backgroundImage !== 'none') || (parse(ps.backgroundColor)?.a > 0))) {
-          if (n !== el) flags.add('pseudo-overlay');
+          const m2 = (ps.transform || 'none').match(/matrix\(([^)]+)\)/);
+          const parked2 = m2 && Math.abs(parseFloat(m2[1].split(',')[5])) >= n.getBoundingClientRect().height * .5;
+          if (n !== el && ps.display !== 'none' && !parked2) flags.add('pseudo-overlay');   // same "only when showing" rule as own fills
         }
       }
       if (!found) {

@@ -31,6 +31,8 @@ for (const path of PAGES) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth), 'no sideways scroll').toBeLessThanOrEqual(0);
     expect(problems).toEqual([]);
     if (!path.startsWith('/maker')) expect(heavy, 'three.js and plant models load on the Maker only').toEqual([]);
+    // No template leaks ("From ₹[object Object]" shipped on the catalogue, 10 Oct 2026).
+    expect(await page.locator('body').innerText()).not.toMatch(/\[object |\bundefined\b|\bNaN\b/);
   });
 }
 

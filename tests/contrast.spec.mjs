@@ -17,7 +17,7 @@ test.beforeEach(async ({ context }) => {
 
 // Measure everything inside `scope`; return only failures, readable in the report.
 async function failures(page, scope, state){
-  await page.addStyleTag({ content: '.cursor-ring,.cursor-dot,.loader{display:none!important} *{transition:none!important;animation-duration:0s!important;animation-delay:0s!important}' });
+  await page.addStyleTag({ content: '.cursor-ring,.cursor-dot,.loader{display:none!important} *,*::before,*::after{transition:none!important;animation-duration:0s!important;animation-delay:0s!important}' });
   await page.evaluate(() => document.querySelectorAll('.reveal,.reveal-line').forEach(e => e.classList.add('in')));
   const found = await page.evaluate(scanPage, { scope, state });
   expect(found.length, `nothing measured in ${scope}`).toBeGreaterThan(0);
@@ -98,7 +98,7 @@ for (const theme of THEMES) {
     await page.goto('/index.html');
     // Scroll reveals start at opacity 0; finish them, as a scrolled visitor would see.
     await page.evaluate(() => document.querySelectorAll('.reveal,.reveal-line').forEach(e => e.classList.add('in')));
-    await page.addStyleTag({ content: '*{transition:none!important;animation-duration:0s!important;animation-delay:0s!important}' });
+    await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation-duration:0s!important;animation-delay:0s!important}' });
     const bad = [];
     for (const sel of ['.runhead-nav a', '.manifesto-inner a.cta', '#catalogue-tease a.cta', 'footer .colo-col a']) {
       const el = page.locator(sel).first();
@@ -165,7 +165,7 @@ for (const theme of THEMES) {
     await page.goto('/product.html#V1-PLT-005');
     const btn = page.locator('.pd-buy .save-btn');
     await btn.scrollIntoViewIfNeeded();
-    await page.addStyleTag({ content: '*{transition:none!important} .cursor-ring,.cursor-dot{display:none!important}' });
+    await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important} .cursor-ring,.cursor-dot{display:none!important}' });
     await btn.hover();
     expect(await failures(page, '.pd-buy .save-btn', 'hover')).toEqual([]);
   });
@@ -181,7 +181,7 @@ for (const theme of THEMES) {
     for (const [url, sel] of [['/about.html', '.floating-wa'], ['/product.html#V1-PLT-005', '.pd-selector-btn.active[data-material]'], ['/product.html#V1-PLT-005', '.runhead .theme-toggle']]) {
       await page.goto(url);
       await page.waitForLoadState('load');
-      await page.addStyleTag({ content: '*{transition:none!important;animation-duration:0s!important}' });
+      await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation-duration:0s!important}' });
       const el = page.locator(sel).first();
       await el.scrollIntoViewIfNeeded();
       await page.keyboard.press('Shift');
@@ -202,7 +202,7 @@ test('CQ-014 Maker-invite ring passes in dark mode', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('earthbox-theme', 'dark'));
   await page.goto('/index.html');
   await page.evaluate(() => document.querySelectorAll('.reveal,.reveal-line').forEach(e => e.classList.add('in')));
-  await page.addStyleTag({ content: '*{transition:none!important;animation-duration:0s!important;animation-delay:0s!important}' });
+  await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation-duration:0s!important;animation-delay:0s!important}' });
   const el = page.locator('.mi-cta').first();
   await el.scrollIntoViewIfNeeded();
   await page.keyboard.press('Shift');

@@ -118,20 +118,44 @@ export async function resolveBatch(page, items){
       const shot = await sharp(await page.screenshot({ animations: 'disabled' })).raw().toBuffer({ resolveWithObject: true });
       const scale = shot.info.width / (await page.evaluate(() => innerWidth));
       let took = 0;
+      const start = i;
       for (; i < flowing.length; i++) {
         const g = flowing[i]._g, top = g.top - sy;
         if (top + g.h > vh - 2) break;                   // not fully on this screen: next chunk
         if (top < head && sy > 0) break;
+      }
+      // Is each item really the topmost thing at its spot on this screen? A
+      // sticky panel (the Maker's preview on phones) can sit over it. 14 of 30
+      // phone items were measured against the preview before this check.
+      const ids = flowing.slice(start, i).map(it => it.cq);
+      const clear = await page.evaluate((ids) => ids.map(id => {
+        const e = document.querySelector(`[data-cq="${id}"]`), r = e.getBoundingClientRect();
+        return [[.5, .5], [.15, .5], [.85, .5]].every(([fx, fy]) => {
+          const t = document.elementFromPoint(r.left + r.width * fx, r.top + r.height * fy);
+          return t && (t === e || e.contains(t) || t.contains(e));
+        });
+      }), ids);
+      for (let k = start; k < i; k++) {
+        if (!clear[k - start]) { loose.push(flowing[k]); flowing[k]._skip = true; continue; }
+        const g = flowing[k]._g, top = g.top - sy;
         const box = { x: Math.max(0, g.left * scale), y: Math.max(0, top * scale), w: g.w * scale, h: g.h * scale };
-        flowing[i]._px = crop(shot, box); flowing[i]._ink = crop(inked, box);
+        flowing[k]._px = crop(shot, box); flowing[k]._ink = crop(inked, box);
         took++;
       }
+      if (i > start) took = Math.max(took, 1);          // progress was made even if every item went to the single path
       if (!took) { loose.push(flowing[i]); flowing[i]._skip = true; i++; }   // couldn't fit: measure on its own
     }
     await page.evaluate(() => { document.documentElement.classList.remove('cq-all', 'cq-shot'); document.querySelectorAll('[data-cq-icon]').forEach(e => e.removeAttribute('data-cq-icon')); });
   }
   await restore();
-  const done = flowing.filter(i => !i._skip).map(it => { const r = fromPixels(it, it._px, it._ink); delete r._g; delete r._px; delete r._ink; return r; });
+  const done = [];
+  for (const it of flowing.filter(i => !i._skip)) {
+    const r = fromPixels(it, it._px, it._ink); delete r._g; delete r._px; delete r._ink;
+    // A batch FAIL is only a candidate: confirm it with the precise per-element
+    // shot (batch and single disagreed on 2 of 120 items in testing).
+    if (r.status === 'fail') { const it2 = { ...it }; delete it2._g; delete it2._px; delete it2._ink; const s = await resolveWithPixels(page, it2); done.push({ ...s, note: s.status === 'fail' ? 'confirmed by a per-element shot' : `batch said ${r.ratio}:1; per-element shot ${s.ratio}:1` }); continue; }
+    done.push(r);
+  }
   for (const it of loose) { delete it._g; delete it._skip; done.push(await resolveWithPixels(page, it)); }
   return done;
 }

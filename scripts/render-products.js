@@ -16,9 +16,10 @@ import { enquiryAltHTML } from './enquiry-form.js';
 
 function formatPrice(pricing){
   if (!pricing) return 'Coming soon';
-  const firstMat = Object.keys(pricing)[0];
-  const price = pricing[firstMat];
-  return `From ₹${price.toLocaleString('en-IN')}`;
+  // Lowest price across materials — and sizes, when there are variants
+  // ({ big: { petg: 1399 }, … }); the old first-key read printed "₹[object Object]".
+  const prices = Object.values(pricing).flatMap(v => (typeof v === 'number' ? [v] : Object.values(v)));
+  return `From ₹${Math.min(...prices).toLocaleString('en-IN')}`;
 }
 
 function getCategoryPriceRange(products){

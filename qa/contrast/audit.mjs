@@ -127,7 +127,7 @@ const results = [], coverage = [], axeFindings = [];
 let base = 0;
 
 async function prepare(page){
-  await page.addStyleTag({ content: '.cursor-ring,.cursor-dot,.loader{display:none!important} *{transition:none!important;animation-duration:0s!important;animation-delay:0s!important;caret-color:transparent!important}' });
+  await page.addStyleTag({ content: '.cursor-ring,.cursor-dot,.loader{display:none!important} *,*::before,*::after{transition:none!important;animation-duration:0s!important;animation-delay:0s!important;caret-color:transparent!important}' });
   await page.evaluate(() => document.querySelectorAll('.reveal,.reveal-line,.reveal-clip').forEach(e => e.classList.add('in')));
   await page.waitForTimeout(150);
 }
