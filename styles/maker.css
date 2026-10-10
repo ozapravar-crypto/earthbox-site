@@ -382,6 +382,8 @@
 .mk-gd-steps button.is-current::before{background:var(--ink)}
 .mk-gd-opts{border:0;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}
 .mk-gd-opts.is-compact{grid-template-columns:repeat(3,minmax(0,1fr))}
+/* Exactly three options (care): one row, so none sits alone. */
+@media (min-width:641px){.mk-gd-opts:has(> .mk-gd-opt:nth-of-type(3):last-of-type){grid-template-columns:repeat(3,minmax(0,1fr))}}
 .mk-gd-opt{position:relative;cursor:pointer}
 .mk-gd-opt input{position:absolute;opacity:0;width:1px;height:1px}
 .mk-gd-opt span{display:grid;gap:.2rem;min-height:56px;align-content:center;padding:.8rem .9rem;border:1px solid var(--rule-stronger);height:100%}
