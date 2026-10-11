@@ -92,7 +92,7 @@ function renderVolumeOne(){
               onerror="this.parentElement.classList.add('v1-card-img--placeholder')"/>
           </div>
           <div class="v1-card-meta">
-            <h4 class="v1-card-name">${p.name}</h4>
+            <h3 class="v1-card-name">${p.name}</h3>
             <p class="v1-card-price">
               ${p.status === 'coming-soon'
                 ? '<span class="v1-soon-badge">Coming soon</span>'
@@ -108,7 +108,7 @@ function renderVolumeOne(){
     <section class="v1-category reveal" id="cat-${cat.slug}">
       <header class="v1-cat-header">
         <span class="caption v1-cat-num">${String(catIndex + 1).padStart(2, '0')}</span>
-        <h3 class="v1-cat-title">${cat.title}</h3>
+        <h2 class="v1-cat-title">${cat.title}</h2>
         <p class="v1-cat-desc">${cat.description}</p>
         ${priceRange ? `<span class="v1-cat-price">${priceRange}</span>` : ''}
       </header>

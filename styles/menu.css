@@ -171,7 +171,7 @@ body.menu-open .hamburger span:nth-child(3){
 
 
 /* ─── Show on mobile only ─── */
-@media (max-width: 720px){
+@media (max-width: 1080px){
   .runhead{
     grid-template-columns:1fr auto !important;
   }

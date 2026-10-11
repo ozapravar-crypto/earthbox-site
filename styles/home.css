@@ -355,7 +355,7 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
   0%,100%{transform:scale(1);opacity:1}
   50%{transform:scale(1.5);opacity:.4}
 }
-.principle h4{font-size:1.1rem;margin-bottom:.5rem}
+.principle h3{font-size:1.1rem;margin-bottom:.5rem;line-height:1.3}   /* h3, not h4: under the section h2 */
 .principle p{
   font-size:.8rem;
   line-height:1.55;
@@ -430,7 +430,6 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
 .notice::before{top:-5px;left:-5px}
 .notice::after{bottom:-5px;right:-5px}
 
-.notice .eyebrow{margin-bottom:2rem}
 .notice h3{
   font-size:clamp(2rem,3.5vw,2.75rem);
   margin-bottom:2rem;
@@ -465,7 +464,8 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
   display:block;
   margin-top:.3rem;
 }
-.colo-col h5{
+.colo-col h2{   /* h2, not h5: headings mustn't skip levels (Lighthouse/axe heading-order) */
+  line-height:normal;
   font-family:var(--sans);
   font-size:.62rem;
   letter-spacing:.32em;

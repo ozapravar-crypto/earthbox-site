@@ -103,7 +103,7 @@ function renderReviewsSection(sku){
     return `
       <section class="pd-reviews reveal" id="reviews">
         <header class="pd-reviews-head">
-          <span class="eyebrow">R e v i e w s</span>
+          <h2 class="u-sr-only">Reviews</h2>
         </header>
         <div class="pd-no-reviews">
           <p>No reviews yet. Be the first to share your experience.</p>
@@ -119,7 +119,7 @@ function renderReviewsSection(sku){
   return `
     <section class="pd-reviews reveal" id="reviews">
       <header class="pd-reviews-head">
-        <span class="eyebrow">R e v i e w s</span>
+        <h2 class="u-sr-only">Reviews</h2>
         <span class="pd-reviews-count">${reviews.length} ${reviews.length === 1 ? 'review' : 'reviews'}</span>
         ${avgRating ? `
           <span class="pd-reviews-avg">
@@ -240,8 +240,7 @@ function renderPrinted(p){
 
           ${isComingSoon ? `
             <div class="pd-coming-soon">
-              <span class="eyebrow">Coming Soon</span>
-              <p class="caption" style="margin-top:.5rem">This product is in development. Register your interest below.</p>
+              <p class="caption">This product is in development. Register your interest below.</p>
             </div>
           ` : ''}
 
@@ -329,7 +328,7 @@ function renderPrinted(p){
       ${related.length ? `
         <section class="pd-related reveal">
           <header class="pd-related-head">
-            <span class="eyebrow">M o r e &nbsp; ${cat ? cat.title : 'Products'}</span>
+            <h2 class="u-sr-only">More ${cat ? cat.title : 'products'}</h2>
           </header>
           <div class="pd-related-grid">
             ${related.map(o => `
@@ -455,7 +454,7 @@ function renderBox(b){
       ${related.length ? `
         <section class="pd-related reveal">
           <header class="pd-related-head">
-            <span class="eyebrow">M o r e &nbsp; f r o m &nbsp; V o l u m e &nbsp; I I</span>
+            <h2 class="u-sr-only">More from Volume II</h2>
           </header>
           <div class="pd-related-grid">
             ${related.map(o => `

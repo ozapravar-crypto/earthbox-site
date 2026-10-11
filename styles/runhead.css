@@ -196,13 +196,13 @@
 }
 
 /* Hide desktop toggle on mobile */
-@media (max-width:720px){
+@media (max-width:1080px){
   .theme-toggle-desktop{
     display:none;
   }
 }
 
-@media (max-width: 720px){
+@media (max-width: 1080px){
   .runhead{grid-template-columns:auto 1fr;}
   .runhead-nav{display:none}
   .runhead-right{justify-self:end}

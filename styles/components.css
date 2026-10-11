@@ -398,7 +398,7 @@
 .runhead-bag-btn span{display:inline-block;min-width:1.4em;margin-left:.2em;letter-spacing:0;font-variant-numeric:tabular-nums}
 .runhead.is-scrolled .runhead-bag-btn{color:var(--ink-soft)}
 .runhead.is-scrolled .runhead-bag-btn:hover{color:var(--ink)}
-@media (max-width:720px){
+@media (max-width:1080px){
   .runhead.runhead{grid-template-columns:1fr auto auto !important}
   .runhead-end{gap:0}
   .runhead-bag{gap:.9rem}

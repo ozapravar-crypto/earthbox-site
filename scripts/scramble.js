@@ -37,6 +37,10 @@ function scramble(el){
 
   const original = el.textContent;
   const chars    = original.split('');
+  // Random glyphs are wider or narrower than the real letters, so a heading
+  // could wrap to another line mid-scramble and shove the page down and back
+  // (product page CLS 0.28, 11 Oct 2026). Hold its height until it settles.
+  el.style.height = `${el.offsetHeight}px`;
   const rand     = mulberry32(seedFor(original));
 
   const total   = 520;        // total ms
@@ -69,6 +73,7 @@ function scramble(el){
       requestAnimationFrame(step);
     } else {
       el.textContent = original;
+      el.style.height = '';
     }
   };
 

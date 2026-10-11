@@ -37,7 +37,24 @@ jobs:
       - run: npx playwright test
       - uses: actions/upload-artifact@v4
         if: failure()
-        with: { name: playwright-results, path: test-results, retention-days: 14 }
+        with: { name: playwright-results, path: test-results, retention-days: 14 }   # includes visual diffs (expected / actual / diff)
+
+  lighthouse:
+    name: Lighthouse (performance, accessibility, SEO, best practices)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install chromium
+      # Accessibility, SEO and best practices are hard limits; performance warns
+      # (single runs vary). Budgets: lighthouserc.json.
+      - run: CHROME_PATH=$(node -e "console.log(require('@playwright/test').chromium.executablePath())") npx --yes @lhci/cli@0.15.1 autorun
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: lighthouse-reports, path: qa/reports/lighthouse, retention-days: 30 }
 
   contrast:
     name: Full contrast audit (every route × theme × viewport × state)

@@ -57,6 +57,10 @@ section{
   outline:none;
 }
 
+/* Pages whose content is drawn by JS (product, catalogue) showed the footer
+   in the first screen, then shoved it down: CLS 0.74. Reserve one screen. */
+main{min-height:100vh}
+
 :focus-visible{
   /* Ink ring: ≥ 3:1 on every page surface, light and dark (--accent measured
      1.9:1; currentColor failed on filled controls with light text, 1.1:1).

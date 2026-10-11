@@ -93,9 +93,9 @@
   }
   </script>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Oranienbaum&family=Quattrocento+Sans:ital,wght@0,400;0,700;1,400&family=Liter&display=swap" rel="stylesheet">
+  <link rel="preload" href="assets/fonts/oranienbaum-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/quattrocento-sans-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles/fonts.css">
 
   <!-- Design System: Tokens → Reset → Type → Layout → Components → Utilities -->
   <link rel="stylesheet" href="styles/tokens.css">
@@ -139,7 +139,6 @@
     <a href="index.html" aria-current="page">Home</a>
     <a href="products.html">Catalogue</a>
     <a href="maker.html">Maker</a>
-    <a href="blog.html">Journal</a>
     <a href="about.html">About</a>
   </nav>
 </header>
@@ -235,8 +234,7 @@
      ═══════════════════════════════════════════════════════════════════ -->
 <section class="page" id="principles">
   <div class="reveal" style="max-width:640px;margin:0 auto;text-align:center">
-    <span class="eyebrow">F o u n d a t i o n</span>
-    <h2 class="scramble" style="margin-top:1.5rem">Five Quiet Commitments</h2>
+    <h2 class="scramble">Five Quiet Commitments</h2>
     <p style="margin-top:1.25rem;color:var(--mute);max-width:52ch;margin-inline:auto">Principles that govern every decision, from the curve of a vessel to the weight of a line of type.</p>
   </div>
 
@@ -247,7 +245,7 @@
           <rect x="6" y="6" width="16" height="16" rx="1.5" stroke="#2C2C2B" stroke-width="1.4"/>
         </svg>
       </div>
-      <h4>Enclosure</h4>
+      <h3>Enclosure</h3>
       <p>The container as defining form. Protected space.</p>
     </div>
     <div class="principle">
@@ -256,7 +254,7 @@
           <circle cx="14" cy="14" r="8" stroke="#B8A99A" stroke-width="1.4"/>
         </svg>
       </div>
-      <h4>Balance</h4>
+      <h3>Balance</h3>
       <p>Equilibrium between form and function.</p>
     </div>
     <div class="principle">
@@ -265,7 +263,7 @@
           <line x1="8" y1="14" x2="20" y2="14" stroke="#2C2C2B" stroke-width="2.4" stroke-linecap="round"/>
         </svg>
       </div>
-      <h4>Craftsmanship</h4>
+      <h3>Craftsmanship</h3>
       <p>Hand of the maker visible. Slow process.</p>
     </div>
     <div class="principle">
@@ -274,7 +272,7 @@
           <line x1="14" y1="7" x2="14" y2="21" stroke="#B8A99A" stroke-width="2.4" stroke-linecap="round"/>
         </svg>
       </div>
-      <h4>Stillness</h4>
+      <h3>Stillness</h3>
       <p>Quiet contemplation. The absence of noise.</p>
     </div>
     <div class="principle">
@@ -283,7 +281,7 @@
           <circle class="p-pulse" cx="14" cy="14" r="2.4" fill="#2C2C2B"/>
         </svg>
       </div>
-      <h4>Respect</h4>
+      <h3>Respect</h3>
       <p>For nature, materials, viewer. Humility.</p>
     </div>
   </div>
@@ -370,8 +368,7 @@
      ═══════════════════════════════════════════════════════════════════ -->
 <section class="page volume-i home-vol-preview" id="catalogue-tease">
   <div class="reveal" style="text-align:center;max-width:680px;margin:0 auto 4rem">
-    <span class="eyebrow">V o l u m e &nbsp; I &nbsp;·&nbsp; A v a i l a b l e &nbsp; N o w</span>
-    <h2 class="scramble" style="margin:1.5rem 0">Objects for plant life.</h2>
+    <h2 class="scramble" style="margin-bottom:1.5rem">Objects for plant life.</h2>
     <p style="color:var(--mute);max-width:48ch;margin:0 auto">
       Designed in Mumbai. By enquiry.
     </p>
@@ -395,8 +392,7 @@
 <div class="purpose-wrap" id="purpose">
   <div class="purpose-inner">
     <div class="purpose-left reveal">
-      <span class="eyebrow">B e y o n d &nbsp; t h e &nbsp; O b j e c t</span>
-      <h2 style="margin-top:1.5rem">A quieter<br>purpose.</h2>
+      <h2>A quieter<br>purpose.</h2>
       <span class="rule-s"></span>
       <p class="phrase">
         The final volume is not an object.<br>It is a consequence.
@@ -432,7 +428,7 @@
     </div>
 
     <div class="colo-col">
-      <h5>The Study</h5>
+      <h2>The Study</h2>
       <ul>
         <li><a href="#philosophy">Philosophy</a></li>
         <li><a href="#principles">Principles</a></li>
@@ -445,7 +441,7 @@
     </div>
 
     <div class="colo-col">
-      <h5>Correspondence</h5>
+      <h2>Correspondence</h2>
       <ul>
         <li><a href="mailto:aayush.lilani@gmail.com">aayush.lilani@gmail.com</a></li>
         <li><a href="tel:+918104811584">+91 81048 11584</a></li>
@@ -462,7 +458,7 @@
     </div>
 
     <div class="colo-col">
-      <h5>Studio</h5>
+      <h2>Studio</h2>
       <ul>
         <li>By enquiry only</li>
         <li>Delivery within Mumbai</li>
@@ -470,7 +466,7 @@
     </div>
 
     <div class="colo-col">
-      <h5>Replacement &amp; Cancellation</h5>
+      <h2>Replacement &amp; Cancellation</h2>
       <ul>
         <li>Within 12 hours · full refund</li>
         <li>12–48 hours · 70% refund</li>

@@ -25,3 +25,8 @@ test-results/
 playwright-report/
 # full per-element results (MBs): CI artifact, not committed; the summary is
 qa/reports/contrast-report.json
+# Lighthouse output (CI artifact)
+qa/reports/lighthouse/
+.lighthouseci/
+# Lighthouse Chrome temp profiles (lhci on WSL writes them here)
+C:*

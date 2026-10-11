@@ -14,6 +14,8 @@ export default defineConfig({
   webServer: { command: 'node qa/serve-cli.mjs 4173', port: 4173, reuseExistingServer: true, stdout: 'ignore', stderr: 'ignore' },
   projects: [
     { name: 'desktop', use: { viewport: { width: 1440, height: 900 } } },
-    { name: 'phone', use: { ...devices['Pixel 7'], browserName: 'chromium' } }
+    { name: 'phone', use: { ...devices['Pixel 7'], browserName: 'chromium' } },
+    // Tablet: layout + visual coverage only (the behaviour suites run on desktop + phone).
+    { name: 'tablet', testMatch: /(smoke|visual)\.spec\.mjs/, use: { viewport: { width: 820, height: 1180 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true, browserName: 'chromium' } }
   ]
 });

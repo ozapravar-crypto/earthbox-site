@@ -6,7 +6,7 @@
 //   · scripts/includes.mjs writes runheadHTML / footerHTML into every page
 //     at build time (static HTML, so crawlers still see it), and
 //     `npm test` fails if a page is out of step;
-//   · menu.js builds the mobile menu from NAV;
+//   · menu.js builds the mobile menu from TOP_NAV (NAV minus the Journal);
 //   · enquiry-form.js, cart.js, maker.js … read the contact constants.
 // Change a link, a phone number or the refund policy HERE, then run
 // `npm run build`.
@@ -25,6 +25,9 @@ export const NAV = [
   { href: 'blog.html',     label: 'Journal' },
   { href: 'about.html',    label: 'About' }
 ];
+// The top bar and phone menu leave the Journal out (Aayush, 11 Oct 2026);
+// the footer still lists it, so it stays one tap away on every page.
+export const TOP_NAV = NAV.filter(n => n.href !== 'blog.html');
 
 // Confirmed by the owner's choice on 10 Oct 2026 (was two versions; site-h04
 // stays open until Aayush confirms the wording).
@@ -61,7 +64,7 @@ export function runheadHTML({ prefix = '', current = null } = {}){
   return `<header class="runhead" role="banner">
   <a href="${prefix}index.html" class="runhead-left caption">EarthBox</a>
   <nav class="runhead-nav" aria-label="Primary">
-${NAV.map(n => `    <a href="${prefix}${n.href}"${n.href === current ? ' aria-current="page"' : ''}>${n.label}</a>`).join('\n')}
+${TOP_NAV.map(n => `    <a href="${prefix}${n.href}"${n.href === current ? ' aria-current="page"' : ''}>${n.label}</a>`).join('\n')}
   </nav>
 </header>`;
 }
@@ -80,14 +83,14 @@ export function footerHTML({ prefix = '', home = false } = {}){
     </div>
 
     <div class="colo-col">
-      <h5>${first.title}</h5>
+      <h2>${first.title}</h2>
       <ul>
 ${li(first.links.map(l => `<a href="${link(prefix, l.href)}">${l.label}</a>`))}
       </ul>
     </div>
 
     <div class="colo-col">
-      <h5>Correspondence</h5>
+      <h2>Correspondence</h2>
       <ul>
         <li><a href="mailto:${EMAIL}">${EMAIL}</a></li>
         <li><a href="tel:+${PHONE}">${PHONE_DISPLAY}</a></li>
@@ -101,14 +104,14 @@ ${SOCIAL.map(s => `          <a href="${s.href}" target="_blank" rel="noopener" 
     </div>
 
     <div class="colo-col">
-      <h5>Studio</h5>
+      <h2>Studio</h2>
       <ul>
 ${li(STUDIO)}
       </ul>
     </div>
 
     <div class="colo-col">
-      <h5>Replacement &amp; Cancellation</h5>
+      <h2>Replacement &amp; Cancellation</h2>
       <ul>
 ${li(REFUND)}
       </ul>

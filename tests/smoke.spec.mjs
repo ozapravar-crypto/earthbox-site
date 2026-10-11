@@ -115,10 +115,56 @@ test('Maker 3D preview loads its plant models (.glb), no errors', async ({ page 
   expect(problems).toEqual([]);
 });
 
-test('mobile menu lists the Maker and marks Journal on articles', async ({ page, isMobile }) => {
-  test.skip(!isMobile, 'phone only');
+test('mobile menu lists the Maker; the Journal is in the footer, not the top menus', async ({ page, isMobile }) => {
   await page.goto('/blog/designing-drainage.html');
+  await expect(page.locator('.runhead-nav a', { hasText: 'Journal' })).toHaveCount(0);
+  await expect(page.locator('footer.colophon a', { hasText: 'Journal' })).toHaveCount(1);
+  if (!isMobile) return;
   await page.locator('.hamburger').click();
   await expect(page.locator('#mobile-nav a', { hasText: 'Maker' })).toBeVisible();
-  await expect(page.locator('#mobile-nav a[aria-current=page]')).toHaveText('Journal');
+  await expect(page.locator('#mobile-nav a', { hasText: 'Journal' })).toHaveCount(0);
 });
+
+// Header at every width from phone to wide desktop: nothing wraps, nothing
+// collides, no sideways scroll. (Tablets 721–1080px wrapped "Saved 0 /
+// Cart 0" under the full nav until 11 Oct 2026; the menu now covers them.)
+test('header fits at every width', async ({ page: p }) => {
+  const bad = [];
+  await p.addInitScript(() => sessionStorage.setItem('earthbox-loader-seen', '1'));
+  await p.goto('/about.html');
+  for (const w of [360, 390, 600, 721, 820, 1024, 1080, 1081, 1180, 1280, 1440, 1920]) {
+    await p.setViewportSize({ width: w, height: 900 });
+    await p.waitForTimeout(150);
+    const r = await p.evaluate(() => {
+      const els = [...document.querySelectorAll('.runhead-left, .runhead-nav a, .runhead-bag-btn, .runhead .theme-toggle, .hamburger')].filter(e => e.checkVisibility());
+      const boxes = els.map(e => e.getBoundingClientRect());
+      const wrap = els.filter(e => e.matches('.runhead-bag-btn, .runhead-nav a')).some(e => e.getBoundingClientRect().height > 48);
+      let hit = false;
+      for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) { const a = boxes[i], b = boxes[j]; if (a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1) hit = true; }
+      return { wrap, hit, over: document.documentElement.scrollWidth - innerWidth };
+    });
+    if (r.wrap || r.hit || r.over > 0) bad.push(`${w}px ${JSON.stringify(r)}`);
+  }
+  expect(bad).toEqual([]);
+});
+
+// Pages must not jump while they load (CLS < 0.1, "good" in Core Web
+// Vitals). Caught: JS-drawn content pushing the footer (0.74), late Google
+// fonts, and scrambled headings wrapping mid-animation (QA-002/009/013).
+for (const path of ['/index.html', '/products.html', '/product.html#V1-PLT-005', '/product.html#MossBox', '/blog/designing-drainage.html']) {
+  test(`no layout jump while loading: ${path}`, async ({ browser, isMobile }, info) => {
+    test.skip(isMobile || info.project.name !== 'desktop', 'runs once, at Lighthouse\'s phone size');
+    // Real motion (the suite defaults to reduced motion, which skips the scramble).
+    const page = await browser.newPage({ viewport: { width: 412, height: 823 }, baseURL: info.project.use.baseURL, reducedMotion: 'no-preference' });
+    await page.addInitScript(() => {
+      sessionStorage.setItem('earthbox-loader-seen', '1');
+      window.__cls = 0;
+      new PerformanceObserver(l => l.getEntries().forEach(e => { if (!e.hadRecentInput) window.__cls += e.value; })).observe({ type: 'layout-shift', buffered: true });
+    });
+    await page.route('**/*.mp4', r => r.abort());
+    await page.goto(path);
+    await page.waitForTimeout(2500);
+    expect(await page.evaluate(() => window.__cls)).toBeLessThan(0.1);
+    await page.close();
+  });
+}

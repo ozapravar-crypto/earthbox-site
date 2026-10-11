@@ -37,7 +37,6 @@ const articleUrl = (slug) => `${SITE}/blog/${slug}.html`;
 function head(a) {
   return `
     <a class="back-link" href="../blog.html">← Back to Journal</a>
-    <span class="eyebrow">${esc(catTitle(a.category))}</span>
     <h1 class="scramble">${esc(a.title)}</h1>
     <p class="article-subtitle">${esc(a.subtitle)}</p>
     <p class="article-byline">

@@ -145,8 +145,9 @@ test('CQ-010 manifesto highlights pass in dark mode', async ({ page }) => {
   expect(await failures(page, '.manifesto-text', 'default')).toEqual([]);
 });
 
-// CQ-011 · Product "Coming soon" label (--accent-dk, 3.10:1) and footer link
-// hover (--accent-dk, 3.10:1).
+// CQ-011 · Product "Coming soon" block (its label was --accent-dk, 3.10:1;
+// the label itself was removed with the other eyebrows on 11 Oct 2026, the
+// caption remains) and footer link hover (--accent-dk, 3.10:1).
 test('CQ-011 coming-soon label and footer link hover pass', async ({ page }) => {
   await page.goto('/product.html#V1-PP-001');
   await page.waitForSelector('#productDetail article');

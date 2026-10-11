@@ -1,0 +1,69 @@
+// Accessibility: every page and its open states against axe-core's WCAG 2.1
+// A/AA rules. Colour contrast is measured separately and more strictly by
+// qa/contrast (pixels, not CSS guesses), so it's excluded here.
+import { test, expect } from '@playwright/test';
+import { AxeBuilder } from '@axe-core/playwright';
+
+test.beforeEach(async ({ context }) => {
+  await context.addInitScript(() => sessionStorage.setItem('earthbox-loader-seen', '1'));
+  await context.route('**/*.mp4', r => r.abort());
+});
+
+const scan = async (page, include) => {
+  const b = new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).disableRules(['color-contrast']);
+  if (include) b.include(include);
+  const r = await b.analyze();
+  return r.violations.map(v => `${v.id} (${v.impact}) ×${v.nodes.length}: ${v.help} — ${v.nodes.slice(0, 3).map(n => n.target.join(' ')).join(' | ')}`);
+};
+
+const PAGES = ['/index.html', '/products.html', '/product.html#V1-PLT-005', '/product.html#MossBox', '/product.html#VIV-III',
+  '/product.html#NOPE', '/maker.html', '/blog.html', '/blog/designing-drainage.html', '/about.html'];
+
+for (const path of PAGES) {
+  test(`a11y: ${path}`, async ({ page }) => {
+    await page.goto(path);
+    await page.waitForLoadState('load');
+    expect(await scan(page)).toEqual([]);
+  });
+}
+
+const STATES = [
+  ['cart drawer', '/product.html#V1-PLT-006', async p => { await p.locator('.pd-buy [data-add-line], #pdMobileCta [data-add-line]').first().click(); }, 'dialog.ct'],
+  ['saved tab', '/products.html', async p => { await p.locator('[data-open=saved]').click(); }, 'dialog.ct'],
+  ['guided search', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); await p.locator('[data-act=guide]').click(); }, '#mkGuide'],
+  ['maker map', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); await p.locator('[data-act=view][data-id=map]').click(); }, null],
+  ['maker review', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=review]').click(); }, null],
+  ['catalogue search', '/products.html', async p => { await p.locator('#catalogueSearchBtn').click(); await p.fill('#cat-search', 'moss'); }, null],
+  ['enquiry form open', '/product.html#V1-PLT-005', async p => { await p.locator('.enquiry-alt summary').first().click(); }, null]
+];
+for (const [name, path, setup, include] of STATES) {
+  test(`a11y state: ${name}`, async ({ page, isMobile }) => {
+    test.skip(isMobile && name === 'enquiry form open', 'desktop-only form');
+    await page.goto(path);
+    await page.waitForLoadState('load');
+    await setup(page);
+    await page.waitForTimeout(300);
+    expect(await scan(page, include)).toEqual([]);
+  });
+}
+
+test('a11y state: mobile menu', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'phone only');
+  await page.goto('/index.html');
+  await page.locator('.hamburger').click();
+  await page.waitForTimeout(300);
+  expect(await scan(page, '#mobile-nav')).toEqual([]);
+});
+
+// Guard against a scan that silently checks nothing: plant two real defects
+// and require axe to report both.
+test('a11y self-test: the scan catches planted defects', async ({ page }) => {
+  await page.goto('/about.html');
+  await page.evaluate(() => {
+    const img = document.createElement('img'); img.src = 'assets/logo.webp'; document.querySelector('main').append(img);   // no alt
+    const b = document.createElement('button'); document.querySelector('main').append(b);                                 // no name
+  });
+  const found = (await scan(page)).join('\n');
+  expect(found).toContain('image-alt');
+  expect(found).toContain('button-name');
+});

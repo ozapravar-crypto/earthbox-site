@@ -2,13 +2,13 @@
 // menu.js · mobile hamburger + side-panel navigation
 //
 // Injects a hamburger button into .runhead and a sliding side-panel
-// into <body>. Visible only on mobile (≤720px) via CSS. Click the
+// into <body>. Visible up to 1080px (phones + tablets: the full header wraps below that) via CSS. Click the
 // hamburger to open; click the overlay or close (×) to dismiss.
 //
 // Keeps the desktop nav (centred links in runhead) untouched.
 // ─────────────────────────────────────────────────────────────────────
 
-import { NAV } from '../data/site.js';      // same list as the desktop header
+import { TOP_NAV } from '../data/site.js';  // same list as the desktop header
 import { createToggle } from './theme.js';
 
 export function initMenu(){
@@ -16,9 +16,7 @@ export function initMenu(){
   if (!runhead) return;
 
   // Determine current page so we mark the active link
-  // Articles count as the Journal, like the desktop header.
-  const path = location.pathname.includes('/blog/') ? 'blog.html'
-    : (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  const path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
 
   // ─── Hamburger button (lives inside runhead-right column) ───
   const ham = document.createElement('button');
@@ -46,7 +44,7 @@ export function initMenu(){
     <button class="mobile-nav-close" type="button" aria-label="Close menu">×</button>
     <nav>
       <ul>
-        ${NAV.map(l => {
+        ${TOP_NAV.map(l => {
           const active = l.href.toLowerCase() === path;
           return `<li><a href="/${l.href}"${active ? ' aria-current="page"' : ''}>${l.label}</a></li>`;
         }).join('')}
