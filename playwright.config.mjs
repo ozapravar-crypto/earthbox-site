@@ -4,13 +4,22 @@
 // Against the live site: BASE_URL=https://www.earthbox.in npm run test:e2e
 import { defineConfig, devices } from '@playwright/test';
 
+const BASE = process.env.BASE_URL || 'http://localhost:4173';
+
 export default defineConfig({
   testDir: 'tests',
   testMatch: '*.spec.mjs',
   timeout: 45_000,
+  // CI only: one retry, and Playwright reports the test as "flaky" (it still
+  // shows in the summary). Not a pass for something broken: a test that fails
+  // twice fails the run. Known flake: bead site-ktu (tablet guided search).
+  retries: process.env.CI ? 1 : 0,
   fullyParallel: true,
   reporter: [['list']],
-  use: { baseURL: process.env.BASE_URL || 'http://localhost:4173', reducedMotion: 'reduce' },
+  // Every test starts with the cookie choice made (Decline), so the banner
+  // doesn't cover what tests click. The banner's own tests clear it.
+  use: { baseURL: BASE, reducedMotion: 'reduce',
+    storageState: { cookies: [], origins: [{ origin: new URL(BASE).origin, localStorage: [{ name: 'earthbox-consent', value: 'denied' }] }] } },
   webServer: { command: 'node qa/serve-cli.mjs 4173', port: 4173, reuseExistingServer: true, stdout: 'ignore', stderr: 'ignore' },
   projects: [
     { name: 'desktop', use: { viewport: { width: 1440, height: 900 } } },

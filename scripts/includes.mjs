@@ -3,6 +3,8 @@
  * includes.mjs — write the shared header + footer (data/site.js) into every
  * deployed page.
  *
+ * Also the consent-gated analytics snippet in <head>.
+ *
  * WHY: the same header and footer were hand-copied into 29 pages. Adding
  * "Maker" took 30 edits and the mobile menu was missed; the footers drifted
  * into two different refund policies. Now there is one source and this
@@ -15,7 +17,7 @@
 import { readFile, writeFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runheadHTML, footerHTML, NAV } from '../data/site.js';
+import { runheadHTML, footerHTML, analyticsHTML, NAV } from '../data/site.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CHECK = process.argv.includes('--check');
@@ -35,6 +37,7 @@ for (const f of pages.sort()) {
 
   let html = before;
   for (const [re, block] of [
+    [/<!-- Analytics -->[\s\S]*?<!-- \/Analytics -->/, analyticsHTML({ prefix })],
     [/<header class="runhead"[\s\S]*?<\/header>/, runheadHTML({ prefix, current })],
     [/<footer class="colophon">[\s\S]*?<\/footer>/, footerHTML({ prefix, home: f === 'index.html' })]
   ]) {

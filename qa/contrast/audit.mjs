@@ -166,6 +166,7 @@ async function run(route, theme, vpName){
     await ctxBrowser.addInitScript(([t, cart]) => {
       sessionStorage.setItem('earthbox-loader-seen', '1');
       localStorage.setItem('earthbox-theme', t);
+      localStorage.setItem('earthbox-consent', 'denied');   // banner audited in contrast.spec (CQ-015)
       if (cart) localStorage.setItem('earthbox-cart', cart); else localStorage.removeItem('earthbox-cart');
     }, [theme, st.cart ? CART : null]);
     await ctxBrowser.route('https://wa.me/**', r => r.fulfill({ body: 'wa' }));

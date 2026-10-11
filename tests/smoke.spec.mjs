@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
 const KNOWN_404 = [/bird-feeder/];
 
 const PAGES = ['/', '/products.html', '/product.html#V1-PLT-005', '/product.html#MossBox', '/product.html#V1-PP-001',
-  '/maker.html', '/blog.html', '/blog/designing-drainage.html', '/about.html'];
+  '/maker.html', '/blog.html', '/blog/designing-drainage.html', '/about.html', '/privacy.html'];
 
 // Collect page errors + failed requests for the whole test.
 function watch(page){

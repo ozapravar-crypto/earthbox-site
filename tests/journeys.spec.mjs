@@ -7,8 +7,10 @@ const errorsOf = (page) => {
   page.on('pageerror', e => errs.push(e.message));
   return errs;
 };
-test.beforeEach(async ({ context }) => {
-  await context.addInitScript(() => { if (!sessionStorage.getItem('qa')) { localStorage.clear(); sessionStorage.setItem('qa', '1'); } sessionStorage.setItem('earthbox-loader-seen', '1'); });
+test.beforeEach(async ({ context }, info) => {
+  // Start clean; cookie choice already made, except in the cookie tests.
+  const consent = info.titlePath.includes('cookie choice') ? null : 'denied';
+  await context.addInitScript((c) => { if (!sessionStorage.getItem('qa')) { localStorage.clear(); if (c) localStorage.setItem('earthbox-consent', c); sessionStorage.setItem('qa', '1'); } sessionStorage.setItem('earthbox-loader-seen', '1'); }, consent);
   await context.route('**/*.mp4', r => r.abort());
   await context.route('https://wa.me/**', r => r.fulfill({ body: 'wa' }));
 });
@@ -205,4 +207,48 @@ test('unknown product link shows "not found" with a way back', async ({ page }) 
   await page.goto('/product.html#DOES-NOT-EXIST');
   await expect(page.locator('#pdNotFound')).toBeVisible();
   await expect(page.locator('#pdNotFound a')).toHaveAttribute('href', /products\.html/);
+});
+
+// ── Cookie choice (consent.js) ───────────────────────────────────────
+// Google Analytics must not load until "Accept". Fresh visitor = no choice.
+test.describe('cookie choice', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+  const gaHits = (page) => { const hits = []; page.route('https://www.googletagmanager.com/**', r => { hits.push(r.request().url()); r.fulfill({ body: '' }); }); return hits; };
+
+  test('no analytics before a choice; Accept loads it and is remembered', async ({ page }) => {
+    const hits = gaHits(page);
+    await page.goto('/about.html');
+    const banner = page.locator('.consent');
+    await expect(banner).toBeVisible();
+    await page.waitForTimeout(500);
+    expect(hits).toEqual([]);
+    await banner.getByRole('button', { name: 'Accept' }).click();
+    await expect(banner).toBeHidden();
+    await expect.poll(() => hits.length).toBeGreaterThan(0);
+    await page.goto('/products.html');
+    await expect(page.locator('.consent')).toHaveCount(0);
+    await expect.poll(() => hits.length).toBeGreaterThan(1);
+  });
+
+  test('Decline: analytics never loads, on any page; the privacy page can reopen the choice', async ({ page }) => {
+    const hits = gaHits(page);
+    await page.goto('/index.html');
+    await page.locator('.consent').getByRole('button', { name: 'Decline' }).click();
+    await page.goto('/blog/designing-drainage.html');
+    await expect(page.locator('.consent')).toHaveCount(0);
+    await page.goto('/privacy.html');
+    await page.waitForTimeout(500);
+    expect(hits).toEqual([]);
+    await page.locator('[data-consent-reset]').click();
+    await expect(page.locator('.consent')).toBeVisible();
+  });
+
+  test('private mode (storage blocked): the banner still works and nothing breaks', async ({ page }) => {
+    const errs = errorsOf(page);
+    await page.addInitScript(() => { Storage.prototype.setItem = () => { throw new DOMException('QuotaExceededError'); }; });
+    await page.goto('/about.html');
+    await page.locator('.consent').getByRole('button', { name: 'Decline' }).click();
+    await expect(page.locator('.consent')).toBeHidden();
+    expect(errs).toEqual([]);
+  });
 });

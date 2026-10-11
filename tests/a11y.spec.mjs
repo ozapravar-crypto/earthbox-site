@@ -17,7 +17,7 @@ const scan = async (page, include) => {
 };
 
 const PAGES = ['/index.html', '/products.html', '/product.html#V1-PLT-005', '/product.html#MossBox', '/product.html#VIV-III',
-  '/product.html#NOPE', '/maker.html', '/blog.html', '/blog/designing-drainage.html', '/about.html'];
+  '/product.html#NOPE', '/maker.html', '/blog.html', '/blog/designing-drainage.html', '/about.html', '/privacy.html'];
 
 for (const path of PAGES) {
   test(`a11y: ${path}`, async ({ page }) => {
@@ -66,4 +66,15 @@ test('a11y self-test: the scan catches planted defects', async ({ page }) => {
   const found = (await scan(page)).join('\n');
   expect(found).toContain('image-alt');
   expect(found).toContain('button-name');
+});
+
+test.describe('cookie banner', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+  test('a11y state: cookie banner (incl. contrast)', async ({ page }) => {
+    await page.goto('/about.html');
+    await page.locator('.consent').waitFor();
+    const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).include('.consent').analyze();
+    expect(r.violations.map(v => `${v.id}: ${v.help}`)).toEqual([]);
+    await page.keyboard.press('Tab');   // reachable by keyboard (skip link first, then on through the page)
+  });
 });

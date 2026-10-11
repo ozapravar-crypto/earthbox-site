@@ -60,6 +60,19 @@ const HOME_STUDY = [
 // href of this page (or null), marked aria-current.
 const link = (prefix, h) => (h.startsWith('#') ? h : prefix + h);
 
+// Analytics waits for consent: the gtag() queue is set up here, but
+// Google's script only loads after "Accept" (scripts/consent.js). Stamped
+// into every page's <head> by includes.mjs, between the two markers.
+export const analyticsHTML = ({ prefix = '' } = {}) => `<!-- Analytics -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-1HHZETMVWP');
+  </script>
+  <script src="${prefix}scripts/consent.js" defer></script>
+  <!-- /Analytics -->`;
+
 export function runheadHTML({ prefix = '', current = null } = {}){
   return `<header class="runhead" role="banner">
   <a href="${prefix}index.html" class="runhead-left caption">EarthBox</a>
@@ -119,7 +132,7 @@ ${li(REFUND)}
   </div>
 
   <div class="colo-bar">
-    <span>© 2026 · EarthBox · ${ADDRESS}</span>
+    <span>© 2026 · EarthBox · ${ADDRESS} · <a href="${prefix}privacy.html">Privacy</a></span>
     <span class="quote">The brand speaks softly, like a crafted object label.</span>
   </div>
 </footer>`;

@@ -68,6 +68,21 @@ for (const [name, path, setup] of STATES) {
   });
 }
 
+test.describe('cookie banner', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+  test('visual state: cookie banner', async ({ page }) => {
+    await page.goto('/about.html');
+    await settle(page);
+    await expect(page.locator('.consent')).toHaveScreenshot('cookie-banner.png', shot);
+  });
+});
+
+test('visual: privacy page', async ({ page }) => {
+  await page.goto('/privacy.html');
+  await settle(page);
+  await expect(page).toHaveScreenshot('privacy.png', { ...shot, mask: mask(page) });
+});
+
 test('visual: footer (shared on every page)', async ({ page }) => {
   await page.goto('/about.html');
   await settle(page);

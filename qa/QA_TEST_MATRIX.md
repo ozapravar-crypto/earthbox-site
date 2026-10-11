@@ -19,6 +19,7 @@ Key: **S** smoke · **J** journeys · **A** a11y (axe) · **V** visual · **C** 
 | `/blog.html` | ✓ | ✓ | ✓ | ✓ | — | D P T |
 | `/blog/<23 articles>` | 1 in S, all 23 in C + prerender check | 1 | 1 | all | 1 | D P (T for 1) |
 | `/about.html` | ✓ | ✓ | ✓ | ✓ | — | D P T |
+| `/privacy.html` | ✓ | ✓ | ✓ | CQ-015 (banner) | — | D P T |
 | Unknown URL (404) | **gap**: Vercel's default page (site-ez9) | — | — | — | — | — |
 
 ## Features and states
@@ -52,6 +53,9 @@ Key: **S** smoke · **J** journeys · **A** a11y (axe) · **V** visual · **C** 
 | No template leaks (`[object`, `undefined`, `NaN`) on any page | S | D P T |
 | No layout jump while loading (CLS < 0.1, motion on) on home, catalogue, 2 products, article | S | 412 px |
 | Top bar and phone menu have no Journal; the footer does | S | D P T |
+| Cookie choice: no Google Analytics before a choice; Accept loads and is remembered; Decline holds on every page; privacy page reopens it; works with storage blocked | J | D P |
+| Cookie banner: axe incl. contrast; pixel contrast both themes, default + hover (CQ-015); visual | A, C, V | D P T |
+| `/privacy.html` loads clean, axe, visual | S, A, V | D P T |
 | Care rules: visit counts, prices, plan codes, kit per chamber | U `care.test` | — |
 | Cart suggestions: fit, never coming soon, no duplicates, at most 2 | U `pairings.test` | — |
 | Every referenced file exists (and isn't excluded from deploy) | U `check-assets` | — |

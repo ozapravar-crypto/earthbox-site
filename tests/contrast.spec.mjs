@@ -239,3 +239,19 @@ for (const theme of THEMES) {
     expect(await failures(page, '.pd-buy [data-add-line]', 'hover')).toEqual([]);
   });
 }
+
+// CQ-015 · Cookie banner (new 11 Oct 2026): text, link and both buttons,
+// default and hover, in both themes. Fresh visitor so the banner shows.
+test.describe('cookie banner', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+  for (const theme of THEMES) {
+    test(`CQ-015 cookie banner passes (${theme})`, async ({ page }) => {
+      await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
+      await page.goto('/about.html');
+      await page.locator('.consent').waitFor();
+      expect(await failures(page, '.consent', 'default')).toEqual([]);
+      await page.locator('.consent [data-consent=denied]').hover();
+      expect(await failures(page, '.consent', 'hover')).toEqual([]);
+    });
+  }
+});

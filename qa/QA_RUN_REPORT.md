@@ -39,3 +39,8 @@ QA-001 to QA-007, QA-009 and QA-013. Details, root causes and evidence are in `Q
 - QA-010: the Maker's first-load work, to be measured on a real phone.
 - QA-011: catalogue image sizes.
 - QA-012: the Bird Feeder photo and a branded 404, both waiting on content.
+
+## Follow-up run · cookie banner (site-dni), 11 Oct 2026
+- **What changed:** Google Analytics now loads only after "Accept" (`scripts/consent.js`, stamped into all 30 pages by `includes.mjs`). Added a privacy page and a footer link. Tests start with the choice already made, so the banner doesn't cover what they click; the banner has its own tests.
+- **Full local suite:** **210 passed, 0 failed** (47 skipped by design). `npm test` passes.
+- **CI on the QA push (38161589482):** 188 passed, 1 failed: the tablet guided-search click, CI-only, passes 3/3 locally. CI now retries a failed test once, reported as "flaky" and tracked in bead site-ktu. Lighthouse and unit jobs passed.

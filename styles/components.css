@@ -496,3 +496,29 @@
   clip:rect(0,0,0,0);
   border:0;
 }
+
+
+/* ─── Cookie choice (scripts/consent.js) ───
+   Bottom-left, out of the way of the WhatsApp button; full width on phones.
+   Not a modal: the page stays usable while it's open. */
+.consent{
+  position:fixed;
+  left:1.5rem;
+  bottom:1.5rem;
+  z-index:95;
+  max-width:24rem;
+  padding:1.25rem 1.4rem;
+  background:var(--bg);
+  border:1px solid var(--rule-stronger);
+  box-shadow:0 12px 40px rgba(0,0,0,.08);
+}
+.consent-text{
+  font-size:.9rem;
+  line-height:1.55;
+  color:var(--ink-soft);
+}
+.consent-text a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.consent-actions{display:flex;gap:.6rem;margin-top:1rem}
+@media (max-width:560px){
+  .consent{left:1rem;right:1rem;bottom:1rem;max-width:none}
+}
