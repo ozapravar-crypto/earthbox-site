@@ -22,6 +22,7 @@ export const NAV = [
   { href: 'index.html',    label: 'Home' },
   { href: 'products.html', label: 'Catalogue' },
   { href: 'maker.html',    label: 'Maker' },
+  { href: 'care.html',     label: 'Care' },
   { href: 'blog.html',     label: 'Journal' },
   { href: 'about.html',    label: 'About' }
 ];

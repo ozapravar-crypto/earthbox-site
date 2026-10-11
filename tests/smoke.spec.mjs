@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
 const KNOWN_404 = [/bird-feeder/];
 
 const PAGES = ['/', '/products.html', '/product.html#V1-PLT-005', '/product.html#MossBox', '/product.html#V1-PP-001',
-  '/maker.html', '/blog.html', '/blog/designing-drainage.html', '/about.html', '/privacy.html'];
+  '/maker.html', '/blog.html', '/blog/designing-drainage.html', '/about.html', '/privacy.html', '/care.html'];
 
 // Collect page errors + failed requests for the whole test.
 function watch(page){
@@ -33,6 +33,11 @@ for (const path of PAGES) {
     if (!path.startsWith('/maker')) expect(heavy, 'three.js and plant models load on the Maker only').toEqual([]);
     // No template leaks ("From ₹[object Object]" shipped on the catalogue, 10 Oct 2026).
     expect(await page.locator('body').innerText()).not.toMatch(/\[object |\bundefined\b|\bNaN\b/);
+    // Footer icons stay icon-sized. On privacy.html they rendered 1440px wide:
+    // the footer CSS lives in home.css, which a new page forgot to load (11 Oct 2026).
+    const icons = await page.locator('footer.colophon svg').evaluateAll(els => els.map(e => Math.round(e.getBoundingClientRect().width)));
+    expect(icons.length).toBeGreaterThan(0);
+    expect(icons.filter(w => w > 48), 'oversized footer icons').toEqual([]);
   });
 }
 

@@ -1,6 +1,6 @@
 # QA bug report
 
-**TL;DR:** ***This QA pass found 13 defects. 9 are fixed and covered by a test or measurement. 4 are open: performance items and content/design decisions. Contrast defects (CQ-001…014, all fixed) are tracked separately in `CONTRAST.md`. "Confirmed" means reproduced by an executed test or measurement; nothing here is a guess unless marked "suspected".***
+**TL;DR:** ***This QA pass found 15 defects. 11 are fixed and covered by a test or measurement. 4 are open: performance items and content/design decisions. Contrast defects (CQ-001…014, all fixed) are tracked separately in `CONTRAST.md`. "Confirmed" means reproduced by an executed test or measurement; nothing here is a guess unless marked "suspected".***
 
 Severity: **critical** (blocks a core task) · **major** (harms many users or the business) · **minor** · **cosmetic**.
 
@@ -63,6 +63,17 @@ Severity: **critical** (blocks a core task) · **major** (harms many users or th
 - **Fix:** `scramble.js` holds the heading's height until the animation ends.
 - **Re-verified:** product CLS 0.28 → 0. `smoke` "no layout jump while loading" fails without the fix (0.21, 0.18) and passes with it.
 - **Lesson:** the suite runs with reduced motion, which hid this. The layout-shift tests now run with motion on.
+
+### QA-014 · Care planner: typing a pincode then tapping "Add visits to cart" did nothing · major · confirmed (caught before release)
+- **Steps:** on `/care.html`, choose visits, type a pincode, then click "Add visits to cart".
+- **Root cause:** leaving the pincode field fired a "change" event that redrew the result panel, so the button was replaced between press and release and no click happened.
+- **Fix:** the change handler ignores the text fields, which already update as you type (`care-page.js`).
+- **Re-verified:** journeys "visits for my own plants" fails without the fix and passes with it.
+
+### QA-015 · Footer icons rendered 1440 px wide on the new privacy page · major · confirmed (live ~1 h)
+- **Root cause:** the shared footer CSS lives in `home.css`, and `privacy.html` didn't load it. Found by the iconography audit (P0).
+- **Fix:** hotfix `4e1fc9c`, plus `care.html` loads it too. The early Care links shipped in that hotfix were removed in `075b35a`.
+- **Re-verified:** `smoke` "loads clean" now fails on any page whose footer icons are over 48 px (it failed on the privacy page without the fix).
 
 ## Open
 

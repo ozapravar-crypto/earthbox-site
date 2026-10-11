@@ -17,6 +17,7 @@ import { getReviews, getAverageRating } from '../data/reviews.js';
 import { observeReveals } from './reveal.js';
 import { enquiryAltHTML } from './enquiry-form.js';
 import { syncCartButtons } from './cart.js';
+import { groupsOf, kitFor, encodePlan } from './care.js';
 
 
 
@@ -179,6 +180,22 @@ function findProduct(id){
 
 
 // ─── V1 3D Printed product · photo + material selector + variant selector ───
+// "Keep it thriving": the matching refill kit (chambers) and a visit plan,
+// prefilled for this piece on care.html. Plan: CARE-PLAN.md.
+function careHTML(sku){
+  const kitsFor = groupsOf(sku).map(kitFor).filter(Boolean);
+  const plan = encodePlan({ s: 'piece', r: sku, d: '12m', f: 'monthly', g: groupsOf(sku) });
+  return `
+      <section class="pd-care reveal" aria-labelledby="pdCareTitle">
+        <h2 id="pdCareTitle" class="pd-care-title">Keep it thriving</h2>
+        <p class="pd-care-text">${kitsFor.length ? 'A refill kit matched to its plants, or' : 'Ask for'} visits from the studio to look after it, in Mumbai.</p>
+        <div class="pd-care-actions">
+          ${kitsFor.map(k => `<button type="button" class="cta cta-small cta-secondary" data-add-line='${JSON.stringify({ kind: 'product', sku: k.sku })}'>Add ${k.name}</button>`).join('')}
+          <a class="cta cta-small cta-secondary" href="care.html#${plan}">Plan care visits</a>
+        </div>
+      </section>`;
+}
+
 function renderPrinted(p){
   const cat = v1Categories.find(c => c.slug === p.category);
   const hasVariants = p.variants && p.variants.length > 0;
@@ -322,6 +339,7 @@ function renderPrinted(p){
           <p>${p.description}</p>
         </div>
       </section>
+${['planters', 'plant-packets', 'plant-support'].includes(p.category) ? careHTML(p.sku) : ''}
 
       ${renderReviewsSection(p.sku)}
 
@@ -450,6 +468,7 @@ function renderBox(b){
           <a class="caption pd-maker-link" href="maker.html?box=${b.sku}">Design yours in the Maker &rarr;</a>
         </aside>
       </section>
+${careHTML(b.sku)}
 
       ${related.length ? `
         <section class="pd-related reveal">

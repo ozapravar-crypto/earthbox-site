@@ -1,0 +1,92 @@
+/* ─────────────────────────────────────────────────────────────────────
+   care.css · care.html (home planner + business quote form)
+   Same grammar as the rest of the site: fine rules, serif headings, small
+   spaced sans labels, no cards or shadows.
+   ───────────────────────────────────────────────────────────────────── */
+
+.care-section{max-width:56rem;padding-bottom:var(--sec)}
+.care-section > h2{font-size:clamp(2.2rem,5vw,3.6rem)}
+.care-lede{margin:1rem 0 2.5rem;color:var(--ink-soft);line-height:1.6;max-width:36rem}
+.care-note{font-size:.88rem;color:var(--mute);line-height:1.6;margin-top:.75rem}
+.care-note a,.care-note strong{color:var(--ink)}
+.care-note a{text-decoration:underline;text-underline-offset:3px}
+
+/* Steps */
+.care-step{border:0;border-top:1px solid var(--rule);padding:2rem 0 0;margin:0 0 2.5rem;min-width:0}
+.care-step > legend{
+  font-family:var(--serif);font-size:clamp(1.4rem,2.6vw,1.9rem);padding:0;margin-bottom:1.25rem;
+  display:flex;gap:.9rem;align-items:baseline;
+  float:left;width:100%;   /* legend in normal flow, below the rule (not straddling it) */
+}
+.care-step > legend + *{clear:both}
+.care-num{font-family:var(--sans);font-size:.62rem;letter-spacing:.24em;color:var(--mute)}
+
+/* Choices: the whole row is the target */
+.care-choice{
+  display:grid;grid-template-columns:auto 1fr;column-gap:.85rem;row-gap:.15rem;
+  padding:.9rem 0;border-bottom:1px solid var(--rule);cursor:pointer;
+}
+.care-choice input{grid-row:span 2;margin-top:.3rem;accent-color:var(--ink)}
+.care-choice span{font-family:var(--serif);font-size:1.15rem}
+.care-choice small,.care-check small{font-size:.82rem;color:var(--mute);line-height:1.5}
+
+.care-field{display:grid;gap:.4rem;margin-top:1.25rem;max-width:24rem}
+.care-field > span,.care-row > legend,.care-groups > legend{
+  font-family:var(--sans);font-size:.6rem;letter-spacing:.26em;text-transform:uppercase;color:var(--mute);padding:0;
+}
+.care-field input,.care-field select{
+  font:inherit;font-size:.95rem;color:var(--ink);background:var(--bg);
+  border:1px solid var(--rule-stronger);border-radius:0;padding:.65rem .75rem;width:100%;min-height:44px;
+}
+
+.care-groups{border:0;padding:0;margin:1.5rem 0 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(13rem,1fr));gap:.25rem 1.5rem}
+.care-groups > legend{margin-bottom:.75rem}
+.care-check{display:grid;grid-template-columns:auto 1fr;column-gap:.6rem;padding:.5rem 0;cursor:pointer}
+.care-check input{grid-row:span 2;margin-top:.2rem;accent-color:var(--ink)}
+
+/* Visit options */
+.care-visit-opts{margin-top:1.5rem}
+.care-row{border:0;padding:0;margin:0 0 1.25rem;display:flex;flex-wrap:wrap;gap:.5rem}
+.care-row > legend{width:100%;margin-bottom:.6rem}
+.care-pill{position:relative;cursor:pointer}
+.care-pill input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.care-pill span{
+  display:inline-flex;align-items:center;min-height:44px;padding:0 1rem;
+  border:1px solid var(--rule-stronger);font-family:var(--sans);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);
+}
+.care-pill input:checked + span{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.care-pill input:focus-visible + span{outline:2px solid var(--ink);outline-offset:2px}
+.care-includes{margin-top:1.5rem;display:grid;gap:.4rem;font-size:.88rem;color:var(--ink-soft)}
+.care-includes li::before{content:"— ";color:var(--mute)}
+
+/* Result */
+.care-result{padding-top:2rem}
+.care-summary{font-size:1rem;color:var(--ink-soft);line-height:1.6}
+.care-price{font-family:var(--serif);font-size:1.6rem;margin:.75rem 0 1.25rem}
+.care-kits{display:grid;grid-template-columns:repeat(auto-fill,minmax(16rem,1fr));gap:2rem}
+.care-kit{border-top:1px solid var(--rule-stronger);padding-top:1.25rem}
+.care-kit h3{font-size:1.4rem}
+.care-contents{margin-top:.9rem;display:grid;gap:.3rem;font-size:.88rem;color:var(--ink-soft)}
+.care-contents li::before{content:"— ";color:var(--mute)}
+.care-kit .care-price{font-size:1.2rem}
+
+/* Business form: enquiry-form styles are desktop-only in components.css
+   (phones use WhatsApp there); this one is the route on every size. */
+.enquiry-alt.care-biz{display:block;max-width:none;margin:0;padding:0;border:0}
+.care-biz .enquiry-form{display:grid;gap:1rem}
+.care-biz-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem 1.5rem}
+.care-biz .enquiry-field{display:grid;gap:.4rem}
+.care-biz .enquiry-field > span{font-family:var(--sans);font-size:.6rem;letter-spacing:.26em;text-transform:uppercase;color:var(--mute)}
+.care-biz .enquiry-field input,.care-biz .enquiry-field select,.care-biz .enquiry-field textarea{
+  font-family:var(--body);font-size:.95rem;color:var(--ink);background:var(--bg);
+  border:1px solid var(--rule-stronger);border-radius:0;padding:.65rem .75rem;width:100%;min-height:44px;
+}
+.care-biz .enquiry-submit{justify-self:start;width:auto}
+.care-biz .enquiry-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.care-biz .enquiry-status{font-size:.9rem;margin-top:1rem;color:var(--ink)}
+.care-biz .enquiry-status:empty{display:none}
+
+@media (max-width:640px){
+  .care-biz-grid{grid-template-columns:1fr}
+  .care-biz .enquiry-submit{width:100%}
+}

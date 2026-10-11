@@ -12,6 +12,10 @@
 //             with the chamber's published range shown as a guide
 //   custom  · a Maker build → one row per component (chamber, foundation,
 //             plants), each priced or "on enquiry", summed into a build total
+// Care (care.html) adds two line types that land in those kinds:
+//   refill kits are ordinary product lines (KIT-…, priced or on enquiry);
+//   a visit plan is {kind:'care', code} → fixed when the studio has set a
+//   per-visit rate, else on enquiry; custom boxes are always quoted.
 //
 // Lines are stored as ids only and resolved against data on every read, so
 // a price change in data/ shows up in carts already saved, and anything
@@ -22,6 +26,9 @@
 import { volumeOne, materials, photoPath } from '../data/volume-one.js';
 import { volumeTwo } from '../data/upcoming.js';
 import { substrates } from '../data/maker.js';
+import { kits } from '../data/care.js';
+import { decodePlan, encodePlan, planPrice, planSummary, refLabel } from './care.js';
+import { suggest } from './pairings.js';
 import { decodeBuild, encodeBuild, chamberOf, plantOf, isSoilless } from './build-codec.js';
 import { enquiryAltHTML, ENQUIRY_PHONE } from './enquiry-form.js';
 import { SITE } from '../data/site.js';
@@ -43,7 +50,9 @@ const num = (v) => (typeof v === 'number' && v > 0 ? v : null);
 export const emptyCart = () => ({ cart: [], saved: [] });
 
 // A line's identity: the same piece in another size or material is a new line.
-export const keyOf = (l) => l.kind === 'build' ? `build:${l.code}` : [l.sku, l.variant, l.material].filter(Boolean).join('|');
+export const keyOf = (l) => l.kind === 'build' ? `build:${l.code}` : l.kind === 'care' ? `care:${l.code}`
+  : [l.sku, l.variant, l.material].filter(Boolean).join('|');
+const ONE_OFF = (l) => l.kind === 'build' || l.kind === 'care';   // no quantity
 
 // Line (ids) → everything the drawer and the order message need.
 export function resolve(l){
@@ -60,6 +69,17 @@ export function resolve(l){
     return { kind: 'custom', key: keyOf(l), qty: 1, title: b.name || `${ch.name} world`, sub: 'Custom build · Maker',
       href: `maker.html#${encodeBuild(b)}`, img: null, parts, status: `Made to order · ${ch.lead}` };
   }
+  if (l.kind === 'care') {
+    const plan = decodePlan(l.code);
+    if (!plan) return null;
+    const price = planPrice(plan);
+    return { kind: price ? 'fixed' : 'enquiry', care: true, key: keyOf(l), qty: 1, title: `Care visits · ${refLabel(plan)}`,
+      sub: planSummary(plan), href: `care.html#${encodePlan(plan)}`, img: null, unit: price,
+      status: plan.s === 'custom' ? 'Quoted for custom boxes' : 'Mumbai · studio confirms dates' };
+  }
+  const kit = kits.find(k => k.sku === l.sku);
+  if (kit) return { kind: kit.price ? 'fixed' : 'enquiry', care: true, key: keyOf(l), qty: l.qty, title: kit.name,
+    sub: kit.for, href: 'care.html', img: null, unit: kit.price, status: 'Studio confirms contents · about 1 week' };
   const p = volumeOne.find(x => x.sku === l.sku);
   if (p) {
     const variant = p.variants?.find(v => v.id === l.variant);
@@ -107,8 +127,8 @@ export function clean(raw){
     const seen = new Set();
     for (const l of Array.isArray(raw?.[list]) ? raw[list] : []) {
       if (!l || typeof l !== 'object') continue;
-      const line = l.kind === 'build'
-        ? { kind: 'build', code: String(l.code || '') }
+      const line = ONE_OFF(l)
+        ? { kind: l.kind, code: String(l.code || '') }
         : { kind: 'product', sku: String(l.sku || ''), variant: l.variant || null, material: l.material || null,
             qty: Math.min(MAX_QTY, Math.max(1, parseInt(l.qty, 10) || 1)) };
       if (!resolve(line) || seen.has(keyOf(line))) continue;
@@ -122,7 +142,7 @@ export function add(state, list, line){
   const s = structuredClone(state), k = keyOf(line);
   const hit = s[list].find(l => keyOf(l) === k);
   if (hit && list === 'cart' && hit.kind === 'product') hit.qty = Math.min(MAX_QTY, hit.qty + (line.qty || 1));
-  else if (!hit) s[list].push(line.kind === 'build' ? line : { qty: 1, ...line });
+  else if (!hit) s[list].push(ONE_OFF(line) ? line : { qty: 1, ...line });
   return s;
 }
 export const remove = (state, list, key) => ({ ...state, [list]: state[list].filter(l => keyOf(l) !== key) });
@@ -178,7 +198,7 @@ let notice = null;
 function addLine(list, line, { open = true } = {}){
   state = add(state, list, line);
   write(); refresh();
-  track(list === 'cart' ? 'cart_add' : 'saved_add', { kind: line.kind, sku: line.sku || 'build' });
+  track(list === 'cart' ? 'cart_add' : 'saved_add', { kind: line.kind, sku: line.sku || line.kind });
   if (open) openDrawer(list);
 }
 const has = (list, line) => state[list].some(l => keyOf(l) === keyOf(line));
@@ -193,8 +213,8 @@ function priceCell(r){
 function lineHTML(r, list){
   const k = esc(r.key);
   const thumb = r.img ? `<img src="/${esc(r.img)}" alt="" width="72" height="72" loading="lazy">`
-    : `<span class="ct-thumb-mark" aria-hidden="true">${r.kind === 'custom' ? 'M' : 'E'}</span>`;
-  const qty = list === 'cart' && r.kind !== 'custom' ? `
+    : `<span class="ct-thumb-mark" aria-hidden="true">${r.kind === 'custom' ? 'M' : r.care ? 'C' : 'E'}</span>`;
+  const qty = list === 'cart' && r.kind !== 'custom' && !r.key.startsWith('care:') ? `
       <div class="ct-qty" role="group" aria-label="Quantity of ${esc(r.title)}">
         <button type="button" data-ct="qty" data-k="${k}" data-d="-1" ${r.qty <= 1 ? 'disabled' : ''} aria-label="One fewer">−</button>
         <output aria-live="polite">${r.qty}</output>
@@ -208,19 +228,33 @@ function lineHTML(r, list){
   return `<li class="ct-line ct-line--${r.kind}">
     <a class="ct-thumb" href="/${esc(r.href)}" tabindex="-1" aria-hidden="true">${thumb}</a>
     <div class="ct-body">
-      <span class="ct-kind caption">${{ fixed: 'Ready to order', enquiry: 'Price on enquiry', custom: 'Custom build' }[r.kind]}</span>
+      <span class="ct-kind caption">${r.care ? 'Care' : { fixed: 'Ready to order', enquiry: 'Price on enquiry', custom: 'Custom build' }[r.kind]}</span>
       <a class="ct-title" href="/${esc(r.href)}">${esc(r.title)}</a>
       <span class="ct-sub">${esc(r.sub)} · ${esc(r.status)}</span>
       ${parts}
       ${qty}
       <div class="ct-actions">
-        ${r.kind === 'custom' ? `<a class="ct-link" href="/${esc(r.href)}">Edit design</a>` : ''}
+        ${r.kind === 'custom' ? `<a class="ct-link" href="/${esc(r.href)}">Edit design</a>` : r.key.startsWith('care:') ? `<a class="ct-link" href="/${esc(r.href)}">Change plan</a>` : ''}
         <button type="button" class="ct-link" data-ct="move" data-from="${list}" data-k="${k}">${list === 'cart' ? 'Save for later' : 'Move to cart'}</button>
         <button type="button" class="ct-link" data-ct="remove" data-from="${list}" data-k="${k}">Remove<span class="u-sr-only"> ${esc(r.title)}</span></button>
       </div>
     </div>
     ${r.kind === 'custom' ? '' : `<div class="ct-cost">${list === 'cart' ? priceCell(r) : r.kind === 'fixed' ? `<span class="ct-price">${rupees(r.unit)}</span>` : '<span class="ct-price ct-price--enquiry">On enquiry</span>'}</div>`}
   </li>`;
+}
+
+// "Goes with your order": at most two, from plain rules (pairings.js).
+function suggestHTML(){
+  const list = suggest(state.cart);
+  if (!list.length) return '';
+  return `<section class="ct-suggest" aria-labelledby="ct-suggest-title">
+    <h3 id="ct-suggest-title" class="caption">Goes with your order</h3>
+    <ul>${list.map(s => `<li>
+      <span class="ct-suggest-text"><span class="ct-suggest-name">${esc(s.title)}</span><span class="ct-suggest-why">${esc(s.reason)}</span></span>
+      ${s.line ? `<button type="button" class="ct-link" data-add-line='${esc(JSON.stringify(s.line))}'>Add<span class="u-sr-only"> ${esc(s.title)}</span></button>`
+        : `<a class="ct-link" href="/${esc(s.href)}">Plan<span class="u-sr-only"> ${esc(s.title)}</span></a>`}
+    </li>`).join('')}</ul>
+  </section>`;
 }
 
 function summaryHTML(lines){
@@ -256,7 +290,7 @@ function drawerHTML(){
         ${notice.undo ? '<button type="button" class="ct-link" data-ct="undo">Undo</button>' : ''}
         ${notice.clear ? '<button type="button" class="ct-link" data-ct="clear">Clear cart</button>' : ''}` : ''}</p>
       ${list.length ? `<ul class="ct-lines">${list.map(r => lineHTML(r, tab)).join('')}</ul>` : empty}
-      ${tab === 'cart' && list.length ? summaryHTML(list) : ''}
+      ${tab === 'cart' && list.length ? suggestHTML() + summaryHTML(list) : ''}
     </div>`;
 }
 

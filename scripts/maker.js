@@ -16,6 +16,7 @@ import { chambers, plants, substrates, elements, recipes,
          chamberElements, spaceQuestions, forms, guide } from '../data/maker.js';
 import { enquiryAltHTML, ENQUIRY_PHONE } from './enquiry-form.js';
 import { syncCartButtons } from './cart.js';
+import { groupsOf, kitFor, encodePlan } from './care.js';
 import { emptyDiscovery, searchPlants, dropChip, clearGuided, climateOrder } from './plant-search.js';
 
 export const STAGES = ['start', 'chamber', 'foundation', 'plants', 'space', 'review'];
@@ -510,6 +511,21 @@ function spacePanel(b){
   </form>`;
 }
 
+// Care for this world (CARE-PLAN.md): kits for its plant groups, or visits
+// (always quoted for custom worlds), planned on care.html.
+function careGroup(b){
+  const code = encodeBuild(b);
+  const kits = (b.plants.length ? groupsOf(code) : suitedElements(b.chamber)).slice(0, 3).map(kitFor).filter(Boolean);
+  return `<section class="mk-group mk-care">
+    <header><h3 class="caption">Keep it thriving</h3></header>
+    <p class="mk-sub">A refill kit for its plants, or visits from the studio in Mumbai (quoted for custom worlds).</p>
+    <div class="mk-secondary">
+      ${kits.map(k => `<button type="button" class="cta cta-secondary cta-small" data-add-line="${esc(JSON.stringify({ kind: 'product', sku: k.sku }))}" data-key="kit-${k.sku}">Add ${esc(k.name)}</button>`).join('')}
+      <a class="cta cta-secondary cta-small" href="care.html#${esc(encodePlan({ s: 'custom', r: code, d: '12m', f: 'monthly' }))}" data-key="care-visits">Plan care visits</a>
+    </div>
+  </section>`;
+}
+
 function reviewPanel(b){
   const ch = chamberOf(b), sub = find(substrates, b.substrate), s = b.space;
   const group = (title, stage, body) => `<section class="mk-group">
@@ -530,6 +546,7 @@ function reviewPanel(b){
     <p class="mk-item"><span>Estimate</span><span>From ${ch.price.split(' – ')[0]}</span></p>
     <p class="mk-sub">Chamber range ${ch.price}. Plants and foundation are quoted with you. Nothing is charged on this page.</p>
   </div>
+  ${careGroup(b)}
   <div class="mk-send">
     <div class="pd-buy">
       <button type="button" class="cta" data-add-line="${esc(JSON.stringify(cartLine(b)))}" data-key="cart">Add to cart ${arrow}</button>
@@ -845,8 +862,9 @@ export function initMaker(){
     const a = root.querySelector('[data-act="send"]');
     if (a) a.href = whatsappHref(b);
     const line = JSON.stringify(cartLine(b));
-    root.querySelectorAll('[data-add-line]').forEach(x => { x.dataset.addLine = line; });
-    root.querySelectorAll('[data-save-line]').forEach(x => { x.dataset.saveLine = line; });
+    // Only the design's own buttons: the care kits on the review step carry their own line.
+    root.querySelectorAll('[data-add-line][data-key="cart"]').forEach(x => { x.dataset.addLine = line; });
+    root.querySelectorAll('[data-save-line][data-key="save"]').forEach(x => { x.dataset.saveLine = line; });
     syncCartButtons();
     const msg = root.querySelector('.enquiry-form textarea[name="message"]');
     if (msg) msg.value = enquiryText(b);

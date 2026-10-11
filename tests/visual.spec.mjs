@@ -42,7 +42,8 @@ const shot = { maxDiffPixelRatio: 0.01, animations: 'disabled' };
 const PAGES = [
   ['home', '/index.html'], ['catalogue', '/products.html'], ['product', '/product.html#V1-PLT-005'],
   ['chamber', '/product.html#MossBox'], ['maker-start', '/maker.html'], ['journal', '/blog.html'],
-  ['article', '/blog/designing-drainage.html'], ['about', '/about.html'], ['not-found', '/product.html#NOPE']
+  ['article', '/blog/designing-drainage.html'], ['about', '/about.html'], ['not-found', '/product.html#NOPE'],
+  ['care', '/care.html']
 ];
 for (const [name, path] of PAGES) {
   test(`visual: ${name} (first screen)`, async ({ page }) => {
@@ -56,7 +57,9 @@ const STATES = [
   ['cart-drawer', '/product.html#V1-PLT-006', async p => { await p.locator('.pd-buy [data-add-line], #pdMobileCta [data-add-line]').first().click(); }],
   ['maker-plants', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); }],
   ['guided-search', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); await p.locator('[data-act=guide]').click(); }],
-  ['maker-review', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=review]').click(); }]
+  ['maker-review', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=review]').click(); }],
+  ['care-visits', '/care.html', async p => { const c = p.locator('#carePlanner'); await c.getByText('Visits from the studio').click(); await c.locator('.care-result').scrollIntoViewIfNeeded(); }],
+  ['cart-suggestions', '/product.html#MossBox', async p => { await p.locator('.pd-buy [data-add-line], #pdMobileCta [data-add-line]').first().click(); }]
 ];
 for (const [name, path, setup] of STATES) {
   test(`visual state: ${name}`, async ({ page }) => {

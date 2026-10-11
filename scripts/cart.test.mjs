@@ -74,3 +74,25 @@ assert.match(text, /Priced items: ₹1,058/);
 assert.match(text, /Still to quote: 3 items/);
 
 console.log('cart: all checks passed');
+
+// Care (care.html): kits are product lines; visit plans are one-off care lines.
+{
+  const { encodePlan } = await import('./care.js');
+  const { visit } = await import('../data/care.js');
+  const kit = { kind: 'product', sku: 'KIT-MOSS', qty: 1 };
+  const plan = { kind: 'care', code: encodePlan({ s: 'piece', r: 'MossBox', d: '12m', f: 'monthly', g: ['Moss'], n: 1, p: '400101' }) };
+  assert.equal(resolve(kit).kind, 'enquiry');                 // no kit price yet
+  assert.equal(resolve(plan).kind, 'enquiry');                // no visit rate yet
+  assert.match(resolve(plan).title, /Care visits · Moss/);
+  visit.perVisit = 900;
+  assert.equal(resolve(plan).kind, 'fixed');
+  assert.equal(resolve(plan).unit, 10800);                    // 12 × 900
+  visit.perVisit = null;
+  let st = add(add(emptyCart(), 'cart', plan), 'cart', plan);
+  assert.equal(st.cart.length, 1);                            // same plan twice → one line, no qty
+  assert.equal(st.cart[0].qty, undefined);
+  st = add(st, 'cart', kit);
+  assert.match(orderText(st.cart.map(resolve)), /Care visits · Moss chamber · 12 months, every month \(12 visits\)/);
+  const cleaned = clean({ cart: [plan, { kind: 'care', code: 's=piece&d=once&r=NOPE' }, { kind: 'care' }, kit] });
+  assert.deepEqual(cleaned.cart.map(keyOf), [keyOf(plan), 'KIT-MOSS']);   // bad plans dropped
+}

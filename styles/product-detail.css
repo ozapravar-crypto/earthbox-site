@@ -687,3 +687,9 @@
   .pd-related-grid{grid-template-columns:1fr}
   .pd-selector-options--inline{flex-direction:column}
 }
+
+/* ─── Keep it thriving (Care, CARE-PLAN.md) ─── */
+.pd-care{border-top:1px solid var(--rule);padding:2.5rem 0;margin-bottom:clamp(3rem,6vh,5rem);display:grid;gap:.9rem;max-width:44rem}
+.pd-care-title{font-size:clamp(1.6rem,3vw,2.2rem)}
+.pd-care-text{color:var(--ink-soft);line-height:1.6}
+.pd-care-actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.5rem}

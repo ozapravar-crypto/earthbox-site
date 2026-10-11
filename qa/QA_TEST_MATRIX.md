@@ -20,6 +20,7 @@ Key: **S** smoke · **J** journeys · **A** a11y (axe) · **V** visual · **C** 
 | `/blog/<23 articles>` | 1 in S, all 23 in C + prerender check | 1 | 1 | all | 1 | D P (T for 1) |
 | `/about.html` | ✓ | ✓ | ✓ | ✓ | — | D P T |
 | `/privacy.html` | ✓ | ✓ | ✓ | CQ-015 (banner) | — | D P T |
+| `/care.html` | ✓ | ✓ + planner states | ✓ + visits state | CQ-016 | — | D P T |
 | Unknown URL (404) | **gap**: Vercel's default page (site-ez9) | — | — | — | — | — |
 
 ## Features and states
@@ -56,6 +57,13 @@ Key: **S** smoke · **J** journeys · **A** a11y (axe) · **V** visual · **C** 
 | Cookie choice: no Google Analytics before a choice; Accept loads and is remembered; Decline holds on every page; privacy page reopens it; works with storage blocked | J | D P |
 | Cookie banner: axe incl. contrast; pixel contrast both themes, default + hover (CQ-015); visual | A, C, V | D P T |
 | `/privacy.html` loads clean, axe, visual | S, A, V | D P T |
+| Care: kit for a chamber → cart kit line | J | D P |
+| Care: own plants → visits plan → cart line (no qty) → order message has duration/frequency/visits/groups/pincode | J | D P |
+| Care: Maker design → quoted plan, care page opens prefilled | J | D P |
+| Care: product page "Keep it thriving" (kit + prefilled plan link) | J; C | D P |
+| Care: business form sends company details; required fields block sending; server error offers email | J (mocked) | D |
+| Cart suggestions: matching kit + visits; adding the kit removes it | J; A; C; V | D P T |
+| Footer icons stay icon-sized on every page | S | D P T |
 | Care rules: visit counts, prices, plan codes, kit per chamber | U `care.test` | — |
 | Cart suggestions: fit, never coming soon, no duplicates, at most 2 | U `pairings.test` | — |
 | Every referenced file exists (and isn't excluded from deploy) | U `check-assets` | — |

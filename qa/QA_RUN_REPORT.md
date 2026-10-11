@@ -44,3 +44,14 @@ QA-001 to QA-007, QA-009 and QA-013. Details, root causes and evidence are in `Q
 - **What changed:** Google Analytics now loads only after "Accept" (`scripts/consent.js`, stamped into all 30 pages by `includes.mjs`). Added a privacy page and a footer link. Tests start with the choice already made, so the banner doesn't cover what they click; the banner has its own tests.
 - **Full local suite:** **210 passed, 0 failed** (47 skipped by design). `npm test` passes.
 - **CI on the QA push (38161589482):** 188 passed, 1 failed: the tablet guided-search click, CI-only, passes 3/3 locally. CI now retries a failed test once, reported as "flaky" and tracked in bead site-ktu. Lighthouse and unit jobs passed.
+
+## Follow-up run · Care (epic site-eeh), 11 Oct 2026
+- **What shipped:**
+  - `care.html`: home planner (kit or visits) and business quote form
+  - care lines in the cart
+  - "Keep it thriving" on product pages and on the Maker's review step
+  - cart suggestions
+  - Care in the top bar, footer and a homepage band
+- **Full local suite:** **242 passed, 2 failed** (51 skipped by design). The 2 failures were phone-size timeouts under load: Maker resume, and the Care kit test where the planner script hadn't run yet. Both re-ran **3 of 3 green**. CI's single retry covers this kind of flake, and it would show as "flaky".
+- **Caught before release:** QA-014, adding visits to the cart failed after typing a pincode. QA-015, oversized footer icons on new pages: hotfixed live and now guarded on every page.
+- **Not done:** prices. Every kit and visit shows "On enquiry" until Aayush sets them (see `CARE.md`).

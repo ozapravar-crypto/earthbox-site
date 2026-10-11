@@ -37,7 +37,8 @@ const PAGE_MODULES = [
   ['#productDetail',                                    () => import('./render-product-detail.js').then(m => m.initProductDetail())],
   ['#aboutSections',                                    () => import('./render-about.js').then(m => m.initAbout())],
   ['#journalGrid, #journalFilters',                     () => import('./render-blog.js').then(m => m.initBlog())],
-  ['#maker',                                            () => import('./maker.js').then(m => m.initMaker())]
+  ['#maker',                                            () => import('./maker.js').then(m => m.initMaker())],
+  ['#carePlanner',                                      () => import('./care-page.js').then(m => m.initCare())]
 ];
 
 async function initPage(){

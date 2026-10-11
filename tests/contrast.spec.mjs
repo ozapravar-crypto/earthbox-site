@@ -255,3 +255,22 @@ test.describe('cookie banner', () => {
     });
   }
 });
+
+// CQ-016 · Care page (new 11 Oct 2026): planner (both modes), business form,
+// and the cart suggestions, in both themes.
+for (const theme of THEMES) {
+  test(`CQ-016 care page and cart suggestions pass (${theme})`, async ({ page }) => {
+    await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
+    await page.goto('/care.html');
+    const c = page.locator('#carePlanner');
+    await c.locator('select[name=r]').selectOption('MossBox');
+    expect(await failures(page, '#homes', 'default')).toEqual([]);
+    await c.getByText('Visits from the studio').click();
+    expect(await failures(page, '#homes', 'default')).toEqual([]);
+    expect(await failures(page, '#business', 'default')).toEqual([]);
+    await page.goto('/product.html#MossBox');
+    await page.locator('.pd-buy [data-add-line]').first().click();
+    expect(await failures(page, '.ct-suggest', 'default')).toEqual([]);
+    expect(await failures(page, '.pd-care', 'default')).toEqual([]);
+  });
+}

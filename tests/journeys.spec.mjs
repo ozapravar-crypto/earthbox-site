@@ -252,3 +252,107 @@ test.describe('cookie choice', () => {
     expect(errs).toEqual([]);
   });
 });
+
+// ── Care (care.html, CARE-PLAN.md) ───────────────────────────────────
+const cartDrawer = (page) => page.locator('dialog.ct');
+const openCart = async (page, isMobile) => { if (!(await cartDrawer(page).isVisible())) await page.locator(isMobile ? '.runhead-bag [data-open=cart], [data-open=cart]' : '[data-open=cart]').first().click(); };
+
+test('Care: a refill kit for a chamber goes in the cart as a kit line', async ({ page, isMobile }) => {
+  const errs = errorsOf(page);
+  await page.goto('/care.html');
+  const planner = page.locator('#carePlanner');
+  await planner.locator('select[name=r]').selectOption('MossBox');
+  await expect(planner.locator('.care-kit h3')).toHaveText(['Moss refill kit']);
+  await planner.getByRole('button', { name: 'Add kit to cart' }).click();
+  await openCart(page, isMobile);
+  await expect(cartDrawer(page).locator('.ct-line')).toHaveCount(1);
+  await expect(cartDrawer(page).locator('.ct-title')).toHaveText('Moss refill kit');
+  expect(errs).toEqual([]);
+});
+
+test('Care: visits for my own plants → plan in cart and in the order message', async ({ page, isMobile }) => {
+  const errs = errorsOf(page);
+  await page.goto('/care.html');
+  const planner = page.locator('#carePlanner');
+  await planner.getByText('My own plants').click();
+  await planner.locator('input[name=n]').fill('8');
+  await planner.getByText('Bite', { exact: true }).click();
+  await planner.getByText('Visits from the studio').click();
+  await planner.getByLabel('6 months').check();
+  await planner.getByLabel('Every 2 weeks').check();
+  await planner.locator('input[name=p]').fill('400101');
+  await expect(planner.locator('.care-summary')).toContainText('12 visits');
+  await expect(planner.locator('.care-price')).toHaveText('On enquiry');     // no rate set yet
+  await planner.getByRole('button', { name: 'Add visits to cart' }).click();
+  await openCart(page, isMobile);
+  const line = cartDrawer(page).locator('.ct-line');
+  await expect(line).toHaveCount(1);
+  await expect(line.locator('.ct-title')).toHaveText('Care visits · 8 of my own plants');
+  await expect(line.locator('.ct-qty')).toHaveCount(0);                         // a plan has no quantity
+  const wa = decodeURIComponent(await cartDrawer(page).locator('[data-ct=send]').getAttribute('href'));
+  expect(wa).toContain('6 months, every 2 weeks (12 visits) · Bite · pincode 400101');
+  expect(errs).toEqual([]);
+});
+
+test('Care: a custom box from the Maker is quoted, and its plan opens prefilled', async ({ page }) => {
+  await page.goto('/maker.html#c=MossBox&s=studio&p=PLT-036&n=QA%20World');
+  await page.locator('.mk-step[data-to=review]').click();
+  const care = page.locator('.mk-care');
+  await expect(care.getByRole('button', { name: 'Add Moss refill kit' })).toBeVisible();
+  await care.getByRole('link', { name: 'Plan care visits' }).click();
+  await expect(page).toHaveURL(/care\.html#s=custom/);
+  const planner = page.locator('#carePlanner');
+  await expect(planner.locator('input[name=s][value=custom]')).toBeChecked();
+  await expect(planner.locator('select[name=r] option:checked')).toHaveText('QA World');
+  await expect(planner.locator('.care-price')).toHaveText('Quoted by the studio');
+});
+
+test('Care: product page offers the matching kit and a prefilled visit plan', async ({ page }) => {
+  await page.goto('/product.html#MossBox');
+  const block = page.locator('.pd-care');
+  await expect(block.getByRole('button', { name: 'Add Moss refill kit' })).toBeVisible();
+  await expect(block.getByRole('link', { name: 'Plan care visits' })).toHaveAttribute('href', /care\.html#s=piece.*r=MossBox/);
+});
+
+test('Cart suggests the matching kit and visits; adding the kit removes it from the list', async ({ page, isMobile }) => {
+  await page.goto('/product.html#MossBox');
+  await page.locator(isMobile ? '#pdMobileCta [data-add-line]' : '.pd-buy [data-add-line]').first().click();
+  const sug = cartDrawer(page).locator('.ct-suggest');
+  await expect(sug.locator('.ct-suggest-name')).toHaveText(['Moss refill kit', 'Care visits']);
+  await sug.getByRole('button', { name: /Add/ }).click();
+  await expect(cartDrawer(page).locator('.ct-line')).toHaveCount(2);
+  await expect(sug.locator('.ct-suggest-name')).toHaveText(['Care visits']);
+});
+
+test.describe('Care business form', () => {
+  test.skip(({ isMobile }) => isMobile, 'same form on phones; network paths checked once');
+  test('sends company details in the message; errors and invalid input handled', async ({ page }) => {
+    let body;
+    await page.route('https://api.web3forms.com/**', r => { body = r.request().postDataJSON(); r.fulfill({ status: 200, contentType: 'application/json', body: '{"success":true}' }); });
+    await page.goto('/care.html#business');
+    const f = page.locator('#careBusiness');
+    await f.getByRole('button', { name: 'Ask for a quote' }).click();
+    expect(body).toBeUndefined();                                   // required fields empty: nothing sent
+    await f.locator('[name=company]').fill('Blue Tokai Andheri');
+    await f.locator('[name=name]').fill('QA');
+    await f.locator('[name=email]').fill('qa@example.com');
+    await f.locator('[name=site]').selectOption('Café or restaurant');
+    await f.locator('[name=size]').fill('30 plants');
+    await f.locator('[name=often]').selectOption('Every month');
+    await f.locator('[name=pin]').fill('400053');
+    await f.getByRole('button', { name: 'Ask for a quote' }).click();
+    await expect(page.locator('.care-biz .enquiry-status')).toContainText('Thank you');
+    expect(body.product).toBe('Care · business');
+    expect(body.message).toContain('Company: Blue Tokai Andheri');
+    expect(body.message).toContain('Visits wanted: Every month');
+    expect(body.message).toContain('Pincode: 400053');
+  });
+  test('server error: says so and offers email', async ({ page }) => {
+    await page.route('https://api.web3forms.com/**', r => r.fulfill({ status: 500, contentType: 'application/json', body: '{"success":false}' }));
+    await page.goto('/care.html#business');
+    const f = page.locator('#careBusiness');
+    for (const [n, v] of [['company', 'X'], ['name', 'QA'], ['email', 'qa@example.com']]) await f.locator(`[name=${n}]`).fill(v);
+    await f.getByRole('button', { name: 'Ask for a quote' }).click();
+    await expect(page.locator('.care-biz .enquiry-status')).toContainText('aayush.lilani@gmail.com');
+  });
+});

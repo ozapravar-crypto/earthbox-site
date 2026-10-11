@@ -17,7 +17,7 @@ const scan = async (page, include) => {
 };
 
 const PAGES = ['/index.html', '/products.html', '/product.html#V1-PLT-005', '/product.html#MossBox', '/product.html#VIV-III',
-  '/product.html#NOPE', '/maker.html', '/blog.html', '/blog/designing-drainage.html', '/about.html', '/privacy.html'];
+  '/product.html#NOPE', '/maker.html', '/blog.html', '/blog/designing-drainage.html', '/about.html', '/privacy.html', '/care.html'];
 
 for (const path of PAGES) {
   test(`a11y: ${path}`, async ({ page }) => {
@@ -34,7 +34,10 @@ const STATES = [
   ['maker map', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); await p.locator('[data-act=view][data-id=map]').click(); }, null],
   ['maker review', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=review]').click(); }, null],
   ['catalogue search', '/products.html', async p => { await p.locator('#catalogueSearchBtn').click(); await p.fill('#cat-search', 'moss'); }, null],
-  ['enquiry form open', '/product.html#V1-PLT-005', async p => { await p.locator('.enquiry-alt summary').first().click(); }, null]
+  ['enquiry form open', '/product.html#V1-PLT-005', async p => { await p.locator('.enquiry-alt summary').first().click(); }, null],
+  ['care: own plants, visits', '/care.html', async p => { const c = p.locator('#carePlanner'); await c.getByText('My own plants').click(); await c.getByText('Visits from the studio').click(); }, '#carePlanner'],
+  ['care: kits', '/care.html', async p => { await p.locator('#carePlanner select[name=r]').selectOption('MossBox'); }, '#carePlanner'],
+  ['cart with suggestions', '/product.html#MossBox', async p => { await p.locator('.pd-buy [data-add-line], #pdMobileCta [data-add-line]').first().click(); }, 'dialog.ct']
 ];
 for (const [name, path, setup, include] of STATES) {
   test(`a11y state: ${name}`, async ({ page, isMobile }) => {

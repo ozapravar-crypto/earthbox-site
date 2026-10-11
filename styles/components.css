@@ -472,6 +472,13 @@
 .ct-note a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
 .ct-summary .cta{margin-top:.5rem}
 .ct-empty{font-family:var(--serif);font-size:1.4rem;margin:2rem 0 .5rem}
+/* "Goes with your order" (pairings.js): quiet, two lines at most */
+.ct-suggest{padding:1.25rem 0 .25rem;border-top:1px solid var(--rule)}
+.ct-suggest ul{display:grid;gap:.25rem;margin-top:.5rem}
+.ct-suggest li{display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.ct-suggest-text{display:grid;gap:.15rem}
+.ct-suggest-name{font-family:var(--serif);font-size:1.05rem;color:var(--ink)}
+.ct-suggest-why{font-size:.8rem;color:var(--mute)}
 
 /* Add / save on product + maker pages */
 .pd-buy{display:flex;gap:.6rem;align-items:stretch}
