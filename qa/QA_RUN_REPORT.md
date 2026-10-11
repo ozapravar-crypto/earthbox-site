@@ -55,3 +55,14 @@ QA-001 to QA-007, QA-009 and QA-013. Details, root causes and evidence are in `Q
 - **Full local suite:** **242 passed, 2 failed** (51 skipped by design). The 2 failures were phone-size timeouts under load: Maker resume, and the Care kit test where the planner script hadn't run yet. Both re-ran **3 of 3 green**. CI's single retry covers this kind of flake, and it would show as "flaky".
 - **Caught before release:** QA-014, adding visits to the cart failed after typing a pincode. QA-015, oversized footer icons on new pages: hotfixed live and now guarded on every page.
 - **Not done:** prices. Every kit and visit shows "On enquiry" until Aayush sets them (see `CARE.md`).
+
+## Follow-up · clean URLs, 11 Oct 2026 (commit 9189be2)
+- **Root cause:** `/` always served the homepage. But the logo and every "Home" link (94) pointed to `index.html`, and all other links used `*.html`, so visitors saw `/index.html`.
+- **Change:** `cleanUrls` in `vercel.json`, and every internal link made clean and root-absolute. Canonical, Open Graph, JSON-LD and sitemap URLs updated.
+- **Verified on a Vercel preview, then production (earthbox.in):**
+  - `/`, `/products`, `/product`, `/blog`, `/blog/<slug>`, `/care`, `/about` and `/privacy` return 200.
+  - Each old `*.html` address permanently redirects (308) to its clean form.
+  - Legacy `/catalogue/*.html` addresses reach `/products` in 2 hops.
+  - A browser pass over 10 live pages plus the cart drawer found **0 internal `.html` links**.
+- **Local suite on the branch:** 243 passed, 4 failed. The 4 were timeouts under load (elements not drawn within 5 s) and passed 2 of 2 on rerun. As the suite grows, this machine is the bottleneck; CI is the reference.
+- **Testing against live with `BASE_URL`:** the "loads clean" and "clean URLs" checks wait for network idle, which the live hero video never reaches. Use the scratch link-audit approach (video blocked) for live checks, or extend the specs to block video when `BASE_URL` is set.
