@@ -32,11 +32,11 @@ const catTitle = (slug) => (categories.find((c) => c.slug === slug)?.title) ?? s
 const fmtDate = (d) => new Date(d).toLocaleDateString('en-IN',
   { day: 'numeric', month: 'long', year: 'numeric' });
 
-const articleUrl = (slug) => `${SITE}/blog/${slug}.html`;
+const articleUrl = (slug) => `${SITE}/blog/${slug}`;
 
 function head(a) {
   return `
-    <a class="back-link" href="../blog.html">← Back to Journal</a>
+    <a class="back-link" href="/blog">← Back to Journal</a>
     <h1 class="scramble">${esc(a.title)}</h1>
     <p class="article-subtitle">${esc(a.subtitle)}</p>
     <p class="article-byline">
@@ -63,7 +63,7 @@ function body(a) {
       <h2>Continue Reading</h2>
       <div class="related-grid">
         ${rel.map((r) => `
-          <a class="article-card" href="${r.slug}.html">
+          <a class="article-card" href="/blog/${r.slug}">
             <div class="article-card-inner">
               <span class="article-category">${esc(catTitle(r.category))}</span>
               <h3>${esc(r.title)}</h3>
@@ -87,7 +87,7 @@ function meta(a) {
     '@context': 'https://schema.org', '@type': 'Article',
     headline: a.title, description: a.metaDescription,
     image: img,
-    author: { '@type': 'Person', name: a.author, url: `${SITE}/about.html` },
+    author: { '@type': 'Person', name: a.author, url: `${SITE}/about` },
     publisher: { '@type': 'Organization', name: 'EarthBox',
       logo: { '@type': 'ImageObject', url: `${SITE}/assets/logo.webp` } },
     datePublished: a.publishDate, dateModified: a.updatedDate ?? a.publishDate,

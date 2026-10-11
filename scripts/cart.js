@@ -12,7 +12,7 @@
 //             with the chamber's published range shown as a guide
 //   custom  · a Maker build → one row per component (chamber, foundation,
 //             plants), each priced or "on enquiry", summed into a build total
-// Care (care.html) adds two line types that land in those kinds:
+// Care (/care) adds two line types that land in those kinds:
 //   refill kits are ordinary product lines (KIT-…, priced or on enquiry);
 //   a visit plan is {kind:'care', code} → fixed when the studio has set a
 //   per-visit rate, else on enquiry; custom boxes are always quoted.
@@ -67,19 +67,19 @@ export function resolve(l){
       ...b.plants.map(id => ({ label: plantOf(id).name, price: num(plantOf(id).price) }))
     ];
     return { kind: 'custom', key: keyOf(l), qty: 1, title: b.name || `${ch.name} world`, sub: 'Custom build · Maker',
-      href: `maker.html#${encodeBuild(b)}`, img: null, parts, status: `Made to order · ${ch.lead}` };
+      href: `/maker#${encodeBuild(b)}`, img: null, parts, status: `Made to order · ${ch.lead}` };
   }
   if (l.kind === 'care') {
     const plan = decodePlan(l.code);
     if (!plan) return null;
     const price = planPrice(plan);
     return { kind: price ? 'fixed' : 'enquiry', care: true, key: keyOf(l), qty: 1, title: `Care visits · ${refLabel(plan)}`,
-      sub: planSummary(plan), href: `care.html#${encodePlan(plan)}`, img: null, unit: price,
+      sub: planSummary(plan), href: `/care#${encodePlan(plan)}`, img: null, unit: price,
       status: plan.s === 'custom' ? 'Quoted for custom boxes' : 'Mumbai · studio confirms dates' };
   }
   const kit = kits.find(k => k.sku === l.sku);
   if (kit) return { kind: kit.price ? 'fixed' : 'enquiry', care: true, key: keyOf(l), qty: l.qty, title: kit.name,
-    sub: kit.for, href: 'care.html', img: null, unit: kit.price, status: 'Studio confirms contents · about 1 week' };
+    sub: kit.for, href: '/care', img: null, unit: kit.price, status: 'Studio confirms contents · about 1 week' };
   const p = volumeOne.find(x => x.sku === l.sku);
   if (p) {
     const variant = p.variants?.find(v => v.id === l.variant);
@@ -89,13 +89,13 @@ export function resolve(l){
     const mat = materials.find(m => m.id === l.material);
     return { kind: table ? 'fixed' : 'enquiry', key: keyOf(l), qty: l.qty, title: p.name,
       sub: [variant?.name, mat?.name].filter(Boolean).join(' · ') || 'Volume I',
-      href: `product.html#${encodeURIComponent(p.sku)}`, img: p.photo ? photoPath(p, '300') : null,
+      href: `/product#${encodeURIComponent(p.sku)}`, img: p.photo ? photoPath(p, '300') : null,
       unit: table ? table[l.material] : null,
       status: p.status === 'coming-soon' ? 'Coming soon' : 'Made to order · about 1 week' };
   }
   const box = volumeTwo.boxes.find(x => x.sku === l.sku);
   if (box) return { kind: 'enquiry', key: keyOf(l), qty: l.qty, title: `${box.name} chamber`, sub: `Elemental Box · ${box.edition}`,
-    href: `product.html#${encodeURIComponent(box.sku)}`, img: box.photo ? `assets/boxes/${box.photo}` : null,
+    href: `/product#${encodeURIComponent(box.sku)}`, img: box.photo ? `assets/boxes/${box.photo}` : null,
     unit: null, range: parseRange(box.price), note: box.price, status: `${volumeTwo.status} · ${box.lead}` };
   return null;
 }
@@ -165,7 +165,7 @@ export function orderText(lines){
     if (r.kind === 'custom') {
       out.push(`${i + 1}. ${r.title} (custom build)`);
       r.parts.forEach(p => out.push(`   · ${p.label}: ${p.price ? rupees(p.price) : p.note || 'on enquiry'}`));
-      out.push(`   Design: ${SITE}/${r.href}`);
+      out.push(`   Design: ${SITE}${r.href}`);
     } else {
       const price = r.kind === 'fixed' ? `${rupees(r.unit)}${r.qty > 1 ? ` × ${r.qty} = ${rupees(r.unit * r.qty)}` : ''}`
         : r.note ? `on enquiry (guide ${r.note})` : 'on enquiry';
@@ -226,15 +226,15 @@ function lineHTML(r, list){
       <li class="ct-parts-total"><span>Build estimate</span><span>${t.high ? `${rupees(t.low)} – ${rupees(t.high)}` : '—'}${t.quoted ? ` + ${t.quoted} quoted` : ''}</span></li></ul>`;
   })() : '';
   return `<li class="ct-line ct-line--${r.kind}">
-    <a class="ct-thumb" href="/${esc(r.href)}" tabindex="-1" aria-hidden="true">${thumb}</a>
+    <a class="ct-thumb" href="${esc(r.href)}" tabindex="-1" aria-hidden="true">${thumb}</a>
     <div class="ct-body">
       <span class="ct-kind caption">${r.care ? 'Care' : { fixed: 'Ready to order', enquiry: 'Price on enquiry', custom: 'Custom build' }[r.kind]}</span>
-      <a class="ct-title" href="/${esc(r.href)}">${esc(r.title)}</a>
+      <a class="ct-title" href="${esc(r.href)}">${esc(r.title)}</a>
       <span class="ct-sub">${esc(r.sub)} · ${esc(r.status)}</span>
       ${parts}
       ${qty}
       <div class="ct-actions">
-        ${r.kind === 'custom' ? `<a class="ct-link" href="/${esc(r.href)}">Edit design</a>` : r.key.startsWith('care:') ? `<a class="ct-link" href="/${esc(r.href)}">Change plan</a>` : ''}
+        ${r.kind === 'custom' ? `<a class="ct-link" href="${esc(r.href)}">Edit design</a>` : r.key.startsWith('care:') ? `<a class="ct-link" href="${esc(r.href)}">Change plan</a>` : ''}
         <button type="button" class="ct-link" data-ct="move" data-from="${list}" data-k="${k}">${list === 'cart' ? 'Save for later' : 'Move to cart'}</button>
         <button type="button" class="ct-link" data-ct="remove" data-from="${list}" data-k="${k}">Remove<span class="u-sr-only"> ${esc(r.title)}</span></button>
       </div>
@@ -252,7 +252,7 @@ function suggestHTML(){
     <ul>${list.map(s => `<li>
       <span class="ct-suggest-text"><span class="ct-suggest-name">${esc(s.title)}</span><span class="ct-suggest-why">${esc(s.reason)}</span></span>
       ${s.line ? `<button type="button" class="ct-link" data-add-line='${esc(JSON.stringify(s.line))}'>Add<span class="u-sr-only"> ${esc(s.title)}</span></button>`
-        : `<a class="ct-link" href="/${esc(s.href)}">Plan<span class="u-sr-only"> ${esc(s.title)}</span></a>`}
+        : `<a class="ct-link" href="${esc(s.href)}">Plan<span class="u-sr-only"> ${esc(s.title)}</span></a>`}
     </li>`).join('')}</ul>
   </section>`;
 }
@@ -278,7 +278,7 @@ function drawerHTML(){
   const tabBtn = (id, label) => `<button type="button" role="tab" id="ct-tab-${id}" aria-controls="ct-panel" aria-selected="${tab === id}" data-ct="tab" data-tab="${id}" ${tab === id ? '' : 'tabindex="-1"'}>${label} <span>(${count(id)})</span></button>`;
   const list = lines[tab];
   const empty = tab === 'cart'
-    ? `<p class="ct-empty">Your cart is empty.</p><p class="ct-note">Add pieces from the <a href="/products.html">catalogue</a>, or design your own in the <a href="/maker.html">Maker</a>.</p>`
+    ? `<p class="ct-empty">Your cart is empty.</p><p class="ct-note">Add pieces from the <a href="/products">catalogue</a>, or design your own in the <a href="/maker">Maker</a>.</p>`
     : `<p class="ct-empty">Nothing saved yet.</p><p class="ct-note">Use “Save” on any piece or design to keep it here.</p>`;
   return `<header class="ct-head">
       <h2 id="ct-title" class="caption">Your selection</h2>

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────
-// care-page.js · care.html: the home planner + the business enquiry
+// care-page.js · /care: the home planner + the business enquiry
 //
 // Homes: what are we looking after → kit or visits → add to cart. The cart
 // (cart.js) handles the rest, as for any other line. Businesses: a quote
@@ -55,7 +55,7 @@ export function initCare(){
       return builds.length ? `
       <label class="care-field"><span>Which design?</span>
         <select name="r">${builds.map(b => `<option value="${esc(b.code)}"${b.code === st.r ? ' selected' : ''}>${esc(b.name)}</option>`).join('')}</select></label>`
-        : `<p class="care-note">Design your world in the <a href="maker.html">Maker</a> and add it to your cart or saved list. It will appear here.</p>`;
+        : `<p class="care-note">Design your world in the <a href="/maker">Maker</a> and add it to your cart or saved list. It will appear here.</p>`;
     }
     const opt = (sku, name) => `<option value="${esc(sku)}"${sku === st.r ? ' selected' : ''}>${esc(name)}</option>`;
     return `

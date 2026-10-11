@@ -19,16 +19,16 @@ export const PHONE_DISPLAY = '+91 81048 11584';
 const ADDRESS = 'Kandivali, Mumbai 400101';
 
 export const NAV = [
-  { href: 'index.html',    label: 'Home' },
-  { href: 'products.html', label: 'Catalogue' },
-  { href: 'maker.html',    label: 'Maker' },
-  { href: 'care.html',     label: 'Care' },
-  { href: 'blog.html',     label: 'Journal' },
-  { href: 'about.html',    label: 'About' }
+  { href: '/',         label: 'Home' },
+  { href: '/products', label: 'Catalogue' },
+  { href: '/maker',    label: 'Maker' },
+  { href: '/care',     label: 'Care' },
+  { href: '/blog',     label: 'Journal' },
+  { href: '/about',    label: 'About' }
 ];
 // The top bar and phone menu leave the Journal out (Aayush, 11 Oct 2026);
 // the footer still lists it, so it stays one tap away on every page.
-export const TOP_NAV = NAV.filter(n => n.href !== 'blog.html');
+export const TOP_NAV = NAV.filter(n => n.href !== '/blog');
 
 // Confirmed by the owner's choice on 10 Oct 2026 (was two versions; site-h04
 // stays open until Aayush confirms the wording).
@@ -52,14 +52,18 @@ const SOCIAL = [
 // The home page's first footer column links to its own sections.
 const HOME_STUDY = [
   { href: '#philosophy', label: 'Philosophy' }, { href: '#principles', label: 'Principles' },
-  { href: 'products.html', label: 'Catalogue' }, { href: 'maker.html', label: 'Maker' },
-  { href: 'blog.html', label: 'Journal' }, { href: '#purpose', label: 'Purpose' },
-  { href: 'about.html', label: 'About' }
+  { href: '/products', label: 'Catalogue' }, { href: '/maker', label: 'Maker' },
+  { href: '/blog', label: 'Journal' }, { href: '#purpose', label: 'Purpose' },
+  { href: '/about', label: 'About' }
 ];
 
-// `prefix` is '' at the root and '../' under /blog/. `current` is the NAV
-// href of this page (or null), marked aria-current.
-const link = (prefix, h) => (h.startsWith('#') ? h : prefix + h);
+// `prefix` is '' at the root and '../' under /blog/ (for assets). Page links
+// are clean and root-absolute ("/about", served from about.html: cleanUrls in
+// vercel.json), so they need no prefix. `current` is the NAV href of this
+// page (or null), marked aria-current.
+const link = (prefix, h) => (h.startsWith('#') || h.startsWith('/') ? h : prefix + h);
+// "about.html" → "/about", "index.html" → "/", "blog/x.html" → "/blog/x".
+export const cleanPath = (file) => `/${file.replace(/\.html$/, '').replace(/(^|\/)index$/, '')}`;
 
 // Analytics waits for consent: the gtag() queue is set up here, but
 // Google's script only loads after "Accept" (scripts/consent.js). Stamped
@@ -76,9 +80,9 @@ export const analyticsHTML = ({ prefix = '' } = {}) => `<!-- Analytics -->
 
 export function runheadHTML({ prefix = '', current = null } = {}){
   return `<header class="runhead" role="banner">
-  <a href="${prefix}index.html" class="runhead-left caption">EarthBox</a>
+  <a href="/" class="runhead-left caption">EarthBox</a>
   <nav class="runhead-nav" aria-label="Primary">
-${TOP_NAV.map(n => `    <a href="${prefix}${n.href}"${n.href === current ? ' aria-current="page"' : ''}>${n.label}</a>`).join('\n')}
+${TOP_NAV.map(n => `    <a href="${link(prefix, n.href)}"${n.href === current ? ' aria-current="page"' : ''}>${n.label}</a>`).join('\n')}
   </nav>
 </header>`;
 }
@@ -133,7 +137,7 @@ ${li(REFUND)}
   </div>
 
   <div class="colo-bar">
-    <span>© 2026 · EarthBox · ${ADDRESS} · <a href="${prefix}privacy.html">Privacy</a></span>
+    <span>© 2026 · EarthBox · ${ADDRESS} · <a href="/privacy">Privacy</a></span>
     <span class="quote">The brand speaks softly, like a crafted object label.</span>
   </div>
 </footer>`;

@@ -3,7 +3,7 @@
 //
 // Plan: CARE-PLAN.md. Homes buy a refill kit matched to their plant group,
 // or a visit plan (how long × how often). Businesses ask for a quote on
-// care.html. Rules (visit counts, prices, plan links) live in
+// /care. Rules (visit counts, prices, plan links) live in
 // scripts/care.js; the cart reads both.
 //
 // Every price is null until Aayush sets it, and null shows "On enquiry",

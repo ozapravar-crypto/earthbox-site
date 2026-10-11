@@ -206,7 +206,7 @@ test('Maker: plant models failing falls back to drawn plants, no errors', async 
 test('unknown product link shows "not found" with a way back', async ({ page }) => {
   await page.goto('/product.html#DOES-NOT-EXIST');
   await expect(page.locator('#pdNotFound')).toBeVisible();
-  await expect(page.locator('#pdNotFound a')).toHaveAttribute('href', /products\.html/);
+  await expect(page.locator('#pdNotFound a')).toHaveAttribute('href', '/products');
 });
 
 // ── Cookie choice (consent.js) ───────────────────────────────────────
@@ -300,7 +300,7 @@ test('Care: a custom box from the Maker is quoted, and its plan opens prefilled'
   const care = page.locator('.mk-care');
   await expect(care.getByRole('button', { name: 'Add Moss refill kit' })).toBeVisible();
   await care.getByRole('link', { name: 'Plan care visits' }).click();
-  await expect(page).toHaveURL(/care\.html#s=custom/);
+  await expect(page).toHaveURL(/\/care#s=custom/);
   const planner = page.locator('#carePlanner');
   await expect(planner.locator('input[name=s][value=custom]')).toBeChecked();
   await expect(planner.locator('select[name=r] option:checked')).toHaveText('QA World');
@@ -311,7 +311,7 @@ test('Care: product page offers the matching kit and a prefilled visit plan', as
   await page.goto('/product.html#MossBox');
   const block = page.locator('.pd-care');
   await expect(block.getByRole('button', { name: 'Add Moss refill kit' })).toBeVisible();
-  await expect(block.getByRole('link', { name: 'Plan care visits' })).toHaveAttribute('href', /care\.html#s=piece.*r=MossBox/);
+  await expect(block.getByRole('link', { name: 'Plan care visits' })).toHaveAttribute('href', /^\/care#s=piece.*r=MossBox/);
 });
 
 test('Cart suggests the matching kit and visits; adding the kit removes it from the list', async ({ page, isMobile }) => {

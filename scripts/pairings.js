@@ -36,14 +36,14 @@ export function suggest(cart){
     }
     if (isBox && !hasCare) {
       const plan = { s: l.kind === 'build' ? 'custom' : 'piece', r: ref, d: '12m', f: 'monthly', g: groupsOf(ref) };
-      push({ key: `care:${ref}`, href: `care.html#${encodePlan(plan)}`, title: 'Care visits', reason: 'We come and look after it, in Mumbai.' });
+      push({ key: `care:${ref}`, href: `/care#${encodePlan(plan)}`, title: 'Care visits', reason: 'We come and look after it, in Mumbai.' });
     }
 
     // Planter → something to grow in it.
     const p = volumeOne.find(x => x.sku === l.sku);
     if (p?.category === 'planters') {
       const pair = volumeOne.find(x => (x.category === 'plant-support' || x.category === 'plant-packets') && available(x) && !inCart.has(x.sku));
-      if (pair) push({ key: pair.sku, href: `product.html#${encodeURIComponent(pair.sku)}`, title: pair.name, reason: 'Pairs with your planter.' });
+      if (pair) push({ key: pair.sku, href: `/product#${encodeURIComponent(pair.sku)}`, title: pair.name, reason: 'Pairs with your planter.' });
     }
   }
   return out;

@@ -16,7 +16,7 @@ const getCategoryTitle = (slug) => {
 
 function renderArticleCard(article) {
   return `
-    <a class="article-card reveal" href="blog/${article.slug}.html" data-category="${article.category}">
+    <a class="article-card reveal" href="/blog/${article.slug}" data-category="${article.category}">
       <div class="article-card-inner">
         <div class="article-meta">
           <span class="article-category">${getCategoryTitle(article.category)}</span>

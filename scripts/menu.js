@@ -16,7 +16,8 @@ export function initMenu(){
   if (!runhead) return;
 
   // Determine current page so we mark the active link
-  const path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  // Clean URLs: "/products" (or "/products.html" on a local file server) → "/products".
+  const path = `/${(location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '').replace(/^index$/, '')}`;
 
   // ─── Hamburger button (lives inside runhead-right column) ───
   const ham = document.createElement('button');
@@ -45,8 +46,8 @@ export function initMenu(){
     <nav>
       <ul>
         ${TOP_NAV.map(l => {
-          const active = l.href.toLowerCase() === path;
-          return `<li><a href="/${l.href}"${active ? ' aria-current="page"' : ''}>${l.label}</a></li>`;
+          const active = l.href === path;
+          return `<li><a href="${l.href}"${active ? ' aria-current="page"' : ''}>${l.label}</a></li>`;
         }).join('')}
       </ul>
     </nav>

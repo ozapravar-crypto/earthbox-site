@@ -69,7 +69,7 @@ assert.match(text, /Capsule Planter · ABS: ₹529 × 2 = ₹1,058/);
 assert.match(text, /TerraMesh Planter.*on enquiry/);
 assert.match(text, /Moss chamber.*guide ₹6,000 – ₹9,000/);
 assert.match(text, /custom build/);
-assert.match(text, /maker\.html#c=MossBox/);
+assert.match(text, /earthbox\.in\/maker#c=MossBox/);
 assert.match(text, /Priced items: ₹1,058/);
 assert.match(text, /Still to quote: 3 items/);
 

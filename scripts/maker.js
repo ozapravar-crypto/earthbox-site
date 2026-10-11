@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────
-// maker.js · Terrarium Maker (maker.html)
+// maker.js · Terrarium Maker (/maker)
 //
 // One `build` object is the single source of truth. Every change goes
 // through commit(), which saves it, then re-renders the steps, preview,
@@ -71,7 +71,7 @@ export function togglePlant(b, id){
 }
 
 
-export const shareUrl = (b) => `${SITE}/maker.html#${encodeBuild(b)}`;
+export const shareUrl = (b) => `${SITE}/maker#${encodeBuild(b)}`;
 
 export function enquiryText(b){
   const ch = chamberOf(b), sub = find(substrates, b.substrate), s = b.space;
@@ -512,7 +512,7 @@ function spacePanel(b){
 }
 
 // Care for this world (CARE-PLAN.md): kits for its plant groups, or visits
-// (always quoted for custom worlds), planned on care.html.
+// (always quoted for custom worlds), planned on /care.
 function careGroup(b){
   const code = encodeBuild(b);
   const kits = (b.plants.length ? groupsOf(code) : suitedElements(b.chamber)).slice(0, 3).map(kitFor).filter(Boolean);
@@ -521,7 +521,7 @@ function careGroup(b){
     <p class="mk-sub">A refill kit for its plants, or visits from the studio in Mumbai (quoted for custom worlds).</p>
     <div class="mk-secondary">
       ${kits.map(k => `<button type="button" class="cta cta-secondary cta-small" data-add-line="${esc(JSON.stringify({ kind: 'product', sku: k.sku }))}" data-key="kit-${k.sku}">Add ${esc(k.name)}</button>`).join('')}
-      <a class="cta cta-secondary cta-small" href="care.html#${esc(encodePlan({ s: 'custom', r: code, d: '12m', f: 'monthly' }))}" data-key="care-visits">Plan care visits</a>
+      <a class="cta cta-secondary cta-small" href="/care#${esc(encodePlan({ s: 'custom', r: code, d: '12m', f: 'monthly' }))}" data-key="care-visits">Plan care visits</a>
     </div>
   </section>`;
 }
@@ -875,7 +875,7 @@ export function initMaker(){
     if (e.target.closest('.enquiry-form')) track('maker_send', { method: 'form', chamber: b.chamber, plants: b.plants.length });
   });
 
-  // Entry from a box page: maker.html?box=FireBox
+  // Entry from a box page: /maker?box=FireBox
   const boxParam = new URLSearchParams(location.search).get('box');
   if (boxParam && find(chambers, boxParam, 'sku')) {
     stage = 'chamber';

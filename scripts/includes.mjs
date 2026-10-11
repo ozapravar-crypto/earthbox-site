@@ -17,7 +17,7 @@
 import { readFile, writeFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runheadHTML, footerHTML, analyticsHTML, NAV } from '../data/site.js';
+import { runheadHTML, footerHTML, analyticsHTML, NAV, cleanPath } from '../data/site.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CHECK = process.argv.includes('--check');
@@ -33,7 +33,7 @@ for (const f of pages.sort()) {
   const before = await readFile(p, 'utf8');
   const inBlog = f.startsWith('blog/');
   const prefix = inBlog ? '../' : '';
-  const current = inBlog ? 'blog.html' : (NAV.some((n) => n.href === f) ? f : null);
+  const current = inBlog ? '/blog' : (NAV.some((n) => n.href === cleanPath(f)) ? cleanPath(f) : null);
 
   let html = before;
   for (const [re, block] of [

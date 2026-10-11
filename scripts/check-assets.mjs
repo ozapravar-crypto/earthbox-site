@@ -35,7 +35,9 @@ const isLocal = (u) => u && !/^(https?:|mailto:|tel:|data:|javascript:|#|\/\/)/.
 function resolveFrom(dir, u){
   const clean = u.split(/[?#]/)[0];
   if (!clean) return null;
-  return clean.startsWith('/') ? clean.slice(1) : path.posix.normalize(path.posix.join(dir, clean));
+  const p = clean.startsWith('/') ? clean.slice(1) : path.posix.normalize(path.posix.join(dir, clean));
+  // Clean page links (cleanUrls in vercel.json): "/about" is served by about.html, "/" by index.html.
+  return p === '' || p === '.' ? 'index.html' : path.posix.extname(p) ? p : `${p}.html`;
 }
 
 const refs = [];   // { file, path }

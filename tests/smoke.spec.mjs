@@ -173,3 +173,19 @@ for (const path of ['/index.html', '/products.html', '/product.html#V1-PLT-005',
     await page.close();
   });
 }
+
+// Clean URLs (cleanUrls in vercel.json, 11 Oct 2026): the site links to
+// "/", "/products", "/blog/<slug>", never to "index.html" or "*.html".
+// Locally qa/serve.mjs resolves them like Vercel does.
+test('clean URLs: pages load without .html, and no internal link exposes .html', async ({ page }) => {
+  const bad = [];
+  for (const path of ['/', '/products', '/product#V1-PLT-005', '/maker', '/care', '/blog', '/blog/designing-drainage', '/about', '/privacy']) {
+    const res = await page.goto(path);
+    expect(res.status(), path).toBe(200);
+    await expect(page.locator('h1:visible').first()).toBeVisible();
+    await page.waitForLoadState('networkidle');
+    const links = await page.locator('a[href]').evaluateAll(as => as.map(a => a.getAttribute('href')));
+    bad.push(...links.filter(h => /\.html(\b|#|\?|$)/.test(h) && !/^(https?:)?\/\/(?!(www\.)?earthbox\.in)/.test(h)).map(h => `${path} → ${h}`));
+  }
+  expect([...new Set(bad)]).toEqual([]);
+});

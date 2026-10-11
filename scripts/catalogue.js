@@ -122,7 +122,7 @@ function renderSearchResults(query, items){
 
   list.innerHTML = matches.map(m => `
     <a class="search-result"
-       href="product.html#${encodeURIComponent(m.sku)}"
+       href="/product#${encodeURIComponent(m.sku)}"
        data-cursor="VIEW">
       <div class="search-result-vol caption">Vol. ${m.vol === 1 ? 'I' : m.vol === 2 ? 'II' : 'III'}</div>
       <div class="search-result-meta">

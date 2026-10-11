@@ -11,7 +11,7 @@ assert.deepEqual(suggest([]), []);
 const moss = suggest([{ kind: 'product', sku: 'MossBox', qty: 1 }]);
 assert.deepEqual(moss.map(s => s.key), ['KIT-MOSS', 'care:MossBox']);
 assert.deepEqual(moss[0].line, { kind: 'product', sku: 'KIT-MOSS' });
-assert.match(moss[1].href, /^care\.html#s=piece&d=12m/);
+assert.match(moss[1].href, /^\/care#s=piece&d=12m/);
 
 // Already in the cart → not suggested again; care already planned → no visits.
 assert.deepEqual(suggest([{ kind: 'product', sku: 'MossBox' }, { kind: 'product', sku: 'KIT-MOSS' }, { kind: 'care', code: 'x' }]), []);

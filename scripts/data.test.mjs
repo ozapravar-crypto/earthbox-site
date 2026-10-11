@@ -3,7 +3,7 @@
 // typo in data/*.js fails the build instead of shipping a broken page or a
 // cart line that can't be priced. Shapes are documented in README.md.
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { volumeOne, categories, materials } from '../data/volume-one.js';
@@ -102,6 +102,11 @@ for (const a of articles) {
 }
 
 // ── Site nav ─────────────────────────────────────────────────────────
-for (const n of NAV) assert.ok(existsSync(path.join(ROOT, n.href)), `NAV: ${n.href} doesn't exist`);
+// Clean URLs (cleanUrls in vercel.json): "/about" must have about.html behind it.
+assert.equal(JSON.parse(readFileSync(path.join(ROOT, 'vercel.json'), 'utf8')).cleanUrls, true, 'vercel.json must keep cleanUrls: the site links to /about, not /about.html');
+for (const n of NAV) {
+  assert.match(n.href, /^\/[a-z-]*$/, `NAV: ${n.href} should be a clean link like /about`);
+  assert.ok(existsSync(path.join(ROOT, `${n.href.slice(1) || 'index'}.html`)), `NAV: no page behind ${n.href}`);
+}
 
 console.log(`data: all checks passed (${volumeOne.length} products, ${volumeTwo.boxes.length} chambers, ${plants.length} plants, ${articles.length} articles)`);

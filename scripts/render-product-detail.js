@@ -23,7 +23,7 @@ import { groupsOf, kitFor, encodePlan } from './care.js';
 
 function enquiryHref(opts = {}){
   const { name, sku, material, variant, price, volume = 1 } = opts;
-  const productUrl = sku ? `${SITE}/product.html#${encodeURIComponent(sku)}` : '';
+  const productUrl = sku ? `${SITE}/product#${encodeURIComponent(sku)}` : '';
 
   let text;
 
@@ -181,7 +181,7 @@ function findProduct(id){
 
 // ─── V1 3D Printed product · photo + material selector + variant selector ───
 // "Keep it thriving": the matching refill kit (chambers) and a visit plan,
-// prefilled for this piece on care.html. Plan: CARE-PLAN.md.
+// prefilled for this piece on /care. Plan: CARE-PLAN.md.
 function careHTML(sku){
   const kitsFor = groupsOf(sku).map(kitFor).filter(Boolean);
   const plan = encodePlan({ s: 'piece', r: sku, d: '12m', f: 'monthly', g: groupsOf(sku) });
@@ -191,7 +191,7 @@ function careHTML(sku){
         <p class="pd-care-text">${kitsFor.length ? 'A refill kit matched to its plants, or' : 'Ask for'} visits from the studio to look after it, in Mumbai.</p>
         <div class="pd-care-actions">
           ${kitsFor.map(k => `<button type="button" class="cta cta-small cta-secondary" data-add-line='${JSON.stringify({ kind: 'product', sku: k.sku })}'>Add ${k.name}</button>`).join('')}
-          <a class="cta cta-small cta-secondary" href="care.html#${plan}">Plan care visits</a>
+          <a class="cta cta-small cta-secondary" href="/care#${plan}">Plan care visits</a>
         </div>
       </section>`;
 }
@@ -229,11 +229,11 @@ function renderPrinted(p){
     <article class="pd-page pd-page--printed">
 
       <nav class="pd-breadcrumb reveal" aria-label="Breadcrumb">
-        <a href="index.html">Home</a>
+        <a href="/">Home</a>
         <span class="pd-breadcrumb-sep">›</span>
-        <a href="products.html">Catalogue</a>
+        <a href="/products">Catalogue</a>
         <span class="pd-breadcrumb-sep">›</span>
-        <a href="products.html#vol-1">${cat ? cat.title : 'Volume I'}</a>
+        <a href="/products#vol-1">${cat ? cat.title : 'Volume I'}</a>
         <span class="pd-breadcrumb-sep">›</span>
         <span class="pd-breadcrumb-current">${p.name}</span>
       </nav>
@@ -350,7 +350,7 @@ ${['planters', 'plant-packets', 'plant-support'].includes(p.category) ? careHTML
           </header>
           <div class="pd-related-grid">
             ${related.map(o => `
-              <a class="pd-related-card" href="product.html#${encodeURIComponent(o.sku)}" data-cursor="VIEW">
+              <a class="pd-related-card" href="/product#${encodeURIComponent(o.sku)}" data-cursor="VIEW">
                 <div class="pd-related-img">
                   <img src="${photoPath(o, '600')}" alt="${o.name}" loading="lazy" onerror="this.style.display='none'"/>
                 </div>
@@ -443,7 +443,7 @@ function renderBox(b){
     <article class="pd-page pd-page--box">
 
       <header class="pd-head reveal">
-        <a href="products.html" class="back-link caption">← Catalogue</a>
+        <a href="/products" class="back-link caption">← Catalogue</a>
         <span class="eyebrow">Volume II &nbsp;·&nbsp; Elemental Boxes</span>
         <h1 class="pd-title scramble">${b.sku}</h1>
         <p class="pd-tagline italic">${b.tagline}</p>
@@ -465,7 +465,7 @@ function renderBox(b){
           ${buyHTML({ kind: 'product', sku: b.sku, qty: 1 }, enquiryHref({ name: b.sku, sku: b.sku, volume: 2 }), b.sku)}
           ${enquiryAltHTML(b.sku)}
           <p class="caption pd-note">Coming soon · register interest now</p>
-          <a class="caption pd-maker-link" href="maker.html?box=${b.sku}">Design yours in the Maker &rarr;</a>
+          <a class="caption pd-maker-link" href="/maker?box=${b.sku}">Design yours in the Maker &rarr;</a>
         </aside>
       </section>
 ${careHTML(b.sku)}
@@ -477,7 +477,7 @@ ${careHTML(b.sku)}
           </header>
           <div class="pd-related-grid">
             ${related.map(o => `
-              <a class="pd-related-card" href="product.html#${encodeURIComponent(o.sku)}" data-cursor="VIEW">
+              <a class="pd-related-card" href="/product#${encodeURIComponent(o.sku)}" data-cursor="VIEW">
                 <div class="pd-related-img">
                   <img src="assets/boxes/${o.photo}" alt="${o.sku}" loading="lazy"/>
                 </div>
@@ -505,7 +505,7 @@ function renderVivarium(v){
     <article class="pd-page pd-page--vivarium">
 
       <header class="pd-head reveal">
-        <a href="products.html" class="back-link caption">← Catalogue</a>
+        <a href="/products" class="back-link caption">← Catalogue</a>
         <span class="eyebrow">Volume III &nbsp;·&nbsp; Horizon</span>
         <h1 class="pd-title scramble">${v.title}</h1>
         <p class="pd-tagline italic">${v.subtitle}</p>

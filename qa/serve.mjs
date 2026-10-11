@@ -2,7 +2,7 @@
 // afterwards), parallel-safe, and supports byte ranges for the home film.
 // Python's http.server (listen backlog 5) stalled under parallel browsers.
 import http from 'node:http';
-import { createReadStream, statSync } from 'node:fs';
+import { createReadStream, existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css',
@@ -13,6 +13,9 @@ export function serve(root, port){
   const server = http.createServer((req, res) => {
     const rel = decodeURIComponent(new URL(req.url, 'http://x').pathname);
     let file = path.join(root, rel.endsWith('/') ? rel + 'index.html' : rel);
+    // Clean URLs, as on Vercel (cleanUrls in vercel.json): /about → about.html.
+    // A page beats a same-named folder: /blog is blog.html, not the blog/ folder of articles.
+    if (!rel.endsWith('/') && !path.extname(file) && existsSync(`${file}.html`)) file += '.html';
     if (!file.startsWith(root)) { res.writeHead(403).end(); return; }
     let st;
     try { st = statSync(file); if (st.isDirectory()) { file = path.join(file, 'index.html'); st = statSync(file); } }

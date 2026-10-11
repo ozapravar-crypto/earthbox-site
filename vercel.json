@@ -1,6 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "outputDirectory": ".",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "headers": [
     {
       "source": "/(.*)",
@@ -48,22 +50,22 @@
   "redirects": [
     {
       "source": "/catalogue/terrariums.html",
-      "destination": "/products.html",
+      "destination": "/products",
       "permanent": true
     },
     {
       "source": "/catalogue/planters.html",
-      "destination": "/products.html",
+      "destination": "/products",
       "permanent": true
     },
     {
       "source": "/catalogue/holders.html",
-      "destination": "/products.html",
+      "destination": "/products",
       "permanent": true
     },
     {
       "source": "/catalogue/:slug",
-      "destination": "/products.html",
+      "destination": "/products",
       "permanent": true
     }
   ]
