@@ -89,6 +89,9 @@ Add `{ "key": "<route> | <theme> | <viewport> | <state> | <selector>", "reason":
 - **The WhatsApp button inside a batch shot:** it's now hidden in batch shots too.
 - **Three pages that timed out on a cold runner:** they now get one retry.
 | CQ-014 | "Build your little world" button focus ring, dark mode | 1.05:1 | The section keeps light paper in dark mode, where `--ink` is light | `--ink` set to the section's own ink (`--mi-ink`) |
+| CQ-015 | Cookie banner (new) | passes | Checked on arrival, both themes, default + hover | Regression test only |
+| CQ-016 | Care page, cart suggestions, "Keep it thriving" (new) | passes | Checked on arrival, both themes | Regression test only |
+| CQ-017 | Catalogue search: hovered or tapped result "View →", phone, light | 2.84:1 | `--accent-dk` on the hovered row tint | `--accent-text` (found by full audit, CI 38165283336) |
 
 **Third full run (CI, 10 Oct 17:16):** 1 failure (CQ-014, fixed above), 11 review, 0 axe violations, every state scanned. All 11 review items were audit artefacts: the scanner treated the button's hover fill layer as visible when it was hidden (`display:none` on secondary buttons) or parked outside the box. It now counts the fill only when it's actually showing.
 

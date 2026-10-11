@@ -274,3 +274,17 @@ for (const theme of THEMES) {
     expect(await failures(page, '.pd-care', 'default')).toEqual([]);
   });
 }
+
+// CQ-017 · Catalogue search: a hovered (or tapped, on phones) result's
+// "View →" was --accent-dk on the row tint, 2.84:1. Found by the full audit, CI 38165283336.
+for (const theme of THEMES) {
+  test(`CQ-017 hovered search result keeps "View" readable (${theme})`, async ({ page }) => {
+    await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
+    await page.goto('/products');
+    await page.locator('#catalogueSearchBtn').click();
+    await page.fill('#cat-search', 'planter');
+    const row = page.locator('#searchResultsList > a.search-result').nth(2);
+    await row.hover();
+    expect(await failures(page, '#searchResultsList', 'hover')).toEqual([]);
+  });
+}

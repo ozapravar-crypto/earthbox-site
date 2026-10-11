@@ -346,7 +346,7 @@
   white-space:nowrap;
 }
 .search-result:hover .search-result-cta{
-  color:var(--accent-dk);
+  color:var(--accent-text);   /* --accent-dk was 2.84:1 on the hovered row (CQ-017) */
 }
 
 .search-empty{
