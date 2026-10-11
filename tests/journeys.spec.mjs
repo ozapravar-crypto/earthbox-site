@@ -356,3 +356,41 @@ test.describe('Care business form', () => {
     await expect(page.locator('.care-biz .enquiry-status')).toContainText('aayush.lilani@gmail.com');
   });
 });
+
+// ── Product points under the photo (site-kry) ────────────────────────
+test('points: hover opens one panel, leaving closes; keyboard and tap work', async ({ page, isMobile }) => {
+  await page.goto('/product#SporeBox');
+  const w = page.locator('[data-points]');
+  const pts = w.locator('.pd-point'), panels = w.locator('.pd-point-panel');
+  await expect(pts).toHaveCount(3);
+  await expect(panels.first()).toBeHidden();                         // default: nothing open
+  await w.scrollIntoViewIfNeeded();
+  // Layout height of the points area (transforms from reveal animations don't count).
+  const below = () => w.evaluate(e => e.offsetHeight);
+  const y0 = await below();
+  if (isMobile) {
+    await pts.nth(0).tap();
+    await expect(panels.nth(0)).toBeVisible();
+    await pts.nth(2).tap();                                          // tap another: switches
+    await expect(panels.nth(2)).toBeVisible();
+    await expect(panels.nth(0)).toBeHidden();
+    await pts.nth(2).tap();                                          // tap again: closes
+    await expect(panels.nth(2)).toBeHidden();
+  } else {
+    await pts.nth(1).hover();
+    await expect(panels.nth(1)).toBeVisible();
+    await expect(panels.nth(1)).toContainText('humidity');
+    await expect(pts.nth(1)).toHaveAttribute('aria-expanded', 'true');
+    await page.mouse.move(5, 5);                                     // leave: back to default
+    await expect(panels.nth(1)).toBeHidden();
+    await pts.nth(0).focus();
+    await page.keyboard.press('Tab');                                // keyboard: focus opens the next
+    await expect(panels.nth(1)).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(panels.nth(1)).toBeHidden();
+  }
+  for (const i of [0, 1, 2]) {                                       // the longest panel must fit the reserved space too
+    await pts.nth(i).click();
+    expect(Math.abs(await below() - y0), `opening point ${i + 1} never moves the page`).toBeLessThan(2);
+  }
+});

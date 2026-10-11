@@ -693,3 +693,43 @@
 .pd-care-title{font-size:clamp(1.6rem,3vw,2.2rem)}
 .pd-care-text{color:var(--ink-soft);line-height:1.6}
 .pd-care-actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.5rem}
+
+/* ─── Numbered points under the photo (site-kry) ───
+   Default: three quiet numbers + a hint. One panel at a time in a stage of
+   fixed height, so opening a point never moves the page. No cards, no icons. */
+.pd-points{margin-top:1.75rem;text-align:center}
+.pd-points-list{display:flex;justify-content:center;gap:clamp(1.5rem,6vw,4.5rem);position:relative}
+.pd-points-list li{position:relative}
+.pd-points-list li + li::before{   /* the fine dot between points */
+  content:"";position:absolute;left:calc(-1 * clamp(1.5rem,6vw,4.5rem) / 2);top:50%;width:3px;height:3px;border-radius:50%;background:var(--rule-stronger);
+}
+.pd-point{
+  background:none;border:0;cursor:pointer;display:grid;gap:.45rem;justify-items:center;
+  min-width:44px;min-height:44px;padding:.35rem .5rem;color:var(--ink-soft);
+}
+.pd-point-n{font-family:var(--serif);font-size:1.15rem;line-height:1;position:relative;padding-bottom:.35rem}
+.pd-point-n::after{   /* the dot that lights up */
+  content:"";position:absolute;left:50%;bottom:-.1rem;width:4px;height:4px;margin-left:-2px;border-radius:50%;
+  background:var(--rule-stronger);transition:background var(--dur-fast) var(--ease-archival),transform var(--dur-fast) var(--ease-archival);
+}
+.pd-point-label{font-family:var(--sans);font-size:.58rem;letter-spacing:.26em;text-transform:uppercase;color:var(--mute)}
+.pd-point:hover,.pd-point[aria-expanded="true"]{color:var(--ink)}
+.pd-point[aria-expanded="true"] .pd-point-n::after{background:var(--ink);transform:scale(1.5)}
+.pd-point[aria-expanded="true"] .pd-point-label{color:var(--ink)}
+.pd-point:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
+
+.pd-points-stage{margin-top:1rem;display:grid;place-items:start center}
+/* Closed panels keep their space (invisible, and out of the accessibility
+   tree), so the stage is always as tall as the longest one: opening a point
+   never moves the page. Beats reset.css [hidden]{display:none}. */
+.pd-point-panel[hidden]{display:block !important;visibility:hidden}
+.pd-points-stage > *{grid-area:1/1}
+.pd-point-panel{max-width:30rem;animation:pd-point-in var(--dur-fast) var(--ease-archival)}
+.pd-point-title{font-size:1.15rem;margin-bottom:.35rem}
+.pd-point-panel p{font-size:.88rem;line-height:1.6;color:var(--ink-soft)}
+.pd-points-hint{font-size:.56rem;letter-spacing:.3em;padding-top:.5rem}
+.pd-points.is-open .pd-points-hint{visibility:hidden}
+.pd-hint-tap{display:none}
+@media (hover:none){ .pd-hint-hover{display:none} .pd-hint-tap{display:inline} }
+@keyframes pd-point-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){ .pd-point-panel{animation:none} .pd-point-n::after{transition:none} }

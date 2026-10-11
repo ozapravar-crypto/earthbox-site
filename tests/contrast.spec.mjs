@@ -288,3 +288,16 @@ for (const theme of THEMES) {
     expect(await failures(page, '#searchResultsList', 'hover')).toEqual([]);
   });
 }
+
+// CQ-018 · Product points under the photo (new, site-kry): numbers, labels,
+// hint and an open panel, both themes.
+for (const theme of THEMES) {
+  test(`CQ-018 product points pass (${theme})`, async ({ page }) => {
+    await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
+    await page.goto('/product#SporeBox');
+    await page.locator('[data-points]').scrollIntoViewIfNeeded();
+    expect(await failures(page, '[data-points]', 'default')).toEqual([]);
+    await page.locator('.pd-point').nth(2).hover();
+    expect(await failures(page, '[data-points]', 'hover')).toEqual([]);
+  });
+}

@@ -18,6 +18,7 @@ import { observeReveals } from './reveal.js';
 import { enquiryAltHTML } from './enquiry-form.js';
 import { syncCartButtons } from './cart.js';
 import { groupsOf, kitFor, encodePlan } from './care.js';
+import { elements, chamberElements } from '../data/maker.js';
 
 
 
@@ -434,6 +435,35 @@ function initPrintedSelectors(p){
 
 
 // ─── V2 box detail layout · big photo + rich description + specs ───
+// ─── Numbered points under the photo (bead site-kry) ───
+// Three discreet points that reveal one short panel each on hover/focus
+// (desktop) or tap (touch), so the photo stays the focus and the facts are
+// there on demand. Built from the chamber's own data; a box can override
+// them with `points: [{ label, title, text }]` in data/upcoming.js.
+export function boxPoints(b){
+  if (Array.isArray(b.points) && b.points.length) return b.points.slice(0, 3);
+  const groups = (chamberElements[b.sku] === 'all' ? elements : elements.filter(e => (chamberElements[b.sku] || []).includes(e.id))).map(e => e.heading.toLowerCase());
+  return [
+    { label: b.plants, title: `What grows: ${b.plants.toLowerCase()}`, text: [b.capacity, groups.length ? `Suits ${groups.join(', ')}.` : 'The studio picks the culture with you.'].filter(Boolean).join(' · ') },
+    { label: 'Climate', title: 'The climate inside', text: `${b.temp} · ${b.humidity} humidity · ${b.light}` },
+    { label: 'The object', title: 'The object', text: `${b.size} · ${b.weight} · ${b.power} · ${b.edition} edition · made in ${b.lead} · ${b.warranty} warranty` }
+  ];
+}
+function pointsHTML(points){
+  return `<div class="pd-points" data-points>
+    <ol class="pd-points-list">${points.map((pt, i) => `
+      <li><button type="button" class="pd-point" data-point="${i}" aria-expanded="false" aria-controls="pdPoint${i}">
+        <span class="pd-point-n">${String(i + 1).padStart(2, '0')}</span><span class="pd-point-label">${pt.label}</span>
+      </button></li>`).join('')}
+    </ol>
+    <div class="pd-points-stage">
+      ${points.map((pt, i) => `<div class="pd-point-panel" id="pdPoint${i}" role="region" aria-label="${pt.label}" hidden>
+        <h3 class="pd-point-title">${pt.title}</h3><p>${pt.text}</p></div>`).join('')}
+      <p class="pd-points-hint caption" aria-hidden="true"><span class="pd-hint-hover">Hover over the points to explore</span><span class="pd-hint-tap">Tap a point to explore</span></p>
+    </div>
+  </div>`;
+}
+
 function renderBox(b){
   const desc = (b.description || []).map(p => `<p>${p}</p>`).join('');
 
@@ -460,6 +490,7 @@ function renderBox(b){
           <div class="pd-hero-frame">
             <img src="assets/boxes/${b.photo}" alt="${b.sku} product photograph" width="1200" height="900"/>
           </div>
+          ${pointsHTML(boxPoints(b))}
         </div>
         <aside class="pd-body-side reveal" style="--d:120ms">
           ${buyHTML({ kind: 'product', sku: b.sku, qty: 1 }, enquiryHref({ name: b.sku, sku: b.sku, volume: 2 }), b.sku)}
@@ -665,4 +696,33 @@ export function initProductDetail(){
   window.addEventListener('hashchange', () => {
     renderProduct(getProductId());
   });
+
+  // Numbered points: one open at a time. Mouse: hover opens, leaving the
+  // points closes. Keyboard: focus opens, Escape or tabbing away closes.
+  // Touch / click: tap toggles, tapping another switches.
+  const show = (wrap, i) => {
+    wrap.querySelectorAll('.pd-point').forEach((b, n) => b.setAttribute('aria-expanded', String(n === i)));
+    wrap.querySelectorAll('.pd-point-panel').forEach((p, n) => { p.hidden = n !== i; });
+    wrap.classList.toggle('is-open', i !== null);
+  };
+  const wrapOf = (e) => e.target.closest?.('[data-points]');
+  host.addEventListener('pointerover', (e) => {
+    const b = e.pointerType === 'mouse' && e.target.closest('.pd-point');
+    if (b) show(wrapOf(e), +b.dataset.point);
+  });
+  host.addEventListener('pointerout', (e) => {
+    const w = e.pointerType === 'mouse' && wrapOf(e);
+    if (w && !w.contains(e.relatedTarget) && !w.contains(document.activeElement)) show(w, null);
+  });
+  host.addEventListener('focusin', (e) => { const b = e.target.closest('.pd-point'); if (b && b.matches(':focus-visible')) show(wrapOf(e), +b.dataset.point); });
+  host.addEventListener('focusout', (e) => { const w = wrapOf(e); if (w && !w.contains(e.relatedTarget)) show(w, null); });
+  host.addEventListener('click', (e) => {
+    const b = e.target.closest('.pd-point');
+    if (!b) return;
+    const w = wrapOf(e), i = +b.dataset.point;
+    // A mouse click on an already-open point keeps it (hover opened it); a tap toggles.
+    if (b.getAttribute('aria-expanded') === 'true' && e.pointerType !== 'mouse' && e.detail !== 0) show(w, null);
+    else show(w, i);
+  });
+  host.addEventListener('keydown', (e) => { const w = wrapOf(e); if (w && e.key === 'Escape') { show(w, null); } });
 }
