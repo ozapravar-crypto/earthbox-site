@@ -90,3 +90,8 @@
   .care-biz-grid{grid-template-columns:1fr}
   .care-biz .enquiry-submit{width:100%}
 }
+
+/* Icon + label (audit §7.4 Care mappings) */
+.care-h{display:flex;align-items:center;gap:.4em}
+.care-h .icon{width:.55em;height:.55em;color:var(--ink-soft)}
+.care-choice span .icon,.care-field > span .icon{vertical-align:-.12em;color:var(--ink-soft)}

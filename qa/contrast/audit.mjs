@@ -69,6 +69,8 @@ const click = (sel) => async (p) => { await p.locator(sel).first().click(); awai
 const seq = (...steps) => async (p) => { for (const s of steps) await s(p); };
 const openCart = click('.runhead-bag-btn[data-open=cart]');
 const fillForm = async (p) => {
+  const fold = p.locator('.pd-other-ways:not([open]) > summary');   // product page folds it (iconography audit P4)
+  if (await fold.count()) await fold.first().click();
   const f = p.locator('.enquiry-alt').first();
   await f.locator('summary').click();
   await f.locator('input[name=name]').fill('QA Test');
@@ -92,7 +94,7 @@ const STATES = {
   'product-priced-variants': [
     { name: 'variant+material-selected', setup: seq(click('[data-variant="small-circle"]'), click('[data-material="asa"]')) },
     { name: 'saved-pressed', setup: click('.pd-buy .save-btn') },
-    { name: 'enquiry-form-open', viewports: ['desktop'], setup: click('.enquiry-alt summary') },
+    { name: 'enquiry-form-open', viewports: ['desktop'], setup: async (p) => { await p.locator('.pd-other-ways > summary').click(); await p.locator('.enquiry-alt summary').first().click(); } },
     { name: 'enquiry-error', viewports: ['desktop'], route: { status: 500, body: { success: false, message: 'down' } }, setup: fillForm },
     { name: 'enquiry-success', viewports: ['desktop'], route: { status: 200, body: { success: true } }, setup: fillForm },
     { name: 'cart-open', cart: true, setup: openCart, scope: 'dialog.ct' },

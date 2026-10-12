@@ -74,10 +74,17 @@ function buyHTML(line, waHref, name){
       <button type="button" class="cta magnetic pd-cta" data-add-line="${attr(line)}" data-cursor="ADD">Add to cart ${ARROW}</button>
       <button type="button" class="cta cta-secondary save-btn" data-save-line="${attr(line)}" aria-pressed="false">${icon('heart')}<span>Save</span><span class="u-sr-only"> ${name}</span></button>
     </div>
-    <a class="pd-alt-wa" id="pdEnquiryCta" href="${waHref}" target="_blank" rel="noopener">Or ask on WhatsApp ${icon('arrow-up-right', { size: 'xs' })}</a>`;
+    <details class="pd-other-ways">
+      <summary>Other ways to order ${icon('chevron-down', { size: 'xs' })}</summary>
+      <a class="pd-alt-wa" id="pdEnquiryCta" href="${waHref}" target="_blank" rel="noopener">Ask a question on WhatsApp ${icon('arrow-up-right', { size: 'xs' })}</a>
+      ${enquiryAltHTML(name)}
+    </details>`;   // one primary action; WhatsApp + email folded (iconography audit P4)
 }
-const mobileBuyHTML = (line) => `
+// Phone sticky bar shows the price beside the button (audit P8): it follows
+// size/material via updatePrice().
+const mobileBuyHTML = (line, price) => `
     <div class="pd-mobile-cta" id="pdMobileCta">
+      <span class="pd-mobile-price" id="pdMobilePrice">${price}</span>
       <button type="button" class="cta" data-add-line="${attr(line)}">Add to cart ${ARROW}</button>
     </div>`;
 
@@ -314,7 +321,6 @@ function renderPrinted(p){
                price: hasPricing ? formatPrice(hasVariants ? p.pricing[p.variants[0].id][availableMaterials[0]] : p.pricing[availableMaterials[0]]) : null,
                volume: 1
              }), p.name)}
-          ${enquiryAltHTML(p.name)}
 
           <!-- Trust signals -->
           <div class="pd-trust-signals">
@@ -370,7 +376,7 @@ ${['planters', 'plant-packets', 'plant-support'].includes(p.category) ? careHTML
     </article>
 
     <!-- Mobile sticky CTA -->
-    ${mobileBuyHTML(line)}
+    ${mobileBuyHTML(line, hasPricing ? formatPrice(hasVariants ? p.pricing[p.variants[0].id][availableMaterials[0]] : p.pricing[availableMaterials[0]]) : 'Price on enquiry')}
   `;
 }
 
@@ -395,6 +401,8 @@ function initPrintedSelectors(p){
       ? p.pricing[currentVariant]?.[currentMaterial]
       : p.pricing[currentMaterial];
     priceEl.textContent = price ? formatPrice(price) : 'Price on enquiry';
+    const mobilePrice = document.getElementById('pdMobilePrice');
+    if (mobilePrice) mobilePrice.textContent = priceEl.textContent;
 
     const variantName = hasVariants ? p.variants.find(v => v.id === currentVariant)?.name : null;
     const href = enquiryHref({
@@ -501,7 +509,6 @@ function renderBox(b){
         </div>
         <aside class="pd-body-side reveal" style="--d:120ms">
           ${buyHTML({ kind: 'product', sku: b.sku, qty: 1 }, enquiryHref({ name: b.sku, sku: b.sku, volume: 2 }), b.sku)}
-          ${enquiryAltHTML(b.sku)}
           <p class="caption pd-note">Coming soon · register interest now</p>
           <a class="caption pd-maker-link" href="/maker?box=${b.sku}">Design yours in the Maker &rarr;</a>
         </aside>
@@ -532,7 +539,7 @@ ${careHTML(b.sku)}
     </article>
 
     <!-- Mobile sticky CTA -->
-    ${mobileBuyHTML({ kind: 'product', sku: b.sku, qty: 1 })}
+    ${mobileBuyHTML({ kind: 'product', sku: b.sku, qty: 1 }, b.price)}
   `;
 }
 
