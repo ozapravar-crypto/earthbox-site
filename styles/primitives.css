@@ -77,3 +77,8 @@ a:focus:not(:focus-visible),
 button:focus:not(:focus-visible){
   outline:none;
 }
+
+/* Functional icons (data/icons.js): size comes from width/height attributes,
+   so an icon never balloons if a stylesheet is missing. */
+.icon{flex-shrink:0;stroke-width:var(--icon-stroke);vertical-align:-.15em}
+.icon-arrow-long{stroke-width:1.2}

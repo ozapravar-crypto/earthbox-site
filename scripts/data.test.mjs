@@ -109,4 +109,18 @@ for (const n of NAV) {
   assert.ok(existsSync(path.join(ROOT, `${n.href.slice(1) || 'index'}.html`)), `NAV: no page behind ${n.href}`);
 }
 
+// ── Icons (data/icons.js) ──────────────────────────────────────────
+// Each icon is shape elements only: a stray <svg> or glued attributes (the
+// first registry build, 12 Oct 2026) render as nothing.
+{
+  const { icon, ICON_NAMES } = await import('../data/icons.js');
+  for (const n of ICON_NAMES) {
+    const svg = icon(n);
+    assert.equal((svg.match(/<svg\b/g) || []).length, 1, `icon ${n}: exactly one <svg>`);
+    assert.match(svg, /<svg [^>]*width="\d+" height="\d+" aria-hidden="true"/, `icon ${n}: sized and hidden`);
+    assert.match(svg.replace(/^<svg[^>]*>|<\/svg>$/g, ''), /^(<(path|circle|rect|line|polyline|polygon|ellipse)\b[^<]*\/>)+$/, `icon ${n}: shapes only`);
+  }
+  assert.throws(() => icon('nope'));
+}
+
 console.log(`data: all checks passed (${volumeOne.length} products, ${volumeTwo.boxes.length} chambers, ${plants.length} plants, ${articles.length} articles)`);

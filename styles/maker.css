@@ -58,7 +58,7 @@
 .mk-steps-list{display:flex;gap:.25rem 2rem;list-style:none;padding:0;margin:0;overflow-x:auto;scrollbar-width:none}
 .mk-step{
   position:relative;
-  display:flex;gap:.6rem;align-items:baseline;
+  display:flex;gap:.6rem;align-items:center;   /* center: the done-step check icon has no text baseline */
   font-family:var(--sans);font-size:.64rem;letter-spacing:.26em;text-transform:uppercase;
   color:var(--mute);
   padding:1rem 0;
@@ -192,6 +192,7 @@ img.mk-thumb,img.mk-swatch{display:block;object-fit:contain}
 .mk-plant-row .mk-card-name{font-size:1.1rem}
 .mk-thumb{width:56px;height:64px;background:var(--mk-plate);border:1px solid var(--rule)}
 .mk-add{
+  display:inline-flex;align-items:center;justify-content:center;gap:.4em;
   min-width:5.5rem;min-height:44px;
   font-family:var(--sans);font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;
   border:1px solid var(--ink);padding:.5rem .8rem;

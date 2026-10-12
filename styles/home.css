@@ -439,97 +439,6 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
 
 /* CTA styles moved to components.css */
 
-/* ─── COLOPHON ─── */
-.colophon{
-  padding:clamp(5rem,10vh,8rem) var(--pad) 3rem;
-  border-top:1px solid var(--rule);
-}
-.colo-main{
-  max-width:var(--max);
-  margin:0 auto;
-  display:grid;
-  grid-template-columns:2fr 1fr 1.2fr 1fr 1.2fr;
-  gap:2.5rem;
-  align-items:start;
-}
-.colo-mark{display:flex;gap:1.25rem;align-items:flex-start}
-.colo-mark img{width:52px;height:auto;opacity:.9}
-.colo-mark .wname{font-family:var(--serif);font-size:1.75rem;line-height:1;margin-bottom:.4rem}
-.colo-mark .ws{
-  font-family:var(--sans);
-  font-size:.65rem;
-  letter-spacing:.28em;
-  text-transform:uppercase;
-  color:var(--mute);
-  display:block;
-  margin-top:.3rem;
-}
-.colo-col h2{   /* h2, not h5: headings mustn't skip levels (Lighthouse/axe heading-order) */
-  line-height:normal;
-  font-family:var(--sans);
-  font-size:.62rem;
-  letter-spacing:.32em;
-  text-transform:uppercase;
-  color:var(--mute);
-  font-weight:400;
-  margin-bottom:1.25rem;
-}
-.colo-col li{
-  margin-bottom:.6rem;
-  font-size:.9rem;
-  color:var(--ink-soft);
-  transition:color .3s ease;
-}
-.colo-col a:hover{color:var(--ink)}   /* --accent-dk measured 3.10:1 */
-
-.colo-social{
-  display:flex;
-  gap:1rem;
-  margin-top:.5rem;
-}
-.colo-social a{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:32px;
-  height:32px;
-  border:1px solid var(--rule);
-  border-radius:50%;
-  color:var(--ink-soft);
-  transition:color .3s ease, border-color .3s ease, background .3s ease;
-}
-.colo-social a:hover{
-  color:var(--bg);
-  background:var(--ink);
-  border-color:var(--ink);
-}
-.colo-social svg{
-  width:16px;
-  height:16px;
-}
-
-.colo-bar{
-  max-width:var(--max);
-  margin:4rem auto 0;
-  padding-top:2rem;
-  border-top:1px solid var(--rule);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  font-family:var(--sans);
-  font-size:.62rem;
-  letter-spacing:.3em;
-  text-transform:uppercase;
-  color:var(--mute);
-}
-.colo-bar .quote{
-  font-style:italic;
-  text-transform:none;
-  letter-spacing:.05em;
-  font-family:var(--body);
-  color:var(--ink-soft);
-}
-
 /* ─── MAKER INVITE ───
    Fixed warm paper in both themes: it matches the photo's own background
    (#F6F3ED), so the image sits in it instead of floating on a box. */
@@ -629,9 +538,6 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
   .spread{grid-template-columns:1fr;gap:2.5rem}
   .principles{grid-template-columns:repeat(2,1fr);gap:3rem}
   .purpose-inner{grid-template-columns:1fr;gap:2rem}
-  .colo-main{grid-template-columns:1fr 1fr;gap:2rem}
-  .colo-mark{grid-column:1/-1}
-  .colo-bar{flex-direction:column;gap:1rem;text-align:center}
 }
 @media (max-width:560px){
   .principles{grid-template-columns:1fr}

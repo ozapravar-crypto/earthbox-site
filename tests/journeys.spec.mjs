@@ -394,3 +394,48 @@ test('points: hover opens one panel, leaving closes; keyboard and tap work', asy
     expect(Math.abs(await below() - y0), `opening point ${i + 1} never moves the page`).toBeLessThan(2);
   }
 });
+
+// ── Icon/label semantics (iconography audit Phase 2, items 2–5) ──────
+test('product size + material are radio groups: announced choice, arrow keys', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'keyboard');
+  await page.goto('/product#V1-PLT-005');
+  const sizes = page.getByRole('radiogroup', { name: 'Size / Variant' });
+  await expect(sizes.getByRole('radio')).toHaveCount(3);          // Stackable Planter: 3 sizes
+  const first = sizes.getByRole('radio').first();
+  await expect(first).toHaveAttribute('aria-checked', 'true');
+  await first.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(sizes.getByRole('radio').nth(1)).toHaveAttribute('aria-checked', 'true');
+  await expect(sizes.getByRole('radio').nth(1)).toBeFocused();
+  await expect(first).toHaveAttribute('aria-checked', 'false');
+  await expect(page.getByRole('radiogroup', { name: 'Material' })).toBeVisible();
+});
+
+test('toggles keep their name; the state is pressed/checked', async ({ page, isMobile }) => {
+  await page.goto('/product#V1-PLT-006');
+  const save = page.locator('.pd-buy .save-btn');
+  if (!isMobile) {
+    await expect(save).toHaveAttribute('aria-pressed', 'false');
+    await save.click();
+    await expect(save).toHaveAttribute('aria-pressed', 'true');
+    await expect(save).toContainText('Save');                      // label doesn't flip to "Saved"
+    await expect(page.locator('.runhead .theme-toggle')).toHaveAttribute('aria-label', 'Dark mode');
+  }
+  await page.goto('/maker#c=MossBox&s=studio&p=PLT-036');
+  await page.locator('.mk-step[data-to=plants]').click();
+  const add = page.locator('.mk-add[data-id="PLT-036"]');
+  await expect(add).toHaveAttribute('aria-pressed', 'true');
+  await expect(add).toHaveAccessibleName(/^Add /);                  // was "Remove …" while showing "Added"
+});
+
+test('catalogue volume tabs: real ids, arrow keys move and select', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'keyboard');
+  await page.goto('/products');
+  const tabs = page.getByRole('tab');
+  await expect(page.getByRole('tabpanel').first()).toHaveAttribute('aria-labelledby', 'tab-1');
+  await expect(page.locator('#tab-1')).toHaveCount(1);
+  await tabs.first().focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+  await expect(tabs.nth(1)).toBeFocused();
+});
