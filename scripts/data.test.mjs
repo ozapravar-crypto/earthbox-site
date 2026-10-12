@@ -83,7 +83,8 @@ const checkModel = (at, m) => {
   if ('scale' in m) assert.ok(m.scale > 0 && m.scale <= 2, `${at}: scale`);
   if ('yaw' in m) assert.ok(Number.isFinite(m.yaw), `${at}: yaw`);
   if ('tint' in m) assert.equal(typeof m.tint, 'boolean', `${at}: tint`);
-  for (const k of Object.keys(m)) assert.ok(['file', 'scale', 'yaw', 'tint'].includes(k), `${at}: unknown option "${k}"`);
+  if ('textured' in m) assert.equal(typeof m.textured, 'boolean', `${at}: textured`);   // realistic scan keeping its texture
+  for (const k of Object.keys(m)) assert.ok(['file', 'scale', 'yaw', 'tint', 'textured'].includes(k), `${at}: unknown option "${k}"`);
 };
 for (const [f, m] of Object.entries(models.forms)) { assert.ok(forms[f], `models.forms: "${f}" is not a form`); checkModel(`models.forms.${f}`, m); }
 const PIDS = new Set(plants.map(p => p.id));

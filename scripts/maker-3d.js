@@ -352,6 +352,32 @@ function toGeo(scene){
   return geo.translate(-(b.min.x + b.max.x) / 2, -b.min.y, -(b.min.z + b.max.z) / 2);
 }
 
+// A realistic scan (`textured: true`): one mesh whose texture is the point,
+// so keep its uv, normals and material; same base-on-y=0, centred contract.
+function toTexturedGeo(scene){
+  scene.updateMatrixWorld(true);
+  let mesh = null;
+  scene.traverse(o => { if (o.isMesh && !mesh) mesh = o; });
+  if (!mesh) throw new Error('empty model');
+  const src = mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry;
+  const g = new THREE.BufferGeometry();
+  for (const name of ['position', 'normal', 'uv']){   // getX/Y undo quantization into plain floats
+    const a = src.attributes[name]; if (!a) continue;
+    const out = new Float32Array(a.count * a.itemSize);
+    for (let i = 0; i < a.count; i++) for (let k = 0; k < a.itemSize; k++) out[i * a.itemSize + k] = a.getComponent(i, k);
+    g.setAttribute(name, new THREE.BufferAttribute(out, a.itemSize));
+  }
+  g.applyMatrix4(mesh.matrixWorld);
+  if (!g.attributes.normal) g.computeVertexNormals();
+  g.computeBoundingBox();
+  const b = g.boundingBox;
+  g.translate(-(b.min.x + b.max.x) / 2, -b.min.y, -(b.min.z + b.max.z) / 2);
+  const material = mesh.material;
+  material.side = THREE.DoubleSide;
+  material.userData.keep = true;                       // cached: never disposed with a scene
+  return { geo: g, material };
+}
+
 // Resolves once the file is ready or has failed (never rejects).
 function loadModel(file){
   if (!files.has(file)){
@@ -359,7 +385,11 @@ function loadModel(file){
     loader ||= import('./vendor/GLTFLoader.js').then(m => new m.GLTFLoader());
     rec.promise = Promise.all([loader, fetch(MODELS.base + file).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })])
       .then(([l, buf]) => l.parseAsync(buf, ''))
-      .then(gltf => { rec.geo = toGeo(gltf.scene); rec.state = 'ready'; })
+      .then(gltf => {
+        const textured = Object.values(MODELS.forms).concat(Object.values(MODELS.plants)).some(m => m?.file === file && m.textured);
+        if (textured) Object.assign(rec, toTexturedGeo(gltf.scene)); else rec.geo = toGeo(gltf.scene);
+        rec.state = 'ready';
+      })
       .catch(() => { rec.state = 'failed'; });
     files.set(file, rec);
   }
@@ -411,11 +441,28 @@ const plantGeos = new Map();                           // 'm:id' (model) or 'p:i
 function plantGeo(p){
   const m = modelReady(p), key = `${m ? 'm' : 'p'}:${p.id}`;
   if (!plantGeos.has(key))
-    plantGeos.set(key, m ? tinted(files.get(m.file).geo, p, m) : merge((BUILD[p.form] || leafPlant)(seeded(p), paletteOf(p), p.name)));
+    plantGeos.set(key, m ? (m.textured ? files.get(m.file).geo : tinted(files.get(m.file).geo, p, m))
+      : merge((BUILD[p.form] || leafPlant)(seeded(p), paletteOf(p), p.name)));
   return plantGeos.get(key);
 }
+// A scan's own texture, gently pulled toward the plant's colour (Neon Pink
+// shouldn't read plain green), one material per plant, cached.
+const plantMats = new Map();
+function plantMat(p){
+  const m = modelReady(p);
+  if (!m?.textured) return mat;
+  if (!plantMats.has(p.id)){
+    const own = files.get(m.file).material.clone();
+    own.userData.keep = true;
+    // A tint can only shade a green texture, never make it pink: colour
+    // cultivars keep the stylised model (data/maker.js); scans shade gently.
+    if (m.tint !== false) own.color.set('#ffffff').lerp(paletteOf(p).main.clone().offsetHSL(0, 0, .25), .3);
+    plantMats.set(p.id, own);
+  }
+  return plantMats.get(p.id);
+}
 function plantMesh(p){
-  const m = new THREE.Mesh(plantGeo(p), mat);
+  const m = new THREE.Mesh(plantGeo(p), plantMat(p));
   m.castShadow = true;
   m.receiveShadow = true;
   return m;
@@ -599,7 +646,9 @@ function layout(spec, base, D){
     const room = Math.max(.5, Math.min(roomX, roomZ));
     const moss = p.form === 'moss';
     let yaw = i * 1.7 + turn.yaw;
-    let sy = moss ? t.h * k / h : Math.min(t.h / h, 1.6 * t.r / r) * k;
+    // Scans spread wider than the stylised models, so they're sized by height
+    // (the wall check below still keeps them inside the glass).
+    let sy = moss ? t.h * k / h : (modelReady(p)?.textured ? t.h / h : Math.min(t.h / h, 1.6 * t.r / r)) * k;
     if (moss) return { p, pos: [x, base, z], s: [Math.min(room, t.r * k) / r, sy, Math.min(room, t.r * k) / r], yaw };
     if (modelReady(p)){
       // A model keeps its proportions (squeezed to 60 % at most) and turns
@@ -609,8 +658,9 @@ function layout(spec, base, D){
       const fit = (y) => { const e = extentOf(pos, y); return Math.min(roomX / e.rx, roomZ / e.rz); };
       if (fit(yaw + Math.PI / 2) > fit(yaw)) yaw += Math.PI / 2;
       const wide = fit(yaw);
-      sy = Math.min(sy, wide / .6);
-      const sxz = Math.max(Math.min(sy, wide), sy * .6);
+      const slim = modelReady(p)?.textured ? .5 : .6;    // scans spread wide: allow a little more slimming
+      sy = Math.min(sy, wide / slim);
+      const sxz = Math.max(Math.min(sy, wide), sy * slim);
       return { p, pos: [x, base, z], s: [sxz, sy, sxz], yaw };
     }
     // Height leads, so plants climb the glass; width follows, slimmed (to
@@ -674,7 +724,7 @@ function diorama(spec){
 const SHARED = new Set([mat, glassMat, glintMat]);
 function disposeTree(o){
   o.traverse(x => {
-    if (x.isMesh){ x.geometry.dispose(); if (!SHARED.has(x.material)) x.material.dispose(); }
+    if (x.isMesh){ x.geometry.dispose(); if (!SHARED.has(x.material) && !x.material.userData?.keep) x.material.dispose(); }
     if (x.isLight) x.dispose();
   });
 }
@@ -807,7 +857,7 @@ export function create3D({ onLost } = {}){
       const geo = plantGeo(it.p);
       let m = byId.get(it.p.id), swapped = false;
       if (!m) m = Object.assign(plantMesh(it.p), { userData: { pid: it.p.id } });
-      else if (m.geometry !== geo){ m.geometry = geo; swapped = true; }
+      else if (m.geometry !== geo){ m.geometry = geo; m.material = plantMat(it.p); swapped = true; }
       m.position.set(...it.pos);
       m.rotation.y = it.yaw;
       m.scale.set(...it.s);

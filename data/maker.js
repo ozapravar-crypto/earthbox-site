@@ -160,7 +160,9 @@ export const forms = {
 export const models = {
   base: 'assets/plants3d/',
   forms: {
-    leaf:    { file: 'leaf-heart.glb' },              // heart/arrow leaves: Syngonium, Anthurium, Alocasia…
+    // `textured: true` = a realistic scan that keeps its own texture (Poly Haven,
+    // 12 Oct 2026); the Maker tints it gently toward the plant's colour.
+    leaf:    { file: 'leaf-syngonium.glb', textured: true },   // heart/arrow leaves: Syngonium, Philodendron, Alocasia…
     trail:   { file: 'trail-pothos.glb' },
     rosette: { file: 'rosette-echeveria.glb' },
     air:     { file: 'air-bromeliad.glb' },
@@ -173,12 +175,22 @@ export const models = {
     'PLT-019': { file: 'leaf-monstera.glb', scale: .9 },   // Rhaphidophora (split leaves)
     'PLT-026': { file: 'leaf-monstera.glb' },         // Umbrella Plant
     'PLT-028': { file: 'leaf-monstera.glb' },         // Fatsia 'Spider's Web'
-    'PLT-009': { file: 'rosette-upright.glb' },       // Haworthia
+    'PLT-009': { file: 'rosette-haworthia.glb', textured: true },   // Haworthia (scan)
+    'PLT-012': { file: 'leaf-anthurium.glb', textured: true },      // Anthurium Scandens
+    'PLT-043': { file: 'leaf-anthurium.glb', textured: true },      // Anthurium Crystallinum
+    'PLT-013': { file: 'leaf-anthurium.glb', textured: true, scale: .9 },   // Peace Lily: same family, closest shape
+    // Colour is the point of these, and a scan's green texture can't be tinted
+    // pink or near-black, so they keep the stylised (exactly coloured) model.
+    'PLT-001': { file: 'leaf-heart.glb' },            // Syngonium Neon Pink
+    'PLT-003': { file: 'leaf-heart.glb' },            // Philodendron Pink Princess
+    'PLT-041': { file: 'leaf-heart.glb' },            // Syngonium Dark Maria
+    'PLT-044': { file: 'leaf-heart.glb' },            // Alocasia Black Velvet
+    'PLT-045': { file: 'leaf-heart.glb' },            // Jewel Orchid
     'PLT-027': { file: 'rosette-flat.glb' },          // Strawberry Begonia
     'PLT-034': { file: 'rosette-flat.glb' },          // Butterwort
-    'PLT-031': { file: 'trap-flytrap.glb' },          // Venus Flytrap (its red traps aren't foliage, so they stay red)
-    'PLT-015': null,                                  // Java Fern: strap leaves, procedural reads truer
-    'PLT-029': null                                   // Bird's Nest Fern: same
+    'PLT-031': { file: 'trap-flytrap-real.glb', textured: true, tint: false },   // Venus Flytrap, original textures
+    'PLT-015': { file: 'fern-strap.glb', textured: true },          // Java Fern (strap leaves, scan)
+    'PLT-029': { file: 'fern-strap.glb', textured: true, scale: 1.1 }   // Bird's Nest Fern
   }
 };
 
