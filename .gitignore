@@ -6,7 +6,6 @@
 
 # Node
 node_modules/
-package-lock.json
 
 # Image optimization backups
 assets-original/
@@ -30,3 +29,6 @@ qa/reports/lighthouse/
 .lighthouseci/
 # Lighthouse Chrome temp profiles (lhci on WSL writes them here)
 C:*
+
+# Built site (scripts/dist.mjs): what Vercel serves
+dist/

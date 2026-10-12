@@ -199,3 +199,17 @@ test('unknown address shows the branded 404 with a way back', async ({ page }) =
   await expect(page.getByRole('link', { name: 'Browse the catalogue' })).toHaveAttribute('href', '/products');
   await expect(page.locator('meta[name=robots]')).toHaveAttribute('content', 'noindex');
 });
+
+// Only the website is served (scripts/dist.mjs allow-list, discovery R2):
+// tests, QA tools, CI config, beads and build tools must 404.
+test('tooling files are not served', async ({ request }) => {
+  const open = [];
+  for (const p of ['/tests/smoke.spec.mjs', '/scripts/cart.test.mjs', '/scripts/includes.mjs', '/qa/serve.mjs', '/qa/contrast/baseline.json',
+    '/.github/workflows/qa.yml', '/.beads/config.yaml', '/.githooks/pre-push', '/vercel.json', '/package.json', '/eslint.config.js',
+    '/lighthouserc.json', '/playwright.config.mjs', '/README.md', '/CARE-PLAN.md', '/assets/og-templates/', '/scripts/vendor/README.md']) {
+    const r = await request.get(p);
+    if (r.status() !== 404) open.push(`${p} → ${r.status()}`);
+  }
+  expect(open).toEqual([]);
+  expect((await request.get('/assets/plants3d/CREDITS.md')).status(), 'CC BY credits must stay reachable').toBe(200);
+});
