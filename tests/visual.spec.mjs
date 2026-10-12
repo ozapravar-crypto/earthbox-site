@@ -43,7 +43,7 @@ const PAGES = [
   ['home', '/index.html'], ['catalogue', '/products.html'], ['product', '/product.html#V1-PLT-005'],
   ['chamber', '/product.html#MossBox'], ['maker-start', '/maker.html'], ['journal', '/blog.html'],
   ['article', '/blog/designing-drainage.html'], ['about', '/about.html'], ['not-found', '/product.html#NOPE'],
-  ['care', '/care.html']
+  ['care', '/care.html'], ['page-404', '/this-page-does-not-exist']
 ];
 for (const [name, path] of PAGES) {
   test(`visual: ${name} (first screen)`, async ({ page }) => {

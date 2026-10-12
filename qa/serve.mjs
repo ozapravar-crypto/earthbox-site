@@ -19,7 +19,12 @@ export function serve(root, port){
     if (!file.startsWith(root)) { res.writeHead(403).end(); return; }
     let st;
     try { st = statSync(file); if (st.isDirectory()) { file = path.join(file, 'index.html'); st = statSync(file); } }
-    catch { res.writeHead(404, { 'content-type': 'text/plain' }).end('not found'); return; }
+    catch {
+      // Unknown page → the site's own 404.html with a 404 status, as Vercel does.
+      const nf = path.join(root, '404.html');
+      if (!path.extname(rel) && existsSync(nf)) { res.writeHead(404, { 'content-type': TYPES['.html'] }); createReadStream(nf).pipe(res); return; }
+      res.writeHead(404, { 'content-type': 'text/plain' }).end('not found'); return;
+    }
     const type = TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream';
     const m = /bytes=(\d*)-(\d*)/.exec(req.headers.range || '');
     if (m) {

@@ -17,7 +17,7 @@ const scan = async (page, include) => {
 };
 
 const PAGES = ['/index.html', '/products.html', '/product.html#V1-PLT-005', '/product.html#MossBox', '/product.html#VIV-III',
-  '/product.html#NOPE', '/maker.html', '/blog.html', '/blog/designing-drainage.html', '/about.html', '/privacy.html', '/care.html'];
+  '/product.html#NOPE', '/maker.html', '/blog.html', '/blog/designing-drainage.html', '/about.html', '/privacy.html', '/care.html', '/404.html'];
 
 for (const path of PAGES) {
   test(`a11y: ${path}`, async ({ page }) => {

@@ -189,3 +189,13 @@ test('clean URLs: pages load without .html, and no internal link exposes .html',
   }
   expect([...new Set(bad)]).toEqual([]);
 });
+
+// Unknown address → the branded 404 (site-ez9), with a real 404 status so
+// search engines don't index it, and a way back into the site.
+test('unknown address shows the branded 404 with a way back', async ({ page }) => {
+  const res = await page.goto('/this-page-does-not-exist');
+  expect(res.status()).toBe(404);
+  await expect(page.locator('h1')).toHaveText('Nothing grows here');
+  await expect(page.getByRole('link', { name: 'Browse the catalogue' })).toHaveAttribute('href', '/products');
+  await expect(page.locator('meta[name=robots]')).toHaveAttribute('content', 'noindex');
+});
