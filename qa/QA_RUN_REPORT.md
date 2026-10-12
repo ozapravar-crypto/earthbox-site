@@ -71,3 +71,17 @@ QA-001 to QA-007, QA-009 and QA-013. Details, root causes and evidence are in `Q
 - **What:** three numbered points under each chamber photo (what grows · climate · the object), built from the chamber's own data. Hover or focus opens one panel; tap toggles on touch; Escape or leaving closes. The page never moves.
 - **Full local suite (2 workers):** **257 passed, 1 failed**. The failure was an expected visual change (the points now show behind the cart drawer) and the reference was updated. Fewer workers removed the load timeouts seen on 11 Oct.
 - **Not covered:** Volume I pieces get no points, because they have no structured details to reuse.
+
+## Follow-up · release gate, icons, security, 12 Oct 2026
+- **Release gate (discovery M1):** `main` is protected and needs 3 green checks. Proven: a direct push was rejected, a failing PR was BLOCKED, and Vercel refused the broken build. Vercel serves an allow-listed `dist/`, and tooling paths 404 live. The bare domain now redirects permanently (308).
+- **Iconography Phase 2:** shipped in PRs #3–#5 (audit items 1–17, 19, 20). Each PR: full suite green locally and on CI, visual changes reviewed by eye before updating references, then verified live.
+- **Security and ops (M3):** shipped in PRs #6 and #7.
+  - CSP `script-src` has no `'unsafe-inline'`, and local tests run under the same CSP.
+  - Weekly live check: `tests/live.spec.mjs` via `.github/workflows/live.yml`, 13/13 against earthbox.in, also green on CI.
+  - Safari-engine (WebKit) CI job; asset cache 1 day; `sharp` updated (0 vulnerabilities).
+- **Bugs found and fixed:**
+  - **Maker taps swallowed on slow devices:** the late 3D load rebuilt every button mid-tap. This was the long-running CI flake site-ktu; a regression test now covers it.
+  - **Product points on iPhone:** a second tap reopened the panel; found by the new WebKit job.
+  - **GA hits blocked live by the CSP:** `www.google.com/g/collect` was missing from `connect-src`, so consented analytics were partly lost since 11 Oct. Found by checking live with the real GA.
+  - **Start-screen 3D hero regression:** caught by visual tests before release.
+- **Hosting note:** one production deploy failed with Vercel's `git_info_fail`, twice. A fresh commit (PR #7) deployed normally. If it recurs, a new commit or a redeploy from the Vercel dashboard is the fix.
