@@ -439,3 +439,39 @@ test('catalogue volume tabs: real ids, arrow keys move and select', async ({ pag
   await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
   await expect(tabs.nth(1)).toBeFocused();
 });
+
+// ── Icons, PR B (audit items 8–12) ───────────────────────────────────
+test('header: heart + bag, counts hidden at zero, read as "Cart 1 items"', async ({ page, isMobile }) => {
+  await page.goto('/product#V1-PLT-006');
+  const cart = page.locator('.runhead-bag-btn[data-open=cart]');
+  await expect(cart.locator('.icon-shopping-bag')).toHaveCount(1);
+  await expect(page.locator('.runhead-bag-btn[data-open=saved] .icon-heart')).toHaveCount(1);
+  await expect(cart.locator('[data-cart-count]')).toBeHidden();               // 0 → nothing shown
+  await page.locator(isMobile ? '#pdMobileCta [data-add-line]' : '.pd-buy [data-add-line]').click();
+  await page.keyboard.press('Escape');
+  await expect(cart.locator('[data-cart-count]')).toHaveText('1');
+  await expect(cart).toHaveAccessibleName(/^Cart\s*1\s*items$/);
+  const labelWidth = (await cart.locator('.rb-label').boundingBox()).width;      // icon-only on phones, still read aloud
+  if (isMobile) expect(labelWidth).toBeLessThanOrEqual(1); else expect(labelWidth).toBeGreaterThan(10);
+});
+
+test('close and remove are one "x" icon with a name; no ESC text', async ({ page, isMobile }) => {
+  await page.goto('/products');
+  await page.locator('#catalogueSearchBtn').click();
+  const close = page.locator('#catalogueSearchClose');
+  await expect(close).toHaveAccessibleName('Close search');
+  await expect(close.locator('.icon-x')).toHaveCount(1);
+  await expect(close).not.toContainText('ESC');
+  await page.keyboard.press('Escape');                                          // the key still closes
+  await expect(page.locator('#catalogueSearchOverlay')).toBeHidden();
+  if (isMobile) { await page.locator('.hamburger').click(); await expect(page.locator('.mobile-nav-close .icon-x')).toBeVisible(); }
+});
+
+test('links that open elsewhere say so', async ({ page }) => {
+  await page.goto('/product#V1-PLT-005');
+  await expect(page.locator('#pdEnquiryCta .icon-arrow-up-right')).toHaveCount(1);
+  const social = page.locator('footer .colo-social a').first();
+  await expect(social).toHaveAccessibleName(/opens in a new tab/);
+  await page.goto('/blog/designing-drainage');
+  await expect(page.locator('a.back-link .icon-arrow-left')).toHaveCount(1);
+});

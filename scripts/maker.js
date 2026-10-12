@@ -230,7 +230,7 @@ function webglOK(){
 
 // ═══ VIEW ═════════════════════════════════════════════════════════════
 
-const arrow = '<svg viewBox="0 0 16 8" fill="none" aria-hidden="true"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>';
+const arrow = icon('arrow-long');
 const climate = (ch) => `${ch.temp} · ${ch.humidity} humidity`;
 
 function describe(b){
@@ -395,7 +395,7 @@ function resultsHTML(b, ui){
   const look = find(guide.looks, d.g.look);
   const guided = cs.some(c => c.guided) || prefs.length > 0;
   const chip = (c) => `<button type="button" class="mk-chip${c.guided || !('test' in c) ? ' is-guided' : ''}" data-act="chip" data-id="${esc(c.key)}"
-    data-key="chip-${esc(c.key)}" aria-label="Remove ${esc(c.label)}">${esc(c.label)} <span aria-hidden="true">×</span></button>`;
+    data-key="chip-${esc(c.key)}" aria-label="Remove ${esc(c.label)}">${esc(c.label)} ${icon('x')}</button>`;
   const head = `<p class="mk-found" aria-live="polite" tabindex="-1">${look ? `Showing ${results.length} plant${results.length === 1 ? '' : 's'} for your ${look.label.toLowerCase()} terrarium`
       : `${results.length} of ${plants.length} plants`}</p>
     ${cs.length || prefs.length ? `<div class="mk-chips" role="group" aria-label="Active filters">${[...cs, ...prefs].map(chip).join('')}
@@ -435,7 +435,7 @@ function plantsPanel(b, ui){
   + `<p class="mk-count"><strong>${b.plants.length}</strong> of ${max} plants${b.plants.length >= max ? ' · chamber full' : ''}</p>
   ${b.plants.length ? `<ul class="mk-tray" aria-label="Selected plants">${b.plants.map(id => `<li>
       <span>${esc(plantOf(id).name)}</span>
-      <button type="button" data-act="plant" data-id="${id}" data-key="tray-${id}" aria-label="Remove ${esc(plantOf(id).name)}">×</button></li>`).join('')}</ul>` : ''}
+      <button type="button" data-act="plant" data-id="${id}" data-key="tray-${id}" aria-label="Remove ${esc(plantOf(id).name)}">${icon('x')}</button></li>`).join('')}</ul>` : ''}
   <div class="mk-disc" role="search">
     <label class="mk-search"><span class="u-sr-only">Search plants</span>
       <input type="search" name="q" value="${esc(d.q)}" placeholder="Search plants, groups or shapes…" autocomplete="off" data-key="q"></label>
@@ -476,7 +476,7 @@ function guideHTML(b, ui){
   const n = searchPlants({ ...ui.disc, g: { look: a.look, light: a.light, roles: a.roles } }, disCtx(b)).results.length;
   return `<form class="mk-gd" method="dialog">
     <header class="mk-gd-head"><p class="caption">Guided search · Step ${i + 1} of ${GD.length}</p>
-      <button type="button" class="mk-gd-x" data-act="gd-close" data-key="gd-close" aria-label="Close guided search">×</button></header>
+      <button type="button" class="mk-gd-x" data-act="gd-close" data-key="gd-close" aria-label="Close guided search">${icon('x', { size: 'md' })}</button></header>
     <ol class="mk-gd-steps">${GD.map((s, k) => `<li><button type="button" data-act="gd-step" data-id="${k}" data-key="gd-s${k}"
       class="${k === i ? 'is-current' : ''}${answered(s) ? ' is-done' : ''}" ${k === i ? 'aria-current="step"' : ''}
       aria-label="Step ${k + 1}${answered(s) ? ', answered' : ''}"></button></li>`).join('')}</ol>
@@ -541,7 +541,7 @@ function reviewPanel(b){
   ${group('Foundation', 'foundation', `<p class="mk-item"><span>${isSoilless(ch.sku) ? 'None, soil-free' : sub.name}</span><span>${isSoilless(ch.sku) ? '—' : 'On enquiry'}</span></p>`)}
   ${group('Plants', 'plants', b.plants.length ? `<ul class="mk-items">${b.plants.map(id => `<li class="mk-item">
       <span>${esc(plantOf(id).name)}</span><span>On enquiry
-      <button type="button" class="mk-x" data-act="plant" data-id="${id}" data-key="rv-${id}" aria-label="Remove ${esc(plantOf(id).name)}">×</button></span></li>`).join('')}</ul>`
+      <button type="button" class="mk-x" data-act="plant" data-id="${id}" data-key="rv-${id}" aria-label="Remove ${esc(plantOf(id).name)}">${icon('x')}</button></span></li>`).join('')}</ul>`
       : '<p class="mk-sub">The studio chooses with you.</p>')}
   ${group('Your space', 'space', `<p class="mk-sub">${spaceBits.length ? spaceBits.join(' · ') : 'Not given'}</p>`)}
   <div class="mk-total">
@@ -555,7 +555,7 @@ function reviewPanel(b){
       <button type="button" class="cta cta-secondary save-btn" data-save-line="${esc(JSON.stringify(cartLine(b)))}" aria-pressed="false" data-key="save">${icon('heart')}<span>Save</span><span class="u-sr-only"> design</span></button>
     </div>
     <p class="mk-sub">The cart tallies this build with anything else you add. Or send just this design:</p>
-    <a class="cta cta-secondary cta-block" href="${whatsappHref(b)}" target="_blank" rel="noopener" data-act="send" data-key="send">Send this design on WhatsApp ${arrow}</a>
+    <a class="cta cta-secondary cta-block" href="${whatsappHref(b)}" target="_blank" rel="noopener" data-act="send" data-key="send">Send this design on WhatsApp ${icon('arrow-up-right', { size: 'xs' })}</a>
     ${enquiryAltHTML(b.name || `Maker · ${ch.name}`, enquiryText(b))}
     <p class="mk-sent" role="status"></p>
     <div class="mk-secondary">

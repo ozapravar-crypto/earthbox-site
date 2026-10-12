@@ -284,7 +284,7 @@
 
 /* Back link */
 .back-link{
-  display:inline-block;
+  display:inline-flex;align-items:center;gap:var(--icon-gap);min-height:44px;
   margin-bottom:1rem;
   font-family:var(--sans);
   font-size:.8rem;
