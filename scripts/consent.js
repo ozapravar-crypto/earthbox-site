@@ -1,8 +1,14 @@
 // Cookie consent. Google Analytics loads only after the visitor taps Accept
 // (DPDP / GDPR). Cart, Saved, the Maker design and the theme stay in the
 // visitor's browser and are needed for the site to work, so they don't ask.
-// The gtag() queue is set up in each page's <head> (data/site.js), so
-// track() calls are harmless until GA loads, and are dropped if it never does.
+// The gtag() queue is set up at the top of this file, so track() calls are
+// harmless until GA loads, and are dropped if it never does.
+// gtag queue: track() calls before or without consent just queue here.
+window.dataLayer = window.dataLayer || [];
+window.gtag = function gtag(){ window.dataLayer.push(arguments); };
+window.gtag('js', new Date());
+window.gtag('config', 'G-1HHZETMVWP');
+
 (() => {
   const KEY = 'earthbox-consent';
   const GA = 'https://www.googletagmanager.com/gtag/js?id=G-1HHZETMVWP';

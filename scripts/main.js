@@ -30,6 +30,19 @@ import { initScramble }   from './scramble.js';
 import { initEnquiryForm } from './enquiry-form.js';
 import { initCart }        from './cart.js';
 
+// Broken images (no inline onerror, so the CSP can forbid inline script):
+//   data-fallback="hide" | "parent:<class>" | "parent:<class> remove"
+// error doesn't bubble, so listen in the capture phase.
+document.addEventListener('error', (e) => {
+  const img = e.target;
+  const how = img instanceof HTMLImageElement && img.dataset.fallback;
+  if (!how) return;
+  if (how === 'hide') { img.style.display = 'none'; return; }
+  const [, cls, remove] = how.match(/^parent:(\S+)( remove)?$/) || [];
+  if (cls) img.parentElement?.classList.add(cls);
+  if (remove) img.remove();
+}, true);
+
 // [root selector, loader] · run in this order (catalogue reads what products rendered).
 const PAGE_MODULES = [
   ['#volumeOneList, #volumeTwoList, #volumeThreeBlock', () => import('./render-products.js').then(m => m.initProducts())],

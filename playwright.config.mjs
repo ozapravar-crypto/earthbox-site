@@ -29,6 +29,10 @@ export default defineConfig({
     { name: 'desktop', use: { viewport: { width: 1440, height: 900 } } },
     { name: 'phone', use: { ...devices['Pixel 7'], browserName: 'chromium' } },
     // Tablet: layout + visual coverage only (the behaviour suites run on desktop + phone).
+    // Safari engine (iPhone): behaviour suites only. Needs WebKit's system
+    // libraries, so it runs on CI (its own job, not yet a release gate) or
+    // locally with WEBKIT=1 after `npx playwright install --with-deps webkit`.
+    ...(process.env.WEBKIT ? [{ name: 'iphone', testMatch: /(smoke|journeys)\.spec\.mjs/, use: { ...devices['iPhone 13'] } }] : []),
     { name: 'tablet', testMatch: /(smoke|visual)\.spec\.mjs/, use: { viewport: { width: 820, height: 1180 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true, browserName: 'chromium' } }
   ]
 });

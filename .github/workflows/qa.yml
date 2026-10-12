@@ -39,6 +39,22 @@ jobs:
         if: failure()
         with: { name: playwright-results, path: test-results, retention-days: 14 }   # includes visual diffs (expected / actual / diff)
 
+  webkit:
+    name: Safari engine (WebKit, iPhone) — smoke + journeys
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps webkit
+      - run: npx playwright test --project=iphone
+        env: { WEBKIT: '1' }
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: webkit-results, path: test-results, retention-days: 14 }
+
   lighthouse:
     name: Lighthouse (performance, accessibility, SEO, best practices)
     runs-on: ubuntu-latest

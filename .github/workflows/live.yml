@@ -1,0 +1,23 @@
+# Weekly check of the real site (production discovery R5): pages load with no
+# errors, tooling stays hidden, security headers and redirects hold.
+# A failure shows as a red run and GitHub emails the repo owner.
+name: Live canary
+
+on:
+  schedule:
+    - cron: '30 3 * * 1'   # Mondays 03:30 UTC (09:00 IST)
+  workflow_dispatch:
+
+jobs:
+  live:
+    name: Live site check (earthbox.in)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test tests/live.spec.mjs --project=desktop
+        env: { LIVE: '1', BASE_URL: 'https://www.earthbox.in' }

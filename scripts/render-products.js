@@ -90,7 +90,7 @@ function renderVolumeOne(){
               alt="${p.name}"
               loading="lazy"
               decoding="async"
-              onerror="this.parentElement.classList.add('v1-card-img--placeholder')"/>
+              data-fallback="parent:v1-card-img--placeholder"/>
           </div>
           <div class="v1-card-meta">
             <h3 class="v1-card-name">${p.name}</h3>
