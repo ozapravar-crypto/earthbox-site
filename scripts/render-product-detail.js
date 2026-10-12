@@ -720,12 +720,16 @@ export function initProductDetail(){
     wrap.classList.toggle('is-open', i !== null);
   };
   const wrapOf = (e) => e.target.closest?.('[data-points]');
+  // Hover only where the device really hovers: iPhone Safari turns a tap into
+  // mouse-looking events, which reopened a panel the tap had just closed
+  // (found by the WebKit job, 12 Oct 2026).
+  const canHover = () => matchMedia('(hover: hover) and (pointer: fine)').matches;
   host.addEventListener('pointerover', (e) => {
-    const b = e.pointerType === 'mouse' && e.target.closest('.pd-point');
+    const b = canHover() && e.pointerType === 'mouse' && e.target.closest('.pd-point');
     if (b) show(wrapOf(e), +b.dataset.point);
   });
   host.addEventListener('pointerout', (e) => {
-    const w = e.pointerType === 'mouse' && wrapOf(e);
+    const w = canHover() && e.pointerType === 'mouse' && wrapOf(e);
     if (w && !w.contains(e.relatedTarget) && !w.contains(document.activeElement)) show(w, null);
   });
   host.addEventListener('focusin', (e) => { const b = e.target.closest('.pd-point'); if (b && b.matches(':focus-visible')) show(wrapOf(e), +b.dataset.point); });
@@ -734,8 +738,9 @@ export function initProductDetail(){
     const b = e.target.closest('.pd-point');
     if (!b) return;
     const w = wrapOf(e), i = +b.dataset.point;
-    // A mouse click on an already-open point keeps it (hover opened it); a tap toggles.
-    if (b.getAttribute('aria-expanded') === 'true' && e.pointerType !== 'mouse' && e.detail !== 0) show(w, null);
+    // With hover, a click on the open point keeps it (hover opened it). Without
+    // hover (touch), a tap toggles. Keyboard (detail 0) always opens.
+    if (b.getAttribute('aria-expanded') === 'true' && !canHover() && e.detail !== 0) show(w, null);
     else show(w, i);
   });
   host.addEventListener('keydown', (e) => { const w = wrapOf(e); if (w && e.key === 'Escape') { show(w, null); } });
