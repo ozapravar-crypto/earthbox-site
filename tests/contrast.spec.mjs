@@ -264,15 +264,19 @@ for (const theme of THEMES) {
     await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
     await page.goto('/care.html');
     const c = page.locator('#carePlanner');
-    await c.locator('select[name=r]').selectOption('MossBox');
+    await c.getByRole('checkbox', { name: /^Moss/ }).check();
     expect(await failures(page, '#homes', 'default')).toEqual([]);
     await c.getByText('Visits from the studio').click();
     expect(await failures(page, '#homes', 'default')).toEqual([]);
     expect(await failures(page, '#business', 'default')).toEqual([]);
-    await page.goto('/product.html#MossBox');
-    await page.locator('.pd-buy [data-add-line]').first().click();
-    expect(await failures(page, '.ct-suggest', 'default')).toEqual([]);
+    await page.goto('/product.html#V1-PLT-005');
+    await page.locator('.pd-care').waitFor();
+    await page.evaluate(() => document.querySelector('.pd-care').classList.add('in'));
     expect(await failures(page, '.pd-care', 'default')).toEqual([]);
+    await page.goto('/maker#c=MossBox&s=studio&p=PLT-036');
+    await page.locator('.mk-step[data-to=review]').click();
+    await page.locator('[data-key=cart]').click();
+    expect(await failures(page, '.ct-suggest', 'default')).toEqual([]);
   });
 }
 

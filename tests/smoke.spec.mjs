@@ -67,7 +67,9 @@ test('cart tallies a priced piece, an enquiry piece and a Maker build', async ({
   await page.locator(add).click();
   await expect(page.locator('dialog.ct .ct-line--fixed')).toHaveCount(1);
   await page.keyboard.press('Escape');
-  await page.goto('/product.html#MossBox');                             // range ₹6,000 – ₹9,000
+  await page.goto('/product.html#MossBox');                             // coming soon: register interest, no cart button
+  await expect(page.locator('.pd-buy [data-add-line], #pdMobileCta [data-add-line]')).toHaveCount(0);
+  await page.goto('/product.html#V1-PLT-001');                          // TerraMesh Planter: price on enquiry
   await page.locator(add).click();
   await page.keyboard.press('Escape');
   await page.goto('/maker.html');
@@ -77,7 +79,7 @@ test('cart tallies a priced piece, an enquiry piece and a Maker build', async ({
   const d = page.locator('dialog.ct');
   await expect(d.locator('.ct-line')).toHaveCount(3);
   await expect(d.locator('.ct-line--custom .ct-parts-total')).toContainText('Build estimate');
-  await expect(d.locator('.ct-row--total')).toContainText('₹12,429');   // 429 + 6,000 + 6,000 (Misty Forest = Moss)
+  await expect(d.locator('.ct-row--total')).toContainText('₹6,429');    // 429 + the build's 6,000 (Misty Forest = Moss); TerraMesh quoted
   await expect(page.locator('[data-cart-count]').first()).toHaveText('3');
   // Remove → Undo puts it back.
   await d.locator('[data-ct=remove]').first().click();

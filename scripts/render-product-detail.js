@@ -80,6 +80,19 @@ function buyHTML(line, waHref, name){
       ${enquiryAltHTML(name)}
     </details>`;   // one primary action; WhatsApp + email folded (iconography audit P4)
 }
+// Coming-soon chambers can't go in the cart (studio decision, 12 Oct 2026):
+// the primary action registers interest on WhatsApp; Save still bookmarks it.
+function interestHTML(line, waHref, name){
+  return `
+    <div class="pd-buy">
+      <a class="cta magnetic pd-cta" id="pdEnquiryCta" href="${waHref}" target="_blank" rel="noopener" data-cursor="ASK">Register interest ${icon('arrow-up-right', { size: 'xs' })}<span class="u-sr-only"> on WhatsApp (opens in a new tab)</span></a>
+      <button type="button" class="cta cta-secondary save-btn" data-save-line="${attr(line)}" aria-pressed="false">${icon('heart')}<span>Save</span><span class="u-sr-only"> ${name}</span></button>
+    </div>
+    <details class="pd-other-ways">
+      <summary>Prefer email? ${icon('chevron-down', { size: 'xs' })}</summary>
+      ${enquiryAltHTML(name)}
+    </details>`;
+}
 // Phone sticky bar shows the price beside the button (audit P8): it follows
 // size/material via updatePrice().
 const mobileBuyHTML = (line, price) => `
@@ -508,12 +521,11 @@ function renderBox(b){
           ${pointsHTML(boxPoints(b))}
         </div>
         <aside class="pd-body-side reveal" style="--d:120ms">
-          ${buyHTML({ kind: 'product', sku: b.sku, qty: 1 }, enquiryHref({ name: b.sku, sku: b.sku, volume: 2 }), b.sku)}
-          <p class="caption pd-note">Coming soon · register interest now</p>
+          ${interestHTML({ kind: 'product', sku: b.sku, qty: 1 }, enquiryHref({ name: b.sku, sku: b.sku, volume: 2 }), b.sku)}
+          <p class="caption pd-note">Coming soon · not yet in the cart</p>
           <a class="caption pd-maker-link" href="/maker?box=${b.sku}">Design yours in the Maker &rarr;</a>
         </aside>
       </section>
-${careHTML(b.sku)}
 
       ${related.length ? `
         <section class="pd-related reveal">
@@ -539,7 +551,10 @@ ${careHTML(b.sku)}
     </article>
 
     <!-- Mobile sticky CTA -->
-    ${mobileBuyHTML({ kind: 'product', sku: b.sku, qty: 1 }, b.price)}
+    <div class="pd-mobile-cta" id="pdMobileCta">
+      <span class="pd-mobile-price">${b.price}</span>
+      <a class="cta" href="${enquiryHref({ name: b.sku, sku: b.sku, volume: 2 })}" target="_blank" rel="noopener">Register interest ${icon('arrow-up-right', { size: 'xs' })}</a>
+    </div>
   `;
 }
 

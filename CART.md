@@ -7,7 +7,7 @@
 | Kind | What's in it | How it shows | How it counts |
 |---|---|---|---|
 | **Ready to order** | Volume I pieces with a price per size × material (`pricing` in `data/volume-one.js`) | Price on the right, quantity stepper | Exact: price × qty |
-| **Price on enquiry** | Pieces with `pricing: null`, Elemental chambers | Italic "On enquiry"; chambers also show their published range as "Guide" | Ranges go into the estimate; the rest are counted as "to quote" |
+| **Price on enquiry** | Pieces with `pricing: null` (Elemental chambers are coming soon: Saved only, never in the cart, since 12 Oct 2026) | Italic "On enquiry"; chambers also show their published range as "Guide" | Ranges go into the estimate; the rest are counted as "to quote" |
 | **Custom build** | A Maker design | One row per part (chamber, foundation, each plant), then "Build estimate" | Priced parts summed + chamber range; unpriced parts counted |
 
 The summary shows: priced items (exact), chambers & builds (guide range), how many items are still to quote, and an **estimated total**.

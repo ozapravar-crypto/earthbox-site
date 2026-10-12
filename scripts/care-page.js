@@ -11,7 +11,6 @@
 import { visit, subjects, businessSites } from '../data/care.js';
 import { elements } from '../data/maker.js';
 import { volumeOne } from '../data/volume-one.js';
-import { volumeTwo } from '../data/upcoming.js';
 import { planPrice, groupsOf, kitFor, encodePlan, decodePlan, planSummary } from './care.js';
 import { decodeBuild, chamberOf } from './build-codec.js';
 import { esc, rupees } from './util.js';
@@ -19,6 +18,9 @@ import { icon } from '../data/icons.js';
 
 const GROUP_NOTE = Object.fromEntries(elements.map(e => [e.id, e.heading]));
 const attr = (o) => esc(JSON.stringify(o));
+// Pieces someone can own and that hold plants: available Volume I planters,
+// plant packets and supports. Chambers are coming soon, so they're not here.
+const OWNABLE = volumeOne.filter(p => p.status !== 'coming-soon' && ['planters', 'plant-packets', 'plant-support'].includes(p.category));
 
 // Maker designs the visitor already has (cart or saved), for "A custom box".
 function savedBuilds(){
@@ -35,7 +37,7 @@ export function initCare(){
 
   const fromLink = decodePlan(location.hash);
   const st = fromLink ? { ...fromLink, mode: 'visits' }
-    : { s: 'piece', r: volumeTwo.boxes[0].sku, g: [], n: 1, d: '12m', f: 'monthly', p: '', mode: 'kit' };
+    : { s: 'piece', r: OWNABLE[0]?.sku || '', g: [], n: 1, d: '12m', f: 'monthly', p: '', mode: 'kit' };
   if (st.d === 'once') st.f = 'monthly';   // remembered for when they pick a term
 
   const $ = (sel) => root.querySelector(sel);
@@ -62,8 +64,7 @@ export function initCare(){
     return `
       <label class="care-field"><span>Which piece?</span>
         <select name="r">
-          <optgroup label="Elemental chambers">${volumeTwo.boxes.map(b => opt(b.sku, `${b.name} chamber`)).join('')}</optgroup>
-          <optgroup label="Volume I">${volumeOne.map(p => opt(p.sku, p.name)).join('')}</optgroup>
+          ${OWNABLE.map(p => opt(p.sku, p.name)).join('')}
         </select></label>`;
   }
 
@@ -135,7 +136,7 @@ export function initCare(){
     // visitor presses "Add visits to cart"; redrawing then swapped the button
     // out from under the click and nothing was added.
     if (name === 'n' || name === 'p') return;
-    if (name === 's') { st.s = value; st.g = []; if (value === 'piece') st.r = volumeTwo.boxes[0].sku; draw.ref(); draw.groups(); }
+    if (name === 's') { st.s = value; st.g = []; if (value === 'piece') st.r = OWNABLE[0]?.sku || ''; draw.ref(); draw.groups(); }
     else if (name === 'r') { st.r = value; st.g = []; draw.groups(); }
     else if (name === 'g') st.g = [...root.querySelectorAll('input[name=g]:checked')].map(i => i.value);
     else if (name === 'mode') st.mode = value;

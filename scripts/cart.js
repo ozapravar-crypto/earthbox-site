@@ -56,7 +56,7 @@ export const keyOf = (l) => l.kind === 'build' ? `build:${l.code}` : l.kind === 
 const ONE_OFF = (l) => l.kind === 'build' || l.kind === 'care';   // no quantity
 
 // Line (ids) → everything the drawer and the order message need.
-export function resolve(l){
+export function resolve(l, list = 'cart'){
   if (l.kind === 'build') {
     const b = decodeBuild(l.code);
     if (!b) return null;
@@ -95,8 +95,11 @@ export function resolve(l){
       unit: table ? table[l.material] : null,
       status: p.status === 'coming-soon' ? 'Coming soon' : 'Made to order · about 1 week' };
   }
+  // Coming-soon chambers never resolve, so they can't be added and any old
+  // cart line is dropped (studio decision, 12 Oct 2026). Saved list keeps them.
   const box = volumeTwo.boxes.find(x => x.sku === l.sku);
-  if (box) return { kind: 'enquiry', key: keyOf(l), qty: l.qty, title: `${box.name} chamber`, sub: `Elemental Box · ${box.edition}`,
+  if (box && list === 'cart' && volumeTwo.status === 'Coming soon') return null;
+  if (box) return { kind: 'enquiry', cartable: volumeTwo.status !== 'Coming soon', key: keyOf(l), qty: l.qty, title: `${box.name} chamber`, sub: `Elemental Box · ${box.edition}`,
     href: `/product#${encodeURIComponent(box.sku)}`, img: box.photo ? `assets/boxes/${box.photo}` : null,
     unit: null, range: parseRange(box.price), note: box.price, status: `${volumeTwo.status} · ${box.lead}` };
   return null;
@@ -133,7 +136,7 @@ export function clean(raw){
         ? { kind: l.kind, code: String(l.code || '') }
         : { kind: 'product', sku: String(l.sku || ''), variant: l.variant || null, material: l.material || null,
             qty: Math.min(MAX_QTY, Math.max(1, parseInt(l.qty, 10) || 1)) };
-      if (!resolve(line) || seen.has(keyOf(line))) continue;
+      if (!resolve(line, list) || seen.has(keyOf(line))) continue;
       seen.add(keyOf(line)); out[list].push(line);
     }
   }
@@ -141,6 +144,7 @@ export function clean(raw){
 }
 
 export function add(state, list, line){
+  if (!resolve(line, list)) return state;   // e.g. a coming-soon chamber can be saved, not carted
   const s = structuredClone(state), k = keyOf(line);
   const hit = s[list].find(l => keyOf(l) === k);
   if (hit && list === 'cart' && hit.kind === 'product') hit.qty = Math.min(MAX_QTY, hit.qty + (line.qty || 1));
@@ -156,7 +160,7 @@ export function setQty(state, key, qty){
 }
 export function move(state, from, key){
   const l = state[from].find(x => keyOf(x) === key);
-  if (!l) return state;
+  if (!l || !resolve(l, from === 'cart' ? 'saved' : 'cart')) return state;   // never lose a line it can't move
   return add(remove(state, from, key), from === 'cart' ? 'saved' : 'cart', l);
 }
 
@@ -236,7 +240,8 @@ function lineHTML(r, list){
       ${qty}
       <div class="ct-actions">
         ${r.kind === 'custom' ? `<a class="ct-link" href="${esc(r.href)}">Edit design</a>` : r.key.startsWith('care:') ? `<a class="ct-link" href="${esc(r.href)}">Change plan</a>` : ''}
-        <button type="button" class="ct-link" data-ct="move" data-from="${list}" data-k="${k}">${list === 'cart' ? 'Save for later' : 'Move to cart'}</button>
+        ${list === 'saved' && r.cartable === false ? '<span class="ct-sub">Coming soon · not yet in the cart</span>'
+          : `<button type="button" class="ct-link" data-ct="move" data-from="${list}" data-k="${k}">${list === 'cart' ? 'Save for later' : 'Move to cart'}</button>`}
         <button type="button" class="ct-link" data-ct="remove" data-from="${list}" data-k="${k}">Remove<span class="u-sr-only"> ${esc(r.title)}</span></button>
       </div>
     </div>
@@ -274,7 +279,7 @@ function summaryHTML(lines){
 }
 
 function drawerHTML(){
-  const lines = { cart: state.cart.map(resolve), saved: state.saved.map(resolve) };
+  const lines = { cart: state.cart.map(l => resolve(l, 'cart')), saved: state.saved.map(l => resolve(l, 'saved')) };
   const count = (l) => l === 'cart' ? state.cart.reduce((n, x) => n + (x.qty || 1), 0) : state.saved.length;
   const tabBtn = (id, label) => `<button type="button" role="tab" id="ct-tab-${id}" aria-controls="ct-panel" aria-selected="${tab === id}" data-ct="tab" data-tab="${id}" ${tab === id ? '' : 'tabindex="-1"'}>${label} <span>(${count(id)})</span></button>`;
   const list = lines[tab];
@@ -362,7 +367,7 @@ export function initCart(){
     if (ct === 'close') return dlg.close();
     if (ct === 'send') { sent('whatsapp'); return; }   // let the link open
     if (ct === 'tab') { tab = b.dataset.tab; notice = null; return refresh(); }
-    const before = state, title = k && resolve(state[from || 'cart'].find(x => keyOf(x) === k))?.title;
+    const before = state, title = k && resolve(state[from || 'cart'].find(x => keyOf(x) === k), from || 'cart')?.title;
     notice = null;
     if (ct === 'qty') { const l = state.cart.find(x => keyOf(x) === k); state = setQty(state, k, l.qty + +b.dataset.d); }
     if (ct === 'remove') { state = remove(state, from, k); notice = { text: `Removed ${title}.`, undo: before }; }

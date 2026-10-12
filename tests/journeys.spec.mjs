@@ -258,11 +258,12 @@ test.describe('cookie choice', () => {
 const cartDrawer = (page) => page.locator('dialog.ct');
 const openCart = async (page, isMobile) => { if (!(await cartDrawer(page).isVisible())) await page.locator(isMobile ? '.runhead-bag [data-open=cart], [data-open=cart]' : '[data-open=cart]').first().click(); };
 
-test('Care: a refill kit for a chamber goes in the cart as a kit line', async ({ page, isMobile }) => {
+test('Care: a refill kit for my plants goes in the cart as a kit line', async ({ page, isMobile }) => {
   const errs = errorsOf(page);
   await page.goto('/care.html');
   const planner = page.locator('#carePlanner');
-  await planner.locator('select[name=r]').selectOption('MossBox');
+  await expect(planner.locator('select[name=r] option[value=MossBox]')).toHaveCount(0);   // chambers are coming soon: nobody owns one
+  await planner.getByRole('checkbox', { name: /^Moss/ }).check();
   await expect(planner.locator('.care-kit h3')).toHaveText(['Moss refill kit']);
   await planner.getByRole('button', { name: 'Add kit to cart' }).click();
   await openCart(page, isMobile);
@@ -308,16 +309,19 @@ test('Care: a custom box from the Maker is quoted, and its plan opens prefilled'
   await expect(planner.locator('.care-price')).toHaveText('Quoted by the studio');
 });
 
-test('Care: product page offers the matching kit and a prefilled visit plan', async ({ page }) => {
+test('Care: planter page offers a prefilled visit plan; chamber pages register interest instead', async ({ page }) => {
+  await page.goto('/product.html#V1-PLT-005');
+  await expect(page.locator('.pd-care').getByRole('link', { name: 'Plan care visits' })).toHaveAttribute('href', /^\/care#s=piece.*r=V1-PLT-005/);
   await page.goto('/product.html#MossBox');
-  const block = page.locator('.pd-care');
-  await expect(block.getByRole('button', { name: 'Add Moss refill kit' })).toBeVisible();
-  await expect(block.getByRole('link', { name: 'Plan care visits' })).toHaveAttribute('href', /^\/care#s=piece.*r=MossBox/);
+  await expect(page.locator('.pd-care')).toHaveCount(0);
+  await expect(page.locator('.pd-buy').getByRole('link', { name: /Register interest/ })).toHaveAttribute('href', /wa\.me/);
+  await expect(page.locator('.pd-buy [data-add-line]')).toHaveCount(0);
 });
 
-test('Cart suggests the matching kit and visits; adding the kit removes it from the list', async ({ page, isMobile }) => {
-  await page.goto('/product.html#MossBox');
-  await page.locator(isMobile ? '#pdMobileCta [data-add-line]' : '.pd-buy [data-add-line]').first().click();
+test('Cart suggests the matching kit and visits; adding the kit removes it from the list', async ({ page }) => {
+  await page.goto('/maker#c=MossBox&s=studio&p=PLT-036&n=QA');        // a Maker design (chambers alone can't be carted)
+  await page.locator('.mk-step[data-to=review]').click();
+  await page.locator('[data-key=cart]').click();
   const sug = cartDrawer(page).locator('.ct-suggest');
   await expect(sug.locator('.ct-suggest-name')).toHaveText(['Moss refill kit', 'Care visits']);
   await sug.getByRole('button', { name: /Add/ }).click();

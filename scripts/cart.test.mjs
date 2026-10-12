@@ -15,7 +15,16 @@ assert.equal(resolve(capsule).kind, 'fixed');
 assert.equal(resolve(capsule).unit, 529);
 assert.equal(resolve(stack).unit, 1799);
 assert.equal(resolve(soon).kind, 'enquiry');
-assert.deepEqual(resolve(moss).range, parseRange('₹6,000 – ₹9,000'));
+// Coming-soon chambers: savable, never in the cart (studio decision, 12 Oct 2026).
+assert.equal(resolve(moss), null);
+assert.deepEqual(resolve(moss, 'saved').range, parseRange('₹6,000 – ₹9,000'));
+assert.equal(resolve(moss, 'saved').cartable, false);
+assert.deepEqual(add(emptyCart(), 'cart', moss), emptyCart());
+const sv = add(emptyCart(), 'saved', moss);
+assert.equal(sv.saved.length, 1);
+assert.deepEqual(move(sv, 'saved', keyOf(moss)), sv);                 // refused, and not lost from Saved
+assert.deepEqual(clean({ cart: [moss], saved: [moss] }).cart, []);
+assert.equal(clean({ cart: [moss], saved: [moss] }).saved.length, 1);
 assert.equal(resolve(build).kind, 'custom');
 
 // Unknown or mismatched ids never resolve.
@@ -39,11 +48,11 @@ assert.equal(setQty(s, keyOf(capsule), 99).cart[0].qty, 20);
 // Totals: fixed exact, ranges carried, unpriced counted.
 const r = (lines) => totals(lines.map(resolve));
 assert.deepEqual(r([capsule, stack]), { items: 2, fixed: 2328, low: 2328, high: 2328, ranged: false, quoted: 0 });
-const mixed = r([{ ...capsule, qty: 2 }, soon, moss]);
+const mixed = r([{ ...capsule, qty: 2 }, soon, build]);       // the build carries the chamber's range
 assert.equal(mixed.fixed, 1058);
 assert.equal(mixed.low, 1058 + 6000);
 assert.equal(mixed.high, 1058 + 9000);
-assert.equal(mixed.quoted, 1);
+assert.equal(mixed.quoted, 1 + 2);
 // Build: chamber range + foundation (studio's choice, unpriced) + 1 unpriced plant → 2 quoted.
 const bt = buildTotal(resolve(build));
 assert.deepEqual([bt.low, bt.high, bt.quoted], [6000, 9000, 2]);
@@ -64,10 +73,9 @@ assert.deepEqual(c.saved, []);
 assert.deepEqual(clean(null), emptyCart());
 
 // Order text carries every line, how it's priced, and the tallies.
-const text = orderText([{ ...capsule, qty: 2 }, soon, moss, build].map(resolve));
+const text = orderText([{ ...capsule, qty: 2 }, soon, build].map(l => resolve(l)));
 assert.match(text, /Capsule Planter · ABS: ₹529 × 2 = ₹1,058/);
 assert.match(text, /TerraMesh Planter.*on enquiry/);
-assert.match(text, /Moss chamber.*guide ₹6,000 – ₹9,000/);
 assert.match(text, /custom build/);
 assert.match(text, /earthbox\.in\/maker#c=MossBox/);
 assert.match(text, /Priced items: ₹1,058/);
