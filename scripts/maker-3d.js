@@ -876,13 +876,18 @@ export function create3D({ onLost } = {}){
     },
     // Plant thumbnail (data URL) or undefined until it's drawn.
     thumb: (id) => thumbCache.get(id),
-    // Draw every thumbnail a few per frame; `done` runs after each batch.
+    // Draw every thumbnail, one per idle moment; `done` runs after each.
     // Waits for the plants' models first (the line drawings show meanwhile).
-    thumbs(list, done){
+    // Was 6 per frame with no break: on slow phones that froze the page for
+    // seconds and swallowed taps (QA-010; CI's guided-search flake site-ktu).
+    // `paused()` holds the work while a dialog is open over the Maker.
+    thumbs(list, done, { paused = () => false } = {}){
       const todo = list.filter(p => !thumbCache.has(p.id));
+      const idle = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 500 }) : setTimeout(fn, 50));
       const step = () => {
         if (lost) return;
-        const batch = todo.splice(0, 6);
+        if (paused()) { setTimeout(step, 300); return; }
+        const batch = todo.splice(0, 1);
         for (const p of batch){
           const g = new THREE.Group(), m = plantMesh(p), { h, r } = sizeOf(p);
           const disc = puck.clone();
@@ -897,9 +902,9 @@ export function create3D({ onLost } = {}){
         }
         restore();
         if (batch.length) done();
-        if (todo.length) requestAnimationFrame(step);
+        if (todo.length) idle(step);
       };
-      Promise.all(pendingFor(todo)).then(() => requestAnimationFrame(step));
+      Promise.all(pendingFor(todo)).then(() => idle(step));
     },
     // A finished terrarium as an image (recipe cards). Cached by `key`.
     // While its models load it returns the procedural version (not cached),

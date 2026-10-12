@@ -503,3 +503,18 @@ test('cart: a Maker design shows its chamber drawing, not a letter', async ({ pa
   await page.locator('[data-key=cart]').click();
   await expect(page.locator('dialog.ct .ct-line--custom .ct-thumb img')).toHaveAttribute('src', /assets\/boxes\/moss\.svg$/);
 });
+
+// When the 3D view arrives it must not rebuild the Maker's buttons: on slow
+// phones a tap landed on a button replaced mid-press and did nothing (CI
+// flake site-ktu, 12 Oct 2026). Delay 3D, tag the button, let 3D arrive.
+test('Maker: the 3D view arriving late does not rebuild buttons', async ({ page }) => {
+  await page.route('**/scripts/maker-3d.js', async r => { await new Promise(res => setTimeout(res, 2500)); await r.continue(); });
+  await page.goto('/maker#c=MossBox&s=studio&p=PLT-036');
+  await page.locator('.mk-step[data-to=plants]').click();
+  const guide = page.locator('[data-act=guide]');
+  await guide.evaluate(el => { el.dataset.qaSame = '1'; });
+  await expect(page.locator('#mkPreview canvas')).toBeVisible({ timeout: 15_000 });   // 3D arrived
+  await expect(guide).toHaveAttribute('data-qa-same', '1');                         // same element, not rebuilt
+  await guide.click();
+  await expect(page.locator('#mkGuide')).toBeVisible();
+});

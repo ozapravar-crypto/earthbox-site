@@ -667,13 +667,7 @@ export function initMaker(){
     if (stage === 'start'){ renderStart(); return; }
 
     $('mkSteps').innerHTML = stepsHTML(b, stage);
-    const ch = chamberOf(b);
-    const caption = ch ? `${ch.name} · indicative. The studio places every specimen by hand.` : 'Choose a chamber to begin';
-    const fig = $('mkPreview');
-    if (view3d){
-      view3d.show(fig, sceneSpec(b), { fresh: ui.fresh, label: describe(b) });
-      fig.append(Object.assign(fig.querySelector('figcaption') || document.createElement('figcaption'), { className: 'caption', textContent: caption }));
-    } else fig.innerHTML = previewSVG(b, { fresh: ui.fresh, label: describe(b) }) + `<figcaption class="caption">${caption}</figcaption>`;
+    renderPreview();
     const panel = { chamber: chamberPanel, foundation: foundationPanel, plants: plantsPanel, space: spacePanel, review: reviewPanel }[stage];
     const notice = ui.notice ? `<div class="mk-notice" role="status"><p>${ui.notice.text}</p>
       ${ui.notice.undo ? '<button type="button" class="cta cta-secondary cta-small" data-act="undo" data-key="undo">Undo</button>' : ''}</div>` : '';
@@ -684,6 +678,26 @@ export function initMaker(){
     if (stage === 'plants') startThumbs();
 
     if (key) document.querySelector(`[data-key="${key}"]:not([disabled])`)?.focus({ preventScroll: true });
+  }
+
+  // The preview only (3D, or the drawing). Called on its own when the 3D view
+  // arrives, so the buttons aren't rebuilt under a visitor's tap.
+  function renderPreview(){
+    const ch = chamberOf(b);
+    const caption = ch ? `${ch.name} · indicative. The studio places every specimen by hand.` : 'Choose a chamber to begin';
+    const fig = $('mkPreview');
+    if (view3d){
+      view3d.show(fig, sceneSpec(b), { fresh: ui.fresh, label: describe(b) });
+      fig.append(Object.assign(fig.querySelector('figcaption') || document.createElement('figcaption'), { className: 'caption', textContent: caption }));
+    } else fig.innerHTML = previewSVG(b, { fresh: ui.fresh, label: describe(b) }) + `<figcaption class="caption">${caption}</figcaption>`;
+  }
+
+  // The start screen's big picture: 3D when available, else the drawing.
+  function renderHeroArt(){
+    const hero = recipes[0];
+    const hb = { ...emptyBuild(), chamber: hero.chamber, substrate: hero.substrate, plants: hero.plants };
+    if (view3d) view3d.show($('mkHeroArt'), sceneSpec(hb), { label: 'A finished Moss chamber with three mosses.' });
+    else $('mkHeroArt').innerHTML = previewSVG(hb, { label: 'A finished Moss chamber with three mosses' });
   }
 
   function renderStart(){
@@ -703,10 +717,7 @@ export function initMaker(){
         <span class="mk-card-meta">${chamberOf(rb).name} chamber · ${r.plants.length} plants</span>
       </button></li>`;
     }).join('');
-    const hero = recipes[0];
-    const hb = { ...emptyBuild(), chamber: hero.chamber, substrate: hero.substrate, plants: hero.plants };
-    if (view3d) view3d.show($('mkHeroArt'), sceneSpec(hb), { label: 'A finished Moss chamber with three mosses.' });
-    else $('mkHeroArt').innerHTML = previewSVG(hb, { label: 'A finished Moss chamber with three mosses' });
+    renderHeroArt();
   }
 
   // Every state change goes through here.
@@ -893,7 +904,21 @@ export function initMaker(){
     import('./maker-3d.js').then(({ create3D }) => {
       view3d = create3D({ onLost(){ view3d = null; render(); } });
       if (!view3d) return;
-      render();
+      // Swap pictures in place. A full render() here rebuilt every button
+      // while 3D loaded, so on slow phones a tap could land on a button that
+      // was replaced mid-press and do nothing (CI flake site-ktu).
+      if (stage === 'start') {
+        renderHeroArt();
+        recipes.forEach(r => {
+          const art = $('mkRecipes')?.querySelector(`[data-id="${r.id}"] .mk-recipe-art`);
+          const rb = { ...emptyBuild(), chamber: r.chamber, substrate: r.substrate, plants: r.plants };
+          const still = art && view3d.still(r.id, sceneSpec(rb), 300, 440, (src) => { const img = art.querySelector('img'); if (img && src) img.src = src; });
+          if (still) art.innerHTML = `<img src="${still}" alt="${esc(describe(rb))}" width="150" height="220">`;
+        });
+      } else {
+        renderPreview();
+        if (stage === 'plants') startThumbs();
+      }
     }).catch(() => { view3d = null; });
   }
 
@@ -908,6 +933,6 @@ export function initMaker(){
         const src = view3d?.thumb(svg.dataset.thumb);
         if (src) svg.outerHTML = `<img class="mk-thumb" src="${src}" alt="" width="56" height="64">`;
       });
-    });
+    }, { paused: () => !!document.querySelector('dialog[open]') });   // guided search or the cart is open
   }
 }
