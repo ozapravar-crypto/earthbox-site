@@ -4,6 +4,7 @@
 |---|---|---|---|---|
 | `three.module.min.js` | three.js, official ES-module build | r160 (`three@0.160.0`) | `https://unpkg.com/three@0.160.0/build/three.module.min.js` (sha256 `3e690ac7…f69ba6`) | MIT, see `three.LICENSE` |
 | `GLTFLoader.js` | three.js glTF loader (reads the Maker's plant models) | r160 (`three@0.160.0`) | `https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js` (sha256 of the original `d073b438…40e6a3`) | MIT, see `three.LICENSE` |
+| `lenis.js` | Lenis smooth scroll (desktop mouse/trackpad; `motion-scroll.js`) | `lenis@1.3.26` | `https://unpkg.com/lenis@1.3.26/dist/lenis.mjs`, saved as `.js` (dist/ serves `.js` only) without its source-map line (original sha256 `b7a2f689…`) | MIT (darkroom.engineering) |
 | `BufferGeometryUtils.js` | the one import GLTFLoader needs | r160 (`three@0.160.0`) | `https://unpkg.com/three@0.160.0/examples/jsm/utils/BufferGeometryUtils.js` (sha256 `9be041e9…92becb`) | MIT, see `three.LICENSE` |
 
 Served from our own origin because the CSP (`vercel.json`) allows no script CDN.

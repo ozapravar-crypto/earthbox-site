@@ -22,7 +22,7 @@ import { initRunhead }       from './runhead.js';
 import { initMenu }          from './menu.js';
 import { initReveal }        from './reveal.js';
 import { initManifesto }  from './manifesto-spotlight.js';
-import { initParallax }   from './parallax.js';
+import { initScrollMotion } from './motion-scroll.js';
 import { initPin }        from './pin.js';
 import { initCursor }     from './cursor.js';
 import { initMagnetic }   from './magnetic.js';
@@ -70,7 +70,7 @@ const boot = async () => {
   initReveal();       // Must run before catalogue so observeReveals() works
   await initPage();
   initManifesto();
-  initParallax();
+  initScrollMotion();
   initPin();
   initCursor();
   initMagnetic();
