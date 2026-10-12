@@ -76,6 +76,7 @@ for (const theme of THEMES) {
   test(`CQ-004 "Coming soon" badges pass (${theme})`, async ({ page }) => {
     await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
     await page.goto('/products.html');
+    await page.waitForSelector('#volumeOneList .v1-card');   // drawn by script; measured too early it found nothing (flaky)
     expect(await failures(page, '#volumeOneList', 'default')).toEqual([]);
   });
 }

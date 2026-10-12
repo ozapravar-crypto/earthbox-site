@@ -4,7 +4,7 @@ import js from '@eslint/js';
 import globals from 'globals';
 
 export default [
-  { ignores: ['node_modules/**', 'scripts/vendor/**', 'assets/**', '.claude/**', '_audits/**', 'qa/reports/**',
+  { ignores: ['node_modules/**', 'dist/**', 'scripts/vendor/**', 'assets/**', '.claude/**', '_audits/**', 'qa/reports/**',
     // local-only image tools (gitignored)
     'scripts/optimize-images.*', 'scripts/generate-responsive.cjs'] },
   js.configs.recommended,

@@ -5,7 +5,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { serve } from './serve.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+// `node qa/serve-cli.mjs [port] [folder]`: folder defaults to the repo; tests serve dist/ (what goes live).
+const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const port = +(process.argv[2] || 4173);
+const root = path.resolve(repo, process.argv[3] || '.');
 await serve(root, port);
 console.log(`serving ${root} on http://localhost:${port}`);

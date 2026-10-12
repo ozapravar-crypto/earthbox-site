@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
       - run: npm test
 
   browser:
@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test
       - uses: actions/upload-artifact@v4
@@ -47,8 +47,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
       - run: npx playwright install chromium
+      - run: node scripts/dist.mjs   # Lighthouse audits dist/, what Vercel serves
       # Accessibility, SEO and best practices are hard limits; performance warns
       # (single runs vary). Budgets: lighthouserc.json.
       - run: CHROME_PATH=$(node -e "console.log(require('@playwright/test').chromium.executablePath())") npx --yes @lhci/cli@0.15.1 autorun
@@ -64,7 +65,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
       # Exits 1 on any confirmed failure not accepted (with a written reason)
       # in qa/contrast/baseline.json. The report is uploaded either way.

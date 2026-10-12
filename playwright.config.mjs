@@ -23,7 +23,8 @@ export default defineConfig({
   // doesn't cover what tests click. The banner's own tests clear it.
   use: { baseURL: BASE, reducedMotion: 'reduce',
     storageState: { cookies: [], origins: [{ origin: new URL(BASE).origin, localStorage: [{ name: 'earthbox-consent', value: 'denied' }] }] } },
-  webServer: { command: 'node qa/serve-cli.mjs 4173', port: 4173, reuseExistingServer: true, stdout: 'ignore', stderr: 'ignore' },
+  // Tests run against dist/, the allow-listed copy Vercel serves (scripts/dist.mjs).
+  webServer: { command: 'node scripts/dist.mjs && node qa/serve-cli.mjs 4173 dist', port: 4173, reuseExistingServer: true, stdout: 'ignore', stderr: 'ignore' },
   projects: [
     { name: 'desktop', use: { viewport: { width: 1440, height: 900 } } },
     { name: 'phone', use: { ...devices['Pixel 7'], browserName: 'chromium' } },
