@@ -35,7 +35,6 @@ function applyTheme(theme) {
 function updateAllToggles(theme) {
   document.querySelectorAll('.theme-toggle').forEach(toggle => {
     toggle.classList.toggle('is-dark', theme === 'dark');
-    toggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
     toggle.setAttribute('aria-checked', theme === 'dark' ? 'true' : 'false');
   });
 }
@@ -52,7 +51,8 @@ export function createToggle(theme) {
   toggle.className = 'theme-toggle' + (theme === 'dark' ? ' is-dark' : '');
   toggle.type = 'button';
   toggle.setAttribute('role', 'switch');
-  toggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  // One fixed name; the switch state says on/off (iconography audit S5).
+  toggle.setAttribute('aria-label', 'Dark mode');
   toggle.setAttribute('aria-checked', theme === 'dark' ? 'true' : 'false');
   toggle.innerHTML = `
     <span class="toggle-track">

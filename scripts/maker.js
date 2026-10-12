@@ -16,6 +16,7 @@ import { chambers, plants, substrates, elements, recipes,
          chamberElements, spaceQuestions, forms, guide } from '../data/maker.js';
 import { enquiryAltHTML, ENQUIRY_PHONE } from './enquiry-form.js';
 import { syncCartButtons } from './cart.js';
+import { icon } from '../data/icons.js';
 import { groupsOf, kitFor, encodePlan } from './care.js';
 import { emptyDiscovery, searchPlants, dropChip, clearGuided, climateOrder } from './plant-search.js';
 
@@ -247,8 +248,8 @@ function stepsHTML(b, stage){
     const tick = s !== 'review' && done(b, s) && STAGES.indexOf(s) < STAGES.indexOf(stage);
     return `<li><button type="button" class="mk-step${now ? ' is-current' : ''}${tick ? ' is-done' : ''}"
       data-act="goto" data-to="${s}" data-key="step-${s}" ${now ? 'aria-current="step"' : ''} ${open ? '' : 'disabled'}>
-      <span class="mk-step-n">${s === 'review' ? '✓' : String(i + 1).padStart(2, '0')}</span><span class="mk-step-label">${LABEL[s]}</span>
-      ${tick ? '<span class="u-sr-only">(done)</span>' : ''}</button></li>`;
+      <span class="mk-step-n">${tick ? icon('check') : String(i + 1).padStart(2, '0')}</span><span class="mk-step-label">${LABEL[s]}</span>
+      ${tick ? '<span class="u-sr-only">, completed</span>' : ''}</button></li>`;   // ✓ = done, not "review" (audit M1/X3)
   }).join('')}</ol>
   <p class="mk-steps-compact caption">${stage === 'review' ? 'Review' : `Step ${STEPS.indexOf(stage) + 1} of 4`}</p>`;
 }
@@ -323,9 +324,10 @@ function plantAction(b, p, ch){
       aria-label="Switch to the ${home.name} chamber and add ${esc(p.name)}">Use ${home.name}</button>`;
   }
   const full = !on && b.plants.length >= capacity(ch);
+  // A toggle: the name stays "Add <plant>" and aria-pressed carries the state
+  // (iconography audit M2; the name used to flip to "Remove …" while showing "Added").
   return `<button type="button" class="mk-add${on ? ' is-on' : ''}" data-act="plant" data-id="${p.id}" data-key="pl-${p.id}"
-    aria-pressed="${on}" ${full ? 'disabled' : ''} aria-label="${on ? 'Remove' : 'Add'} ${esc(p.name)}">
-    ${on ? 'Added ✓' : full ? 'Full' : 'Add'}</button>`;
+    aria-pressed="${on}" ${full ? 'disabled' : ''}>${on ? icon('check') : ''}<span>${full ? 'Full' : 'Add'}</span><span class="u-sr-only"> ${esc(p.name)}</span></button>`;
 }
 
 // Only what the studio has published. Empty workbook columns say so, never guess.
@@ -550,7 +552,7 @@ function reviewPanel(b){
   <div class="mk-send">
     <div class="pd-buy">
       <button type="button" class="cta" data-add-line="${esc(JSON.stringify(cartLine(b)))}" data-key="cart">Add to cart ${arrow}</button>
-      <button type="button" class="cta cta-secondary save-btn" data-save-line="${esc(JSON.stringify(cartLine(b)))}" aria-pressed="false" data-key="save"><span>Save</span><span class="u-sr-only"> design</span></button>
+      <button type="button" class="cta cta-secondary save-btn" data-save-line="${esc(JSON.stringify(cartLine(b)))}" aria-pressed="false" data-key="save">${icon('heart')}<span>Save</span><span class="u-sr-only"> design</span></button>
     </div>
     <p class="mk-sub">The cart tallies this build with anything else you add. Or send just this design:</p>
     <a class="cta cta-secondary cta-block" href="${whatsappHref(b)}" target="_blank" rel="noopener" data-act="send" data-key="send">Send this design on WhatsApp ${arrow}</a>

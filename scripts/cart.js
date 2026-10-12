@@ -300,7 +300,7 @@ function refresh(){
   document.querySelectorAll('[data-saved-count]').forEach(el => { el.textContent = state.saved.length; });
   document.querySelectorAll('[data-save-line]').forEach(btn => {
     const on = has('saved', JSON.parse(btn.dataset.saveLine));
-    btn.setAttribute('aria-pressed', on); btn.querySelector('span').textContent = on ? 'Saved' : 'Save';
+    btn.setAttribute('aria-pressed', on);   // the label stays "Save"; the heart fills (iconography audit P2)
   });
   if (dlg?.open) {
     const focusKey = document.activeElement?.closest('[data-ct]') && [document.activeElement.dataset.ct, document.activeElement.dataset.k, document.activeElement.dataset.d, document.activeElement.dataset.tab].join();

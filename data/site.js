@@ -114,7 +114,7 @@ ${li(first.links.map(l => `<a href="${link(prefix, l.href)}">${l.label}</a>`))}
         <li><a href="tel:+${PHONE}">${PHONE_DISPLAY}</a></li>
         <li class="colo-social">
 ${SOCIAL.map(s => `          <a href="${s.href}" target="_blank" rel="noopener" aria-label="${s.label}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${s.svg}</svg>
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${s.svg}</svg>
           </a>`).join('\n')}
         </li>
         <li>${ADDRESS}</li>

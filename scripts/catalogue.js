@@ -21,6 +21,7 @@ function setActiveTab(volNum, isUserAction = false){
     const isActive = p.dataset.vol === String(volNum);
     p.classList.toggle('is-active', isActive);
     p.setAttribute('aria-selected', String(isActive));
+    p.tabIndex = isActive ? 0 : -1;   // one Tab stop; arrows move between tabs
   });
 
   let activePanel = null;
@@ -140,6 +141,14 @@ function renderSearchResults(query, items){
 // ─── Boot ───
 export function initCatalogue(){
   const pills = document.querySelectorAll('.vol-pill');
+  // Tabs keyboard pattern (iconography audit C1): arrows, Home/End.
+  pills.forEach((p, i) => p.addEventListener('keydown', (e) => {
+    const n = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: pills.length - 1 }[e.key];
+    if (n === undefined) return;
+    e.preventDefault();
+    const next = pills[(n + pills.length) % pills.length];
+    next.click(); next.focus();
+  }));
   if (!pills.length) return;
 
   const index = buildIndex();

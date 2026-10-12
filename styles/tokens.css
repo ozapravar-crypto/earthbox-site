@@ -40,6 +40,12 @@
   --dur-draw:    1.6s;
 
   /* CURSOR (pass 2) */
+  /* Icons (data/icons.js, iconography audit §7.2) */
+  --icon-xs: 12px; --icon-sm: 16px; --icon-md: 20px; --icon-lg: 24px;
+  --icon-stroke: 1.5;
+  --icon-gap: .5em;
+  --icon-target: 44px;
+
   --cursor-ring-size: 32px;
   --cursor-dot-size:  4px;
 }

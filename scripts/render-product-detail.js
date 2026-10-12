@@ -19,6 +19,7 @@ import { enquiryAltHTML } from './enquiry-form.js';
 import { syncCartButtons } from './cart.js';
 import { groupsOf, kitFor, encodePlan } from './care.js';
 import { elements, chamberElements } from '../data/maker.js';
+import { icon } from '../data/icons.js';
 
 
 
@@ -71,7 +72,7 @@ function buyHTML(line, waHref, name){
   return `
     <div class="pd-buy">
       <button type="button" class="cta magnetic pd-cta" data-add-line="${attr(line)}" data-cursor="ADD">Add to cart ${ARROW}</button>
-      <button type="button" class="cta cta-secondary save-btn" data-save-line="${attr(line)}" aria-pressed="false"><span>Save</span><span class="u-sr-only"> ${name}</span></button>
+      <button type="button" class="cta cta-secondary save-btn" data-save-line="${attr(line)}" aria-pressed="false">${icon('heart')}<span>Save</span><span class="u-sr-only"> ${name}</span></button>
     </div>
     <a class="pd-alt-wa" id="pdEnquiryCta" href="${waHref}" target="_blank" rel="noopener">Or ask on WhatsApp</a>`;
 }
@@ -87,12 +88,12 @@ function formatReviewDate(isoDate){
   return date.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
 }
 
+// Five stars read as one sentence, not five unnamed pictures (audit P5).
 function renderStars(rating){
-  return Array.from({ length: 5 }, (_, i) => `
-    <svg viewBox="0 0 12 12" class="${i < rating ? 'filled' : ''}">
+  return `<span class="pd-stars" role="img" aria-label="Rated ${rating} out of 5">${Array.from({ length: 5 }, (_, i) => `
+    <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false" class="${i < rating ? 'filled' : ''}">
       <path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="currentColor"/>
-    </svg>
-  `).join('');
+    </svg>`).join('')}</span>`;
 }
 
 function renderReviewsSection(sku){
@@ -125,7 +126,7 @@ function renderReviewsSection(sku){
         <span class="pd-reviews-count">${reviews.length} ${reviews.length === 1 ? 'review' : 'reviews'}</span>
         ${avgRating ? `
           <span class="pd-reviews-avg">
-            <svg viewBox="0 0 12 12"><path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="currentColor"/></svg>
+            <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false"><path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="currentColor"/></svg>
             ${avgRating}
           </span>
         ` : ''}
@@ -144,7 +145,7 @@ function renderReviewsSection(sku){
             <p class="pd-review-text">${r.text}</p>
             ${r.verified ? `
               <span class="pd-review-verified">
-                <svg viewBox="0 0 12 12"><path d="M10 3L4.5 8.5 2 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false"><path d="M10 3L4.5 8.5 2 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Verified Purchase
               </span>
             ` : ''}
@@ -153,7 +154,7 @@ function renderReviewsSection(sku){
       </div>
       <div class="pd-reviews-footer">
         <a class="pd-review-link" href="${googleReviewUrl}" target="_blank" rel="noopener">
-          <svg viewBox="0 0 12 12"><path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="currentColor"/></svg>
+          <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false"><path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="currentColor"/></svg>
           Leave a review on Google
         </a>
       </div>
@@ -264,10 +265,10 @@ function renderPrinted(p){
 
           ${hasVariants ? `
             <div class="pd-selector" data-selector="variant">
-              <label class="caption">Size / Variant</label>
-              <div class="pd-selector-options">
+              <span class="caption" id="pdVariantLabel">Size / Variant</span>
+              <div class="pd-selector-options" role="radiogroup" aria-labelledby="pdVariantLabel">
                 ${p.variants.map((v, i) => `
-                  <button class="pd-selector-btn ${i === 0 ? 'active' : ''}" data-variant="${v.id}">
+                  <button type="button" role="radio" aria-checked="${i === 0}" tabindex="${i === 0 ? 0 : -1}" class="pd-selector-btn ${i === 0 ? 'active' : ''}" data-variant="${v.id}">
                     <span class="pd-selector-name">${v.name}</span>
                     <span class="pd-selector-desc">${v.description}</span>
                   </button>
@@ -278,12 +279,12 @@ function renderPrinted(p){
 
           ${hasPricing && availableMaterials.length > 0 ? `
             <div class="pd-selector" data-selector="material">
-              <label class="caption">Material</label>
-              <div class="pd-selector-options pd-selector-options--inline">
+              <span class="caption" id="pdMaterialLabel">Material</span>
+              <div class="pd-selector-options pd-selector-options--inline" role="radiogroup" aria-labelledby="pdMaterialLabel">
                 ${availableMaterials.map((m, i) => {
                   const mat = materials.find(x => x.id === m) || { id: m, name: m.toUpperCase(), description: '' };
                   return `
-                    <button class="pd-selector-btn pd-selector-btn--chip ${i === 0 ? 'active' : ''}" data-material="${m}">
+                    <button type="button" role="radio" aria-checked="${i === 0}" tabindex="${i === 0 ? 0 : -1}" class="pd-selector-btn pd-selector-btn--chip ${i === 0 ? 'active' : ''}" data-material="${m}">
                       ${mat.name}
                     </button>
                   `;
@@ -323,7 +324,7 @@ function renderPrinted(p){
             </div>
             ${reviewCount > 0 ? `
               <a href="#reviews" class="pd-rating-badge">
-                <svg viewBox="0 0 12 12"><path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="currentColor"/></svg>
+                <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false"><path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="currentColor"/></svg>
                 <span>${avgRating} · ${reviewCount} ${reviewCount === 1 ? 'review' : 'reviews'}</span>
               </a>
             ` : ''}
@@ -412,25 +413,31 @@ function initPrintedSelectors(p){
     syncCartButtons();
   }
 
-  // Variant selector
-  document.querySelectorAll('[data-variant]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('[data-variant]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentVariant = btn.dataset.variant;
-      updatePrice();
+  // Size and material are radio groups (iconography audit P1): the choice is
+  // announced (aria-checked), Tab reaches the group once, arrows move within it.
+  const pick = (attr, btn) => {
+    document.querySelectorAll(`[${attr}]`).forEach(b => {
+      const on = b === btn;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-checked', String(on));
+      b.tabIndex = on ? 0 : -1;
     });
-  });
-
-  // Material selector
-  document.querySelectorAll('[data-material]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('[data-material]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentMaterial = btn.dataset.material;
-      updatePrice();
+    if (attr === 'data-variant') currentVariant = btn.dataset.variant; else currentMaterial = btn.dataset.material;
+    updatePrice();
+  };
+  for (const attr of ['data-variant', 'data-material']) {
+    const btns = [...document.querySelectorAll(`[${attr}]`)];
+    btns.forEach((btn, i) => {
+      btn.addEventListener('click', () => pick(attr, btn));
+      btn.addEventListener('keydown', (e) => {
+        const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+        if (!step) return;
+        e.preventDefault();
+        const next = btns[(i + step + btns.length) % btns.length];
+        pick(attr, next); next.focus();
+      });
     });
-  });
+  }
 }
 
 
