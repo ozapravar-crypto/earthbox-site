@@ -45,3 +45,18 @@ test('live: security headers and redirects', async ({ request }) => {
   const old = await request.get(SITE + '/about.html', { maxRedirects: 0 });
   expect(old.status()).toBe(308);
 });
+
+// After "Accept", Google Analytics must reach Google: the CSP once blocked
+// its www.google.com/g/collect hits, silently losing data (12 Oct 2026).
+test('live: analytics is not blocked by the CSP after Accept', async ({ page, context }) => {
+  await context.addInitScript(() => localStorage.removeItem('earthbox-consent'));
+  const blocked = [];
+  page.on('console', m => { if (/Content Security Policy|Refused to/i.test(m.text())) blocked.push(m.text().slice(0, 140)); });
+  const hits = [];
+  page.on('request', r => { if (/\/g\/collect/.test(r.url())) hits.push(r.url()); });
+  await page.goto(SITE + '/about', { waitUntil: 'load' });
+  await page.locator('.consent [data-consent=granted]').click();
+  await page.waitForTimeout(4000);
+  expect(blocked).toEqual([]);
+  expect(hits.length).toBeGreaterThan(0);
+});
