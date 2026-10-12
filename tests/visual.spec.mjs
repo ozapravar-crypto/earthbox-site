@@ -60,7 +60,7 @@ const STATES = [
   ['maker-review', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=review]').click(); }],
   ['care-visits', '/care.html', async p => { const c = p.locator('#carePlanner'); await c.getByText('Visits from the studio').click(); await c.locator('.care-result').scrollIntoViewIfNeeded(); }],
   ['product-points', '/product#SporeBox', async p => { await p.locator('.pd-point').nth(1).click(); await p.locator('[data-points]').scrollIntoViewIfNeeded(); }],
-  ['cart-suggestions', '/product.html#MossBox', async p => { await p.locator('.pd-buy [data-add-line], #pdMobileCta [data-add-line]').first().click(); }]
+  ['cart-suggestions', '/maker#c=MossBox&s=studio&p=PLT-036', async p => { await p.locator('.mk-step[data-to=review]').click(); await p.locator('[data-key=cart]').click(); }]
 ];
 for (const [name, path, setup] of STATES) {
   test(`visual state: ${name}`, async ({ page }) => {
