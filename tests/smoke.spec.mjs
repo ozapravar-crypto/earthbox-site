@@ -12,6 +12,8 @@ const PAGES = ['/', '/products.html', '/product.html#V1-PLT-005', '/product.html
 function watch(page){
   const problems = [];
   page.on('pageerror', e => problems.push(`error: ${e.message}`));
+  // The local server sends vercel.json's CSP (no inline scripts): any block is a bug.
+  page.on('console', m => { if (m.type() === 'error' && /Content Security Policy/i.test(m.text())) problems.push(`csp: ${m.text().slice(0, 160)}`); });
   page.on('response', r => { if (r.status() >= 400 && !KNOWN_404.some(k => k.test(r.url()))) problems.push(`${r.status()} ${r.url()}`); });
   return problems;
 }

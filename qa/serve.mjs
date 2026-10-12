@@ -2,12 +2,21 @@
 // afterwards), parallel-safe, and supports byte ranges for the home film.
 // Python's http.server (listen backlog 5) stalled under parallel browsers.
 import http from 'node:http';
-import { createReadStream, existsSync, statSync } from 'node:fs';
+import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css',
   '.json': 'application/json', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.png': 'image/png',
   '.mp4': 'video/mp4', '.glb': 'model/gltf-binary', '.xml': 'application/xml', '.txt': 'text/plain', '.ico': 'image/x-icon' };
+
+// The site-wide headers from vercel.json (CSP etc.), so local tests run under
+// the same rules as production: a script the CSP blocks fails here too.
+const SITE_HEADERS = (() => {
+  try {
+    const cfg = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
+    return (cfg.headers.find(h => h.source === '/(.*)')?.headers || []).filter(h => h.key !== 'Strict-Transport-Security').map(h => [h.key, h.value]);
+  } catch { return []; }
+})();
 
 export function serve(root, port){
   const server = http.createServer((req, res) => {
@@ -26,6 +35,7 @@ export function serve(root, port){
       res.writeHead(404, { 'content-type': 'text/plain' }).end('not found'); return;
     }
     const type = TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream';
+    for (const [k, val] of SITE_HEADERS) res.setHeader(k, val);   // same security headers as Vercel
     const m = /bytes=(\d*)-(\d*)/.exec(req.headers.range || '');
     if (m) {
       const start = m[1] ? +m[1] : 0, end = m[2] ? Math.min(+m[2], st.size - 1) : st.size - 1;

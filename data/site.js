@@ -65,16 +65,12 @@ const link = (prefix, h) => (h.startsWith('#') || h.startsWith('/') ? h : prefix
 // "about.html" → "/about", "index.html" → "/", "blog/x.html" → "/blog/x".
 export const cleanPath = (file) => `/${file.replace(/\.html$/, '').replace(/(^|\/)index$/, '')}`;
 
-// Analytics waits for consent: the gtag() queue is set up here, but
-// Google's script only loads after "Accept" (scripts/consent.js). Stamped
+// Analytics waits for consent: Google's script only loads after "Accept"
+// (scripts/consent.js). Stamped
 // into every page's <head> by includes.mjs, between the two markers.
+// No inline script: the gtag queue is set up inside consent.js, so the CSP
+// can forbid inline scripts (production discovery R6).
 export const analyticsHTML = ({ prefix = '' } = {}) => `<!-- Analytics -->
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-1HHZETMVWP');
-  </script>
   <script src="${prefix}scripts/consent.js" defer></script>
   <!-- /Analytics -->`;
 

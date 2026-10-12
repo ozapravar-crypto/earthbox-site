@@ -267,7 +267,7 @@ function chamberPanel(b){
     return `<button type="button" class="mk-card mk-chamber${on ? ' is-on' : ''}" data-act="chamber" data-id="${ch.sku}"
       data-key="ch-${ch.sku}" aria-pressed="${on}">
       <span class="mk-card-img"><img src="assets/boxes/${ch.photo.replace('.webp', '-300.webp')}" alt="" loading="lazy" width="300" height="240"
-        onerror="this.parentNode.classList.add('is-missing');this.remove()"></span>
+        data-fallback="parent:is-missing remove"></span>
       <span class="mk-card-body">
         <span class="mk-card-name">${ch.name}${ch.edition !== 'Standard' ? ` <span class="mk-tag">${ch.edition}</span>` : ''}</span>
         <span class="mk-card-desc">${ch.tagline}</span>

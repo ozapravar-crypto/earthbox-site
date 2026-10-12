@@ -10,7 +10,7 @@
 // ─────────────────────────────────────────────────────────────────────
 
 import { SITE, PHONE } from '../data/site.js';
-import { rupees, track } from './util.js';
+import { esc, rupees, track } from './util.js';
 import { volumeOne as v1Products, categories as v1Categories, materials, photoPath } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
 import { getReviews, getAverageRating } from '../data/reviews.js';
@@ -256,7 +256,7 @@ function renderPrinted(p){
       <section class="pd-showcase">
         <div class="pd-hero reveal">
           <div class="pd-hero-frame">
-            <img src="${photoPath(p)}" alt="${p.name}" width="1200" height="900" onerror="this.parentElement.classList.add('pd-hero-frame--placeholder')"/>
+            <img src="${photoPath(p)}" alt="${esc(p.name)}" width="1200" height="900" data-fallback="parent:pd-hero-frame--placeholder"/>
           </div>
         </div>
         <aside class="pd-body-side reveal" style="--d:120ms">
@@ -360,7 +360,7 @@ ${['planters', 'plant-packets', 'plant-support'].includes(p.category) ? careHTML
             ${related.map(o => `
               <a class="pd-related-card" href="/product#${encodeURIComponent(o.sku)}" data-cursor="VIEW">
                 <div class="pd-related-img">
-                  <img src="${photoPath(o, '600')}" alt="${o.name}" loading="lazy" onerror="this.style.display='none'"/>
+                  <img src="${photoPath(o, '600')}" alt="${esc(o.name)}" loading="lazy" data-fallback="hide"/>
                 </div>
                 <div class="pd-related-meta">
                   <span class="caption">Volume I</span>
