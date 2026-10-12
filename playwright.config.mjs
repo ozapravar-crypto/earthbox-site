@@ -14,6 +14,9 @@ export default defineConfig({
   // shows in the summary). Not a pass for something broken: a test that fails
   // twice fails the run. Known flake: bead site-ktu (tablet guided search).
   retries: process.env.CI ? 1 : 0,
+  // Locally, 2 workers: with 3 the machine is overloaded and pages miss the
+  // 5 s waits at random (site-fh6). CI picks its own.
+  workers: process.env.CI ? undefined : 2,
   fullyParallel: true,
   reporter: [['list']],
   // Every test starts with the cookie choice made (Decline), so the banner
