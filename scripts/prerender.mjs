@@ -16,6 +16,7 @@
  * Run:  npm run prerender    (or: node scripts/prerender.mjs)
  * Check: npm run check:prerender  — fails if any article page has no <h1>.
  */
+import { icon } from '../data/icons.js';
 import { readFile, writeFile } from 'node:fs/promises';
 import { readdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -36,7 +37,7 @@ const articleUrl = (slug) => `${SITE}/blog/${slug}`;
 
 function head(a) {
   return `
-    <a class="back-link" href="/blog">← Back to Journal</a>
+    <a class="back-link" href="/blog">${icon('arrow-left', { size: 'xs' })}Back to Journal</a>
     <h1 class="scramble">${esc(a.title)}</h1>
     <p class="article-subtitle">${esc(a.subtitle)}</p>
     <p class="article-byline">

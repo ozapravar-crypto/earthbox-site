@@ -81,7 +81,7 @@
 }
 .hero-proof li{display:inline-flex;align-items:center;gap:.75rem;padding-right:1.75rem;margin-right:1.75rem;border-right:1px solid rgba(251,248,242,.35)}
 .hero-proof li:last-child{border-right:0}
-.hero-proof svg{width:15px;height:15px;flex:none}
+.hero-proof svg{width:var(--icon-sm);height:var(--icon-sm);flex:none}
 
 .hero-card{
   grid-column:2;grid-row:2;align-self:end;

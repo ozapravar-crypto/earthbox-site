@@ -8,7 +8,8 @@
 // Keeps the desktop nav (centred links in runhead) untouched.
 // ─────────────────────────────────────────────────────────────────────
 
-import { TOP_NAV } from '../data/site.js';  // same list as the desktop header
+import { TOP_NAV } from '../data/site.js';
+import { icon } from '../data/icons.js';  // same list as the desktop header
 import { createToggle } from './theme.js';
 
 export function initMenu(){
@@ -42,7 +43,7 @@ export function initMenu(){
   panel.id = 'mobile-nav';
   panel.setAttribute('aria-hidden', 'true');
   panel.innerHTML = `
-    <button class="mobile-nav-close" type="button" aria-label="Close menu">×</button>
+    <button class="mobile-nav-close" type="button" aria-label="Close menu">${icon('x', { size: 'md' })}</button>
     <nav>
       <ul>
         ${TOP_NAV.map(l => {

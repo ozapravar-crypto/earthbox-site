@@ -3,7 +3,9 @@
  * includes.mjs — write the shared header + footer (data/site.js) into every
  * deployed page.
  *
- * Also the consent-gated analytics snippet in <head>.
+ * Also the consent-gated analytics snippet in <head>, and every functional
+ * icon written into a page (<svg class="icon icon-NAME" width="N" …>) is
+ * re-drawn from data/icons.js, so static pages can't drift from the registry.
  *
  * WHY: the same header and footer were hand-copied into 29 pages. Adding
  * "Maker" took 30 edits and the mobile menu was missed; the footers drifted
@@ -18,6 +20,7 @@ import { readFile, writeFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runheadHTML, footerHTML, analyticsHTML, NAV, cleanPath } from '../data/site.js';
+import { icon } from '../data/icons.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CHECK = process.argv.includes('--check');
@@ -44,6 +47,7 @@ for (const f of pages.sort()) {
     if (!re.test(html)) { console.error(`includes: ${f} has no ${re.source.slice(1, 16)}… block`); process.exit(1); }
     html = html.replace(re, () => block);
   }
+  html = html.replace(/<svg class="icon icon-([a-z0-9-]+)"[^>]*\swidth="(\d+)"[^>]*>[\s\S]*?<\/svg>/g, (_, name, w) => icon(name, { size: +w }));
   if (html === before) continue;
   stale.push(f);
   if (!CHECK) await writeFile(p, html, 'utf8');

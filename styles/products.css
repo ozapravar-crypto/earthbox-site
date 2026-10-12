@@ -251,14 +251,13 @@
 .search-overlay-input::placeholder{
   color:var(--mute);
 }
-.search-overlay-close{
-  padding:.25rem .5rem;
+.search-overlay-close{   /* was the text "ESC"; the Esc key still closes (audit C3) */
+  display:inline-flex;align-items:center;justify-content:center;
+  width:var(--icon-target);height:var(--icon-target);
+  padding:0;
   background:transparent;
-  border:1px solid var(--rule);
-  font-family:var(--sans);
-  font-size:.55rem;
-  letter-spacing:.1em;
-  color:var(--mute);
+  border:0;
+  color:var(--ink-soft);
   cursor:pointer;
   transition:all .2s ease;
 }
@@ -817,3 +816,6 @@
   .boxes-grid{grid-template-columns:1fr}
   .v1-grid{grid-template-columns:repeat(2, 1fr)}
 }
+
+/* The browser's own blue clear "×" next to ours (audit C3): one close, on brand. */
+.search-overlay-input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none}

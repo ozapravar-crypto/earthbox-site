@@ -33,6 +33,7 @@ import { decodeBuild, encodeBuild, chamberOf, plantOf, isSoilless } from './buil
 import { enquiryAltHTML, ENQUIRY_PHONE } from './enquiry-form.js';
 import { SITE } from '../data/site.js';
 import { esc, rupees, track } from './util.js';
+import { icon } from '../data/icons.js';
 
 const STORE = 'earthbox-cart';
 const MAX_QTY = 20;
@@ -203,7 +204,6 @@ function addLine(list, line, { open = true } = {}){
 }
 const has = (list, line) => state[list].some(l => keyOf(l) === keyOf(line));
 
-const arrow = '<svg viewBox="0 0 16 8" fill="none" aria-hidden="true"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>';
 
 function priceCell(r){
   if (r.kind === 'fixed') return `<span class="ct-price">${rupees(r.unit * r.qty)}</span>${r.qty > 1 ? `<span class="ct-each">${rupees(r.unit)} each</span>` : ''}`;
@@ -267,7 +267,7 @@ function summaryHTML(lines){
     ${row('Estimated total', t.ranged ? `${rupees(t.low)} – ${rupees(t.high)}` : t.fixed ? rupees(t.fixed) : 'On enquiry', 'ct-row--total')}
     ${t.quoted && (t.fixed || t.ranged) ? `<p class="ct-note">+ ${t.quoted} item${t.quoted > 1 ? 's' : ''} on enquiry, added when the studio quotes.</p>` : ''}
     <p class="ct-note">Nothing is charged here. The studio confirms the final total, delivery within Mumbai and lead time, then sends you a secure payment link.</p>
-    <a class="cta cta-block" data-ct="send" href="https://wa.me/${ENQUIRY_PHONE}?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">Send order on WhatsApp ${arrow}</a>
+    <a class="cta cta-block" data-ct="send" href="https://wa.me/${ENQUIRY_PHONE}?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">Send order on WhatsApp ${icon('arrow-up-right', { size: 'xs' })}</a>
     ${enquiryAltHTML(`Cart · ${t.items} item${t.items > 1 ? 's' : ''}`, text)}
   </div>`;
 }
@@ -282,7 +282,7 @@ function drawerHTML(){
     : `<p class="ct-empty">Nothing saved yet.</p><p class="ct-note">Use “Save” on any piece or design to keep it here.</p>`;
   return `<header class="ct-head">
       <h2 id="ct-title" class="caption">Your selection</h2>
-      <button type="button" class="ct-close" data-ct="close" aria-label="Close">×</button>
+      <button type="button" class="ct-close" data-ct="close" aria-label="Close">${icon('x', { size: 'md' })}</button>
     </header>
     <div class="ct-tabs" role="tablist" aria-labelledby="ct-title">${tabBtn('cart', 'Cart')}${tabBtn('saved', 'Saved')}</div>
     <div class="ct-panel" id="ct-panel" role="tabpanel" aria-labelledby="ct-tab-${tab}">
@@ -296,8 +296,8 @@ function drawerHTML(){
 
 function refresh(){
   const n = state.cart.reduce((s, x) => s + (x.qty || 1), 0);
-  document.querySelectorAll('[data-cart-count]').forEach(el => { el.textContent = n; });
-  document.querySelectorAll('[data-saved-count]').forEach(el => { el.textContent = state.saved.length; });
+  document.querySelectorAll('[data-cart-count]').forEach(el => { el.textContent = n || ''; });   // hidden at 0
+  document.querySelectorAll('[data-saved-count]').forEach(el => { el.textContent = state.saved.length || ''; });
   document.querySelectorAll('[data-save-line]').forEach(btn => {
     const on = has('saved', JSON.parse(btn.dataset.saveLine));
     btn.setAttribute('aria-pressed', on);   // the label stays "Save"; the heart fills (iconography audit P2)
@@ -336,8 +336,10 @@ export function initCart(){
 
   const btns = document.createElement('div');
   btns.className = 'runhead-bag';
-  btns.innerHTML = `<button type="button" class="runhead-bag-btn" data-open="saved">Saved <span data-saved-count>0</span></button>
-    <button type="button" class="runhead-bag-btn" data-open="cart">Cart <span data-cart-count>0</span></button>`;
+  // Heart + bag (audit item 10): the word shows ≥1081px, icon-only below;
+  // the count shows only when there's something. Read as "Cart 2 items".
+  btns.innerHTML = `<button type="button" class="runhead-bag-btn" data-open="saved">${icon('heart', { size: 'md' })}<span class="rb-label">Saved</span> <span class="rb-count" data-saved-count></span><span class="u-sr-only"> items</span></button>
+    <button type="button" class="runhead-bag-btn" data-open="cart">${icon('shopping-bag', { size: 'md' })}<span class="rb-label">Cart</span> <span class="rb-count" data-cart-count></span><span class="u-sr-only"> items</span></button>`;
   // Right column = cart buttons + theme toggle, so the header stays a 3-column grid.
   const end = document.createElement('div');
   end.className = 'runhead-end';

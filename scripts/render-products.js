@@ -7,6 +7,7 @@
 // ─────────────────────────────────────────────────────────────────────
 
 import { PHONE } from '../data/site.js';
+import { icon } from '../data/icons.js';
 import { track } from './util.js';
 import { volumeOne, categories as v1Categories, photoPath } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
@@ -202,7 +203,7 @@ function renderVolumeThree(){
          target="_blank" rel="noopener"
          data-cursor="ASK">
         Write in on WhatsApp
-        <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
+        ${icon('arrow-up-right', { size: 'xs' })}
       </a>
       ${enquiryAltHTML('Digital Vivariums (Volume III)')}
     </div>

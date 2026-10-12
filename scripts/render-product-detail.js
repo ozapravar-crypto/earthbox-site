@@ -67,14 +67,14 @@ function enquiryHref(opts = {}){
 // Add to cart + Save, then WhatsApp as the quieter route. `line` is a cart
 // line (cart.js); the selectors rewrite it when size or material changes.
 const attr = (o) => JSON.stringify(o).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-const ARROW = '<svg viewBox="0 0 16 8" fill="none" aria-hidden="true"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>';
+const ARROW = icon('arrow-long');
 function buyHTML(line, waHref, name){
   return `
     <div class="pd-buy">
       <button type="button" class="cta magnetic pd-cta" data-add-line="${attr(line)}" data-cursor="ADD">Add to cart ${ARROW}</button>
       <button type="button" class="cta cta-secondary save-btn" data-save-line="${attr(line)}" aria-pressed="false">${icon('heart')}<span>Save</span><span class="u-sr-only"> ${name}</span></button>
     </div>
-    <a class="pd-alt-wa" id="pdEnquiryCta" href="${waHref}" target="_blank" rel="noopener">Or ask on WhatsApp</a>`;
+    <a class="pd-alt-wa" id="pdEnquiryCta" href="${waHref}" target="_blank" rel="noopener">Or ask on WhatsApp ${icon('arrow-up-right', { size: 'xs' })}</a>`;
 }
 const mobileBuyHTML = (line) => `
     <div class="pd-mobile-cta" id="pdMobileCta">
@@ -111,8 +111,8 @@ function renderReviewsSection(sku){
         <div class="pd-no-reviews">
           <p>No reviews yet. Be the first to share your experience.</p>
           <a class="cta-small pd-review-cta" href="${googleReviewUrl}" target="_blank" rel="noopener">
-            Leave a review
-            <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
+            Leave a review<span class="u-sr-only"> on Google (opens in a new tab)</span>
+            ${icon('arrow-up-right', { size: 'xs' })}
           </a>
         </div>
       </section>
@@ -155,7 +155,7 @@ function renderReviewsSection(sku){
       <div class="pd-reviews-footer">
         <a class="pd-review-link" href="${googleReviewUrl}" target="_blank" rel="noopener">
           <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false"><path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="currentColor"/></svg>
-          Leave a review on Google
+          Leave a review on Google<span class="u-sr-only"> (opens in a new tab)</span> ${icon('arrow-up-right', { size: 'xs' })}
         </a>
       </div>
     </section>
@@ -232,11 +232,11 @@ function renderPrinted(p){
 
       <nav class="pd-breadcrumb reveal" aria-label="Breadcrumb">
         <a href="/">Home</a>
-        <span class="pd-breadcrumb-sep">›</span>
+        <span class="pd-breadcrumb-sep" aria-hidden="true">${icon('chevron-right', { size: 'xs' })}</span>
         <a href="/products">Catalogue</a>
-        <span class="pd-breadcrumb-sep">›</span>
+        <span class="pd-breadcrumb-sep" aria-hidden="true">${icon('chevron-right', { size: 'xs' })}</span>
         <a href="/products#vol-1">${cat ? cat.title : 'Volume I'}</a>
-        <span class="pd-breadcrumb-sep">›</span>
+        <span class="pd-breadcrumb-sep" aria-hidden="true">${icon('chevron-right', { size: 'xs' })}</span>
         <span class="pd-breadcrumb-current">${p.name}</span>
       </nav>
 
@@ -319,7 +319,7 @@ function renderPrinted(p){
           <!-- Trust signals -->
           <div class="pd-trust-signals">
             <div class="pd-lead-time">
-              <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              ${icon('clock')}
               <span>Made to order · ~1 week</span>
             </div>
             ${reviewCount > 0 ? `
@@ -329,7 +329,7 @@ function renderPrinted(p){
               </a>
             ` : ''}
             <div class="pd-delivery">
-              <svg viewBox="0 0 16 16" fill="none"><path d="M1 4h9v7H1z" stroke="currentColor" stroke-width="1.2"/><path d="M10 6h3l2 3v2h-5V6z" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="12" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="12" cy="12" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
+              ${icon('truck')}
               <span>Delivery within Mumbai</span>
             </div>
           </div>
@@ -480,7 +480,7 @@ function renderBox(b){
     <article class="pd-page pd-page--box">
 
       <header class="pd-head reveal">
-        <a href="/products" class="back-link caption">← Catalogue</a>
+        <a href="/products" class="back-link caption">${icon('arrow-left', { size: 'xs' })}Catalogue</a>
         <span class="eyebrow">Volume II &nbsp;·&nbsp; Elemental Boxes</span>
         <h1 class="pd-title scramble">${b.sku}</h1>
         <p class="pd-tagline italic">${b.tagline}</p>
@@ -543,7 +543,7 @@ function renderVivarium(v){
     <article class="pd-page pd-page--vivarium">
 
       <header class="pd-head reveal">
-        <a href="/products" class="back-link caption">← Catalogue</a>
+        <a href="/products" class="back-link caption">${icon('arrow-left', { size: 'xs' })}Catalogue</a>
         <span class="eyebrow">Volume III &nbsp;·&nbsp; Horizon</span>
         <h1 class="pd-title scramble">${v.title}</h1>
         <p class="pd-tagline italic">${v.subtitle}</p>
@@ -558,7 +558,7 @@ function renderVivarium(v){
            target="_blank" rel="noopener"
            data-cursor="ASK">
           Write in on WhatsApp
-          <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
+          ${icon('arrow-up-right', { size: 'xs' })}
         </a>
         <p class="caption pd-note">${v.status}</p>
       </section>
@@ -572,7 +572,7 @@ function renderVivarium(v){
          target="_blank" rel="noopener"
          data-cursor="ASK">
         Write in on WhatsApp
-        <svg viewBox="0 0 16 8" fill="none"><path d="M0 4 H14 M10 1 L14 4 L10 7" stroke="currentColor" stroke-width="1.2"/></svg>
+        ${icon('arrow-up-right', { size: 'xs' })}
       </a>
     </div>
   `;

@@ -39,7 +39,8 @@
   color:var(--ink);
 }
 .pd-breadcrumb-sep{
-  color:var(--mute);   /* was --rule (12 % ink, 1.25:1): the › is text, so it needs 4.5:1 */
+  color:var(--mute);   /* an icon now (aria-hidden); --mute keeps 3:1 for a graphic */
+  display:inline-flex;
   font-size:.7rem;
 }
 .pd-breadcrumb-current{
@@ -59,7 +60,7 @@
   margin-bottom:clamp(2rem,4vh,3rem);
 }
 .pd-head .back-link{
-  display:block;
+  display:flex;width:fit-content;align-items:center;gap:var(--icon-gap);min-height:44px;
   margin-bottom:1rem;
 }
 .pd-head .eyebrow{

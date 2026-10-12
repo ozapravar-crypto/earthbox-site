@@ -395,14 +395,17 @@
   color:rgba(248,247,245,.78);background:none;border:0;padding:.75rem 0;cursor:pointer;min-height:44px;
 }
 .runhead-bag-btn:hover,.runhead-bag-btn:focus-visible{color:rgba(248,247,245,.98)}
-.runhead-bag-btn span{display:inline-block;min-width:1.4em;margin-left:.2em;letter-spacing:0;font-variant-numeric:tabular-nums}
+.runhead-bag-btn{display:inline-flex;align-items:center;gap:.45em;min-height:44px}
+.runhead-bag-btn .rb-count{letter-spacing:0;font-variant-numeric:tabular-nums}
+.runhead-bag-btn .rb-count:empty{display:none}
 .runhead.is-scrolled .runhead-bag-btn{color:var(--ink-soft)}
 .runhead.is-scrolled .runhead-bag-btn:hover{color:var(--ink)}
 @media (max-width:1080px){
   .runhead.runhead{grid-template-columns:1fr auto auto !important}
   .runhead-end{gap:0}
-  .runhead-bag{gap:.9rem}
-  .runhead-bag-btn{letter-spacing:.2em}
+  .runhead-bag{gap:.25rem}
+  .runhead-bag-btn{letter-spacing:.2em;min-width:44px;justify-content:center}
+  .runhead-bag-btn .rb-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}   /* icon-only; still read aloud */
 }
 
 /* Drawer */
@@ -418,7 +421,7 @@
 
 .ct-head{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.5rem;border-bottom:1px solid var(--rule)}
 .ct-head h2{margin:0;font-size:.66rem;letter-spacing:.32em}
-.ct-close{width:44px;height:44px;margin:-10px -12px -10px 0;border:0;background:none;color:var(--ink);font-size:1.5rem;line-height:1;cursor:pointer}
+.ct-close{width:44px;height:44px;margin:-10px -12px -10px 0;border:0;background:none;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
 .ct-tabs{display:flex;border-bottom:1px solid var(--rule)}
 .ct-tabs button{
   flex:1;padding:1rem .5rem;border:0;background:none;cursor:pointer;position:relative;
