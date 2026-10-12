@@ -25,14 +25,14 @@ Template: `Downloads/NCERT Complete/product_motion_director_agent.md` (skill: `p
 | Screen | Section |
 | ENTER | Section scrolls into view (`.reveal` → `.in`, one-shot) |
 | IDLE | Ambient CSS loop, paused for reduced motion |
-| EXIT | Not used. Page scroll *is* the exit; don't animate out. |
+| EXIT | Headings and intro lines fade as they slide under the header (scroll-linked, `motion-scroll.js`; owner brief 12 Oct 2026). Nothing else animates out. |
 | Figma layers | DOM elements + files in `assets/` |
 | Missing Asset Request | Same format, same rule: **don't fake artwork** |
 
 **Extra web rules the template lacks:**
 1. `prefers-reduced-motion`: every motion has an off-switch (the existing modules already do).
 2. Never delay or hide the LCP element; images keep `width`/`height` (no layout shift).
-3. Motion never blocks scrolling or input. No scroll-jacking beyond the existing `pin`.
+3. Motion never blocks scrolling or input. The only scroll smoothing is Lenis on desktop mouse/trackpad (owner brief 12 Oct 2026); touch and keyboard stay native, and drawers/dialogs/menus scroll themselves.
 4. Text stays real text; images never contain copy.
 
 ## 3. Primitives already on the site (use these, add nothing new)
@@ -40,7 +40,9 @@ Template: `Downloads/NCERT Complete/product_motion_director_agent.md` (skill: `p
 | Primitive | Where | Note |
 |---|---|---|
 | `.reveal` / `.reveal-line` | `motion.css` + `reveal.js` | Fade-rise / line-mask rise. The default. |
-| `data-parallax` | `parallax.js` | ⚠️ Offsets by **absolute** `scrollY`. Only safe at the top of the page (hero). Mid-page it jumps hundreds of px. |
+| `data-parallax="0.05"` | `motion-scroll.js` | Viewport-relative drift (±strength of its height) inside a clipping frame, scaled to hide edges. Safe anywhere. On: hero photo, film, Maker-invite photo, product hero (12 Oct 2026). Replaced the old absolute-`scrollY` `parallax.js` |
+| text fade in/out | `motion-scroll.js` | Scroll-linked opacity + 18px rise for `main h2`, `.lede`, intros. Never prices, buttons, forms, product page, Maker, article body. Off with reduced motion |
+| smooth scroll | `motion-scroll.js` + `vendor/lenis.js` | Lenis 1.3.26, `lerp .09`, desktop fine pointer only; paused while a dialog is open |
 | `.reveal-clip` | `motion.css` | ⚠️ **Deadlock:** fully clipped elements never report as intersecting, so they never reveal. Don't use until `reveal.js` observes a wrapper instead. |
 | `.scramble` | `scramble.js` | Section titles only |
 | `.magnetic`, cursor | `magnetic.js`, `cursor.js` | CTAs only |

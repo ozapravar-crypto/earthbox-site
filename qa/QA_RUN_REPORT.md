@@ -2,6 +2,15 @@
 
 **TL;DR:** ***Everything below was actually executed. The final local suite passed apart from 3 load-related timeouts, all fixed and re-run green. Lighthouse accessibility is now 100 on 4 of 5 pages (98 on the catalogue, down from 98 everywhere), SEO is 100 everywhere, and layout shift is fixed on the product, catalogue and Journal pages. Two items stay open by decision (homepage intro delay, Maker first-load work), plus small performance items. CI confirms on push (link below once it's green).***
 
+## 12 Oct 2026 · scroll motion (smooth scroll, parallax, text fades)
+
+| Suite | Result |
+|---|---|
+| `npm test` | pass (0 fail) |
+| `tests/motion.spec.mjs` (new, motion on) | 10/10 over two repeats |
+| Full Playwright (desktop · phone · tablet) | 279 pass; 12 visual fails = stale baselines from 11 Oct (no header icons / Care link). Motion is off under reduced motion, which the visual suite uses. Baselines refreshed; visual re-run 63/63 |
+| Lighthouse | CI on the PR |
+
 ## What ran
 
 | Suite | Command | Result | Notes |

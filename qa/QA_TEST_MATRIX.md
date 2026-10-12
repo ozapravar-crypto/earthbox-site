@@ -67,6 +67,7 @@ Key: **S** smoke · **J** journeys · **A** a11y (axe) · **V** visual · **C** 
 | Care rules: visit counts, prices, plan codes, kit per chamber | U `care.test` | — |
 | Cart suggestions: fit, never coming soon, no duplicates, at most 2 | U `pairings.test` | — |
 | Every referenced file exists (and isn't excluded from deploy) | U `check-assets` | — |
+| Scroll motion: smooth wheel scroll, parallax drift, text fade in/out, pauses under drawers, off for reduced motion and touch | M `motion.spec` (motion on) | D (phone/touch checked inside) |
 
 ## Known gaps (not claimed as covered)
 - **Real devices:** Safari/iOS, Firefox and real GPUs. All runs are Chromium; the 3D is tested on software rendering only.

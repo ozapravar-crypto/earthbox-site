@@ -269,7 +269,7 @@ function renderPrinted(p){
       <section class="pd-showcase">
         <div class="pd-hero reveal">
           <div class="pd-hero-frame">
-            <img src="${photoPath(p)}" alt="${esc(p.name)}" width="1200" height="900" data-fallback="parent:pd-hero-frame--placeholder"/>
+            <img src="${photoPath(p)}" alt="${esc(p.name)}" width="1200" height="900" data-parallax="0.05" data-fallback="parent:pd-hero-frame--placeholder"/>
           </div>
         </div>
         <aside class="pd-body-side reveal" style="--d:120ms">
@@ -516,7 +516,7 @@ function renderBox(b){
       <section class="pd-showcase">
         <div class="pd-hero reveal">
           <div class="pd-hero-frame">
-            <img src="assets/boxes/${b.photo}" alt="${b.sku} product photograph" width="1200" height="900"/>
+            <img src="assets/boxes/${b.photo}" alt="${b.sku} product photograph" width="1200" height="900" data-parallax="0.05"/>
           </div>
           ${pointsHTML(boxPoints(b))}
         </div>

@@ -60,3 +60,13 @@
     -webkit-clip-path:none;
   }
 }
+
+
+/* ─── Smooth scroll (Lenis, scripts/motion-scroll.js) ───
+   From lenis.css 1.3.26, plus: Lenis does the easing, so the browser's own
+   smooth scroll must be off while it runs, or the two fight. */
+html.lenis, html.lenis body{height:auto}
+html.lenis{scroll-behavior:auto}
+.lenis:not(.lenis-autoToggle).lenis-stopped{overflow:clip}
+.lenis [data-lenis-prevent]{overscroll-behavior:contain}
+.lenis.lenis-smooth iframe{pointer-events:none}
