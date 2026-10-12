@@ -2,6 +2,15 @@
 
 **TL;DR:** ***Everything below was actually executed. The final local suite passed apart from 3 load-related timeouts, all fixed and re-run green. Lighthouse accessibility is now 100 on 4 of 5 pages (98 on the catalogue, down from 98 everywhere), SEO is 100 everywhere, and layout shift is fixed on the product, catalogue and Journal pages. Two items stay open by decision (homepage intro delay, Maker first-load work), plus small performance items. CI confirms on push (link below once it's green).***
 
+## 12 Oct 2026 · Sketchfab plant models (9, CC BY 4.0)
+
+| Suite | Result |
+|---|---|
+| `npm test` + ESLint | pass (0 fail) |
+| Full Playwright (desktop · phone · tablet) | **291 pass, 0 fail** |
+| Maker renders (carnivorous, mixed, earlier saved design) | all models load, no 4xx/console errors; earlier design unchanged after the width-limit change |
+| Lighthouse | CI on the PR |
+
 ## 12 Oct 2026 · scroll motion (smooth scroll, parallax, text fades)
 
 | Suite | Result |

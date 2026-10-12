@@ -646,9 +646,10 @@ function layout(spec, base, D){
     const room = Math.max(.5, Math.min(roomX, roomZ));
     const moss = p.form === 'moss';
     let yaw = i * 1.7 + turn.yaw;
-    // Scans spread wider than the stylised models, so they're sized by height
-    // (the wall check below still keeps them inside the glass).
-    let sy = moss ? t.h * k / h : (modelReady(p)?.textured ? t.h / h : Math.min(t.h / h, 1.6 * t.r / r)) * k;
+    // Scans spread wider than the stylised models, so they're sized mostly by
+    // height, with a looser width limit so flat ones (rosettes) don't fill the
+    // floor (the wall check below still keeps them inside the glass).
+    let sy = moss ? t.h * k / h : Math.min(t.h / h, (modelReady(p)?.textured ? 2.6 : 1.6) * t.r / r) * k;
     if (moss) return { p, pos: [x, base, z], s: [Math.min(room, t.r * k) / r, sy, Math.min(room, t.r * k) / r], yaw };
     if (modelReady(p)){
       // A model keeps its proportions (squeezed to 60 % at most) and turns

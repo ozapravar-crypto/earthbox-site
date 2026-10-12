@@ -163,16 +163,23 @@ export const models = {
     // `textured: true` = a realistic scan that keeps its own texture (Poly Haven,
     // 12 Oct 2026); the Maker tints it gently toward the plant's colour.
     leaf:    { file: 'leaf-syngonium.glb', textured: true },   // heart/arrow leaves: Syngonium, Philodendron, Alocasia…
-    trail:   { file: 'trail-pothos.glb' },
-    rosette: { file: 'rosette-echeveria.glb' },
-    air:     { file: 'air-bromeliad.glb' },
-    fern:    { file: 'fern-clump.glb' },
-    moss:    { file: 'moss-cushion.glb' },
-    trap:    null                                     // no licensed sundew/pitcher models found: procedural
+    // Sketchfab CC BY models (12 Oct 2026), credited on maker.html.
+    trail:   { file: 'trail-pothos-real.glb', textured: true },
+    rosette: { file: 'rosette-echeveria-purple.glb', textured: true, tint: false, scale: .3 },   // Echeveria 'Perle' is purple
+    air:     { file: 'air-tillandsia.glb', textured: true },
+    fern:    { file: 'fern-male.glb', textured: true },
+    moss:    { file: 'moss-cushion.glb' },            // stylised still beats every moss scan found
+    trap:    null                                     // each trap plant has its own model below
   },
   plants: {
-    'PLT-018': { file: 'leaf-monstera.glb' },         // Monstera
-    'PLT-019': { file: 'leaf-monstera.glb', scale: .9 },   // Rhaphidophora (split leaves)
+    'PLT-018': { file: 'leaf-monstera-real.glb', textured: true },   // Monstera
+    'PLT-019': { file: 'leaf-monstera-real.glb', textured: true, scale: .9 },   // Rhaphidophora (split leaves)
+    'PLT-004': { file: 'trail-pothos-marble.glb', textured: true, tint: false },   // Pothos Marble Queen (variegated)
+    'PLT-005': { file: 'trail-pothos.glb' },          // Tradescantia Nanouk: colour is the point, stylised
+    'PLT-007': { file: 'trail-pothos.glb' },          // Tradescantia Pink Fury: same
+    'PLT-032': { file: 'trap-sundew.glb', textured: true, tint: false },       // Cape Sundew
+    'PLT-033': { file: 'trap-nepenthes.glb', textured: true, tint: false },    // Pitcher Plant (Nepenthes)
+    'PLT-035': { file: 'trap-sarracenia.glb', textured: true, tint: false },   // North American Pitcher Plant
     'PLT-026': { file: 'leaf-monstera.glb' },         // Umbrella Plant
     'PLT-028': { file: 'leaf-monstera.glb' },         // Fatsia 'Spider's Web'
     'PLT-009': { file: 'rosette-haworthia.glb', textured: true },   // Haworthia (scan)
