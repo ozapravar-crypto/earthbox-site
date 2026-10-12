@@ -66,3 +66,8 @@ QA-001 to QA-007, QA-009 and QA-013. Details, root causes and evidence are in `Q
   - A browser pass over 10 live pages plus the cart drawer found **0 internal `.html` links**.
 - **Local suite on the branch:** 243 passed, 4 failed. The 4 were timeouts under load (elements not drawn within 5 s) and passed 2 of 2 on rerun. As the suite grows, this machine is the bottleneck; CI is the reference.
 - **Testing against live with `BASE_URL`:** the "loads clean" and "clean URLs" checks wait for network idle, which the live hero video never reaches. Use the scratch link-audit approach (video blocked) for live checks, or extend the specs to block video when `BASE_URL` is set.
+
+## Follow-up · product points (site-kry), 12 Oct 2026
+- **What:** three numbered points under each chamber photo (what grows · climate · the object), built from the chamber's own data. Hover or focus opens one panel; tap toggles on touch; Escape or leaving closes. The page never moves.
+- **Full local suite (2 workers):** **257 passed, 1 failed**. The failure was an expected visual change (the points now show behind the cart drawer) and the reference was updated. Fewer workers removed the load timeouts seen on 11 Oct.
+- **Not covered:** Volume I pieces get no points, because they have no structured details to reuse.
