@@ -15,6 +15,7 @@ import { volumeTwo } from '../data/upcoming.js';
 import { planPrice, groupsOf, kitFor, encodePlan, decodePlan, planSummary } from './care.js';
 import { decodeBuild, chamberOf } from './build-codec.js';
 import { esc, rupees } from './util.js';
+import { icon } from '../data/icons.js';
 
 const GROUP_NOTE = Object.fromEntries(elements.map(e => [e.id, e.heading]));
 const attr = (o) => esc(JSON.stringify(o));
@@ -112,15 +113,15 @@ export function initCare(){
     </fieldset>
     <fieldset class="care-step"><legend><span class="care-num">02</span> How would you like to care for it?</legend>
       <label class="care-choice"><input type="radio" name="mode" value="kit"${st.mode === 'kit' ? ' checked' : ''}>
-        <span>A refill kit</span><small>Soil, feed and tools matched to your plants. You do the care.</small></label>
+        <span>${icon('package')} A refill kit</span><small>Soil, feed and tools matched to your plants. You do the care.</small></label>
       <label class="care-choice"><input type="radio" name="mode" value="visits"${st.mode === 'visits' ? ' checked' : ''}>
-        <span>Visits from the studio</span><small>We come to you in Mumbai and look after it.</small></label>
+        <span>${icon('calendar-clock')} Visits from the studio</span><small>We come to you in Mumbai and look after it.</small></label>
       <div id="careVisitOpts" class="care-visit-opts">
         <fieldset class="care-row"><legend>For how long?</legend>
           ${visit.durations.map(d => `<label class="care-pill"><input type="radio" name="d" value="${d.id}"${d.id === st.d ? ' checked' : ''}><span>${d.label}</span></label>`).join('')}</fieldset>
         <fieldset class="care-row" id="careFreq"><legend>How often?</legend>
           ${visit.frequencies.map(f => `<label class="care-pill"><input type="radio" name="f" value="${f.id}"${f.id === st.f ? ' checked' : ''}><span>${f.label}</span></label>`).join('')}</fieldset>
-        <label class="care-field"><span>Pincode</span>
+        <label class="care-field"><span>${icon('map-pin', { size: 'xs' })} Pincode</span>
           <input type="text" name="p" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="postal-code" value="${esc(st.p)}" placeholder="400101"></label>
         <ul class="care-includes">${visit.includes.map(i => `<li>${esc(i)}</li>`).join('')}</ul>
       </div>

@@ -408,6 +408,7 @@
 .pd-review-link{
   display:inline-flex;
   align-items:center;
+  min-height:44px;
   gap:.5rem;
   font-family:var(--sans);
   font-size:.6rem;
@@ -665,8 +666,10 @@
     padding:1rem var(--pad);
     padding-bottom:calc(1rem + env(safe-area-inset-bottom, 0px));
   }
+  .pd-mobile-cta{display:flex;align-items:center;gap:1rem}
+  .pd-mobile-price{font-family:var(--serif);font-size:1.15rem;color:var(--ink);white-space:nowrap}
   .pd-mobile-cta .cta{
-    width:100%;
+    flex:1;
     justify-content:center;
   }
 

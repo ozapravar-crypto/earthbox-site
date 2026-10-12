@@ -68,7 +68,8 @@ export function resolve(l){
       ...b.plants.map(id => ({ label: plantOf(id).name, price: num(plantOf(id).price) }))
     ];
     return { kind: 'custom', key: keyOf(l), qty: 1, title: b.name || `${ch.name} world`, sub: 'Custom build · Maker',
-      href: `/maker#${encodeBuild(b)}`, img: null, parts, status: `Made to order · ${ch.lead}` };
+      // The chamber's own line art, not a letter (audit K4): botanical art, not an icon.
+      href: `/maker#${encodeBuild(b)}`, img: ch.illustration ? `assets/boxes/${ch.illustration}` : null, parts, status: `Made to order · ${ch.lead}` };
   }
   if (l.kind === 'care') {
     const plan = decodePlan(l.code);

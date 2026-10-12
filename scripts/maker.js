@@ -355,7 +355,7 @@ function plantRow(b, p, ch){
       ${ok ? '' : `<span class="mk-why">Needs the ${homeOf(p).name} chamber’s climate</span>`}
     </span>
     ${plantAction(b, p, ch)}
-    <details class="mk-detail"><summary>Details<span class="u-sr-only"> for ${esc(p.name)}</span></summary>${plantDetail(p)}</details>
+    <details class="mk-detail"><summary>Details<span class="u-sr-only"> for ${esc(p.name)}</span>${icon('chevron-down', { size: 'xs' })}</summary>${plantDetail(p)}</details>
   </li>`;
 }
 
@@ -378,7 +378,7 @@ function mapHTML(b, ch, results, ui){
           <p class="mk-card-name">${esc(pin.name)}</p><p class="mk-bot">${esc(pin.botanical)}</p>
           ${isSuited(pin, ch.sku) ? '' : `<p class="mk-why">Needs the ${homeOf(pin).name} chamber’s climate</p>`}
           ${plantAction(b, pin, ch)}
-          <details class="mk-detail"><summary>Details</summary>${plantDetail(pin)}</details>
+          <details class="mk-detail"><summary>Details${icon('chevron-down', { size: 'xs' })}</summary>${plantDetail(pin)}</details>
         </div>` : ''}
     </li>`;
   }).join('')}</ol>`;
@@ -414,7 +414,7 @@ function resultsHTML(b, ui){
 function refineHTML(d, ui){
   const chipBtn = (kind, id, label, on) => `<button type="button" class="selector-chip${on ? ' active' : ''}" data-act="refine"
     data-id="${kind}:${id}" data-key="rf-${kind}-${id}" aria-pressed="${on}">${label}</button>`;
-  return `<details class="mk-refine"${ui.refineOpen ? ' open' : ''}><summary>Filter &amp; sort</summary>
+  return `<details class="mk-refine"${ui.refineOpen ? ' open' : ''}><summary>${icon('sliders-horizontal', { size: 'xs' })}Filter &amp; sort${icon('chevron-down', { size: 'xs' })}</summary>
     <div class="mk-refine-body">
       <label class="mk-check-row"><input type="checkbox" data-act="fit" data-key="fit" ${d.f.fit ? 'checked' : ''}> Only plants that fit my chamber</label>
       <fieldset><legend class="caption">Plant group</legend><div class="mk-filter">${elements.map(e => chipBtn('group', e.id, e.id, d.f.groups.includes(e.id))).join('')}</div></fieldset>

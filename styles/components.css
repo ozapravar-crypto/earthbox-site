@@ -311,6 +311,8 @@
     transition:color var(--dur-fast) var(--ease-archival);
   }
   .enquiry-alt summary::-webkit-details-marker{display:none}
+  .enquiry-alt summary{display:inline-flex;align-items:center;gap:.4em;min-height:44px}
+  .enquiry-alt[open] summary .icon-chevron-down{transform:rotate(180deg)}
   .enquiry-alt summary:hover,
   .enquiry-alt[open] summary{color:var(--ink)}
   .enquiry-alt summary:focus-visible{outline:1px solid var(--ink);outline-offset:4px}
@@ -462,7 +464,7 @@
 }
 .ct-link:hover{color:var(--ink);text-decoration-color:currentColor}
 .ct-qty{display:inline-flex;align-items:center;align-self:flex-start;margin-top:.5rem;border:1px solid var(--rule-stronger)}
-.ct-qty button{width:40px;height:40px;border:0;background:none;color:var(--ink);font-size:1.05rem;cursor:pointer}
+.ct-qty button{width:44px;height:44px;border:0;background:none;color:var(--ink);font-size:1.05rem;cursor:pointer}
 .ct-qty button:disabled{color:var(--rule-stronger);cursor:default}
 .ct-qty button:not(:disabled):hover{background:var(--bg-tint)}
 .ct-qty output{min-width:2ch;text-align:center;font-variant-numeric:tabular-nums}
@@ -489,7 +491,16 @@
 .save-btn[aria-pressed="true"]{--cta-color:var(--ink);--cta-border:var(--ink)}
 .save-btn{gap:var(--icon-gap)}
 .save-btn[aria-pressed="true"] .icon-heart{fill:currentColor}   /* status = filled (audit §7.3) */
-.pd-alt-wa{display:inline-block;margin-top:.9rem;font-family:var(--sans);font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);text-decoration:underline;text-underline-offset:4px}
+.pd-other-ways{margin-top:1rem}
+.pd-other-ways > summary{
+  list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:.4em;min-height:44px;
+  font-family:var(--sans);font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);
+}
+.pd-other-ways > summary::-webkit-details-marker{display:none}
+.pd-other-ways > summary:hover{color:var(--ink)}
+.pd-other-ways[open] > summary .icon-chevron-down{transform:rotate(180deg)}
+.pd-other-ways .enquiry-alt{margin-top:.5rem}
+.pd-alt-wa{display:inline-flex;align-items:center;gap:.35em;min-height:44px;font-family:var(--sans);font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);text-decoration:underline;text-underline-offset:4px}
 .pd-alt-wa:hover{color:var(--ink)}
 .ct-notice{display:flex;flex-wrap:wrap;align-items:center;gap:0 1rem;margin:1rem 0 0;padding:.75rem 1rem;border:1px solid var(--rule-stronger);background:var(--bg-tint);font-size:.88rem;color:var(--ink)}
 .ct-notice:empty{display:none}
@@ -590,9 +601,10 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  width:32px;
-  height:32px;
-  border:1px solid var(--rule);
+  width:44px;    /* 44px targets (audit X10/K2); the ring stays 32px via the shadow below */
+  height:44px;
+  border:0;
+  box-shadow:inset 0 0 0 6px var(--bg), inset 0 0 0 7px var(--rule);
   border-radius:50%;
   color:var(--ink-soft);
   transition:color .3s ease, border-color .3s ease, background .3s ease;

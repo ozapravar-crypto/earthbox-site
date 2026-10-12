@@ -17,6 +17,7 @@
 export { PHONE as ENQUIRY_PHONE } from '../data/site.js';
 import { EMAIL as ENQUIRY_EMAIL, PHONE as ENQUIRY_PHONE, PHONE_DISPLAY as ENQUIRY_PHONE_DISPLAY } from '../data/site.js';
 import { esc as escapeHTML, track } from './util.js';
+import { icon } from '../data/icons.js';
 
 // ─── Form service ───
 // Free access key from https://web3forms.com — enter the address that should
@@ -41,7 +42,7 @@ export function enquiryAltHTML(product = '', message = ''){
 
   return `
     <details class="enquiry-alt">
-      <summary>Not on WhatsApp Web? &nbsp;Send an enquiry here</summary>
+      <summary>Prefer email? Send an enquiry ${icon('chevron-down', { size: 'xs' })}</summary>
 
       <form class="enquiry-form" novalidate>
         <input type="hidden" name="product" value="${p}"/>

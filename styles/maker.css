@@ -415,3 +415,8 @@ img.mk-thumb,img.mk-swatch{display:block;object-fit:contain}
 @media (max-width:380px){ .mk-map{grid-template-columns:1fr} }
 .mk-found:focus{outline:none}
 .mk-credit{max-width:none;margin:2.5rem 0 0;font-size:.78rem}.mk-credit a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+
+/* Disclosures: one chevron (audit M6), not the browser's triangle */
+.mk-detail > summary,.mk-refine > summary{list-style:none;display:inline-flex;align-items:center;gap:.4em;cursor:pointer;min-height:32px}
+.mk-detail > summary::-webkit-details-marker,.mk-refine > summary::-webkit-details-marker{display:none}
+.mk-detail[open] > summary .icon-chevron-down,.mk-refine[open] > summary .icon-chevron-down{transform:rotate(180deg)}

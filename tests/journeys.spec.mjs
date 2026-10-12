@@ -18,6 +18,7 @@ test.beforeEach(async ({ context }, info) => {
 // ── Enquiry form (Web3Forms) ─────────────────────────────────────────
 async function openForm(page){
   await page.goto('/product.html#V1-PLT-005');
+  await page.locator('.pd-other-ways > summary').click();          // folded under "Other ways to order"
   const wrap = page.locator('.enquiry-alt').first();
   await wrap.locator('summary').click();
   return wrap;
@@ -474,4 +475,31 @@ test('links that open elsewhere say so', async ({ page }) => {
   await expect(social).toHaveAccessibleName(/opens in a new tab/);
   await page.goto('/blog/designing-drainage');
   await expect(page.locator('a.back-link .icon-arrow-left')).toHaveCount(1);
+});
+
+// ── PR C (audit items 13–19) ─────────────────────────────────────────
+test('product: one primary action; WhatsApp + email folded under "Other ways to order"', async ({ page, isMobile }) => {
+  await page.goto('/product#V1-PLT-005');
+  const fold = page.locator('.pd-buy ~ .pd-other-ways').first();
+  await expect(fold.locator('#pdEnquiryCta')).toBeHidden();                 // folded by default
+  await fold.locator(':scope > summary').click();
+  await expect(fold.getByRole('link', { name: /Ask a question on WhatsApp/ })).toBeVisible();
+  if (!isMobile) await expect(fold.locator('.enquiry-alt summary')).toContainText('Prefer email?');
+});
+
+test('phone sticky bar shows the price and follows the choice', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'phone bar');
+  await page.goto('/product#V1-PLT-005');
+  const price = page.locator('#pdMobilePrice');
+  await expect(price).toHaveText(await page.locator('#pdPrice').innerText());
+  await page.locator('[data-variant="small-circle"]').click();
+  await page.locator('[data-material="asa"]').click();
+  await expect(price).toHaveText('₹799');
+});
+
+test('cart: a Maker design shows its chamber drawing, not a letter', async ({ page }) => {
+  await page.goto('/maker#c=MossBox&s=studio&p=PLT-036&n=QA');
+  await page.locator('.mk-step[data-to=review]').click();
+  await page.locator('[data-key=cart]').click();
+  await expect(page.locator('dialog.ct .ct-line--custom .ct-thumb img')).toHaveAttribute('src', /assets\/boxes\/moss\.svg$/);
 });

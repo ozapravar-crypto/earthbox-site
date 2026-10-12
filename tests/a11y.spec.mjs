@@ -34,7 +34,7 @@ const STATES = [
   ['maker map', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); await p.locator('[data-act=view][data-id=map]').click(); }, null],
   ['maker review', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=review]').click(); }, null],
   ['catalogue search', '/products.html', async p => { await p.locator('#catalogueSearchBtn').click(); await p.fill('#cat-search', 'moss'); }, null],
-  ['enquiry form open', '/product.html#V1-PLT-005', async p => { await p.locator('.enquiry-alt summary').first().click(); }, null],
+  ['enquiry form open', '/product.html#V1-PLT-005', async p => { await p.locator('.pd-other-ways > summary').click(); await p.locator('.enquiry-alt summary').first().click(); }, null],
   ['care: own plants, visits', '/care.html', async p => { const c = p.locator('#carePlanner'); await c.getByText('My own plants').click(); await c.getByText('Visits from the studio').click(); }, '#carePlanner'],
   ['care: kits', '/care.html', async p => { await p.locator('#carePlanner select[name=r]').selectOption('MossBox'); }, '#carePlanner'],
   ['product points open', '/product#SporeBox', async p => { await p.locator('.pd-point').nth(1).click(); }, '[data-points]'],
