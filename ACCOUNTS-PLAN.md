@@ -103,12 +103,20 @@ Three small Vercel functions are added for what must not happen in the browser:
 
 ## 5 · What's needed from you / Aayush
 
+**Already answered by the site (checked 13 Oct 2026):**
+- **Owner account email:** `aayush.lilani@gmail.com` (`data/site.js`). Use it for Supabase, Google Cloud and Resend, so everything belongs to Aayush.
+- **`earthbox.in` DNS is on Vercel** (`ns1/ns2.vercel-dns.com`), with no mail records yet. We can add the email records ourselves through Vercel; nobody else's permission is needed, but the Vercel CLI login on this machine has expired, so run `vercel login` once. This also means `hello@earthbox.in` doesn't exist yet. Free forwarding via **ImprovMX** works with Vercel DNS. Cloudflare Email Routing would need the domain moved to Cloudflare, so we skip it.
+- **Delivery area:** "Delivery within Mumbai", studio in Kandivali (footer). Delivery *timing* is still unknown.
+- **Refund policy:** the 4-tier schedule is live (12 h full → 20% after shipping) but still unconfirmed (`site-h04`).
+- **Still unknown:** legal business name, GST status, delivery timing, Aayush's written OK on refunds.
+
+
 | # | What | Why | Cost |
 |---|---|---|---|
 | 1 | A **Supabase account** (free) created with EarthBox's email, and me invited as a member | Data and sign-in should belong to the business | ₹0 |
 | 2 | A **Google Cloud project** (free) for "Sign in with Google": create the OAuth client. I'll give exact click steps | Google requires the owner to create it | ₹0 |
-| 3 | A **Resend account** (free) + permission to add 3 DNS records to `earthbox.in` | Emails from `hello@earthbox.in` land in inboxes, not spam | ₹0 |
-| 4 | **Where does `hello@earthbox.in` go?** Forward it to Aayush's Gmail (free) or give it a Google Workspace inbox (₹136/mo) | Replies to order emails | ₹0 / ₹136 |
+| 3 | A **Resend account** (free). DNS records go in via Vercel (we control it) | Emails from `hello@earthbox.in` land in inboxes, not spam | ₹0 |
+| 4 | **`hello@earthbox.in`** (doesn't exist yet): forward to `aayush.lilani@gmail.com` via ImprovMX (free, recommended), or a Workspace inbox (₹136/mo) | Replies to order emails | ₹0 / ₹136 |
 | 5 | **Decision: Vercel Pro from phase C?** | Commercial-use terms | ₹1,760/mo |
 | 6 | **Order statuses and wording** Aayush is happy to maintain (the five above?) | He updates them by hand | — |
 | 7 | **Stage 2 answers** (refund wording, delivery area, legal name, GST) | Needed before phase C, and the account emails reference these policies | — |
