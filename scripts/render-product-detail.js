@@ -12,7 +12,8 @@
 import { SITE, PHONE } from '../data/site.js';
 import { esc, rupees, track } from './util.js';
 import { volumeOne as v1Products, categories as v1Categories, materials, photoPath } from '../data/volume-one.js';
-import { volumeTwo, volumeThree } from '../data/upcoming.js';
+import { volumeTwo } from '../data/upcoming.js';
+import { findProduct, productMeta } from './product-meta.js';
 import { getReviews, getAverageRating } from '../data/reviews.js';
 import { observeReveals } from './reveal.js';
 import { enquiryAltHTML } from './enquiry-form.js';
@@ -25,7 +26,7 @@ import { icon } from '../data/icons.js';
 
 function enquiryHref(opts = {}){
   const { name, sku, material, variant, price, volume = 1 } = opts;
-  const productUrl = sku ? `${SITE}/product#${encodeURIComponent(sku)}` : '';
+  const productUrl = sku ? `${SITE}/product/${encodeURIComponent(sku)}` : '';
 
   let text;
 
@@ -184,23 +185,6 @@ function renderReviewsSection(sku){
 
 
 // ─── Find a product by ID across all volumes ───
-function findProduct(id){
-
-  // V1 — 3D Printed products (new)
-  const v1 = v1Products.find(p => p.sku === id);
-  if (v1) return { volume: 1, kind: 'printed', data: v1 };
-
-  // V2 — Elemental Boxes
-  const v2 = volumeTwo.boxes.find(b => b.sku === id);
-  if (v2) return { volume: 2, kind: 'box', data: v2 };
-
-  // V3 — Digital Vivariums
-  if (id === volumeThree.sku) return { volume: 3, kind: 'vivarium', data: volumeThree };
-
-  return null;
-}
-
-
 // ─── V1 3D Printed product · photo + material selector + variant selector ───
 // "Keep it thriving": the matching refill kit (chambers) and a visit plan,
 // prefilled for this piece on /care. Plan: CARE-PLAN.md.
@@ -371,7 +355,7 @@ ${['planters', 'plant-packets', 'plant-support'].includes(p.category) ? careHTML
           </header>
           <div class="pd-related-grid">
             ${related.map(o => `
-              <a class="pd-related-card" href="/product#${encodeURIComponent(o.sku)}" data-cursor="VIEW">
+              <a class="pd-related-card" href="/product/${encodeURIComponent(o.sku)}" data-cursor="VIEW">
                 <div class="pd-related-img">
                   <img src="${photoPath(o, '600')}" alt="${esc(o.name)}" loading="lazy" data-fallback="hide"/>
                 </div>
@@ -516,7 +500,7 @@ function renderBox(b){
       <section class="pd-showcase">
         <div class="pd-hero reveal">
           <div class="pd-hero-frame">
-            <img src="assets/boxes/${b.photo}" alt="${b.sku} product photograph" width="1200" height="900" data-parallax="0.05"/>
+            <img src="/assets/boxes/${b.photo}" alt="${b.sku} product photograph" width="1200" height="900" data-parallax="0.05"/>
           </div>
           ${pointsHTML(boxPoints(b))}
         </div>
@@ -534,9 +518,9 @@ function renderBox(b){
           </header>
           <div class="pd-related-grid">
             ${related.map(o => `
-              <a class="pd-related-card" href="/product#${encodeURIComponent(o.sku)}" data-cursor="VIEW">
+              <a class="pd-related-card" href="/product/${encodeURIComponent(o.sku)}" data-cursor="VIEW">
                 <div class="pd-related-img">
-                  <img src="assets/boxes/${o.photo}" alt="${o.sku}" loading="lazy"/>
+                  <img src="/assets/boxes/${o.photo}" alt="${o.sku}" loading="lazy"/>
                 </div>
                 <div class="pd-related-meta">
                   <span class="caption">Volume II</span>
@@ -623,13 +607,7 @@ function renderProduct(id){
     return;
   }
 
-  const name = found.kind === 'box' ? found.data.sku
-             : found.kind === 'printed' ? found.data.name
-             : found.data.title;
-  const description = found.data.description || found.data.tagline || '';
-  const photo = found.kind === 'printed' ? photoPath(found.data)
-              : found.kind === 'box' ? `assets/boxes/${found.data.photo}`
-              : 'assets/og-home.jpg';
+  const { name, description, photo } = productMeta(found);
 
   document.title = `EarthBox — ${name}`;
 
@@ -641,7 +619,7 @@ function renderProduct(id){
   updateMeta('meta[name="description"]', description.slice(0, 160));
   updateMeta('meta[property="og:title"]', `EarthBox — ${name}`);
   updateMeta('meta[property="og:description"]', description.slice(0, 160));
-  updateMeta('meta[property="og:image"]', `https://www.earthbox.in/${photo}`);
+  updateMeta('meta[property="og:image"]', `${SITE}${photo}`);
   updateMeta('meta[name="twitter:title"]', `EarthBox — ${name}`);
   updateMeta('meta[name="twitter:description"]', description.slice(0, 160));
 
@@ -690,11 +668,12 @@ function renderProduct(id){
 
 
 // ─── Get product ID from URL ───
+// /product/<SKU> is the real address (a crawlable page per piece, built by
+// seo.mjs); /product#<SKU> and ?id=<SKU> are older links that still work.
 function getProductId(){
   const hashId = location.hash ? decodeURIComponent(location.hash.slice(1)) : null;
-  const params = new URLSearchParams(location.search);
-  const queryId = params.get('id');
-  return hashId || queryId;
+  const pathId = decodeURIComponent(location.pathname.match(/^\/product\/([^/]+)/)?.[1] || '');
+  return hashId || pathId || new URLSearchParams(location.search).get('id');
 }
 
 

@@ -21,14 +21,15 @@ const NOT_LIVE = new Set(['debug.html']);
 await rm(OUT, { recursive: true, force: true });
 await mkdir(OUT);
 
-// Root: pages + the two crawler files.
+// Root: pages + the crawler files.
 for (const f of await readdir(ROOT)) {
-  if ((f.endsWith('.html') && !NOT_LIVE.has(f)) || f === 'robots.txt' || f === 'sitemap.xml') await copyFile(path.join(ROOT, f), path.join(OUT, f));
+  if ((f.endsWith('.html') && !NOT_LIVE.has(f)) || f === 'robots.txt' || f === 'sitemap.xml' || f === 'llms.txt') await copyFile(path.join(ROOT, f), path.join(OUT, f));
 }
 
 // Folders, filtered by file type: browser code and content only.
 const keep = {
   blog:   (f) => f.endsWith('.html'),
+  product: (f) => f.endsWith('.html'),   // one page per piece (seo.mjs)
   styles: (f) => f.endsWith('.css'),
   data:   (f) => f.endsWith('.js'),
   // Runtime modules are .js; build tools are .mjs/.cjs and tests are *.test.mjs.

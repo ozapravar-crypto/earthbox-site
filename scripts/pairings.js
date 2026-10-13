@@ -43,7 +43,7 @@ export function suggest(cart){
     const p = volumeOne.find(x => x.sku === l.sku);
     if (p?.category === 'planters') {
       const pair = volumeOne.find(x => (x.category === 'plant-support' || x.category === 'plant-packets') && available(x) && !inCart.has(x.sku));
-      if (pair) push({ key: pair.sku, href: `/product#${encodeURIComponent(pair.sku)}`, title: pair.name, reason: 'Pairs with your planter.' });
+      if (pair) push({ key: pair.sku, href: `/product/${encodeURIComponent(pair.sku)}`, title: pair.name, reason: 'Pairs with your planter.' });
     }
   }
   return out;

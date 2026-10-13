@@ -16,7 +16,7 @@ export const SITE = 'https://www.earthbox.in';   // canonical host — the apex 
 export const EMAIL = 'aayush.lilani@gmail.com';
 export const PHONE = '918104811584';              // wa.me / tel: form
 export const PHONE_DISPLAY = '+91 81048 11584';
-const ADDRESS = 'Kandivali, Mumbai 400101';
+export const ADDRESS = 'Kandivali, Mumbai 400101';
 
 export const NAV = [
   { href: '/',         label: 'Home' },

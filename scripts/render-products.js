@@ -81,7 +81,7 @@ function renderVolumeOne(){
     const renderCard = (p) => {
       return `
       <article class="v1-card ${p.status === 'coming-soon' ? 'v1-card--soon' : ''}">
-        <a class="v1-card-link" href="/product#${encodeURIComponent(p.sku)}" data-cursor="VIEW">
+        <a class="v1-card-link" href="/product/${encodeURIComponent(p.sku)}" data-cursor="VIEW">
           <div class="v1-card-img">
             <img
               src="${photoPath(p, '600')}"
@@ -165,7 +165,7 @@ function renderVolumeTwo(){
             `;
         return `
         <article class="box-card">
-          <a class="box-card-link" href="/product#${encodeURIComponent(b.sku)}" data-cursor="VIEW">
+          <a class="box-card-link" href="/product/${encodeURIComponent(b.sku)}" data-cursor="VIEW">
             <div class="box-image box-image--art ${hasIllust ? '' : 'box-image--photo-only'}" aria-label="${b.sku}">
               ${imageHTML}
             </div>

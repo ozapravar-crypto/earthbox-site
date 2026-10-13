@@ -100,3 +100,15 @@ Severity: **critical** (blocks a core task) · **major** (harms many users or th
 ### QA-012 · Missing Bird Feeder photo; no branded 404 · minor · confirmed · already tracked
 - **Bird Feeder:** the photo is missing (404 in the console, best-practices 96), tracked as site-tue and waiting on the client.
 - **404 page:** there's no branded page, tracked as site-ez9.
+
+### QA-013 · 404 page unstyled below the top level · minor · fixed 13 Oct 2026
+- **Evidence:** `/blog/typo` or `/product/NOPE` served `404.html`, whose relative `styles/…` paths resolved inside the missing folder.
+- **Fix:** the 404 uses site-absolute paths; `includes.mjs` stamps it with prefix `/`. Guarded by the smoke test "product pages are readable without JavaScript".
+
+### QA-014 · Cart thumbnails broken on Journal pages · minor · fixed 13 Oct 2026
+- **Evidence:** cart lines built `assets/…` relative paths, which point to `/blog/assets/…` inside `/blog/`.
+- **Fix:** product photo paths are site-absolute (`photoPath`, `cart.js`).
+
+### QA-015 · Box share description joined with commas · minor · fixed 13 Oct 2026
+- **Evidence:** an Elemental Box's description is a list of paragraphs, so `.slice(0, 160)` set the meta description to an array.
+- **Fix:** the shared `scripts/product-meta.js` joins it, for both the page and the build.

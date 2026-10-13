@@ -35,7 +35,7 @@ for (const f of pages.sort()) {
   const p = path.join(ROOT, f);
   const before = await readFile(p, 'utf8');
   const inBlog = f.startsWith('blog/');
-  const prefix = inBlog ? '../' : '';
+  const prefix = inBlog ? '../' : f === '404.html' ? '/' : '';   // the 404 is served at any depth
   const current = inBlog ? '/blog' : (NAV.some((n) => n.href === cleanPath(f)) ? cleanPath(f) : null);
 
   let html = before;
