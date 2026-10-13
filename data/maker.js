@@ -168,7 +168,7 @@ export const models = {
     rosette: { file: 'rosette-echeveria-purple.glb', textured: true, tint: false, scale: .3 },   // Echeveria 'Perle' is purple
     air:     { file: 'air-tillandsia.glb', textured: true },
     fern:    { file: 'fern-male.glb', textured: true },
-    moss:    { file: 'moss-cushion.glb' },            // stylised still beats every moss scan found
+    moss:    { file: 'moss-clump-real.glb', textured: true },   // one moss scan for all five mosses
     trap:    null                                     // each trap plant has its own model below
   },
   plants: {
@@ -186,13 +186,14 @@ export const models = {
     'PLT-012': { file: 'leaf-anthurium.glb', textured: true },      // Anthurium Scandens
     'PLT-043': { file: 'leaf-anthurium.glb', textured: true },      // Anthurium Crystallinum
     'PLT-013': { file: 'leaf-anthurium.glb', textured: true, scale: .9 },   // Peace Lily: same family, closest shape
+    'PLT-001': { file: 'leaf-syngonium-neon.glb', textured: true, tint: false, scale: .8 },   // Syngonium Neon Pink: a pink-leaved scan
+    'PLT-045': { file: 'leaf-calathea-rose.glb', textured: true, tint: false },    // Jewel Orchid: stand-in (a Calathea), right colours
     // Colour is the point of these, and a scan's green texture can't be tinted
-    // pink or near-black, so they keep the stylised (exactly coloured) model.
-    'PLT-001': { file: 'leaf-heart.glb' },            // Syngonium Neon Pink
+    // pink or near-black, so they keep the stylised (exactly coloured) model
+    // until photo-made models exist (bead: Tripo).
     'PLT-003': { file: 'leaf-heart.glb' },            // Philodendron Pink Princess
     'PLT-041': { file: 'leaf-heart.glb' },            // Syngonium Dark Maria
     'PLT-044': { file: 'leaf-heart.glb' },            // Alocasia Black Velvet
-    'PLT-045': { file: 'leaf-heart.glb' },            // Jewel Orchid
     'PLT-027': { file: 'rosette-flat.glb' },          // Strawberry Begonia
     'PLT-034': { file: 'rosette-flat.glb' },          // Butterwort
     'PLT-031': { file: 'trap-flytrap-real.glb', textured: true, tint: false },   // Venus Flytrap, original textures

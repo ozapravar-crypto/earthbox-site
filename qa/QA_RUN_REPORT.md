@@ -2,6 +2,15 @@
 
 **TL;DR:** ***Everything below was actually executed. The final local suite passed apart from 3 load-related timeouts, all fixed and re-run green. Lighthouse accessibility is now 100 on 4 of 5 pages (98 on the catalogue, down from 98 everywhere), SEO is 100 everywhere, and layout shift is fixed on the product, catalogue and Journal pages. Two items stay open by decision (homepage intro delay, Maker first-load work), plus small performance items. CI confirms on push (link below once it's green).***
 
+## 13 Oct 2026 · Neon Pink, Jewel Orchid stand-in, moss scan (CC BY 4.0)
+
+| Suite | Result |
+|---|---|
+| `npm test` + ESLint | pass (0 fail) |
+| Full Playwright | 286 pass, 5 fail under machine load (load avg ~12, run 18.5 min vs 7.6). The 5 re-run (all projects): **14/14 pass**. None touch the Maker models |
+| Maker renders (colour + moss chambers) | models load, no 4xx/console errors |
+| Lighthouse | CI on the PR |
+
 ## 12 Oct 2026 · Sketchfab plant models (9, CC BY 4.0)
 
 | Suite | Result |

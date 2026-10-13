@@ -7,15 +7,14 @@ which is where each model page below serves its file. Licences were read on each
 **Changes made to every file (applies to the CC BY ones too):** textures baked into flat vertex
 colours, textures/UVs/normals removed, meshes joined, simplified where noted, re-centred, quantized
 (`KHR_mesh_quantization`), names stripped. In the browser the foliage is recoloured per plant.
-`moss-cushion.glb` is 5 scaled copies of one bush.
+
 
 | File | Used for | Original | Author | Licence | Source | Triangles (original → here) |
 |---|---|---|---|---|---|---|
-| `leaf-heart.glb` | Colour cultivars: Neon Pink, Pink Princess, Dark Maria, Black Velvet, Jewel Orchid (a scan's green texture can't be tinted) | Big Leaf Plant | reyshapes | CC0 1.0 | https://poly.pizza/m/aKIm5k6l5F | 732 → 732 |
+| `leaf-heart.glb` | Colour cultivars: Pink Princess, Dark Maria, Black Velvet (a scan's green texture can't be tinted) | Big Leaf Plant | reyshapes | CC0 1.0 | https://poly.pizza/m/aKIm5k6l5F | 732 → 732 |
 | `leaf-monstera.glb` | Umbrella Plant, Fatsia | Large Monstera Plant | Isa Lousberg (Tiny Treats, "House Plants") | CC0 1.0 | https://poly.pizza/m/kZQ2WmnJFI · pack: https://tinytreats.itch.io/house-plants | 5,612 → 4,000 |
 | `trail-pothos.glb` | Tradescantia Nanouk, Pink Fury (colour matters) | Pothos Plant Large | Isa Lousberg (Tiny Treats) | CC0 1.0 | https://poly.pizza/m/i7CfuCzaoo | 6,576 → 4,000 |
 | `rosette-flat.glb` | Strawberry Begonia, Butterwort | Green Succulent | Isa Lousberg (Tiny Treats) | CC0 1.0 | https://poly.pizza/m/MMZ35YRwa9 | 924 → 924 |
-| `moss-cushion.glb` | Mosses | Bush (×5) | Isa Lousberg (Tiny Treats) | CC0 1.0 | https://poly.pizza/m/I5KhMKZKju | 180 → 900 |
 
 Licences: CC0 1.0 https://creativecommons.org/publicdomain/zero/1.0/ ·
 CC BY 3.0 https://creativecommons.org/licenses/by/3.0/
@@ -61,3 +60,8 @@ no meshopt/draco. Credited by name on `maker.html` under the Maker.
 | `rosette-echeveria-purple.glb` | Rosettes (default): Echeveria | Low Poly Purple Echeveria | Mak_Sensei (sketchfab.com/Mak_Sensei) | **CC BY 4.0** | https://sketchfab.com/3d-models/low-poly-purple-echeveria-5171385ab70f446d8263855d5098b1d1 |
 | `air-tillandsia.glb` | Air plants (Tillandsia) | Air Plant v1.0 | YouniqueĪdeaStudio (sketchfab.com/sinnervoncrawsz) | **CC BY 4.0** | https://sketchfab.com/3d-models/air-plant-v10-22ceb29f9bd947c19a9f964d5a9533a1 |
 | `fern-male.glb` | Ferns (default) | Realistic HD Male fern (3/50) | PlantCatalog (sketchfab.com/PlantCatalog) | **CC BY 4.0** | https://sketchfab.com/3d-models/realistic-hd-male-fern-350-5186272e16e3414e9240e093f37c3bf3 |
+| `leaf-syngonium-neon.glb` | Syngonium Neon Pink (own colours) | Exotic Pink Leafed Plant | Nicola Hynes (sketchfab.com/zNKHz) | **CC BY 4.0** | https://sketchfab.com/3d-models/exotic-pink-leafed-plant-868828fad0e348378c6be5397da0895c |
+| `leaf-calathea-rose.glb` | Jewel Orchid (stand-in: a Calathea with the right colours) | Rose Painted Calethea | Laise.Mendes (sketchfab.com/Laise.Mendes) | **CC BY 4.0** | https://sketchfab.com/3d-models/rose-painted-calethea-bbdd911a63ac44fd8b100d6de52f24d9 |
+| `moss-clump-real.glb` | All mosses | Moss clump | ZiemniaQ (sketchfab.com/ZiemniaQ) | **CC BY 4.0** | https://sketchfab.com/3d-models/moss-clump-1a39ea43153a4bd3a92beaadfba4d089 |
+
+Added 13 Oct 2026. Pot removed (calathea); moss simplified and its texture re-baked onto the simplified mesh.
