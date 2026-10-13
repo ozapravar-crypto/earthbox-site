@@ -49,6 +49,10 @@ for (const [name, path] of PAGES) {
   test(`visual: ${name} (first screen)`, async ({ page }) => {
     await page.goto(path);
     await settle(page);
+    if (name === 'maker-start') {   // the recipe stills redraw once their plant models arrive; wait for them, then settle again
+      await page.waitForFunction(() => performance.getEntriesByType('resource').some(e => /plants3d\/moss-/.test(e.name)), null, { timeout: 30000 });
+      await settle(page);
+    }
     await expect(page).toHaveScreenshot(`${name}.png`, { ...shot, mask: mask(page) });
   });
 }
