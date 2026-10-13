@@ -60,7 +60,7 @@ for (const { f, dir } of pages) scanMarkup(f, dir, await readFile(path.join(ROOT
 const { volumeOne, photoPath } = await import(path.join(ROOT, 'data/volume-one.js'));
 const { volumeTwo } = await import(path.join(ROOT, 'data/upcoming.js'));
 for (const p of volumeOne) if (p.photo)
-  for (const size of ['', '300', '600']) refs.push({ file: `data/volume-one.js (${p.sku})`, path: photoPath(p, size) });
+  for (const size of ['', '300', '600']) refs.push({ file: `data/volume-one.js (${p.sku})`, path: photoPath(p, size).slice(1) });   // photoPath is site-absolute
 for (const b of volumeTwo.boxes) {
   if (b.photo) refs.push({ file: `data/upcoming.js (${b.sku})`, path: `assets/boxes/${b.photo}` });
   if (b.illustration) refs.push({ file: `data/upcoming.js (${b.sku})`, path: `assets/boxes/${b.illustration}` });

@@ -6,6 +6,7 @@ import { test, expect } from '@playwright/test';
 const KNOWN_404 = [/bird-feeder/];
 
 const PAGES = ['/', '/products.html', '/product.html#V1-PLT-005', '/product.html#MossBox', '/product.html#V1-PP-001',
+  '/product/V1-PLT-005', '/product/MossBox',
   '/maker.html', '/blog.html', '/blog/designing-drainage.html', '/about.html', '/privacy.html', '/care.html'];
 
 // Collect page errors + failed requests for the whole test.
@@ -204,6 +205,27 @@ test('unknown address shows the branded 404 with a way back', async ({ page }) =
   await expect(page.locator('h1')).toHaveText('Nothing grows here');
   await expect(page.getByRole('link', { name: 'Browse the catalogue' })).toHaveAttribute('href', '/products');
   await expect(page.locator('meta[name=robots]')).toHaveAttribute('content', 'noindex');
+});
+
+// Search and answer engines (GPTBot, ClaudeBot, PerplexityBot) read raw HTML
+// and don't run JavaScript: each piece has its own page with its name, facts,
+// canonical and Product schema in the source (scripts/seo.mjs). Before, every
+// piece was the same empty /product shell.
+test('product pages are readable without JavaScript', async ({ request, page }) => {
+  const html = await (await request.get('/product/V1-PLT-005')).text();
+  expect(html).toContain('<link rel="canonical" href="https://www.earthbox.in/product/V1-PLT-005"');
+  expect(html).toMatch(/<h1>[^<]+<\/h1>/);
+  const ld = JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/)[1]);
+  expect(ld['@graph'][0]).toMatchObject({ '@type': 'Product', sku: 'V1-PLT-005' });
+  for (const f of ['/sitemap.xml', '/llms.txt']) expect((await request.get(f)).status(), f).toBe(200);
+  // An unknown piece is a real 404, and the branded page still has its styles.
+  const res = await page.goto('/product/NOPE');
+  expect(res.status()).toBe(404);
+  await expect(page.locator('h1')).toHaveText('Nothing grows here');
+  expect(await page.evaluate(() => getComputedStyle(document.body).fontFamily)).not.toMatch(/^"?Times/);
+  // Catalogue cards link to the real addresses.
+  await page.goto('/products');
+  await expect(page.locator('a.v1-card-link').first()).toHaveAttribute('href', /^\/product\/V1-/);
 });
 
 // Only the website is served (scripts/dist.mjs allow-list, discovery R2):

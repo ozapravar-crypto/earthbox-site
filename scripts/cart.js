@@ -69,7 +69,7 @@ export function resolve(l, list = 'cart'){
     ];
     return { kind: 'custom', key: keyOf(l), qty: 1, title: b.name || `${ch.name} world`, sub: 'Custom build · Maker',
       // The chamber's own line art, not a letter (audit K4): botanical art, not an icon.
-      href: `/maker#${encodeBuild(b)}`, img: ch.illustration ? `assets/boxes/${ch.illustration}` : null, parts, status: `Made to order · ${ch.lead}` };
+      href: `/maker#${encodeBuild(b)}`, img: ch.illustration ? `/assets/boxes/${ch.illustration}` : null, parts, status: `Made to order · ${ch.lead}` };
   }
   if (l.kind === 'care') {
     const plan = decodePlan(l.code);
@@ -91,7 +91,7 @@ export function resolve(l, list = 'cart'){
     const mat = materials.find(m => m.id === l.material);
     return { kind: table ? 'fixed' : 'enquiry', key: keyOf(l), qty: l.qty, title: p.name,
       sub: [variant?.name, mat?.name].filter(Boolean).join(' · ') || 'Volume I',
-      href: `/product#${encodeURIComponent(p.sku)}`, img: p.photo ? photoPath(p, '300') : null,
+      href: `/product/${encodeURIComponent(p.sku)}`, img: p.photo ? photoPath(p, '300') : null,
       unit: table ? table[l.material] : null,
       status: p.status === 'coming-soon' ? 'Coming soon' : 'Made to order · about 1 week' };
   }
@@ -100,7 +100,7 @@ export function resolve(l, list = 'cart'){
   const box = volumeTwo.boxes.find(x => x.sku === l.sku);
   if (box && list === 'cart' && volumeTwo.status === 'Coming soon') return null;
   if (box) return { kind: 'enquiry', cartable: volumeTwo.status !== 'Coming soon', key: keyOf(l), qty: l.qty, title: `${box.name} chamber`, sub: `Elemental Box · ${box.edition}`,
-    href: `/product#${encodeURIComponent(box.sku)}`, img: box.photo ? `assets/boxes/${box.photo}` : null,
+    href: `/product/${encodeURIComponent(box.sku)}`, img: box.photo ? `/assets/boxes/${box.photo}` : null,
     unit: null, range: parseRange(box.price), note: box.price, status: `${volumeTwo.status} · ${box.lead}` };
   return null;
 }
