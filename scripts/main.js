@@ -63,6 +63,9 @@ async function initPage(){
 }
 
 const boot = async () => {
+  // The catalogue search loads a moment after the page shows: a tap in that
+  // gap is remembered and opens search when it's ready, not lost (site-ksq).
+  document.getElementById('catalogueSearchBtn')?.addEventListener('click', (e) => { e.currentTarget.dataset.pending = '1'; }, { once: true });
   initTheme();
   initRunhead();
   initCart();         // after initTheme: wraps the desktop toggle

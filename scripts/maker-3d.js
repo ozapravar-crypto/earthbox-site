@@ -959,13 +959,15 @@ export function create3D({ onLost } = {}){
     },
     // A finished terrarium as an image (recipe cards). Cached by `key`.
     // While its models load it returns the procedural version (not cached),
-    // then calls onUpdate(url) once with the finished one.
+    // then calls onUpdate() once they're in: call still() again, when it suits,
+    // for the finished one. (It used to redraw here, all six recipes in one
+    // burst, even after the start screen had gone: site-glj.)
     still(key, spec, w, h, onUpdate){
       if (lost) return '';
       if (shotCache.has(key)) return shotCache.get(key);
       const waiting = pendingFor(spec.plants);
       if (waiting.length){
-        if (!stillWait.has(key)) Promise.all(waiting).then(() => { const cb = stillWait.get(key); stillWait.delete(key); if (!lost) cb?.(this.still(key, spec, w, h)); });
+        if (!stillWait.has(key)) Promise.all(waiting).then(() => { const cb = stillWait.get(key); stillWait.delete(key); if (!lost) cb?.(); });
         stillWait.set(key, onUpdate);
         return drawStill(spec, w, h);
       }
