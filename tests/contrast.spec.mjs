@@ -129,6 +129,7 @@ test('CQ-008 Maker placeholders pass', async ({ page }) => {
 // light "your chamber" plate kept dark-mode tokens in dark mode (1.72–2.47:1).
 for (const theme of THEMES) {
   test(`CQ-009 Maker map + pin card pass (${theme})`, async ({ page }) => {
+    test.slow();   // software 3D on CI (bead: Maker CI speed)
     await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
     await page.goto('/maker.html');
     await page.locator('[data-act=recipe]').first().click();
