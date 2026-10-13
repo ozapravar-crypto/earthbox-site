@@ -97,6 +97,21 @@ test('catalogue search: results, empty state, close with Escape', async ({ page 
   await expect(page.locator('#catalogueSearchOverlay')).toBeHidden();
 });
 
+// site-ksq: on a slow phone the button shows before catalogue.js has wired
+// it; that early tap used to do nothing. Here catalogue.js is held back.
+test('catalogue search: a tap before the script loads still opens search', async ({ page }) => {
+  let release;
+  const held = new Promise(r => { release = r; });
+  await page.route('**/scripts/catalogue.js', async (route) => { await held; await route.continue(); });
+  const asked = page.waitForRequest('**/scripts/catalogue.js');                // main.js is booting
+  await page.goto('/products.html');
+  await asked;
+  await page.locator('#catalogueSearchBtn').click();
+  await expect(page.locator('#catalogueSearchOverlay')).toBeHidden();
+  release();
+  await expect(page.locator('#cat-search')).toBeVisible();
+});
+
 // ── Theme ────────────────────────────────────────────────────────────
 test('theme choice survives a reload and another page', async ({ page, isMobile }) => {
   await page.goto('/index.html');

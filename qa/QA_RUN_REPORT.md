@@ -120,3 +120,19 @@ QA-001 to QA-007, QA-009 and QA-013. Details, root causes and evidence are in `Q
   - **QA-013:** the 404 page was unstyled at any deeper address.
   - **QA-014:** cart thumbnails broke on Journal pages.
   - **QA-015:** an Elemental Box's share description had its paragraphs joined with commas.
+
+## Follow-up · search tap and Maker speed, 13 Oct 2026
+- **site-ksq (fixed):** a tap on the Catalogue search before `catalogue.js` had loaded did nothing. `main.js` now remembers that tap, and search opens as soon as it's ready. New journey test (it holds the script back): it fails without the fix and passes with it, on desktop and phone.
+- **site-glj (improved, still open):**
+  - **Cause:** profiling at 4× CPU slowdown with software WebGL (as on CI) showed the six recipe-card pictures were drawn all at once when the Maker opened. They were then redrawn in one burst when the plant models arrived, even after the start screen had gone.
+  - **Fix:** they're now drawn one per idle moment, and only while the start screen shows.
+  - **Results:**
+    - start-screen freeze: 2.9 s → 1.0 s
+    - picking a recipe and reaching the next step (warm): 5.1 s → 2.7 s
+  - **Ruled out:** WebP encoding and shadows; neither was the cost.
+  - **Left:** the 45 plant thumbnails (about 250 ms each in software, one per idle moment).
+- **Checks:**
+  - `npm test`
+  - Maker, search and cart tests on desktop, phone and tablet: 60 passed
+  - visual + a11y on all three devices: 116 passed; tablet guided-search visual failed once under load and passed twice on rerun
+  - The "Maker 3D preview loads its plant models" smoke test fails in some full runs and passes when run alone. It did this before the change too (see the 13 Oct SEO run).

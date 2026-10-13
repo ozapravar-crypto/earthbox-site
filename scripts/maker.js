@@ -700,23 +700,42 @@ export function initMaker(){
     else $('mkHeroArt').innerHTML = previewSVG(hb, { label: 'A finished Moss chamber with three mosses' });
   }
 
+  // Recipe pictures: 3D stills, drawn one per idle moment and swapped in over
+  // the line drawing. Drawing all six at once froze a slow phone for ~3 s
+  // as the Maker opened, before anything could be tapped (site-glj).
+  const recipeBuild = (r) => ({ ...emptyBuild(), chamber: r.chamber, substrate: r.substrate, plants: r.plants });
+  const stills = new Map();                                   // recipe id → image URL
+  const stillImg = (r) => `<img src="${stills.get(r.id)}" alt="${esc(describe(recipeBuild(r)))}" width="150" height="220">`;
+  const idle = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 500 }) : setTimeout(fn, 50));
+  let drawing = false;                                        // one queue at a time
+  function drawStills(){
+    if (drawing) return;
+    drawing = true;
+    const step = () => {
+      const r = recipes.find(x => !stills.has(x.id));
+      if (!r || !view3d || stage !== 'start') { drawing = false; return; }
+      const src = view3d.still(r.id, sceneSpec(recipeBuild(r)), 300, 440, () => { stills.delete(r.id); drawStills(); });   // its models arrived: redraw it
+      if (src) stills.set(r.id, src);
+      const art = $('mkRecipes')?.querySelector(`[data-id="${r.id}"] .mk-recipe-art`);
+      if (art && src) art.innerHTML = stillImg(r);
+      if (src) idle(step); else drawing = false;
+    };
+    idle(step);
+  }
+
   function renderStart(){
     $('mkResume').hidden = !b.chamber;
     $('mkBegin').hidden = !!b.chamber;
     $('mkRecipes').innerHTML = recipes.map(r => {
-      const rb = { ...emptyBuild(), chamber: r.chamber, substrate: r.substrate, plants: r.plants };
-      // A 3D still; it's redrawn once its plant models arrive.
-      const still = view3d?.still(r.id, sceneSpec(rb), 300, 440, (src) => {
-        const img = $('mkRecipes').querySelector(`[data-id="${r.id}"] img`);
-        if (img && src) img.src = src;
-      });
+      const rb = recipeBuild(r);
       return `<li><button type="button" class="mk-recipe" data-act="recipe" data-id="${r.id}" data-key="rc-${r.id}">
-        <span class="mk-recipe-art">${still ? `<img src="${still}" alt="${esc(describe(rb))}" width="150" height="220">` : previewSVG(rb, { label: describe(rb) })}</span>
+        <span class="mk-recipe-art">${stills.has(r.id) ? stillImg(r) : previewSVG(rb, { label: describe(rb) })}</span>
         <span class="mk-card-name">${r.name}</span>
         <span class="mk-card-desc">${r.line}</span>
         <span class="mk-card-meta">${chamberOf(rb).name} chamber · ${r.plants.length} plants</span>
       </button></li>`;
     }).join('');
+    if (view3d) drawStills();
     renderHeroArt();
   }
 
@@ -909,12 +928,7 @@ export function initMaker(){
       // was replaced mid-press and do nothing (CI flake site-ktu).
       if (stage === 'start') {
         renderHeroArt();
-        recipes.forEach(r => {
-          const art = $('mkRecipes')?.querySelector(`[data-id="${r.id}"] .mk-recipe-art`);
-          const rb = { ...emptyBuild(), chamber: r.chamber, substrate: r.substrate, plants: r.plants };
-          const still = art && view3d.still(r.id, sceneSpec(rb), 300, 440, (src) => { const img = art.querySelector('img'); if (img && src) img.src = src; });
-          if (still) art.innerHTML = `<img src="${still}" alt="${esc(describe(rb))}" width="150" height="220">`;
-        });
+        drawStills();
       } else {
         renderPreview();
         if (stage === 'plants') startThumbs();

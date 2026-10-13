@@ -187,6 +187,8 @@ export function initCatalogue(){
 
   if (searchBtn){
     searchBtn.addEventListener('click', openSearch);
+    if (searchBtn.dataset.pending) openSearch();   // tapped before this loaded (main.js)
+    delete searchBtn.dataset.pending;
   }
 
   if (searchClose){
