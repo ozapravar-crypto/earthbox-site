@@ -62,6 +62,7 @@ test('review badge scrolls, keeps the product (was a blank page)', async ({ page
 });
 
 test('cart tallies a priced piece, an enquiry piece and a Maker build', async ({ page, isMobile }) => {
+  test.slow();   // the Maker draws 3D in software on CI: ~30 s of the 45 s budget already on main (bead: Maker CI speed)
   const add = isMobile ? '#pdMobileCta [data-add-line]' : '.pd-buy [data-add-line]';
   await page.goto('/product.html#V1-PLT-006');                          // Capsule Planter, PETG ₹429
   await page.locator(add).click();
@@ -89,6 +90,7 @@ test('cart tallies a priced piece, an enquiry piece and a Maker build', async ({
 });
 
 test('guided search opens centred and its answers filter the list', async ({ page, isMobile }) => {
+  test.slow();   // the Maker draws 3D in software on CI: ~30 s of the 45 s budget already on main (bead: Maker CI speed)
   await page.goto('/maker.html');
   await page.locator('[data-act=recipe]').first().click();
   await page.locator('[data-act=goto][data-to=plants]').click();
