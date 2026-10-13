@@ -47,6 +47,7 @@ const PAGES = [
 ];
 for (const [name, path] of PAGES) {
   test(`visual: ${name} (first screen)`, async ({ page }) => {
+    if (name === 'maker-start') test.slow();
     await page.goto(path);
     await settle(page);
     if (name === 'maker-start') {   // the recipe stills redraw once their plant models arrive; wait for them, then settle again
@@ -68,6 +69,7 @@ const STATES = [
 ];
 for (const [name, path, setup] of STATES) {
   test(`visual state: ${name}`, async ({ page }) => {
+    if (path.includes('maker')) test.slow();   // software 3D on CI (bead: Maker CI speed)
     await page.goto(path);
     await settle(page);
     await setup(page);
