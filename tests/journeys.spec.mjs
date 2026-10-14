@@ -110,6 +110,20 @@ test('catalogue: the place switch works from the keyboard', async ({ page, isMob
   await expect(page.locator('.v1-card[data-sku="V1-PLT-006"] .v1-card-amount')).toHaveText('₹529');   // ABS
 });
 
+// Cart thumbnails broke on 13 Oct: photo paths became site-absolute and the
+// drawer added a second "/", so "//assets/…" pointed at another host. The
+// old check matched the end of the src only; this one checks it loads.
+test('cart thumbnails load (a catalogue piece)', async ({ page }) => {
+  await page.goto('/products');
+  await page.locator('.v1-card[data-sku="V1-PLT-006"] .v1-card-add').click();
+  const imgs = page.locator('dialog.ct .ct-thumb img');
+  await expect(imgs.first()).toBeVisible();
+  for (const img of await imgs.all()) {
+    expect(await img.getAttribute('src')).toMatch(/^\/assets\//);
+    await expect.poll(() => img.evaluate(el => el.complete && el.naturalWidth)).toBeGreaterThan(0);
+  }
+});
+
 // ── Product page ─────────────────────────────────────────────────────
 test('price, WhatsApp message and cart line follow the chosen size + material', async ({ page, isMobile }) => {
   const errs = errorsOf(page);
@@ -561,7 +575,7 @@ test('cart: a Maker design shows its chamber drawing, not a letter', async ({ pa
   await page.goto('/maker#c=MossBox&s=studio&p=PLT-036&n=QA');
   await page.locator('.mk-step[data-to=review]').click();
   await page.locator('[data-key=cart]').click();
-  await expect(page.locator('dialog.ct .ct-line--custom .ct-thumb img')).toHaveAttribute('src', /assets\/boxes\/moss\.svg$/);
+  await expect(page.locator('dialog.ct .ct-line--custom .ct-thumb img')).toHaveAttribute('src', /^\/assets\/boxes\/moss\.svg$/);
 });
 
 // When the 3D view arrives it must not rebuild the Maker's buttons: on slow
