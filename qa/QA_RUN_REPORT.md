@@ -136,3 +136,15 @@ QA-001 to QA-007, QA-009 and QA-013. Details, root causes and evidence are in `Q
   - Maker, search and cart tests on desktop, phone and tablet: 60 passed
   - visual + a11y on all three devices: 116 passed; tablet guided-search visual failed once under load and passed twice on rerun
   - The "Maker 3D preview loads its plant models" smoke test fails in some full runs and passes when run alone. It did this before the change too (see the 13 Oct SEO run).
+
+## Follow-up · shopping Phase 1, 14 Oct 2026 (site-zwk)
+- **What changed:** a "Where will it live?" choice (Indoors / Sunny window / Balcony → PETG / ABS / ASA) sets one exact price on every Catalogue card. Save and Add now sit on the cards, and product pages open on the same choice. Details: `SHOPPING-PLAN.md`.
+- **Checks:**
+  - `npm test`, including the new data checks: every orderable piece has a price in every place, plus `priceOf` cases
+  - journeys, smoke and a11y on desktop + phone: 179 passed. The new tests cover:
+    - switch → card price → Add → cart line in ASA at ₹629
+    - Save from the card
+    - coming soon has no Add
+    - the product page follows the choice, and the choice persists back to the Catalogue
+    - the switch works from the keyboard
+  - visual + contrast on all three devices: 95 passed. The three Catalogue first-screen baselines were refreshed on purpose and reviewed.

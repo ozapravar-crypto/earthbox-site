@@ -69,6 +69,47 @@ test.describe('enquiry form', () => {
   });
 });
 
+// ── Catalogue: exact prices + Add/Save on cards (SHOPPING-PLAN.md) ────
+test('catalogue: where it lives sets every card price; Add and Save from the card', async ({ page }) => {
+  const errs = errorsOf(page);
+  await page.goto('/products');
+  const card = page.locator('.v1-card[data-sku="V1-PLT-006"]');                  // Capsule Planter
+  await expect(card.locator('.v1-card-amount')).toHaveText('₹429');              // Indoors (PETG) by default
+  await page.locator('[data-place=balcony]').click();
+  await expect(page.locator('[data-place=balcony]')).toHaveAttribute('aria-checked', 'true');
+  await expect(card.locator('.v1-card-amount')).toHaveText('₹629');              // ASA
+  await expect(page.locator('#placeNote')).toContainText('ASA');
+  await card.locator('.v1-card-add').click();
+  await expect(page.locator('dialog.ct .ct-line--fixed .ct-sub')).toContainText('ASA');
+  await expect(page.locator('dialog.ct .ct-price').first()).toHaveText('₹629');
+  await page.keyboard.press('Escape');
+  await card.locator('.v1-card-save').click();
+  await expect(card.locator('.v1-card-save')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('[data-saved-count]').first()).toHaveText('1');
+  // Coming soon: Save only, no Add.
+  const soon = page.locator('.v1-card--soon').first();
+  await expect(soon.locator('.v1-card-add')).toHaveCount(0);
+  await expect(soon.locator('.v1-card-save')).toHaveCount(1);
+  // The product page opens on the same place, and the choice is remembered.
+  await page.goto('/product/V1-PLT-006');
+  await expect(page.locator('#pdPrice')).toHaveText('₹629');
+  await expect(page.locator('[data-material=asa]')).toHaveAttribute('aria-checked', 'true');
+  await page.locator('[data-material=petg]').click();
+  await page.goto('/products');
+  await expect(page.locator('[data-place=indoors]')).toHaveAttribute('aria-checked', 'true');
+  expect(errs).toEqual([]);
+});
+
+test('catalogue: the place switch works from the keyboard', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'keyboard');
+  await page.goto('/products');
+  await page.locator('[data-place=indoors]').focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(page.locator('[data-place=window]')).toBeFocused();
+  await expect(page.locator('[data-place=window]')).toHaveAttribute('aria-checked', 'true');
+  await expect(page.locator('.v1-card[data-sku="V1-PLT-006"] .v1-card-amount')).toHaveText('₹529');   // ABS
+});
+
 // ── Product page ─────────────────────────────────────────────────────
 test('price, WhatsApp message and cart line follow the chosen size + material', async ({ page, isMobile }) => {
   const errs = errorsOf(page);

@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { volumeOne, categories, materials } from '../data/volume-one.js';
+import { volumeOne, categories, materials, places, priceOf } from '../data/volume-one.js';
 import { volumeTwo } from '../data/upcoming.js';
 import { plants, elements, chamberElements, substrates, recipes, forms, SOILLESS, models } from '../data/maker.js';
 import { articles, categories as articleCats } from '../data/articles.js';
@@ -123,5 +123,14 @@ for (const n of NAV) {
   }
   assert.throws(() => icon('nope'));
 }
+
+// "Where will it live?": every place names a real material, and every
+// orderable piece has an exact price in every place (the card shows it).
+for (const pl of places) assert.ok(materials.some(m => m.id === pl.material), `place ${pl.id}: unknown material ${pl.material}`);
+for (const p of volumeOne.filter(x => x.status === 'available'))
+  for (const pl of places) assert.ok(priceOf(p, pl.material) > 0, `${p.sku}: no ${pl.name} (${pl.material}) price`);
+assert.equal(priceOf(volumeOne.find(p => p.sku === 'V1-PLT-005'), 'asa', 'small-circle'), 799);
+assert.equal(priceOf(volumeOne.find(p => p.sku === 'V1-PLT-005'), 'petg'), 1399);   // first size
+assert.equal(priceOf(volumeOne.find(p => p.status === 'coming-soon'), 'petg'), null);
 
 console.log(`data: all checks passed (${volumeOne.length} products, ${volumeTwo.boxes.length} chambers, ${plants.length} plants, ${articles.length} articles)`);

@@ -27,6 +27,20 @@ export const materials = [
   { id: 'asa',  name: 'ASA',  description: 'Outdoor pro, UV resistant, weatherproof' }
 ];
 
+// "Where will it live?" A shopper picks a place, not a plastic. Each place
+// has one material, so every card can show one exact price instead of
+// "From ₹…" (owner brief, 14 Oct 2026; SHOPPING-PLAN.md).
+export const places = [
+  { id: 'indoors', name: 'Indoors',      material: 'petg' },
+  { id: 'window',  name: 'Sunny window', material: 'abs' },
+  { id: 'balcony', name: 'Balcony',      material: 'asa' }
+];
+
+// The exact price of a piece in one material and size; null = on enquiry.
+// Size defaults to the first, the one the product page opens on.
+export const priceOf = (p, material, variant = p.variants?.[0]?.id) =>
+  (variant ? p.pricing?.[variant] : p.pricing)?.[material] ?? null;
+
 /**
  * @typedef {'petg'|'abs'|'asa'} Material
  * @typedef {Partial<Record<Material, number>>} PriceTable   whole rupees, e.g. { petg: 429, abs: 529 }

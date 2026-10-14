@@ -601,6 +601,10 @@
   border-color:var(--ink);
 }
 
+/* Place name first, the material underneath in smaller type (SHOPPING-PLAN.md) */
+.pd-selector-btn--chip{gap:.5rem}
+.pd-chip-sub{font-size:.55rem;letter-spacing:.14em;opacity:.8}
+
 /* ─── Price Display ─── */
 .pd-price-display{
   margin:1.5rem 0 1rem;

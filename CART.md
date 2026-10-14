@@ -2,6 +2,13 @@
 
 **TL;DR:** Every page has **Saved** and **Cart** in the header. The cart holds three kinds of line and tallies what can be tallied. "Checkout" sends the whole order to the studio on WhatsApp or by email. The studio confirms the total, delivery and lead time, then sends a Razorpay payment link. No money is taken on the site yet.
 
+## Where lines come from
+
+Lines are added from:
+- **Product pages:** Add to cart / Save, using the chosen size and material.
+- **Catalogue cards** (since 14 Oct 2026): Add and Save on each card, using the shopper's **"Where will it live?"** choice. Indoors → PETG, Sunny window → ABS, Balcony → ASA (`places` in `data/volume-one.js`), plus the piece's first size. The choice is stored as `earthbox-place` and shared with product pages. See `SHOPPING-PLAN.md`.
+- **The Maker** (a build), **Care** (kits and visit plans), and **"Goes with your order"** in the drawer.
+
 ## Three kinds of line
 
 | Kind | What's in it | How it shows | How it counts |

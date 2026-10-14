@@ -10,8 +10,8 @@
 // ─────────────────────────────────────────────────────────────────────
 
 import { SITE, PHONE } from '../data/site.js';
-import { esc, rupees, track } from './util.js';
-import { volumeOne as v1Products, categories as v1Categories, materials, photoPath } from '../data/volume-one.js';
+import { esc, rupees, track, savedPlace, rememberPlace } from './util.js';
+import { volumeOne as v1Products, categories as v1Categories, materials, photoPath, places } from '../data/volume-one.js';
 import { volumeTwo } from '../data/upcoming.js';
 import { findProduct, productMeta } from './product-meta.js';
 import { getReviews, getAverageRating } from '../data/reviews.js';
@@ -21,6 +21,9 @@ import { syncCartButtons } from './cart.js';
 import { groupsOf, kitFor, encodePlan } from './care.js';
 import { elements, chamberElements } from '../data/maker.js';
 import { icon } from '../data/icons.js';
+
+// The material matching the shopper's place, if this piece comes in it.
+const startMaterial = (mats) => { const m = savedPlace(places).material; return mats.includes(m) ? m : mats[0]; };
 
 
 
@@ -215,6 +218,10 @@ function renderPrinted(p){
         : Object.keys(p.pricing))
     : [];
 
+  // Open on the shopper's place (Indoors / Sunny window / Balcony), as the
+  // Catalogue does, so the price here matches the card they tapped.
+  const startMat = startMaterial(availableMaterials);
+
   // Related products from same category
   const related = v1Products
     .filter(o => o.sku !== p.sku && o.category === p.category)
@@ -226,7 +233,7 @@ function renderPrinted(p){
   const reviewCount = reviews.length;
 
   const line = { kind: 'product', sku: p.sku, variant: hasVariants ? p.variants[0].id : null,
-                 material: availableMaterials[0] || null, qty: 1 };
+                 material: startMat || null, qty: 1 };
 
   // Extract key points from description (first sentence or up to 100 chars)
   const shortDesc = p.description.split('.')[0] + '.';
@@ -285,11 +292,13 @@ function renderPrinted(p){
             <div class="pd-selector" data-selector="material">
               <span class="caption" id="pdMaterialLabel">Material</span>
               <div class="pd-selector-options pd-selector-options--inline" role="radiogroup" aria-labelledby="pdMaterialLabel">
-                ${availableMaterials.map((m, i) => {
+                ${availableMaterials.map((m) => {
                   const mat = materials.find(x => x.id === m) || { id: m, name: m.toUpperCase(), description: '' };
+                  const place = places.find(x => x.material === m);
+                  const on = m === startMat;
                   return `
-                    <button type="button" role="radio" aria-checked="${i === 0}" tabindex="${i === 0 ? 0 : -1}" class="pd-selector-btn pd-selector-btn--chip ${i === 0 ? 'active' : ''}" data-material="${m}">
-                      ${mat.name}
+                    <button type="button" role="radio" aria-checked="${on}" tabindex="${on ? 0 : -1}" class="pd-selector-btn pd-selector-btn--chip ${on ? 'active' : ''}" data-material="${m}" title="${esc(mat.description)}">
+                      ${place ? `${place.name} <span class="pd-chip-sub">${mat.name}</span>` : mat.name}
                     </button>
                   `;
                 }).join('')}
@@ -301,10 +310,10 @@ function renderPrinted(p){
             ${hasPricing ? `
               <span class="pd-price" id="pdPrice">
                 ${hasVariants
-                  ? formatPrice(p.pricing[p.variants[0].id][availableMaterials[0]])
-                  : formatPrice(p.pricing[availableMaterials[0]])}
+                  ? formatPrice(p.pricing[p.variants[0].id][startMat])
+                  : formatPrice(p.pricing[startMat])}
               </span>
-              ${p.priceRange ? `<span class="pd-price-range caption">${p.priceRange[availableMaterials[0]]}</span>` : ''}
+              ${p.priceRange ? `<span class="pd-price-range caption">${p.priceRange[startMat]}</span>` : ''}
             ` : `
               <span class="pd-price pd-price--enquiry">Price on enquiry</span>
             `}
@@ -313,9 +322,9 @@ function renderPrinted(p){
           ${buyHTML(line, enquiryHref({
                name: p.name,
                sku: p.sku,
-               material: availableMaterials[0],
+               material: startMat,
                variant: hasVariants ? p.variants[0].name : null,
-               price: hasPricing ? formatPrice(hasVariants ? p.pricing[p.variants[0].id][availableMaterials[0]] : p.pricing[availableMaterials[0]]) : null,
+               price: hasPricing ? formatPrice(hasVariants ? p.pricing[p.variants[0].id][startMat] : p.pricing[startMat]) : null,
                volume: 1
              }), p.name)}
 
@@ -373,7 +382,7 @@ ${['planters', 'plant-packets', 'plant-support'].includes(p.category) ? careHTML
     </article>
 
     <!-- Mobile sticky CTA -->
-    ${mobileBuyHTML(line, hasPricing ? formatPrice(hasVariants ? p.pricing[p.variants[0].id][availableMaterials[0]] : p.pricing[availableMaterials[0]]) : 'Price on enquiry')}
+    ${mobileBuyHTML(line, hasPricing ? formatPrice(hasVariants ? p.pricing[p.variants[0].id][startMat] : p.pricing[startMat]) : 'Price on enquiry')}
   `;
 }
 
@@ -389,9 +398,7 @@ function initPrintedSelectors(p){
   if (!priceEl || !ctaEl) return;
 
   let currentVariant = hasVariants ? p.variants[0].id : null;
-  let currentMaterial = hasVariants
-    ? Object.keys(p.pricing[p.variants[0].id])[0]
-    : Object.keys(p.pricing)[0];
+  let currentMaterial = startMaterial(Object.keys(hasVariants ? p.pricing[p.variants[0].id] : p.pricing));
 
   function updatePrice(){
     const price = hasVariants
@@ -427,7 +434,12 @@ function initPrintedSelectors(p){
       b.setAttribute('aria-checked', String(on));
       b.tabIndex = on ? 0 : -1;
     });
-    if (attr === 'data-variant') currentVariant = btn.dataset.variant; else currentMaterial = btn.dataset.material;
+    if (attr === 'data-variant') currentVariant = btn.dataset.variant;
+    else {
+      currentMaterial = btn.dataset.material;
+      const place = places.find(x => x.material === currentMaterial);
+      if (place) rememberPlace(place.id);   // the Catalogue follows this choice
+    }
     updatePrice();
   };
   for (const attr of ['data-variant', 'data-material']) {

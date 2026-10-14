@@ -8,45 +8,33 @@
 
 import { PHONE } from '../data/site.js';
 import { icon } from '../data/icons.js';
-import { track } from './util.js';
-import { volumeOne, categories as v1Categories, photoPath } from '../data/volume-one.js';
+import { track, esc, rupees, savedPlace, rememberPlace } from './util.js';
+import { syncCartButtons } from './cart.js';
+import { volumeOne, categories as v1Categories, photoPath, places, materials, priceOf } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
 import { observeReveals } from './reveal.js';
 import { enquiryAltHTML } from './enquiry-form.js';
 
 
-function formatPrice(pricing){
-  if (!pricing) return 'Coming soon';
-  // Lowest price across materials — and sizes, when there are variants
-  // ({ big: { petg: 1399 }, … }); the old first-key read printed "₹[object Object]".
-  const prices = Object.values(pricing).flatMap(v => (typeof v === 'number' ? [v] : Object.values(v)));
-  return `From ₹${Math.min(...prices).toLocaleString('en-IN')}`;
-}
+// Prices follow the shopper's place (Indoors / Sunny window / Balcony →
+// one material), so a card shows the exact price, not "From ₹…".
+// A piece with sizes shows its first size, the one its page opens on.
+const cardLine = (p, place) => ({ kind: 'product', sku: p.sku, variant: p.variants?.[0]?.id ?? null, material: p.pricing ? place.material : null, qty: 1 });
+const attr = (o) => esc(JSON.stringify(o));
+const cardPrice = (p, place) => {
+  const price = priceOf(p, place.material);
+  return price ? rupees(price) : 'Price on enquiry';
+};
+const sizeNote = (p) => (p.variants?.length > 1 ? `${p.variants[0].name} · ${p.variants.length} sizes` : '');
 
-function getCategoryPriceRange(products){
-  const availableProducts = products.filter(p => p.status === 'available' && p.pricing);
-  if (availableProducts.length === 0) return null;
-
-  let allPrices = [];
-  availableProducts.forEach(p => {
-    if (p.variants && typeof p.pricing === 'object') {
-      Object.values(p.pricing).forEach(variantPrices => {
-        if (typeof variantPrices === 'object') {
-          allPrices.push(...Object.values(variantPrices));
-        }
-      });
-    } else if (typeof p.pricing === 'object') {
-      allPrices.push(...Object.values(p.pricing));
-    }
-  });
-
-  if (allPrices.length === 0) return null;
-
-  const min = Math.min(...allPrices);
-  const max = Math.max(...allPrices);
-
-  if (min === max) return `₹${min.toLocaleString('en-IN')}`;
-  return `₹${min.toLocaleString('en-IN')} – ₹${max.toLocaleString('en-IN')}`;
+// "₹129 – ₹1,799" across every size of the category's orderable pieces, in this place.
+function categoryRange(products, place){
+  const all = products.filter(p => p.status === 'available' && p.pricing)
+    .flatMap(p => (p.variants?.length ? p.variants.map(v => priceOf(p, place.material, v.id)) : [priceOf(p, place.material)]))
+    .filter(Boolean);
+  if (!all.length) return null;
+  const lo = Math.min(...all), hi = Math.max(...all);
+  return lo === hi ? rupees(lo) : `${rupees(lo)} – ${rupees(hi)}`;
 }
 
 function sortByAvailability(products){
@@ -72,15 +60,19 @@ function renderVolumeOne(){
     products: volumeOne.filter(p => p.category === cat.slug)
   }));
 
-  host.innerHTML = grouped.map(({ cat, products }, catIndex) => {
-    const priceRange = getCategoryPriceRange(products);
+  const place = savedPlace(places);
+  host.innerHTML = placeSwitchHTML(place) + grouped.map(({ cat, products }, catIndex) => {
+    const priceRange = categoryRange(products, place);
     const { available, comingSoon } = sortByAvailability(products);
     const hasAvailable = available.length > 0;
     const hasComingSoon = comingSoon.length > 0;
 
+    // Image-first, quiet card: Save sits on the photo, Add beside the price.
+    // Buttons are siblings of the link (a button can't live inside a link).
     const renderCard = (p) => {
+      const soon = p.status === 'coming-soon', line = cardLine(p, place);
       return `
-      <article class="v1-card ${p.status === 'coming-soon' ? 'v1-card--soon' : ''}">
+      <article class="v1-card ${soon ? 'v1-card--soon' : ''}" data-sku="${p.sku}">
         <a class="v1-card-link" href="/product/${encodeURIComponent(p.sku)}" data-cursor="VIEW">
           <div class="v1-card-img">
             <img
@@ -95,12 +87,13 @@ function renderVolumeOne(){
           <div class="v1-card-meta">
             <h3 class="v1-card-name">${p.name}</h3>
             <p class="v1-card-price">
-              ${p.status === 'coming-soon'
-                ? '<span class="v1-soon-badge">Coming soon</span>'
-                : formatPrice(p.pricing)}
+              ${soon ? '<span class="v1-soon-badge">Coming soon</span>' : `<span class="v1-card-amount">${cardPrice(p, place)}</span>`}
             </p>
+            ${!soon && sizeNote(p) ? `<p class="v1-card-note">${sizeNote(p)}</p>` : ''}
           </div>
         </a>
+        <button type="button" class="v1-card-save" data-save-line="${attr(line)}" aria-pressed="false">${icon('heart')}<span class="u-sr-only">Save ${esc(p.name)}</span></button>
+        ${soon ? '' : `<button type="button" class="v1-card-add" data-add-line="${attr(line)}">${icon('plus', { size: 'xs' })}Add<span class="u-sr-only"> ${esc(p.name)} to cart</span></button>`}
       </article>
     `;
     };
@@ -130,6 +123,59 @@ function renderVolumeOne(){
   `;}).join('');
 
   observeReveals(host);
+  initPlaceSwitch(host);
+  syncCartButtons();
+}
+
+// ─── "Where will it live?" ───
+// One choice for the whole catalogue; it sets the material behind every
+// price, Add and Save, and the product pages open on it too.
+const materialNote = (place) => {
+  const m = materials.find(x => x.id === place.material);
+  return `Prices in ${m.name}: ${m.description.toLowerCase()}.`;
+};
+function placeSwitchHTML(place){
+  return `
+    <div class="place-switch">
+      <span class="caption" id="placeLabel">Where will it live?</span>
+      <div class="place-options" role="radiogroup" aria-labelledby="placeLabel">
+        ${places.map(x => `<button type="button" role="radio" class="place-btn" data-place="${x.id}" aria-checked="${x.id === place.id}" tabindex="${x.id === place.id ? 0 : -1}">${x.name}</button>`).join('')}
+      </div>
+      <p class="place-note caption" id="placeNote" aria-live="polite">${materialNote(place)}</p>
+    </div>`;
+}
+function initPlaceSwitch(host){
+  const btns = [...host.querySelectorAll('[data-place]')];
+  const choose = (btn) => {
+    const place = places.find(x => x.id === btn.dataset.place);
+    rememberPlace(place.id);
+    btns.forEach(b => { const on = b === btn; b.setAttribute('aria-checked', String(on)); b.tabIndex = on ? 0 : -1; });
+    host.querySelector('#placeNote').textContent = materialNote(place);
+    host.querySelectorAll('.v1-card[data-sku]').forEach(card => {
+      const p = volumeOne.find(x => x.sku === card.dataset.sku);
+      const line = JSON.stringify(cardLine(p, place));
+      card.querySelectorAll('[data-add-line]').forEach(b => { b.dataset.addLine = line; });
+      card.querySelectorAll('[data-save-line]').forEach(b => { b.dataset.saveLine = line; });
+      const amount = card.querySelector('.v1-card-amount');
+      if (amount) amount.textContent = cardPrice(p, place);
+    });
+    v1Categories.forEach(cat => {
+      const el = host.querySelector(`#cat-${cat.slug} .v1-cat-price`);
+      if (el) el.textContent = categoryRange(volumeOne.filter(p => p.category === cat.slug), place) || '';
+    });
+    syncCartButtons();
+    track('place_select', { place: place.id });
+  };
+  btns.forEach((btn, i) => {
+    btn.addEventListener('click', () => choose(btn));
+    btn.addEventListener('keydown', (e) => {
+      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+      if (!step) return;
+      e.preventDefault();
+      const next = btns[(i + step + btns.length) % btns.length];
+      choose(next); next.focus();
+    });
+  });
 }
 
 

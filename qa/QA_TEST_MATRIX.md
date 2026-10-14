@@ -69,6 +69,7 @@ Key: **S** smoke · **J** journeys · **A** a11y (axe) · **V** visual · **C** 
 | Every referenced file exists (and isn't excluded from deploy) | U `check-assets` | — |
 | Scroll motion: smooth wheel scroll, parallax drift, text fade in/out, pauses under drawers, off for reduced motion and touch | M `motion.spec` (motion on) | D (phone/touch checked inside) |
 | Crawlers: every piece has its own page with name, canonical and Product schema without JS; sitemap, llms.txt and schema match the data; unknown piece is a 404 | U `seo.mjs --check`, S "product pages are readable without JavaScript", Lighthouse SEO | D |
+| Catalogue: one place choice sets every card price; Add/Save on cards; product page follows; keyboard radiogroup | U `data.test` (prices per place), J "catalogue: where it lives…", J "place switch works from the keyboard", V catalogue | D, P, T |
 
 ## Known gaps (not claimed as covered)
 - **Real devices:** Safari/iOS, Firefox and real GPUs. All runs are Chromium; the 3D is tested on software rendering only.
