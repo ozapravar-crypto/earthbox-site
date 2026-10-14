@@ -217,7 +217,7 @@ function priceCell(r){
 
 function lineHTML(r, list){
   const k = esc(r.key);
-  const thumb = r.img ? `<img src="/${esc(r.img)}" alt="" width="72" height="72" loading="lazy">`
+  const thumb = r.img ? `<img src="${esc(r.img)}" alt="" width="72" height="72" loading="lazy">`
     : `<span class="ct-thumb-mark" aria-hidden="true">${r.kind === 'custom' ? 'M' : r.care ? 'C' : 'E'}</span>`;
   const qty = list === 'cart' && r.kind !== 'custom' && !r.key.startsWith('care:') ? `
       <div class="ct-qty" role="group" aria-label="Quantity of ${esc(r.title)}">

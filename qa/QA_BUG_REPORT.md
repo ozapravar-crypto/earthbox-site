@@ -112,3 +112,9 @@ Severity: **critical** (blocks a core task) · **major** (harms many users or th
 ### QA-015 · Box share description joined with commas · minor · fixed 13 Oct 2026
 - **Evidence:** an Elemental Box's description is a list of paragraphs, so `.slice(0, 160)` set the meta description to an array.
 - **Fix:** the shared `scripts/product-meta.js` joins it, for both the page and the build.
+
+### QA-016 · Cart thumbnails broken everywhere · major · fixed 14 Oct 2026
+- **Evidence:** the owner's screenshot showed a broken image on a cart line. Since PR #17 (13 Oct), photo paths start with "/", and the drawer still prefixed its own "/", so `src="//assets/…"` pointed at a host named "assets".
+- **Why tests missed it:** the Maker thumbnail check matched only the end of the src.
+- **Fix:** the drawer uses the path as given (`scripts/cart.js`).
+- **Guard:** a new journey test, "cart thumbnails load", checks that the src starts with `/assets/` and that the image actually loaded. It fails without the fix. The Maker check is now anchored to the start of the src.
