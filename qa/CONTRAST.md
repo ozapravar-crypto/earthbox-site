@@ -62,14 +62,14 @@ Add `{ "key": "<route> | <theme> | <viewport> | <state> | <selector>", "reason":
 |---|---|---|---|---|
 | CQ-001 | Homepage hero text + header over the photo | 1.1–4.4:1 | The scrim (`.hero::before`, z −1) painted under the photo (`.hero-bg`, also z −1, later in the page) | Photo z −2; each text group gets a flat scrim band; strengths set by measurement at 1280–1920 px + phone |
 | CQ-002 | Floating WhatsApp icon | 1.98:1 (needs 3) | White on brand green #25D366 | WhatsApp dark green #128C7E (4.1:1) |
-| CQ-003 | Manifesto closing line | 4.27 light / 4.23 dark | 55 % / 60 % opacity text on a lit band | 70 % / 75 % |
+| CQ-003 | Manifesto closing line | 4.27 light / 4.23 dark | 55 % / 60 % opacity text on a lit band | 70 % / 75 % · **section removed 15 Oct; test retired** |
 | CQ-004 | "Coming soon" badge | 4.42 | `--accent-text` on `--bg-tint`, darkened by the paper grain | Paper (`--bg`) badge background; grain added to the token check |
 | CQ-005 | Accent text (earlier, 10 Oct Phase 3) | 2.14 / 4.46 | `--accent` used for text | `--accent-text` (#736759) |
 | CQ-006 | Product breadcrumb "›" | 1.25:1 | Separator set in `--rule` (12 % ink) | `--mute` |
 | CQ-007 | Keyboard focus rings sitewide | 1.9–2.2:1 (needs 3); 1:1 on the manifesto band | Global `:focus-visible` used `--accent`; on the band, `currentColor` was ink on ink | `currentColor` (already ≥ 4.5:1 on its own background); on the manifesto band, `--bg` |
 | CQ-008 | Maker search + note placeholders | 3.74:1 | Browser default placeholder colour | `::placeholder { color: var(--mute) }` |
 | CQ-009 | Maker map: empty regions; "your chamber" plate in dark mode | 2.07–2.91; 1.72–2.47 | Opacity .5 on empty regions; the plate stays light but its contents used dark-mode tokens | Muted colour instead of opacity; light-theme tokens scoped to the plate |
-| CQ-010 | Manifesto highlighted words, dark mode | 1.57:1 | `--accent` on the band that turns light in dark mode | #736759 in dark mode |
+| CQ-010 | Manifesto highlighted words, dark mode | 1.57:1 | `--accent` on the band that turns light in dark mode | #736759 in dark mode · **section removed 15 Oct; test retired** |
 | CQ-011 | Product "Coming soon" label; footer link hover | 3.10:1 | `--accent-dk` | `--accent-text`; hover → `--ink` |
 | CQ-004b | Coming-soon catalogue cards | 3.88:1 | The whole card was at opacity .85, fading its text (axe caught it; the first pixel model ignored ancestor opacity) | Fade only the photo |
 

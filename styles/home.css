@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════
    home.css · Home page only
-   Layout for hero, manifesto, brand context, principles, purpose,
+   Layout for hero, brand context, principles, purpose,
    notice, colophon. The catalogue + elemental sections live on /products.
    ═══════════════════════════════════════════════════════════════════════ */
 
@@ -204,88 +204,6 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
 }
 .home-vol-preview.volume-i{
   padding-block:clamp(4rem,8vh,7rem) clamp(6rem,12vh,10rem);
-}
-
-/* ─── MANIFESTO ─── */
-.manifesto{
-  background:var(--ink);
-  color:var(--reverse);
-  padding:clamp(8rem,22vh,18rem) var(--pad);
-  text-align:center;
-  position:relative;
-  overflow:hidden;
-}
-.manifesto::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:radial-gradient(
-    circle 420px at var(--mx,50%) var(--my,50%),
-    rgba(184,169,154,.22),
-    transparent 60%
-  );
-  transition:background .2s ease;
-  pointer-events:none;
-}
-.manifesto::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  opacity:.04;
-  pointer-events:none;
-  background-image:
-    linear-gradient(var(--reverse) 1px, transparent 1px),
-    linear-gradient(90deg, var(--reverse) 1px, transparent 1px);
-  background-size:120px 170px;
-  background-position:center;
-  mask-image:radial-gradient(ellipse at center, black 30%, transparent 80%);
-  -webkit-mask-image:radial-gradient(ellipse at center, black 30%, transparent 80%);
-}
-.manifesto-inner{
-  position:relative;
-  z-index:2;
-  max-width:900px;
-  margin:0 auto;
-}
-.manifesto .topmark,
-.manifesto .botmark{
-  display:block;
-  width:48px;height:1px;
-  background:var(--accent);
-  margin:0 auto;
-}
-.manifesto .topmark{margin-bottom:3.5rem}
-.manifesto .botmark{margin-top:4rem}
-.manifesto-text{
-  font-family:var(--serif);
-  font-size:clamp(1.8rem,4vw,3.2rem);
-  line-height:1.28;
-  color:var(--reverse);
-  letter-spacing:-.01em;
-}
-.manifesto-text .accented{color:var(--accent)}   /* on the dark band: 6:1 here; --accent-text would fail */
-[data-theme="dark"] .manifesto-text .accented{color:#736759}
-/* Rings on the manifesto band: currentColor would be ink on the ink band
-   (1:1). --bg is the opposite of the band in both themes. */
-.manifesto :focus-visible{outline-color:var(--bg)}   /* the band is light in dark mode: --accent measured 1.57:1 */
-.manifesto-mid{
-  display:block;
-  width:56px;height:1px;
-  background:var(--accent);
-  margin:3rem auto;
-  opacity:.7;
-}
-.manifesto-tail{
-  font-family:var(--body);
-  font-style:italic;
-  color:rgba(248,247,245,.7);   /* .55 measured 4.27:1 on the lit band; .7 ≥ 6:1 */
-  font-size:1rem;
-  line-height:1.7;
-  max-width:40ch;
-  margin:2rem auto 0;
-}
-[data-theme="dark"] .manifesto-tail{
-  color:rgba(26,25,24,.75);   /* dark mode band is light: .6 measured 4.23:1, .75 ≥ 6:1 */
 }
 
 /* ─── BRAND CONTEXT (spread) ─── */
@@ -528,11 +446,6 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
 @media (prefers-reduced-motion:reduce){ .mi-leaves{animation:none} }
 
 /* Trust strip & floating-wa styles moved to components.css */
-
-/* ─── PAGE-SPECIFIC OVERRIDES ─── */
-.manifesto-cta{
-  margin-top:2.5rem;
-}
 
 /* ─── RESPONSIVE ─── */
 @media (max-width:1000px){

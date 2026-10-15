@@ -59,15 +59,6 @@ test('CQ-002 WhatsApp button icon ≥ 3:1', async ({ page }) => {
   expect(await failures(page, '.floating-wa', 'default')).toEqual([]);
 });
 
-// CQ-003 · Manifesto closing line at 55 % white on the lit dark band = 4.27:1.
-for (const theme of THEMES) {
-  test(`CQ-003 manifesto closing line passes (${theme})`, async ({ page }) => {
-    await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
-    await page.goto('/index.html');
-    expect(await failures(page, '.manifesto-tail', 'default')).toEqual([]);
-  });
-}
-
 // CQ-004 · "Coming soon" badge: --accent-text on --bg-tint under the paper
 // grain = 4.42:1 (the token check, which ignored the grain, said 4.67).
 // Also: the coming-soon card faded the WHOLE card to .85 → 3.88:1 (axe caught
@@ -92,7 +83,7 @@ test('CQ-005/006 product page captions, breadcrumb separators and badges pass', 
 });
 
 // CQ-007 · Focus rings were 2px --accent = 1.9–2.2:1 (rings need 3:1).
-// Now currentColor. Checked on a light page, the dark manifesto band, and dark mode.
+// Now currentColor. Checked on a light page and in dark mode.
 for (const theme of THEMES) {
   test(`CQ-007 keyboard focus rings ≥ 3:1 (${theme})`, async ({ page }) => {
     await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
@@ -101,7 +92,7 @@ for (const theme of THEMES) {
     await page.evaluate(() => document.querySelectorAll('.reveal,.reveal-line').forEach(e => e.classList.add('in')));
     await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation-duration:0s!important;animation-delay:0s!important}' });
     const bad = [];
-    for (const sel of ['.runhead-nav a', '.manifesto-inner a.cta', '#catalogue-tease a.cta', 'footer .colo-col a']) {
+    for (const sel of ['.runhead-nav a', '#catalogue-tease a.cta', 'footer .colo-col a']) {
       const el = page.locator(sel).first();
       await el.scrollIntoViewIfNeeded();
       await page.keyboard.press('Shift');                     // make focus "keyboard" focus
@@ -139,13 +130,6 @@ for (const theme of THEMES) {
     expect(await failures(page, '.mk-map', 'map-pin')).toEqual([]);
   });
 }
-
-// CQ-010 · Dark mode: manifesto highlighted words kept --accent on the light band = 1.57:1.
-test('CQ-010 manifesto highlights pass in dark mode', async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem('earthbox-theme', 'dark'));
-  await page.goto('/index.html');
-  expect(await failures(page, '.manifesto-text', 'default')).toEqual([]);
-});
 
 // CQ-011 · Product "Coming soon" block (its label was --accent-dk, 3.10:1;
 // the label itself was removed with the other eyebrows on 11 Oct 2026, the
