@@ -73,18 +73,6 @@
   border-radius:0;
 }
 
-/* Inverts cleanly over the dark manifesto section */
-.cursor-ring.is-dark{
-  border-color:var(--bg);
-  mix-blend-mode:normal;
-}
-.cursor-dot.is-dark{
-  background:var(--bg);
-}
-.cursor-ring.is-dark .cursor-label{
-  color:var(--bg);
-}
-
 /* Sprig trail — sprigs are appended into this layer, then removed */
 .cursor-sprigs{
   position:fixed;

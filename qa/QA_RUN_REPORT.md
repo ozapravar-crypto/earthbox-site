@@ -148,3 +148,11 @@ QA-001 to QA-007, QA-009 and QA-013. Details, root causes and evidence are in `Q
     - the product page follows the choice, and the choice persists back to the Catalogue
     - the switch works from the keyboard
   - visual + contrast on all three devices: 95 passed. The three Catalogue first-screen baselines were refreshed on purpose and reviewed.
+
+## Follow-up · homepage manifesto removed, 15 Oct 2026
+- **What changed:** the dark "EarthBox is not selling plants…" band is gone from the homepage, along with its cursor spotlight script, the cursor's dark-band styling, its CSS and its GA event (`manifesto_cta_click`).
+- **Checks:**
+  - `npm test`, ESLint and the build all pass.
+  - Full Playwright suite on desktop, phone and tablet: 304 passed, 61 skipped (the live-only suite).
+  - Contrast checks CQ-003 and CQ-010 covered only this section, so they were retired (see `CONTRAST.md`). The manifesto button was also removed from the CQ-007 focus-ring check.
+  - The homepage first-screen baselines didn't change, because the band sat below the fold.

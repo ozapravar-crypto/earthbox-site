@@ -30,9 +30,6 @@ const labelFor = (el) => {
 const isFrameTarget = (el) =>
   el.matches('img, .vis svg, .product-vis svg, .chamber-visual svg, .logo-svg');
 
-const isDarkSection = (el) =>
-  !!el.closest('.manifesto');
-
 
 export function initCursor(){
   if (reduced || !fine) return;
@@ -92,13 +89,10 @@ export function initCursor(){
 
     const interactive = t.closest('a, button, input, label, .product-row');
     const frameish    = isFrameTarget(t);
-    const dark        = isDarkSection(t);
 
     ring.classList.toggle('is-hover', !!interactive);
     dot.classList .toggle('is-hover', !!interactive);
     ring.classList.toggle('is-frame', frameish && !interactive);
-    ring.classList.toggle('is-dark',  dark);
-    dot.classList .toggle('is-dark',  dark);
 
     label.textContent = interactive ? labelFor(interactive) : '';
   });

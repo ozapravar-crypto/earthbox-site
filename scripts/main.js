@@ -21,7 +21,6 @@ import { initLoader }        from './loader.js';
 import { initRunhead }       from './runhead.js';
 import { initMenu }          from './menu.js';
 import { initReveal }        from './reveal.js';
-import { initManifesto }  from './manifesto-spotlight.js';
 import { initScrollMotion } from './motion-scroll.js';
 import { initPin }        from './pin.js';
 import { initCursor }     from './cursor.js';
@@ -72,7 +71,6 @@ const boot = async () => {
   initMenu();
   initReveal();       // Must run before catalogue so observeReveals() works
   await initPage();
-  initManifesto();
   initScrollMotion();
   initPin();
   initCursor();
@@ -107,14 +105,6 @@ const boot = async () => {
         page: window.location.pathname
       });
   });
-
-  // GA4: Track manifesto CTA clicks
-  const manifestoCta = document.querySelector('.manifesto-cta');
-  if (manifestoCta) {
-    manifestoCta.addEventListener('click', () => {
-      track('manifesto_cta_click');
-    });
-  }
 };
 
 const start = () => {
