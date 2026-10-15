@@ -291,3 +291,21 @@ for (const theme of THEMES) {
     expect(await failures(page, '[data-points]', 'hover')).toEqual([]);
   });
 }
+
+// CQ-019 · The card's Save heart sits on the photo: its outside focus ring
+// (light ink in dark mode) met light photos at 1.52:1. The ring is now inside
+// the button, on its own tint (found by full audit, CI 38730488950).
+for (const theme of THEMES) {
+  test(`CQ-019 card Save focus ring passes (${theme})`, async ({ page }) => {
+    await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
+    await page.goto('/products.html');
+    const el = page.locator('.v1-card-save').first();
+    await el.scrollIntoViewIfNeeded();
+    await page.keyboard.press('Shift');
+    await el.focus();
+    const rings = (await page.evaluate(scanPage, { scope: '.v1-card', state: 'focus' })).filter(r => r.kind === 'focus-ring');
+    expect(rings.length).toBeGreaterThan(0);
+    const found = [...rings.filter(r => r.status !== 'review'), ...await resolveBatch(page, rings.filter(r => r.status === 'review'))];
+    expect(found.filter(r => r.status !== 'pass').map(r => `${r.ratio}:1 ${r.fg} on ${r.bg}`)).toEqual([]);
+  });
+}

@@ -345,7 +345,7 @@
   white-space:nowrap;
 }
 .search-result:hover .search-result-cta{
-  color:var(--accent-text);   /* --accent-dk was 2.84:1 on the hovered row (CQ-017) */
+  color:var(--accent-text);   /* --accent-dk was 2.84:1 on the hovered row (CQ-019) */
 }
 
 .search-empty{
@@ -814,6 +814,8 @@
 }
 .v1-card-save:hover,.v1-card-add:hover,
 .v1-card-save:focus-visible,.v1-card-add:focus-visible{color:var(--ink);border-color:var(--ink);background:var(--bg-tint)}
+/* The heart sits on the photo: an outside ring met light photos at 1.52:1 in dark mode (CQ-019). Inside, it sits on the button's own tint. */
+.v1-card-save:focus-visible{outline-offset:-5px}
 
 /* "Where will it live?": underlined text options, like the volume tabs */
 .place-switch{
