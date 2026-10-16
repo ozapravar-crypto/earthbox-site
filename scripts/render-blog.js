@@ -40,9 +40,9 @@ function renderFilters() {
   const host = document.getElementById('journalFilters');
   if (!host) return;
 
-  const allBtn = `<button class="filter-btn is-active" data-filter="all">All</button>`;
+  const allBtn = `<button type="button" class="filter-btn" aria-pressed="true" data-filter="all">All</button>`;
   const catBtns = categories.map(c =>
-    `<button class="filter-btn" data-filter="${c.slug}">${c.title}</button>`
+    `<button type="button" class="filter-btn" aria-pressed="false" data-filter="${c.slug}">${c.title}</button>`
   ).join('');
 
   host.innerHTML = allBtn + catBtns;
@@ -50,8 +50,7 @@ function renderFilters() {
   host.querySelectorAll('.filter-btn').forEach(el => {
     const btn = /** @type {HTMLButtonElement} */ (el);
     btn.addEventListener('click', () => {
-      host.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('is-active'));
-      btn.classList.add('is-active');
+      host.querySelectorAll('.filter-btn').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
       filterArticles(/** @type {string} */ (btn.dataset.filter));
     });
   });

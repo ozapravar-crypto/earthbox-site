@@ -53,7 +53,7 @@
 }
 .cursor-label{
   font-family:var(--sans);
-  font-size:.52rem;
+  font-size:.62rem;
   letter-spacing:.28em;
   text-transform:uppercase;
   color:var(--accent);

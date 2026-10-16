@@ -26,7 +26,7 @@
   gap:.5rem;
   margin-bottom:1.5rem;
   font-family:var(--sans);
-  font-size:.55rem;
+  font-size:.62rem;
   letter-spacing:.2em;
   text-transform:uppercase;
 }
@@ -49,7 +49,7 @@
 
 @media (max-width: 560px){
   .pd-breadcrumb{
-    font-size:.5rem;
+    font-size:.62rem;
     gap:.35rem;
   }
 }
@@ -206,12 +206,12 @@
 }
 .pd-maker-link{
   display:block;margin-top:1rem;text-align:center;
-  font-size:.58rem;letter-spacing:.24em;color:var(--ink-soft);
+  font-size:.62rem;letter-spacing:.24em;color:var(--ink-soft);
 }
 .pd-maker-link:hover{color:var(--ink)}
 .pd-note{
   margin-top:1rem;
-  font-size:.55rem;
+  font-size:.62rem;
   letter-spacing:.28em;
   color:var(--mute);
   text-align:center;
@@ -243,7 +243,7 @@
   align-items:center;
   gap:.5rem;
   font-family:var(--sans);
-  font-size:.6rem;
+  font-size:.62rem;
   letter-spacing:.15em;
   color:var(--mute);
 }
@@ -259,7 +259,7 @@
   align-items:center;
   gap:.4rem;
   font-family:var(--sans);
-  font-size:.6rem;
+  font-size:.62rem;
   letter-spacing:.15em;
   color:var(--ink-soft);
   text-decoration:none;
@@ -299,7 +299,7 @@
   align-items:center;
   gap:.4rem;
   font-family:var(--sans);
-  font-size:.6rem;
+  font-size:.62rem;
   letter-spacing:.2em;
   color:var(--mute);
 }
@@ -344,7 +344,7 @@
 }
 .pd-review-date{
   font-family:var(--sans);
-  font-size:.5rem;
+  font-size:.62rem;
   letter-spacing:.28em;
   color:var(--mute);
 }
@@ -373,7 +373,7 @@
   gap:.35rem;
   margin-top:.75rem;
   font-family:var(--sans);
-  font-size:.5rem;
+  font-size:.62rem;
   letter-spacing:.2em;
   color:var(--mute);
 }
@@ -411,7 +411,7 @@
   min-height:44px;
   gap:.5rem;
   font-family:var(--sans);
-  font-size:.6rem;
+  font-size:.62rem;
   letter-spacing:.2em;
   text-transform:uppercase;
   color:var(--ink-soft);
@@ -478,7 +478,7 @@
   padding:.85rem 1rem 1rem;
 }
 .pd-related-meta .caption{
-  font-size:.5rem;
+  font-size:.62rem;
   letter-spacing:.32em;
   color:var(--accent-text);
 }
@@ -500,7 +500,7 @@
 /* ─── BACK LINK · top-left ─── */
 .back-link{
   display:inline-block;
-  font-size:.6rem;
+  font-size:.62rem;
   letter-spacing:.32em;
   color:var(--mute);
   text-decoration:none;
@@ -527,7 +527,7 @@
 /* ─── Unit label (e.g., "30 pieces") ─── */
 .pd-unit{
   margin-top:.75rem;
-  font-size:.6rem;
+  font-size:.62rem;
   letter-spacing:.28em;
   color:var(--mute);
 }
@@ -539,7 +539,7 @@
 .pd-selector > label{
   display:block;
   margin-bottom:.6rem;
-  font-size:.55rem;
+  font-size:.62rem;
   letter-spacing:.28em;
 }
 .pd-selector-options{
@@ -553,11 +553,13 @@
   gap:.4rem;
 }
 
-/* ─── Selector Buttons ─── */
+/* ─── Selector Buttons ───
+   A choice that changes what you buy is filled when chosen (UX audit rule E2). */
 .pd-selector-btn{
   display:flex;
   flex-direction:column;
   align-items:flex-start;
+  min-height:44px;
   padding:.75rem 1rem;
   background:var(--bg);
   border:1px solid var(--rule);
@@ -570,9 +572,11 @@
   background:var(--bg-tint);
 }
 .pd-selector-btn.active{
-  border-color:var(--accent);
-  background:var(--bg);
+  border-color:var(--ink);
+  background:var(--ink);
 }
+.pd-selector-btn.active .pd-selector-name,
+.pd-selector-btn.active .pd-selector-desc{color:var(--bg)}
 .pd-selector-name{
   font-family:var(--serif);
   font-size:.95rem;
@@ -588,6 +592,7 @@
 /* ─── Chip-style buttons (for materials) ─── */
 .pd-selector-btn--chip{
   flex-direction:row;
+  align-items:center;
   padding:.5rem .9rem;
   font-family:var(--sans);
   font-size:.65rem;
@@ -603,7 +608,7 @@
 
 /* Place name first, the material underneath in smaller type (SHOPPING-PLAN.md) */
 .pd-selector-btn--chip{gap:.5rem}
-.pd-chip-sub{font-size:.55rem;letter-spacing:.14em;opacity:.8}
+.pd-chip-sub{font-size:.62rem;letter-spacing:.14em;opacity:.8}
 
 /* ─── Price Display ─── */
 .pd-price-display{
@@ -632,7 +637,7 @@
 .pd-hero-frame--placeholder::after{
   content:"Image coming soon";
   font-family:var(--sans);
-  font-size:.6rem;
+  font-size:.62rem;
   letter-spacing:.28em;
   text-transform:uppercase;
   color:var(--mute);
@@ -712,7 +717,7 @@
   content:"";position:absolute;left:50%;bottom:-.1rem;width:4px;height:4px;margin-left:-2px;border-radius:50%;
   background:var(--rule-stronger);transition:background var(--dur-fast) var(--ease-archival),transform var(--dur-fast) var(--ease-archival);
 }
-.pd-point-label{font-family:var(--sans);font-size:.58rem;letter-spacing:.26em;text-transform:uppercase;color:var(--mute)}
+.pd-point-label{font-family:var(--sans);font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;color:var(--mute)}
 .pd-point:hover,.pd-point[aria-expanded="true"]{color:var(--ink)}
 .pd-point[aria-expanded="true"] .pd-point-n::after{background:var(--ink);transform:scale(1.5)}
 .pd-point[aria-expanded="true"] .pd-point-label{color:var(--ink)}
@@ -727,7 +732,7 @@
 .pd-point-panel{max-width:30rem;animation:pd-point-in var(--dur-fast) var(--ease-archival)}
 .pd-point-title{font-size:1.15rem;margin-bottom:.35rem}
 .pd-point-panel p{font-size:.88rem;line-height:1.6;color:var(--ink-soft)}
-.pd-points-hint{font-size:.56rem;letter-spacing:.3em;padding-top:.5rem}
+.pd-points-hint{font-size:.62rem;letter-spacing:.3em;padding-top:.5rem}
 .pd-points.is-open .pd-points-hint{visibility:hidden}
 .pd-hint-tap{display:none}
 @media (hover:none){ .pd-hint-hover{display:none} .pd-hint-tap{display:inline} }

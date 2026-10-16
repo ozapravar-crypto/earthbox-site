@@ -14,16 +14,19 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════════════════════════
-   1. BUTTONS
-   Base: .cta
-   Variants: .cta-secondary, .cta-small, .cta-block
+   1. BUTTONS · three tiers (UX audit rule E1, 16 Oct 2026)
+   Main      .cta            filled ink at rest; ONE per section or step
+   Secondary .cta-secondary  1px outline
+   Tertiary  .ct-link / text link, underlined small caps
+   The homepage hero's round button is the one agreed exception.
+   Sizes: .cta-small, .cta-block
    ═══════════════════════════════════════════════════════════════════════ */
 
 .cta{
-  --cta-bg: var(--bg);
-  --cta-color: var(--ink);
+  --cta-bg: var(--ink);
+  --cta-color: var(--bg);
   --cta-border: var(--ink);
-  --cta-hover-bg: var(--ink);
+  --cta-hover-bg: var(--ink-soft);   /* a softer fill slides in: the old sweep, on a filled button */
   --cta-hover-color: var(--bg);
 
   display:inline-flex;
@@ -74,8 +77,9 @@
 }
 .cta:hover svg{transform:translateX(6px)}
 
-/* Secondary: ghost style, no fill on hover */
+/* Secondary: outline, no fill on hover */
 .cta-secondary{
+  --cta-bg: transparent;
   --cta-border: var(--rule-stronger);
   --cta-color: var(--ink-soft);
   --cta-hover-color: var(--ink);   /* no fill sweep here, so hover text must stay ink (it turned --bg: invisible) */
@@ -88,7 +92,7 @@
 
 /* Small: compact version for inline use */
 .cta-small{
-  font-size:.6rem;
+  font-size:.62rem;
   letter-spacing:.22em;
   padding:.65rem 1rem;
   gap:.5rem;
@@ -137,6 +141,20 @@
    Status indicators, labels, tags
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* One badge, for status words only: Coming soon, On enquiry, Made to order
+   (UX audit C-15). One status signal per card or line. */
+.badge{
+  display:inline-block;
+  font-family:var(--sans);
+  font-size:var(--label-min);
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--accent-text);
+  padding:.25rem .5rem;
+  background:var(--bg);   /* on --bg-tint it measured 4.42:1 under the paper grain */
+  border:1px dashed var(--rule-stronger);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    4. TRUST SIGNALS
    Social proof strip, rating displays, trust indicators
@@ -173,7 +191,7 @@
 
 .trust-label{
   font-family:var(--sans);
-  font-size:.55rem;
+  font-size:.62rem;
   letter-spacing:.2em;
   text-transform:uppercase;
   color:var(--mute);
@@ -326,7 +344,7 @@
   .enquiry-field{display:grid;gap:.35rem}
   .enquiry-field > span{
     font-family:var(--sans);
-    font-size:.58rem;
+    font-size:.62rem;
     letter-spacing:.28em;
     text-transform:uppercase;
     color:var(--mute);
@@ -440,7 +458,7 @@
 .ct-thumb img{width:100%;height:100%;object-fit:cover}
 .ct-thumb-mark{font-family:var(--serif);font-size:1.6rem;color:var(--accent-text)}
 .ct-body{display:flex;flex-direction:column;gap:.3rem;min-width:0}
-.ct-kind{font-size:.56rem;letter-spacing:.26em;color:var(--accent-text)}
+.ct-kind{font-size:.62rem;letter-spacing:.26em;color:var(--accent-text)}
 .ct-line--fixed .ct-kind{color:var(--ink-soft)}
 .ct-title{font-family:var(--serif);font-size:1.2rem;line-height:1.15;color:var(--ink);text-decoration:none}
 .ct-title:hover{text-decoration:underline;text-underline-offset:3px}
@@ -459,7 +477,7 @@
 .ct-actions{display:flex;flex-wrap:wrap;align-items:center;gap:0 1.25rem}
 .ct-link{
   background:none;border:0;padding:.6rem 0;min-height:44px;cursor:pointer;
-  font-family:var(--sans);font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);
   text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--rule-stronger);display:inline-flex;align-items:center;
 }
 .ct-link:hover{color:var(--ink);text-decoration-color:currentColor}
@@ -498,17 +516,17 @@
 .pd-other-ways{margin-top:1rem}
 .pd-other-ways > summary{
   list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:.4em;min-height:44px;
-  font-family:var(--sans);font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);
 }
 .pd-other-ways > summary::-webkit-details-marker{display:none}
 .pd-other-ways > summary:hover{color:var(--ink)}
 .pd-other-ways[open] > summary .icon-chevron-down{transform:rotate(180deg)}
 .pd-other-ways .enquiry-alt{margin-top:.5rem}
-.pd-alt-wa{display:inline-flex;align-items:center;gap:.35em;min-height:44px;font-family:var(--sans);font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);text-decoration:underline;text-underline-offset:4px}
+.pd-alt-wa{display:inline-flex;align-items:center;gap:.35em;min-height:44px;font-family:var(--sans);font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);text-decoration:underline;text-underline-offset:4px}
 .pd-alt-wa:hover{color:var(--ink)}
 .ct-notice{display:flex;flex-wrap:wrap;align-items:center;gap:0 1rem;margin:1rem 0 0;padding:.75rem 1rem;border:1px solid var(--rule-stronger);background:var(--bg-tint);font-size:.88rem;color:var(--ink)}
 .ct-notice:empty{display:none}
-.ct-notice .ct-link{min-height:36px;color:var(--ink)}
+.ct-notice .ct-link{min-height:44px;color:var(--ink)}
 
 
 /* Visually hidden, still read by screen readers (was utilities.css; the
@@ -595,6 +613,11 @@
   transition:color .3s ease;
 }
 .colo-col a:hover{color:var(--ink)}   /* --accent-dk measured 3.10:1 */
+/* 44 px tap areas for text links on touch screens (UX audit S-15/C-19); a mouse keeps the tighter rhythm */
+@media (pointer:coarse){
+  .colo-col li{margin-bottom:0}
+  .colo-col a,.colo-bar a,.runhead-left,.runhead-nav a,.pd-breadcrumb a,.pd-rating-badge,.pd-maker-link,.kv-table a{display:inline-flex;align-items:center;min-height:44px}
+}
 
 .colo-social{
   display:flex;

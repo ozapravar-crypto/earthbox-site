@@ -172,7 +172,7 @@
   gap:2rem;
   align-items:baseline;
 }
-.kv-table dt{font-size:.6rem}
+.kv-table dt{font-size:.62rem}
 .kv-table dd{
   font-family:var(--serif);
   font-size:1.05rem;

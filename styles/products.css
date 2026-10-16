@@ -23,7 +23,7 @@
   align-items:center;
   gap:.75rem;
   font-family:var(--sans);
-  font-size:.6rem;
+  font-size:.62rem;
   letter-spacing:.32em;
   text-transform:uppercase;
   color:rgba(248,247,245,.55);
@@ -158,7 +158,7 @@
 .vol-pill.is-active .pill-num{color:var(--ink)}
 .pill-label{
   font-family:var(--sans);
-  font-size:.6rem;
+  font-size:.62rem;
   letter-spacing:.2em;
   text-transform:uppercase;
 }
@@ -185,7 +185,7 @@
 }
 .search-btn-label{
   font-family:var(--sans);
-  font-size:.6rem;
+  font-size:.62rem;
   letter-spacing:.2em;
   text-transform:uppercase;
 }
@@ -321,7 +321,7 @@
   padding-left:1.5rem;
 }
 .search-result-vol{
-  font-size:.55rem;
+  font-size:.62rem;
   letter-spacing:.32em;
   color:var(--accent-text);
   font-family:var(--sans);
@@ -338,7 +338,7 @@
   line-height:1.5;
 }
 .search-result-cta{
-  font-size:.6rem;
+  font-size:.62rem;
   letter-spacing:.28em;
   color:var(--ink-soft);
   flex-shrink:0;
@@ -373,7 +373,7 @@
     gap:.25rem;
   }
   .pill-num{font-size:.85rem}
-  .pill-label{font-size:.5rem;letter-spacing:.15em}
+  .pill-label{font-size:.62rem;letter-spacing:.15em}
   .search-btn-label{display:none}
   .catalogue-search-btn svg{
     width:14px;
@@ -383,7 +383,7 @@
 
 @media (max-width:560px){
   .search-result{grid-template-columns:1fr;gap:.5rem}
-  .search-result-vol{font-size:.5rem}
+  .search-result-vol{font-size:.62rem}
   .search-result-cta{margin-top:.5rem}
   .vol-pill{
     padding:0 .75rem;
@@ -580,7 +580,7 @@
   margin-top:auto;
   padding-top:1rem;
   border-top:1px solid var(--rule);
-  font-size:.6rem;
+  font-size:.62rem;
   letter-spacing:.32em;
   color:var(--ink-soft);
   transition:color .3s ease, padding-left .3s ease;
@@ -708,7 +708,7 @@
   background:var(--rule);
 }
 .v1-coming-divider .caption{
-  font-size:.6rem;
+  font-size:.62rem;
   letter-spacing:.3em;
   white-space:nowrap;
 }
@@ -760,7 +760,7 @@
 .v1-card-img--placeholder::after{
   content:"Coming soon";
   font-family:var(--sans);
-  font-size:.5rem;
+  font-size:.62rem;
   letter-spacing:.28em;
   text-transform:uppercase;
   color:var(--mute);
@@ -788,7 +788,7 @@
 }
 /* Exact price for the shopper's place; size note under it (SHOPPING-PLAN.md) */
 .v1-card-amount{color:var(--ink);font-size:.95rem}
-.v1-card-note{margin:0;font-family:var(--sans);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+.v1-card-note{margin:0;font-family:var(--sans);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
 .v1-card-meta{padding-right:5.5rem}   /* room for Add */
 .v1-card--soon .v1-card-meta{padding-right:1.25rem}
 
@@ -805,12 +805,13 @@
   transition:color .2s ease, border-color .2s ease, background .2s ease;
 }
 .v1-card-save{top:.75rem;right:.75rem;width:2.25rem;height:2.25rem;padding:0}
+.v1-card-save::after{content:"";position:absolute;inset:-4px}   /* 44 px tap area around the 36 px square (UX audit S-15) */
 .v1-card-save[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
 .v1-card-save[aria-pressed="true"] .icon-heart{fill:currentColor}
 .v1-card-add{
   right:1rem;bottom:1.1rem;
   min-height:2.25rem;padding:0 .8rem;
-  font-family:var(--sans);font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;
 }
 .v1-card-save:hover,.v1-card-add:hover,
 .v1-card-save:focus-visible,.v1-card-add:focus-visible{color:var(--ink);border-color:var(--ink);background:var(--bg-tint)}
@@ -831,18 +832,6 @@
 .place-btn:hover{color:var(--ink)}
 .place-btn[aria-checked="true"]{color:var(--ink);border-bottom-color:var(--ink)}
 .place-note{margin:0;flex-basis:100%;color:var(--mute)}
-
-.v1-soon-badge{
-  display:inline-block;
-  font-family:var(--sans);
-  font-size:.55rem;
-  letter-spacing:.2em;
-  text-transform:uppercase;
-  color:var(--accent-text);
-  padding:.25rem .5rem;
-  background:var(--bg);   /* on --bg-tint it measured 4.42:1 under the paper grain */
-  border:1px dashed var(--rule-stronger);
-}
 
 /* ═══════════════════════════════════════════════════════════════════════
    RESPONSIVE

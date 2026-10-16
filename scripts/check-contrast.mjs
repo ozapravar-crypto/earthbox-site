@@ -8,7 +8,7 @@
  * Reads styles/tokens.css, so a token edit that breaks contrast fails here.
  * Run: node scripts/check-contrast.mjs   (part of npm test)
  */
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -45,5 +45,11 @@ for (const [mode, t] of /** @type {[string, Record<string, string>][]} */ ([['li
     const r = ratio(grained(t[fg]), grained(t[bg]));
     if (r < 4.5) { fail++; console.error(`FAIL ${mode}: --${fg} ${t[fg]} on --${bg} ${t[bg]} = ${r.toFixed(2)}:1 (needs 4.5)`); }
   }
-if (fail) { console.error(`check-contrast FAILED — ${fail} pair(s)`); process.exit(1); }
-console.log(`check-contrast OK — ${TEXT.length * SURFACES.length * 2} text/background pairs ≥ 4.5:1`);
+// Type floor (UX audit C-14): no rem font size under --label-min (.62rem ≈ 10 px) in any stylesheet.
+for (const f of (await readdir(path.join(ROOT, 'styles'))).filter(n => n.endsWith('.css'))) {
+  const text = await readFile(path.join(ROOT, 'styles', f), 'utf8');
+  for (const m of text.matchAll(/font-size:\s*(\d*\.?\d+)rem/g))
+    if (Number(m[1]) < 0.62) { fail++; console.error(`FAIL type floor: styles/${f} font-size:${m[1]}rem (minimum .62rem)`); }
+}
+if (fail) { console.error(`check-contrast FAILED — ${fail} problem(s)`); process.exit(1); }
+console.log(`check-contrast OK — ${TEXT.length * SURFACES.length * 2} text/background pairs ≥ 4.5:1, no type under .62rem`);

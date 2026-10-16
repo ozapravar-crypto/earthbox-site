@@ -41,7 +41,8 @@ window.gtag('config', 'G-1HHZETMVWP');
     box.innerHTML = `
       <p class="consent-text">We use Google Analytics to see which pages help, only if you agree. Your cart and saved pieces stay in your browser either way. <a href="/privacy">Privacy</a></p>
       <div class="consent-actions">
-        <button type="button" class="cta cta-small" data-consent="granted">Accept</button>
+        <!-- Equal weight on purpose: neither choice is nudged (both outline, rule E1's exception) -->
+        <button type="button" class="cta cta-small cta-secondary" data-consent="granted">Accept</button>
         <button type="button" class="cta cta-small cta-secondary" data-consent="denied">Decline</button>
       </div>`;
     box.addEventListener('click', (e) => {

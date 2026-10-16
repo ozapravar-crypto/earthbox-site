@@ -387,6 +387,9 @@ test.describe('cookie choice', () => {
     await expect(banner).toBeVisible();
     await page.waitForTimeout(500);
     expect(hits).toEqual([]);
+    // Accept and Decline look the same: neither choice is nudged.
+    expect(await banner.getByRole('button', { name: 'Accept' }).getAttribute('class'))
+      .toBe(await banner.getByRole('button', { name: 'Decline' }).getAttribute('class'));
     await banner.getByRole('button', { name: 'Accept' }).click();
     await expect(banner).toBeHidden();
     await expect.poll(() => hits.length).toBeGreaterThan(0);
