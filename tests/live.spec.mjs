@@ -24,7 +24,7 @@ for (const path of ['/', '/products', '/product#V1-PLT-005', '/product#MossBox',
     expect(/** @type {import('@playwright/test').Response} */ (res).status()).toBe(200);
     await expect(page.locator('h1:visible').first()).toBeVisible();
     await page.waitForTimeout(1500);
-    expect(errors.filter(e => !/bird-feeder/.test(e))).toEqual([]);   // known missing photo: bead site-tue
+    expect(errors).toEqual([]);
   });
 }
 

@@ -36,5 +36,7 @@ export function productMeta(found){
   // Only Volume I pieces can be ordered today (made to order); boxes and the
   // vivarium are "coming soon", so their estimates are not offers.
   const available = found.kind === 'printed' && found.data.status === 'available';
-  return { name, description, photo, prices: available ? prices(found.data.pricing) : [], available };
+  // Says what the piece is, and where: the bare "EarthBox — Name" told search nothing (SEO audit P2-6).
+  const title = `${found.kind === 'box' ? `${name} terrarium chamber` : name} · EarthBox, Mumbai`;
+  return { name, title, description, photo, prices: available ? prices(found.data.pricing) : [], available };
 }

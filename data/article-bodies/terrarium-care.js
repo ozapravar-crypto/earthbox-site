@@ -76,7 +76,7 @@ export const terrariumCareArticles = {
 <ul>
   <li><strong>Fittonia (nerve plant):</strong> High transpiration, dramatic when thirsty, quick recovery</li>
   <li><strong>Sheet moss:</strong> Excellent moisture indicator—browns when dry, greens when watered</li>
-  <li><strong>Selaginella:</strong> Native to India, adapts well to terrarium humidity</li>
+  <li><strong>Selaginella:</strong> Some species are native to India; adapts well to terrarium humidity</li>
 </ul>
 
 <h2>Long-Term Maintenance</h2>
@@ -233,7 +233,7 @@ export const terrariumCareArticles = {
   <li>Fittonia (nerve plant)—colorful, forgiving, loves humidity</li>
   <li>Moss—multiple varieties, indicates moisture levels</li>
   <li>Miniature ferns—Maidenhair, Button fern</li>
-  <li>Selaginella—native to India, feathery texture</li>
+  <li>Selaginella—feathery texture; some species are native to India</li>
   <li>Peperomia—compact varieties, interesting foliage</li>
   <li>Pilea—aluminum plant, easy care</li>
 </ul>
@@ -290,7 +290,7 @@ export const terrariumCareArticles = {
   <li>Have bright, direct sunlight available</li>
   <li>Prefer succulents and desert aesthetics</li>
   <li>Want to easily rearrange and modify</li>
-  <li>Live in a very dry climate (closed terrariums can struggle)</li>
+  <li>Can water regularly—open terrariums dry out faster, especially in dry rooms</li>
 </ul>
 
 <figure>

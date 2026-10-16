@@ -33,7 +33,7 @@ for (const p of volumeOne) {
   assert.ok(p.name && p.description, `${at}: name + description`);
   assert.ok(CAT.includes(p.category), `${at}: category "${p.category}" not in categories`);
   assert.ok(['available', 'coming-soon'].includes(p.status), `${at}: status "${p.status}"`);
-  assert.match(p.photo, /\.webp$/, `${at}: photo is a .webp file name`);
+  assert.match(p.photo, /^$|\.webp$/, `${at}: photo is a .webp file name, or '' while it's awaited`);
   if (p.pricing == null) continue;          // price on enquiry
   // Fixed price: { material: rupees } or, with variants, { variant: { material: rupees } }.
   /** @type {[string, unknown][]} */
@@ -111,6 +111,8 @@ for (const a of articles) {
   assert.ok(a.body && a.title && a.metaDescription, `${at}: body, title, metaDescription`);
   assert.ok(existsSync(path.join(ROOT, 'blog', `${a.slug}.html`)), `${at}: blog/${a.slug}.html is missing (copy an existing article page, then npm run build)`);
   for (const r of a.relatedArticles ?? []) assert.ok(SLUGS.includes(r), `${at}: related "${r}" doesn't exist`);
+  // "From the studio" links (prerender.mjs): 19 of 23 once pointed at SKUs that don't exist.
+  for (const sku of a.relatedProducts) assert.ok(volumeOne.some(p => p.sku === sku && p.status === 'available'), `${at}: related product "${sku}" isn't an orderable piece`);
 }
 
 // ── Site nav ─────────────────────────────────────────────────────────

@@ -158,7 +158,7 @@ export const plantFundamentalsArticles = {
 
     <h2>Why Regular Soil Doesn't Work</h2>
 
-    <p>Garden soil and standard potting mix will kill most terrariums within months. Here's why:</p>
+    <p>Garden soil should stay out of terrariums, and standard potting mix on its own holds too much water for a closed system. Amend it, or use a dedicated mix. Here's why:</p>
 
     <p><strong>Compaction.</strong> Regular soil compresses over time, eliminating air pockets roots need. In the confined terrarium environment, this happens faster than in open pots.</p>
 
@@ -182,7 +182,7 @@ export const plantFundamentalsArticles = {
     <ul>
       <li><strong>Leca (expanded clay balls):</strong> Lightweight, pH-neutral, won't decompose. Our preferred choice.</li>
       <li><strong>Gravel or pebbles:</strong> Works but adds weight. Choose smooth stones without sharp edges.</li>
-      <li><strong>Activated charcoal pieces:</strong> Can serve as drainage while also filtering.</li>
+      <li><strong>Activated charcoal pieces:</strong> Can serve as part of the drainage layer.</li>
     </ul>
 
     <figure>
@@ -204,14 +204,7 @@ export const plantFundamentalsArticles = {
 
     <h3>Layer 3: Activated Charcoal (1 cm)</h3>
 
-    <p>Charcoal isn't strictly necessary, but it significantly improves long-term terrarium health:</p>
-
-    <ul>
-      <li><strong>Absorbs odours</strong> from decomposing organic matter</li>
-      <li><strong>Filters impurities</strong> from circulating water</li>
-      <li><strong>Inhibits bacterial growth</strong> through natural antimicrobial properties</li>
-      <li><strong>Provides trace minerals</strong> as it slowly breaks down</li>
-    </ul>
+    <p>Charcoal isn't strictly necessary. Many keepers add a thin layer because it may help absorb odours from decomposing organic matter, though the evidence for its benefits in terrariums is limited. Good drainage and the right mix matter far more.</p>
 
     <div class="callout">
       <p class="callout-title">Charcoal Source</p>
@@ -220,7 +213,7 @@ export const plantFundamentalsArticles = {
 
     <figure>
       <div class="image-placeholder">Activated charcoal layer being added to terrarium</div>
-      <figcaption>A thin charcoal layer—powerful protection against stagnation</figcaption>
+      <figcaption>A thin charcoal layer above the drainage</figcaption>
     </figure>
 
     <h3>Layer 4: Growing Medium (5-8 cm)</h3>
@@ -276,7 +269,7 @@ export const plantFundamentalsArticles = {
 
     <p><strong>Moss-dominant terrariums:</strong> Reduce or eliminate bark, increase coir ratio. Moss needs consistently moist conditions and doesn't rely on deep substrate.</p>
 
-    <p><strong>Fern terrariums:</strong> Add extra perlite and charcoal. Fern roots need exceptional aeration and are sensitive to stagnant conditions.</p>
+    <p><strong>Fern terrariums:</strong> Add extra perlite. Fern roots need exceptional aeration and are sensitive to stagnant conditions.</p>
 
     <figure>
       <img src="/assets/blog/substrate-mixes-diagram.svg" alt="Comparison chart showing substrate mix ratios for different plant types: tropical, succulents, moss terrariums, and orchids with component percentages" width="700" height="450" loading="lazy">
@@ -303,7 +296,7 @@ export const plantFundamentalsArticles = {
 
     <p><strong>Soil staying wet weeks after setup:</strong> Mix too dense. Remove and remix with more perlite, or start over with better drainage.</p>
 
-    <p><strong>White fuzzy mould on surface:</strong> Often harmless soil fungus consuming organic matter. Increase ventilation temporarily. If persistent, reduce moisture and add more charcoal.</p>
+    <p><strong>White fuzzy mould on surface:</strong> Often harmless soil fungus consuming organic matter. Increase ventilation temporarily. If persistent, reduce moisture and remove any decaying material.</p>
 
     <p><strong>Soil compacting over time:</strong> Normal in systems over 2 years old. Gently aerate with a chopstick, working around roots. Consider top-dressing with fresh mix.</p>
 
@@ -312,7 +305,7 @@ export const plantFundamentalsArticles = {
       <figcaption>Gentle aeration revives compacted substrate without disturbing plants</figcaption>
     </figure>
 
-    <p><strong>Unpleasant smell:</strong> Anaerobic (oxygen-deprived) conditions from poor drainage or over-watering. Open the terrarium, improve drainage, reduce water. Charcoal helps absorb odours.</p>
+    <p><strong>Unpleasant smell:</strong> Anaerobic (oxygen-deprived) conditions from poor drainage or over-watering. Open the terrarium, improve drainage, reduce water. Charcoal may help absorb odours.</p>
 
     <p>Substrate is infrastructure. It's not glamorous, but getting it right makes everything else easier. Invest time in proper layering and mixing at setup—your terrarium will reward you for years.</p>
   `,
@@ -592,7 +585,7 @@ export const plantFundamentalsArticles = {
 
     <div class="callout">
       <p class="callout-title">Wild Harvesting</p>
-      <p>Moss can be collected from shady outdoor areas—rocks, walls, tree bases. Take small portions to allow regrowth. Quarantine wild moss before adding to terrariums to prevent hitchhiking pests.</p>
+      <p>Moss can be collected from shady rocks, walls and tree bases in your own garden or a space where you have permission—never from national parks or other protected areas. Take small portions to allow regrowth. Quarantine wild moss before adding to terrariums to prevent hitchhiking pests.</p>
     </div>
 
     <p><strong>Care notes:</strong> Keep humid. Mist occasionally if condensation cycles seem insufficient. Tolerates very low light but grows more vigorously in bright indirect conditions.</p>
@@ -612,7 +605,7 @@ export const plantFundamentalsArticles = {
 
     <p><strong>Polka dot plant (Hypoestes).</strong> Grows explosively fast, quickly becoming leggy and outgrowing small spaces.</p>
 
-    <p><strong>Most ferns.</strong> While humidity-loving, many ferns grow too large or need more airflow than closed terrariums provide. Exception: small species like Selaginella and miniature maidenhairs can work.</p>
+    <p><strong>Most ferns.</strong> While humidity-loving, many ferns grow too large or need more airflow than closed terrariums provide. Exception: small species like miniature maidenhairs can work. (Selaginella looks like a fern but is a spikemoss, and is far easier.)</p>
 
     <p><strong>Carnivorous plants.</strong> Require specific conditions (acidic substrate, mineral-free water, dormancy periods) that don't suit standard terrariums.</p>
 
@@ -635,7 +628,7 @@ export const plantFundamentalsArticles = {
 
     <p><strong>Local nurseries:</strong> Often have fittonia (usually sold as houseplants), sometimes peperomia. Prices are lower than online, and you can inspect plant health.</p>
 
-    <p><strong>Online sellers:</strong> Wider selection, especially for specific varieties. Look for sellers specialising in terrarium or rare plants. Popular platforms: Instagram plant sellers, Ugaoo, Nurserylive.</p>
+    <p><strong>Online sellers:</strong> Wider selection, especially for specific varieties. Look for sellers specialising in terrarium or rare plants. Options include online plant nurseries and Instagram plant sellers.</p>
 
     <p><strong>Plant swaps and communities:</strong> Facebook groups like "Terrarium Enthusiasts India" often have members sharing cuttings. Great for variety and community.</p>
 

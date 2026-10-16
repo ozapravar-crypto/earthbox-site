@@ -3,7 +3,7 @@
 import { test, expect } from '@playwright/test';
 
 // Missing files the client still owes (mirrors KNOWN_MISSING in check-assets.mjs).
-const KNOWN_404 = [/bird-feeder/];
+const KNOWN_404 = /** @type {RegExp[]} */ ([]);   // the Bird Feeder now falls back to the studio mark
 
 const PAGES = ['/', '/products.html', '/product.html#V1-PLT-005', '/product.html#MossBox', '/product.html#V1-PP-001',
   '/product/V1-PLT-005', '/product/MossBox',
@@ -265,3 +265,11 @@ for (const path of ['/', '/products', '/blog', '/about', '/care', '/blog/open-vs
     expect(hidden).toEqual([]);
   });
 }
+
+// SEO audit (16 Oct): rendered product pages had 3 <h1> (the crawler copy and the
+// hidden not-found block stayed in the page). One heading per page.
+test('a rendered product page has exactly one h1', async ({ page }) => {
+  await page.goto('/product/V1-PLT-005');
+  await page.waitForSelector('#productDetail article h1');
+  await expect(page.locator('h1')).toHaveCount(1);
+});

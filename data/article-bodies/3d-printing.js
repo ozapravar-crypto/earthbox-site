@@ -69,9 +69,9 @@ export const printingArticles = {
 
 <p>Our primary materials:</p>
 <ul>
-  <li><strong>ABS:</strong> Tough, heat-resistant, excellent for outdoor use</li>
+  <li><strong>PETG:</strong> Our standard for indoor pieces; moisture-resistant, clear options available</li>
+  <li><strong>ABS:</strong> Tough and heat-resistant, for sunny windows</li>
   <li><strong>ASA:</strong> ABS's UV-stable cousin, ideal for balconies</li>
-  <li><strong>PETG:</strong> Food-safe grade, crystal-clear options available</li>
 </ul>
 
 <figure>
@@ -118,7 +118,7 @@ export const printingArticles = {
 `,
 
 'pla-vs-abs-plant-accessories': `
-<p><strong>Which 3D printing material is best for planters?</strong> ABS and ASA are best for planters—they resist UV, moisture, and temperature changes. PLA is biodegradable and may degrade with constant moisture. PETG offers a middle ground with good durability and easier printing.</p>
+<p><strong>Which 3D printing material is best for planters?</strong> PETG suits most indoor planters: it resists moisture and prints cleanly. ABS handles more heat, which suits sunny windows, and ASA resists UV, which suits balconies. PLA absorbs moisture and softens in heat, so it is a poor choice for long-term planters.</p>
 
 <p>Choosing the right 3D printing material for plant accessories isn't just technical—it determines how long your pieces last, how they age, and whether they're safe for your plants. Here's what you need to know about each option.</p>
 
@@ -148,7 +148,6 @@ export const printingArticles = {
   <li>Prints at low temperatures without warping</li>
   <li>Minimal odor during printing</li>
   <li>Biodegradable under industrial composting conditions</li>
-  <li>Food-safe grades available</li>
   <li>Widest color selection</li>
 </ul>
 
@@ -189,7 +188,7 @@ export const printingArticles = {
   <li>Moderate UV degradation over years of direct sun exposure</li>
 </ul>
 
-<p>For most indoor and sheltered outdoor applications, ABS is our default recommendation. It's what we use for the majority of EarthBox production.</p>
+<p>ABS earns its place where heat is the problem, such as a sunny window. For most indoor pieces we use PETG instead (see below).</p>
 
 <h2>ASA: The Outdoor Specialist</h2>
 
@@ -210,7 +209,7 @@ export const printingArticles = {
 
 <h2>PETG: The Versatile Middle Ground</h2>
 
-<p>PETG (Polyethylene Terephthalate Glycol) combines PLA's printability with ABS's durability. It's food-safe, moisture-resistant, and available in beautiful translucent colors.</p>
+<p>PETG (Polyethylene Terephthalate Glycol) combines PLA's printability with ABS's durability. It's moisture-resistant and available in beautiful translucent colors. It's our default for indoor pieces.</p>
 
 <figure>
   <div class="image-placeholder">Photo: Translucent PETG propagation vessel</div>
@@ -222,7 +221,6 @@ export const printingArticles = {
   <li>Easier to print than ABS (no warping, no enclosure needed)</li>
   <li>Good moisture and chemical resistance</li>
   <li>Available in clear and translucent options</li>
-  <li>Food-safe grades certified</li>
 </ul>
 
 <p><strong>PETG limitations:</strong></p>
@@ -234,17 +232,17 @@ export const printingArticles = {
 
 <h2>Plant Safety: What Actually Matters</h2>
 
-<p>All these materials are considered plant-safe in their solid, printed form. The concerns arise from:</p>
+<p>These materials are generally considered safe around plants in their solid, printed form. The concerns arise from:</p>
 
 <ul>
-  <li><strong>Colorants:</strong> Some pigments contain heavy metals. We use only plant-safe certified colorants.</li>
+  <li><strong>Colorants:</strong> Pigments vary between filament brands, so buy from manufacturers who publish safety data for their materials.</li>
   <li><strong>Degradation products:</strong> As PLA breaks down, it acidifies soil slightly. Not harmful but measurable.</li>
   <li><strong>Surface finishing:</strong> Some post-processing chemicals (acetone vapor smoothing) leave residues. We avoid these for plant vessels.</li>
 </ul>
 
 <div class="callout">
   <div class="callout-title">Our Material Selection</div>
-  <p>EarthBox uses: ABS for indoor pieces, ASA for outdoor, PETG for propagation vessels. All filaments are sourced from manufacturers with material safety certifications.</p>
+  <p>EarthBox uses: PETG for indoor pieces, ABS for sunny windows, ASA for balconies. Standard printing filaments and printed parts are not certified food-safe, so our pieces are made for plants, not for food or drink.</p>
 </div>
 
 <h2>Making Your Choice</h2>
@@ -252,9 +250,10 @@ export const printingArticles = {
 <p>Summary recommendations:</p>
 
 <ul>
-  <li><strong>Indoor, decorative:</strong> PLA acceptable, ABS preferred</li>
-  <li><strong>Indoor, long-term:</strong> ABS or PETG</li>
-  <li><strong>Balcony, sheltered:</strong> ABS</li>
+  <li><strong>Indoor, decorative:</strong> PLA acceptable, PETG preferred</li>
+  <li><strong>Indoor, long-term:</strong> PETG</li>
+  <li><strong>Sunny window:</strong> ABS</li>
+  <li><strong>Balcony, sheltered:</strong> ABS or ASA</li>
   <li><strong>Outdoor, full sun:</strong> ASA only</li>
   <li><strong>Propagation, visibility needed:</strong> Translucent PETG</li>
 </ul>
@@ -804,7 +803,7 @@ export const printingArticles = {
 
 <ul>
   <li><strong>ABS material:</strong> Waterproof, won't degrade from moisture</li>
-  <li><strong>UV-stable:</strong> Outdoor balcony use won't fade the material</li>
+  <li><strong>Sun:</strong> For balconies, ASA resists UV fading better than ABS</li>
   <li><strong>Soil-resistant:</strong> Easy to wipe clean if muddy</li>
   <li><strong>Years of use:</strong> No replacement needed; tags outlast many plants</li>
 </ul>
