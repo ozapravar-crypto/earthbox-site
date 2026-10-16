@@ -24,10 +24,13 @@
   gap:.75rem;
   margin-top:2rem;
 }
+/* One view of the same list: the chosen one is underlined (UX audit rule E2). */
 .filter-btn{
   background:none;
-  border:1px solid var(--rule);
-  padding:.5rem 1rem;
+  border:0;
+  border-bottom:1px solid transparent;
+  min-height:44px;
+  padding:.5rem .25rem;
   font-family:var(--sans);
   font-size:.72rem;
   letter-spacing:.12em;
@@ -36,9 +39,9 @@
   cursor:pointer;
   transition:all .25s ease;
 }
-.filter-btn:hover,
-.filter-btn.is-active{
-  border-color:var(--ink);
+.filter-btn:hover{color:var(--ink)}
+.filter-btn[aria-pressed="true"]{
+  border-bottom-color:var(--ink);
   color:var(--ink);
 }
 
@@ -178,10 +181,9 @@
   line-height:1.7;
   margin-bottom:.5rem;
 }
-.article-body blockquote{
-  border-left:2px solid var(--accent);
-  padding-left:1.5rem;
-  margin:2rem 0;
+.article-body blockquote{   /* indent + italic set it apart; no one-edge stripe (house rule) */
+  margin:2rem 0 2rem 1.5rem;
+  font-size:1rem;
   font-style:italic;
   color:var(--ink-soft);
 }
@@ -252,9 +254,9 @@
 }
 
 /* Callout boxes */
-.article-body .callout{
+.article-body .callout{   /* the full-border notice box, as .ct-notice (UX audit C-12) */
   background:var(--bg-tint);
-  border-left:3px solid var(--accent);
+  border:1px solid var(--rule-stronger);
   padding:1.5rem;
   margin:2rem 0;
 }

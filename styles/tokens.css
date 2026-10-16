@@ -17,6 +17,9 @@
   --reverse:       #F8F7F5;
   --rule:          rgba(44,44,43,.12);
   --rule-stronger: rgba(44,44,43,.22);
+  /* Small-caps labels: nothing smaller than --label-min (~10 px; UX audit C-14).
+     Decision-critical facts use body-size text, never these. */
+  --label-min:     .62rem;
 
   /* TYPE FAMILIES */
   --serif: 'Oranienbaum', 'Cormorant Garamond', serif;

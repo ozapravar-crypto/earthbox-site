@@ -62,7 +62,7 @@ export function enquiryAltHTML(product = '', message = ''){
           <textarea name="message" rows="${message ? 8 : 3}" required>${escapeHTML(prefill)}</textarea>
         </label>
 
-        <button type="submit" class="cta enquiry-submit">Send enquiry</button>
+        <button type="submit" class="cta cta-secondary enquiry-submit">Send enquiry</button>
       </form>
 
       <p class="enquiry-status" role="status" aria-live="polite"></p>

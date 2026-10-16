@@ -32,7 +32,7 @@
 
 .care-field{display:grid;gap:.4rem;margin-top:1.25rem;max-width:24rem}
 .care-field > span,.care-row > legend,.care-groups > legend{
-  font-family:var(--sans);font-size:.6rem;letter-spacing:.26em;text-transform:uppercase;color:var(--mute);padding:0;
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;color:var(--mute);padding:0;
 }
 .care-field input,.care-field select{
   font:inherit;font-size:.95rem;color:var(--ink);background:var(--bg);
@@ -76,7 +76,7 @@
 .care-biz .enquiry-form{display:grid;gap:1rem}
 .care-biz-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem 1.5rem}
 .care-biz .enquiry-field{display:grid;gap:.4rem}
-.care-biz .enquiry-field > span{font-family:var(--sans);font-size:.6rem;letter-spacing:.26em;text-transform:uppercase;color:var(--mute)}
+.care-biz .enquiry-field > span{font-family:var(--sans);font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;color:var(--mute)}
 .care-biz .enquiry-field input,.care-biz .enquiry-field select,.care-biz .enquiry-field textarea{
   font-family:var(--body);font-size:.95rem;color:var(--ink);background:var(--bg);
   border:1px solid var(--rule-stronger);border-radius:0;padding:.65rem .75rem;width:100%;min-height:44px;

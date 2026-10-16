@@ -196,3 +196,23 @@ QA-001 to QA-007, QA-009 and QA-013. Details, root causes and evidence are in `Q
   - **A thrown TypeError in the Maker's focus fallback.** This was new in Phase 0. It was fixed before release, with a test (PR #26).
   - **A cart unit test helper** passed the array index as the `list` argument. Fixed.
 - **Checks:** `npm test` and `npm run build` pass. The full Playwright suite (desktop, phone, tablet, `E2E_PORT`): 324 passed, 78 skipped (the live-only ones), 0 failed.
+
+## Follow-up · UX audit Phase 1: shared rules, 16 Oct 2026 (site-bhr.2)
+- **What changed** (rules E1, E2, C-12, C-14, C-15, S-15, C-19, M-17 in `_audits/2026-10-16_ux-ia-density-audit.md`):
+  - **Buttons in three tiers.** The main `.cta` is now filled ink at rest, with a softer fill on hover. Outline is the secondary style. The check found one clash per page (the email form's "Send enquiry" beside the main button), and it's now secondary.
+  - **The cookie banner's Accept and Decline are deliberately equal.** A journey test asserts it.
+  - **"Selected" has one meaning per look:**
+    - Underline for views: Journal filters, now with `aria-pressed`; the Maker's List/Map.
+    - Filled for buying choices: size and material cards.
+  - **Small labels have a type floor.** Nothing is under .62rem (63 sizes raised; the `--label-min` token). `check-contrast.mjs` now fails on any smaller font size.
+  - **One `.badge` for status words**, in components.css.
+  - **Article callouts and quotes** lose their one-edge stripe. They use the full-border notice box, and quotes are 1rem.
+  - **44 px tap areas:**
+    - Card Save, Maker chips, sort, filter and step numbers.
+    - Text links (footer, header, breadcrumb, rating, About contact) on touch screens only, so a mouse keeps the desktop rhythm.
+    - A tap-target probe at 390 px finds none left, apart from native radios inside their labels.
+- **Checks:**
+  - `npm test` passes (it includes typecheck, lint, knip and jscpd).
+  - Visual baselines were refreshed on purpose, all 39 of them. Reviewed: product, cart, cookie banner, Journal, Maker plants.
+  - Full Playwright suite: 323 passed and 1 failed (the Maker review phone screenshot). It passed when rerun alone, the known load flake.
+- **Note:** the home phone baseline shows no hero text. That's a test artefact: `visual.spec` turns animations off, so the hero fade-in never runs. The live site shows the text.

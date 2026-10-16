@@ -108,7 +108,7 @@ function renderVolumeOne(){
           <div class="v1-card-meta">
             <h3 class="v1-card-name">${p.name}</h3>
             <p class="v1-card-price">
-              ${soon ? '<span class="v1-soon-badge">Coming soon</span>' : `<span class="v1-card-amount">${cardPrice(p, place)}</span>`}
+              ${soon ? '<span class="badge v1-soon-badge">Coming soon</span>' : `<span class="v1-card-amount">${cardPrice(p, place)}</span>`}
             </p>
             ${!soon && sizeNote(p) ? `<p class="v1-card-note">${sizeNote(p)}</p>` : ''}
           </div>

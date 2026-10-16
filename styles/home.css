@@ -69,7 +69,7 @@
 .hero-aside{
   grid-column:2;grid-row:1;align-self:center;
   display:grid;justify-items:end;gap:.55rem;padding-right:3.25rem;position:relative;
-  font-family:var(--sans);font-size:.6rem;letter-spacing:.36em;text-transform:uppercase;color:rgba(251,248,242,.8);
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.36em;text-transform:uppercase;color:rgba(251,248,242,.8);
   opacity:0;animation:fadeInHero 1.2s ease 3s forwards;
 }
 .hero-aside::before{content:"";position:absolute;right:0;top:-.5rem;width:2rem;height:1px;background:currentColor}
@@ -79,7 +79,7 @@
   grid-column:1;grid-row:2;align-self:end;
   display:flex;flex-wrap:wrap;align-items:center;gap:1rem 0;
   list-style:none;margin:0;padding:1.75rem 0 2.25rem;
-  font-family:var(--sans);font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(251,248,242,.86);
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(251,248,242,.86);
   opacity:0;animation:fadeInHero 1s ease 3.2s forwards;
 }
 .hero-proof li{display:inline-flex;align-items:center;gap:.75rem;padding-right:1.75rem;margin-right:1.75rem;border-right:1px solid rgba(251,248,242,.35)}
@@ -91,7 +91,7 @@
   display:flex;align-items:center;gap:1.25rem;
   margin-right:calc(var(--pad) * -1);padding:1.25rem calc(var(--pad) + 4.5rem) 2rem 2rem;   /* clears the floating WhatsApp button */
   border-left:1px solid rgba(251,248,242,.35);
-  font-family:var(--sans);font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:#FBF8F2;
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:#FBF8F2;
   opacity:0;animation:fadeInHero 1s ease 3.3s forwards;
 }
 .hero-card img{width:42px;height:auto;border:1px solid rgba(251,248,242,.3)}
@@ -390,8 +390,8 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
   font-size:clamp(1rem,1.25vw,1.2rem);line-height:1.6;
 }
 .maker-invite .mi-cta{
-  --cta-bg:transparent; --cta-color:var(--mi-ink); --cta-border:var(--mi-ink);
-  --cta-hover-bg:var(--mi-ink); --cta-hover-color:var(--mi-paper);
+  --cta-bg:var(--mi-ink); --cta-color:var(--mi-paper); --cta-border:var(--mi-ink);
+  --cta-hover-bg:var(--mi-soft); --cta-hover-color:var(--mi-paper);   /* filled main button, in the band's own inks */
   margin-top:2.5rem;
 }
 .mi-art{margin:0}
@@ -407,7 +407,7 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
 }
 .mi-spec{display:grid;gap:1.75rem;text-align:right}
 .mi-spec > div + div{padding-top:1.75rem;border-top:1px solid rgba(35,39,32,.16)}
-.mi-spec dt{font-family:var(--sans);font-size:.6rem;letter-spacing:.34em;text-transform:uppercase;color:var(--mi-mute);margin-bottom:.5rem}
+.mi-spec dt{font-family:var(--sans);font-size:.62rem;letter-spacing:.34em;text-transform:uppercase;color:var(--mi-mute);margin-bottom:.5rem}
 .mi-spec dd{font-family:var(--serif);font-size:1.2rem;color:var(--mi-ink)}
 .mi-spec dd.small{font-family:var(--body);font-style:italic;font-size:1rem}
 
