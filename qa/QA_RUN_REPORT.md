@@ -156,3 +156,9 @@ QA-001 to QA-007, QA-009 and QA-013. Details, root causes and evidence are in `Q
   - Full Playwright suite on desktop, phone and tablet: 304 passed, 61 skipped (the live-only suite).
   - Contrast checks CQ-003 and CQ-010 covered only this section, so they were retired (see `CONTRAST.md`). The manifesto button was also removed from the CQ-007 focus-ring check.
   - The homepage first-screen baselines didn't change, because the band sat below the fold.
+
+## Follow-up · Journal and About visibility, 16 Oct 2026 (QA-017)
+- **What changed:** the Journal list and the About sections show again. They were drawn after the reveal set-up and never registered.
+- **Checks:**
+  - `npm test` passes.
+  - The new smoke test "every scroll reveal shows" passes on desktop for 7 pages. It's skipped on phone and tablet, where wheel scrolling isn't available. It failed on /blog and /about before the fix.

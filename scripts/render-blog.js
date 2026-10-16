@@ -3,6 +3,7 @@
 // ─────────────────────────────────────────────────────────────────────
 
 import { articles, categories } from '../data/articles.js';
+import { observeReveals } from './reveal.js';
 
 const formatDate = (dateStr) => {
   const d = new Date(dateStr);
@@ -70,6 +71,7 @@ function renderArticleGrid() {
   );
 
   host.innerHTML = sorted.map(renderArticleCard).join('');
+  observeReveals(host);   // drawn after initReveal: unregistered cards stayed invisible (QA-017)
 }
 
 export function initBlog() {

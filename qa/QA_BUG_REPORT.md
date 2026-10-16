@@ -118,3 +118,10 @@ Severity: **critical** (blocks a core task) · **major** (harms many users or th
 - **Why tests missed it:** the Maker thumbnail check matched only the end of the src.
 - **Fix:** the drawer uses the path as given (`scripts/cart.js`).
 - **Guard:** a new journey test, "cart thumbnails load", checks that the src starts with `/assets/` and that the image actually loaded. It fails without the fix. The Maker check is now anchored to the start of the src.
+
+### QA-017 · Journal list and half of About invisible · critical · fixed 16 Oct 2026
+- **Evidence:** found by the UX audit (`_audits/2026-10-16_ux-ia-density-audit.md`, C-01). On www.earthbox.in, 23 of 24 Journal cards and 4 of 8 About sections stayed at opacity 0 after scrolling. Their links still took keyboard focus.
+- **Cause:** `main.js` sets up the scroll reveals before the page draws. The Catalogue registers what it draws (`observeReveals`), but `render-blog.js` and `render-about.js` never did.
+- **Why tests missed it:** the visual tests shoot only the first screen, and the smoke tests don't check opacity.
+- **Fix:** both renderers call `observeReveals`.
+- **Guard:** a new smoke test, "every scroll reveal shows", wheel-scrolls 7 pages and fails if any reveal is still hidden. It fails without the fix on /blog and /about.

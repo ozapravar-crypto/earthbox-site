@@ -4,6 +4,7 @@
 // ─────────────────────────────────────────────────────────────────────
 
 import { sections, closingStatement } from '../data/about.js';
+import { observeReveals } from './reveal.js';
 
 
 function renderSection(s){
@@ -88,6 +89,7 @@ export function initAbout(){
   if (!host) return;
 
   host.innerHTML = sections.map(renderSection).join('');
+  observeReveals(host);   // see render-blog.js (QA-017)
 
   const close = document.getElementById('aboutClosing');
   if (close) close.textContent = closingStatement;

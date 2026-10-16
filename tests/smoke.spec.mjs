@@ -241,3 +241,21 @@ test('tooling files are not served', async ({ request }) => {
   expect(open).toEqual([]);
   expect((await request.get('/assets/plants3d/CREDITS.md')).status(), 'CC BY credits must stay reachable').toBe(200);
 });
+
+// QA-017 · Blocks drawn by script after the reveal set-up were never
+// registered, so the Journal list and half of About stayed at opacity 0, live.
+// Scroll each page through and check every reveal has shown.
+for (const path of ['/', '/products', '/blog', '/about', '/care', '/blog/open-vs-closed-terrariums', '/product/V1-PLT-005']) {
+  test(`every scroll reveal shows: ${path}`, async ({ page, isMobile }) => {
+    test.skip(isMobile, 'wheel scrolling (the site smooths scrolling, so scrollTo jumps past reveals)');
+    await page.addInitScript(() => sessionStorage.setItem('earthbox-loader-seen', '1'));   // the intro loader locks scrolling
+    await page.goto(path);
+    await page.waitForLoadState('networkidle');
+    const h = await page.evaluate(() => document.documentElement.scrollHeight);
+    for (let y = 0; y < h + 1000; y += 500) { await page.mouse.wheel(0, 500); await page.waitForTimeout(120); }
+    await page.waitForTimeout(1200);
+    const hidden = await page.evaluate(() => [...document.querySelectorAll('.reveal, .reveal-clip')]
+      .filter(e => e.getClientRects().length && !e.classList.contains('in')).map(e => e.className.slice(0, 60)));
+    expect(hidden).toEqual([]);
+  });
+}
