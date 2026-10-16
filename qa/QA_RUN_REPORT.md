@@ -185,3 +185,14 @@ QA-001 to QA-007, QA-009 and QA-013. Details, root causes and evidence are in `Q
     - coming-soon page registers interest
   - Full Playwright suite (desktop, phone, tablet) on its own port (`E2E_PORT`, see the note below): 319 passed and 1 failed. The failure was the new share-link test racing the app's own reload; after the fix it passed 3 runs out of 3.
 - **Note:** another checkout on this machine served :4173, and Playwright's `reuseExistingServer` would have tested its code. `playwright.config.mjs` now takes `E2E_PORT`.
+
+## Follow-up · code quality gates, 16 Oct 2026 (site-tve)
+- **What changed:** four checks now run in `npm test`, so they also run in CI and on every Vercel build:
+  - **Strict type-checking** (`npm run typecheck`, TypeScript `checkJs` + `strict`, no compiling). Error count: 1,436 → 0.
+  - **Type-aware ESLint** (typescript-eslint, via `npm run lint`). Problem count: 136 → 0, with no `eslint-disable` added.
+  - **Unused-code check** (knip, `npm run check:unused`). It found one dead file (`scripts/lenis.js`), an unused export, two dead branches (`s.table` on About, `priceRange` on products) and two missing dependency declarations.
+  - **Duplicate-code check** (jscpd, `npm run check:dupes`, threshold 0). It found 7 clones; they're now shared helpers (`radioKeys` in util.js, `ringFailures` in contrast.spec, `fillAndSend`, `tests/helpers.mjs`).
+- **Bugs the types found:**
+  - **A thrown TypeError in the Maker's focus fallback.** This was new in Phase 0. It was fixed before release, with a test (PR #26).
+  - **A cart unit test helper** passed the array index as the `list` argument. Fixed.
+- **Checks:** `npm test` and `npm run build` pass. The full Playwright suite (desktop, phone, tablet, `E2E_PORT`): 324 passed, 78 skipped (the live-only ones), 0 failed.
