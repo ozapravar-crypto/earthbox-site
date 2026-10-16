@@ -329,6 +329,18 @@ test('Maker: adding and removing plants is announced, and focus stays in the tra
   await expect(page.locator(':focus')).toHaveAttribute('data-key', /^tray-/);   // the next plant, not the page
 });
 
+// Continue on "Your space" leads to Review, which has no Continue: the focused
+// control vanishes. The focus fallback threw (false?.focus) — found by the type checker.
+test('Maker: reaching Review by keyboard raises no error and keeps focus on the page', async ({ page }) => {
+  const errs = errorsOf(page);
+  await page.goto('/maker.html#c=MossBox&s=studio&p=PLT-036&n=QA');
+  await page.locator('.mk-step[data-to=space]').click();
+  await page.locator('[data-act=next]').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#maker')).toHaveAttribute('data-stage', 'review');
+  expect(errs).toEqual([]);
+});
+
 test('Maker: if 3D files fail to load, the drawing preview is shown', async ({ page }) => {
   const errs = errorsOf(page);
   await page.route('**/scripts/vendor/three*', r => r.abort());

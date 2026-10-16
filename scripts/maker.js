@@ -701,7 +701,7 @@ export function initMaker(){
     syncCartButtons();
     if (stage === 'plants') startThumbs();
 
-    if (key) (document.querySelector(`[data-key="${key}"]:not([disabled])`) || (/^(tray|rv)-/.test(key) && root.querySelector('.mk-title')))?.focus({ preventScroll: true });
+    if (key) (document.querySelector(`[data-key="${key}"]:not([disabled])`) || (/^(tray|rv)-/.test(key) ? root.querySelector('.mk-title') : null))?.focus({ preventScroll: true });
   }
 
   // The preview only (3D, or the drawing). Called on its own when the 3D view
