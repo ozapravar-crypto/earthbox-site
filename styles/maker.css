@@ -223,6 +223,15 @@ img.mk-thumb,img.mk-swatch{display:block;object-fit:contain}
 .mk-choice:hover span{border-color:var(--rule-stronger)}
 .mk-choice input:checked + span{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .mk-choice input:checked + span::before{content:"✓\00a0"}
+/* Answers with a drawing: a small tile, the word under the picture */
+.mk-choice.has-art span{flex-direction:column;justify-content:flex-end;gap:.35rem;width:7.5rem;padding:.6rem .5rem .55rem;text-align:center;font-size:.82rem;line-height:1.25}
+.mk-choice.has-art .art{width:4.75rem}
+.mk-choice.has-art.is-row span{flex-direction:row;justify-content:flex-start;width:auto;text-align:left;gap:.9rem}
+.mk-choice.has-art.is-row .art{width:3.5rem}
+.mk-choice.has-art input:checked + span::before{content:"✓";position:absolute;top:.35rem;left:.5rem}
+.mk-choice.has-art.is-row input:checked + span::before{position:static}
+.mk-empty .art{width:6rem;color:var(--ink-soft)}
+.mk-gd-opt .art{width:3.75rem;margin-bottom:.25rem;color:inherit}
 .mk-choice input:focus-visible + span{outline:1px solid var(--ink);outline-offset:3px}
 .mk-field{display:grid}
 .mk-field textarea,.mk-field input{
@@ -406,7 +415,8 @@ img.mk-thumb,img.mk-swatch{display:block;object-fit:contain}
 @media (max-width:640px){
   .mk-guide{width:100vw;max-width:none;height:100dvh;max-height:none;margin:0;border:0}
   .mk-gd{min-height:100%;grid-template-rows:auto auto auto auto 1fr auto;padding:1rem 16px calc(1rem + env(safe-area-inset-bottom))}
-  .mk-gd-opts,.mk-gd-opts.is-compact{grid-template-columns:1fr 1fr;align-content:start}
+  .mk-gd-opts{grid-template-columns:1fr 1fr;align-content:start}
+  .mk-gd-opts.is-compact{grid-template-columns:repeat(3,minmax(0,1fr));align-content:start}   /* 7 rooms, now with drawings: 3 rows, not 4 */
   .mk-gd-foot{position:sticky;bottom:0;background:var(--bg);padding-top:.75rem}
   .mk-gd-foot .cta{flex:1;justify-content:center}
   .mk-map{grid-template-columns:1fr 1fr}

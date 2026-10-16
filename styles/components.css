@@ -476,6 +476,10 @@
 .ct-note{margin:0;font-size:.82rem;line-height:1.5;color:var(--mute)}
 .ct-note a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
 .ct-summary .cta{margin-top:.5rem}
+/* Botanical art (assets/illustrations · iconography audit 7.6): ink mask in currentColor */
+.art{display:block;flex:none;aspect-ratio:1;background:currentColor;-webkit-mask:var(--art) center/contain no-repeat;mask:var(--art) center/contain no-repeat}
+.ct-art{width:132px;margin:2.5rem auto 0;color:var(--ink-soft)}
+.art-404{width:min(240px,60vw);margin:2.5rem auto 0;color:var(--ink-soft)}
 .ct-empty{font-family:var(--serif);font-size:1.4rem;margin:2rem 0 .5rem}
 /* "Goes with your order" (pairings.js): quiet, two lines at most */
 .ct-suggest{padding:1.25rem 0 .25rem;border-top:1px solid var(--rule)}

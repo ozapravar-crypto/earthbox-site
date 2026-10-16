@@ -8,6 +8,11 @@ export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => (
 ));
 
 // 1299 → "₹1,299"
+// Botanical drawing as an ink mask painted in currentColor (styles/components.css .art),
+// so it follows light/dark mode and the inverted "selected" state. Always decorative:
+// the words next to it carry the meaning.
+export const art = (id, cls = '') => id ? `<i class="art${cls ? ' ' + cls : ''}" aria-hidden="true" style="--art:url(/assets/illustrations/${id}.webp)"></i>` : '';
+
 export const rupees = (n) => `₹${n.toLocaleString('en-IN')}`;
 
 // GA4 event; a no-op when analytics is blocked or not loaded.

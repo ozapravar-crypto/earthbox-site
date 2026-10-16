@@ -100,6 +100,12 @@ Feature docs: **`MAKER.md`** (terrarium Maker, discovery, 3D) · **`CART.md`** (
 2. Copy any `blog/*.html` to `blog/<slug>.html` and set `<body data-article="<slug>">`.
 3. Run `npm run build`. It writes the article and header/footer into the page, then checks it. Add the URL to `sitemap.xml`.
 
+**Add a botanical drawing** (`assets/illustrations/`)
+1. Generate it in the engraved style with a print-kit plate as the style reference (black ink on white, no frame, nothing touching the edges), and keep the original PNG in `earthbox-print/img/site-art/`.
+2. Turn it into an **ink mask**: 480 × 480 WebP, black pixels, alpha = ink density, cropped to the drawing. CSS paints it in `currentColor`, so one file works in light mode, dark mode and the inverted "selected" state.
+3. Add its entry to `assets/illustrations/manifest.json`. Use it with `art('<id>')` (`scripts/util.js`). For a Maker answer, map it in `answerArt` (`data/maker.js`).
+4. Run `npm test`. `check-assets` fails if any `art()` id, `answerArt` entry or `--art:url()` points at a missing file.
+
 **Change the nav, contact details, footer or refund policy**
 Edit `data/site.js`, then `npm run build`. All 29 pages update; the mobile menu reads the same `NAV`.
 
@@ -125,7 +131,8 @@ Only in `styles/tokens.css`, for both light and dark. `check:contrast` tells you
 - **Static where crawlers look.** Header, footer and articles are real HTML at deploy time.
 - **Accessibility floor:** 44 px tap targets, visible focus, `prefers-reduced-motion` honoured, text ≥ 4.5:1, a skip link on every page.
 - **Design rules:** site tokens, sharp rectangular edges (the homepage hero's round arrow is the one agreed exception), and checks at 1440 / 375 px plus dark mode.
-- **Don't fake data or artwork.** A missing price stays "on enquiry"; a missing photo is an issue in beads (see `KNOWN_MISSING` in `check-assets.mjs`).
+- **Don't fake data.** A missing price stays "on enquiry"; a missing product photo is an issue in beads (see `KNOWN_MISSING` in `check-assets.mjs`).
+- **Generated art is tagged, never passed off.** Every AI-generated image has an entry in its folder's `manifest.json` (prompt, model, style reference, date, `"source": "AI-generated illustration"`). Botanical drawings are decorative (`aria-hidden`); the words beside them carry the meaning. Rules: `earthbox-iconography-audit.md` §7.6.
 - **Bugs get a regression test.** When fixing one, add the check that would have caught it (see `tests/smoke.spec.mjs`).
 
 ## Deploy

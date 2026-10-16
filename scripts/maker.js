@@ -13,7 +13,8 @@
 // ─────────────────────────────────────────────────────────────────────
 
 import { chambers, plants, substrates, elements, recipes,
-         chamberElements, spaceQuestions, forms, guide } from '../data/maker.js';
+         chamberElements, spaceQuestions, forms, guide, answerArt } from '../data/maker.js';
+import { art } from './util.js';
 import { enquiryAltHTML, ENQUIRY_PHONE } from './enquiry-form.js';
 import { syncCartButtons } from './cart.js';
 import { icon } from '../data/icons.js';
@@ -289,7 +290,7 @@ function swatch(look){
 function foundationPanel(b){
   const ch = chamberOf(b);
   if (isSoilless(ch.sku)) return head('Foundation', '')
-    + `<div class="mk-empty"><p>The ${ch.name} chamber is soil-free: plants grow in air, fed by mist.</p><p>Nothing to choose here.</p></div>`;
+    + `<div class="mk-empty">${art('empty-soil-free')}<p>The ${ch.name} chamber is soil-free: plants grow in air, fed by mist.</p><p>Nothing to choose here.</p></div>`;
   return head('Build the foundation', 'The layers your plants root into.')
   + `<div class="mk-list">${substrates.map(s => {
     const ok = substrateSuits(s, ch.sku), on = b.substrate === s.id;
@@ -427,7 +428,7 @@ function refineHTML(d, ui){
 function plantsPanel(b, ui){
   const ch = chamberOf(b);
   if (!suitedElements(ch.sku).length) return head('Plants', '')
-    + `<div class="mk-empty"><p>The ${ch.name} chamber grows mushroom cultures, which aren’t on our plant list.</p>
+    + `<div class="mk-empty">${art('empty-mushroom')}<p>The ${ch.name} chamber grows mushroom cultures, which aren’t on our plant list.</p>
        <p>The studio chooses the strain with you. Continue to tell us about your space.</p></div>`;
 
   const max = capacity(ch), d = ui.disc;
@@ -461,7 +462,7 @@ const GD = [
 function guideOptions(step, a){
   const opt = (name, value, label, line, type = 'radio') => `<label class="mk-gd-opt">
     <input type="${type}" name="gd-${name}" value="${esc(value)}" data-key="gd-${name}-${esc(value)}" ${(type === 'radio' ? a[name] === value : a[name].includes(value)) ? 'checked' : ''}>
-    <span><strong>${esc(label)}</strong>${line ? `<em>${esc(line)}</em>` : ''}</span></label>`;
+    <span>${art(answerArt[name]?.[value])}<strong>${esc(label)}</strong>${line ? `<em>${esc(line)}</em>` : ''}</span></label>`;
   if (step === 'look')  return guide.looks.map(o => opt('look', o.id, o.label, o.line)).join('');
   if (step === 'room')  return spaceQuestions.room.map(v => opt('room', v, v, '')).join('');
   if (step === 'light') return guide.light.map(o => opt('light', o.id, o.label, '')).join('');
@@ -493,8 +494,9 @@ function guideHTML(b, ui){
 }
 
 function choice(name, value, type, checked){
-  return `<label class="mk-choice"><input type="${type}" name="${name}" value="${esc(value)}" ${checked ? 'checked' : ''}>
-    <span>${esc(value.split(' —')[0])}</span></label>`;
+  const pic = answerArt[name]?.[value];
+  return `<label class="mk-choice${pic ? ' has-art' : ''}"><input type="${type}" name="${name}" value="${esc(value)}" ${checked ? 'checked' : ''}>
+    <span>${art(pic)}${esc(value.split(' —')[0])}</span></label>`;
 }
 
 function spacePanel(b){
@@ -507,7 +509,7 @@ function spacePanel(b){
       <div class="mk-choices">${spaceQuestions.household.map(v => choice('household', v, 'checkbox', s.household.includes(v))).join('')}</div></fieldset>
     <fieldset><legend>How grown should it arrive?</legend>
       <div class="mk-choices mk-choices-wide">${spaceQuestions.maturity.map(v =>
-        `<label class="mk-choice"><input type="radio" name="maturity" value="${esc(v)}" ${s.maturity === v ? 'checked' : ''}><span>${esc(v)}</span></label>`).join('')}</div></fieldset>
+        `<label class="mk-choice has-art is-row"><input type="radio" name="maturity" value="${esc(v)}" ${s.maturity === v ? 'checked' : ''}><span>${art(answerArt.maturity[v])}${esc(v)}</span></label>`).join('')}</div></fieldset>
     <label class="mk-field"><span>A mood or story, if you have one</span>
       <textarea name="note" rows="3" maxlength="400" placeholder="“A misted Himalayan dawn”">${esc(s.note)}</textarea></label>
   </form>`;
