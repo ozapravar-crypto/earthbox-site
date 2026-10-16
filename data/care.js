@@ -31,6 +31,22 @@ const KIT = {
   Dark:  ['Aroid mix top-up', 'Low-strength liquid feed', 'Leaf-cleaning cloth', 'Care card']
 };
 
+// Plain names first, the Maker's house names second (UX audit S-21, rule
+// E12): "Mosses (Moss)", not "Moss". Written from each group's plants
+// (data/maker.js); no new claims.
+/** @type {Record<string, string>} */
+export const groupNames = {
+  Earth: 'Leafy soil plants',
+  Fire:  'Succulents & sun lovers',
+  Water: 'Humidity lovers & ferns',
+  Air:   'Climbers & epiphytes',
+  Aero:  'Air plants',
+  Frost: 'Cool-climate plants',
+  Bite:  'Carnivorous plants',
+  Moss:  'Mosses',
+  Dark:  'Low-light foliage'
+};
+
 export const kits = elements.map(e => ({
   sku: `KIT-${e.id.toUpperCase()}`,
   element: e.id,
@@ -59,7 +75,7 @@ export const visit = {
 
 // What a home customer wants looked after.
 export const subjects = [
-  { id: 'piece',  label: 'An EarthBox piece',  note: 'A chamber, planter or plant you bought from us.' },
+  { id: 'piece',  label: 'An EarthBox piece',  note: 'A planter or plant support you bought from us.' },
   { id: 'custom', label: 'A custom box',       note: 'A world designed in the Maker. Visits are quoted, as each one is different.' },
   { id: 'own',    label: 'My own plants',      note: 'Plants and terrariums from anywhere. Tell us roughly how many.' }
 ];
@@ -67,6 +83,9 @@ export const subjects = [
 // Mumbai only for visits. Pincodes 400001–400104 are Mumbai; anything else
 // is still accepted and the studio confirms.
 // ponytail: prefix check, swap for an explicit pincode list if the studio covers Thane/Navi Mumbai.
-export const coverage = { city: 'Mumbai', isCovered: (/** @type {string | number} */ pin) => /^400(0\d\d|10[0-4])$/.test(String(pin)) };
+export const coverage = { city: 'Mumbai', isCovered: (/** @type {string | number} */ pin) => /^400(0\d\d|10[0-4])$/.test(String(pin)),
+  // The Care planner's lines under the pincode (UX audit S-24)
+  note: { empty: 'Visits are within Mumbai. Elsewhere, the studio confirms.', inside: 'Inside our Mumbai visit area.',
+    outside: 'Outside our usual Mumbai area: the studio confirms before booking.' } };
 
 export const businessSites = ['Office', 'Café or restaurant', 'Hotel', 'Clinic', 'Retail store', 'Other'];

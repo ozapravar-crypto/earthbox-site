@@ -5,19 +5,14 @@
 // Review: what happens next (M-07), one main action (M-13), Edit leads
 // back to Review (M-14), and a recipe's name goes with its chamber (M-12).
 import { test, expect } from '@playwright/test';
-import { quietStart } from './helpers.mjs';
+import { quietStart, openMakerAt } from './helpers.mjs';
 
 /** @typedef {import('@playwright/test').Page} Page */
 
 test.beforeEach(quietStart);
 
 const panel = (/** @type {Page} */ page) => page.locator('#mkPanelBody');
-/** Open a design link on a step. @param {Page} page @param {string} code @param {string} step */
-async function openAt(page, code, step){
-  await page.goto(`/maker.html#${code}`);
-  await page.locator(`.mk-step[data-to=${step}]`).click();
-  await expect(page.locator('#maker')).toHaveAttribute('data-stage', step);
-}
+const openAt = openMakerAt;
 
 test('Plants, simple mode: the chamber\'s own plants straight away, no search tools', async ({ page }) => {
   await openAt(page, 'c=DarkBox&s=SOIL-001&p=PLT-041', 'plants');

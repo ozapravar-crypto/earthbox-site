@@ -102,7 +102,7 @@ export const plants = [
 // Only SOIL-001 is filled in the workbook (tab 07). "Studio's choice" is the
 // honest default until the other mixes exist. `suits` = plant groups.
 /**
- * @typedef {{ id: string, name: string, note: string, look: string, suits?: string[], price?: number }} Substrate
+ * @typedef {{ id: string, name: string, note: string, look: string, suits?: string[], price?: number, recommended?: boolean }} Substrate
  * @type {Substrate[]}
  */
 export const substrates = [
@@ -110,7 +110,8 @@ export const substrates = [
     id: 'studio',
     name: 'Studio’s choice',
     note: 'We layer the base to suit your chamber’s climate and plants.',
-    look: 'studio'
+    look: 'studio',
+    recommended: true                       // the studio's own default (UX audit M-16)
   },
   {
     id: 'SOIL-001',

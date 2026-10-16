@@ -185,6 +185,13 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
   object-fit:cover;
   display:block;
 }
+/* Quieter (UX audit D5): a smaller frame, no accent corners, after the Maker */
+.video-stage--quiet{padding-block:clamp(2.5rem,5vh,4rem)}
+.video-stage--quiet .film-frame{max-width:760px}
+.video-stage--quiet .film-frame::before,
+.video-stage--quiet .film-frame::after{display:none}
+.video-stage--quiet .film-frame-header .film-frame-desc{font-size:.95rem}
+
 @media (max-width: 720px){
   .film-frame{
     aspect-ratio:16/9;
@@ -200,13 +207,13 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
   }
 }
 
-/* ─── HOME · Volume I preview · embedded catalogue ─── */
+/* ─── HOME · catalogue tease: four pieces, the count, the way in (C-02) ─── */
 .home-vol-preview{
   padding-block:clamp(4rem,8vh,7rem);
   background:var(--bg-tint);
 }
 .home-vol-preview.volume-i{
-  padding-block:clamp(4rem,8vh,7rem) clamp(6rem,12vh,10rem);
+  padding-block:clamp(4rem,8vh,7rem);
 }
 
 /* ─── BRAND CONTEXT (spread) ─── */
@@ -278,26 +285,27 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
   margin-inline:auto;
 }
 
-/* ─── PURPOSE ─── */
-.purpose-wrap{
-  background:var(--bg-tint);
-  padding-block:var(--sec);
-}
+/* ─── PRINCIPLES + PURPOSE · one quiet band, then a link to About (D5) ─── */
+.home-ethos{background:var(--bg-tint)}
+.home-ethos .principles{margin-top:3.5rem}
+.home-ethos-more{margin-top:clamp(2.5rem,5vh,3.5rem);text-align:center}
 .purpose-inner{
   max-width:var(--max);
-  margin:0 auto;
-  padding-inline:var(--pad);
+  margin:clamp(4rem,8vh,6rem) auto 0;
+  padding-top:clamp(3rem,6vh,4rem);
+  border-top:1px solid var(--rule);
   display:grid;
   grid-template-columns:5fr 7fr;
   gap:clamp(3rem,6vw,6rem);
   align-items:start;
 }
-.purpose-left h2{
+.purpose-left .purpose-title{
+  font-size:clamp(1.9rem,3.2vw,2.6rem);
   line-height:1;
   margin-top:1rem;
   max-width:11ch;
 }
-.purpose-left .rule-s{margin:3rem 0}
+.purpose-left .rule-s{margin:2rem 0}
 .purpose-left .phrase{
   font-family:var(--body);
   font-style:italic;
@@ -375,15 +383,10 @@ body:has(.hero-bg) .runhead:not(.is-scrolled) .runhead-bag-btn{color:#FBF8F2}
   gap:2rem;
   align-items:center;
 }
-.mi-num{
-  display:flex;align-items:center;gap:1.25rem;
-  font-family:var(--serif);font-size:1.4rem;color:var(--mi-mute);
-}
-.mi-rule{display:inline-block;width:90px;height:1px;background:var(--mi-mute);opacity:.5}
 .mi-title{
   font-family:var(--serif);font-weight:400;color:var(--mi-ink);
   font-size:clamp(3.2rem,6.4vw,6.4rem);line-height:.95;letter-spacing:-.02em;
-  margin:2.25rem 0 2rem;
+  margin:0 0 2rem;
 }
 .mi-lede{
   font-family:var(--body);font-style:italic;color:var(--mi-soft);

@@ -21,6 +21,13 @@ assert.ok(matchesQuery(p('PLT-008'), '  PERLE von nurnberg '), 'accent-insensiti
 assert.ok(matchesQuery(p('PLT-031'), 'dionaea'), 'botanical name');
 assert.ok(matchesQuery(p('PLT-041'), 'low light'), 'group heading');
 assert.ok(!matchesQuery(p('PLT-041'), 'low cactus'), 'all words must match');
+// Synonyms from real data (M-22): the Fire chamber grows "Succulents, cacti".
+const cactus = ids(searchPlants(st({ q: 'Cactus' })));
+assert.deepEqual(cactus, ids(searchPlants(st({ q: 'succulent' }))));
+assert.ok(cactus.includes('PLT-008') && cactus.includes('PLT-010'), 'Echeveria + Burro’s Tail');
+assert.equal(ids(searchPlants(st({ q: 'cacti' }))).length, cactus.length);
+// "easy" is not a synonym: no plant has a care rating yet, so it would be a guess.
+assert.equal(searchPlants(st({ q: 'easy' })).results.length, 0);
 const fern = ids(searchPlants(st({ q: 'fern' })));
 assert.ok(fern.includes('PLT-015') && fern.includes('PLT-029'), 'Java Fern + Bird’s Nest Fern');
 assert.ok(fern.every(id => p(id).name.includes('Fern') || p(id).form === 'fern'));
@@ -48,6 +55,10 @@ const lowAll = searchPlants(st({ g: { look: '', light: 'low', roles: [] } }));
 assert.equal(lowAll.results.length, 45);
 assert.equal(lowAll.results[0].element, 'Dark');
 assert.equal(searchPlants(st({ g: { look: '', light: 'unsure', roles: [] } })).preferences.length, 0, 'not sure adds nothing');
+
+// Light can come from build.space (its one home since M-11): same order as g.light.
+assert.equal(searchPlants(st(), { space: { light: 'low' } }).results[0]?.element, 'Dark');
+assert.deepEqual(searchPlants(st(), { space: { light: 'low' } }).preferences.map(x => x.key), ['light']);
 
 // Room + care come from build.space and never remove plants.
 const pref = searchPlants(st(), { space: { room: 'Study', care: 'Easy' } });

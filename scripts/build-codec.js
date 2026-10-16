@@ -14,7 +14,7 @@ import { chambers, plants, substrates, elements, chamberElements, SOILLESS } fro
  * @typedef {import('../data/maker.js').Plant} Plant
  * @typedef {import('../data/maker.js').Chamber} Chamber
  * @typedef {import('../data/maker.js').Substrate} Substrate
- * @typedef {{ room: string, household: string[], maturity: string, note: string, care: string }} Space
+ * @typedef {{ room: string, light: string, household: string[], maturity: string, note: string, care: string }} Space
  * @typedef {{ name: string, chamber: string|null, substrate: string|null, plants: string[], space: Space }} Build
  */
 
@@ -28,7 +28,7 @@ const find = (list, id, key = 'id') => list.find(x => x[key] === id);
 /** @returns {Build} */
 export const emptyBuild = () => ({
   name: '', chamber: null, substrate: null, plants: [],
-  space: { room: '', household: [], maturity: '', note: '', care: '' }
+  space: { room: '', light: '', household: [], maturity: '', note: '', care: '' }
 });
 
 /** @param {Build} b */

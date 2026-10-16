@@ -38,8 +38,11 @@ window.gtag('config', 'G-1HHZETMVWP');
     const box = document.createElement('section');
     box.className = 'consent';
     box.setAttribute('aria-label', 'Cookie choice');
+    // While the banner shows, the WhatsApp button sits above it, not under
+    // it (UX audit C-09): components.css reads the banner's height.
+    const lift = new ResizeObserver(() => document.documentElement.style.setProperty('--consent-h', `${box.offsetHeight}px`));
     box.innerHTML = `
-      <p class="consent-text">We use Google Analytics to see which pages help, only if you agree. Your cart and saved pieces stay in your browser either way. <a href="/privacy">Privacy</a></p>
+      <p class="consent-text">We use Google Analytics to see which pages help, only if you agree. <span class="consent-more">Your cart and saved pieces stay in your browser either way.</span> <a href="/privacy">Privacy</a></p>
       <div class="consent-actions">
         <!-- Equal weight on purpose: neither choice is nudged (both outline, rule E1's exception) -->
         <button type="button" class="cta cta-small cta-secondary" data-consent="granted">Accept</button>
@@ -51,8 +54,11 @@ window.gtag('config', 'G-1HHZETMVWP');
       set(/** @type {string} */ (b.dataset.consent));
       if (b.dataset.consent === 'granted') loadGA();
       box.remove();
+      lift.disconnect();
+      document.documentElement.style.removeProperty('--consent-h');
     });
     document.body.append(box);
+    lift.observe(box);
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', show);
   else show();

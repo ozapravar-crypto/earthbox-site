@@ -8,8 +8,8 @@
 // No-op on pages without .vol-pills.
 // ─────────────────────────────────────────────────────────────────────
 
-import { track } from './util.js';
-import { volumeOne, categories as v1Categories } from '../data/volume-one.js';
+import { track, esc, rupees, savedPlace } from './util.js';
+import { volumeOne, categories as v1Categories, materials, places, priceOf } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
 
 // ─── Tab switching ───
@@ -42,6 +42,10 @@ function setActiveTab(volNum, isUserAction = false){
     });
   }
 
+  // The sticky bar's "Prices for: …" belongs to Volume I (UX audit S-16).
+  const bar = /** @type {HTMLElement | null} */ (document.querySelector('.catalogue-bar'));
+  if (bar) bar.dataset.vol = String(volNum);
+
   history.replaceState(null, '', `#vol-${volNum}`);
 
   // GA4: Track volume switches (only user-initiated, not initial load)
@@ -57,8 +61,17 @@ function setActiveTab(volNum, isUserAction = false){
 
 
 // ─── Search index — flatten all volumes ───
+// A piece is found by its name, category, description, and the materials
+// and places it's made for ("asa", "balcony"); UX audit S-18.
+/** @param {import('../data/volume-one.js').Product} p */
+function madeIn(p){
+  const table = /** @type {Record<string, unknown>} */ ((p.variants?.length ? /** @type {Record<string, object>} */ (p.pricing)?.[p.variants[0].id] : p.pricing) || {});
+  const mats = materials.filter(m => m.id in table);
+  return [...mats.map(m => m.name), ...places.filter(x => mats.some(m => m.id === x.material)).map(x => x.name)];
+}
 /** @typedef {ReturnType<typeof buildIndex>[number]} SearchItem */
 function buildIndex(){
+  /** @type {{ vol: number, sku: string, name: string, sub: string, desc: string, blob: string, product: import('../data/volume-one.js').Product | null, status: string }[]} */
   const items = [];
 
   volumeOne.forEach(p => {
@@ -69,7 +82,9 @@ function buildIndex(){
       name:  p.name,
       sub:   cat ? cat.title : '',
       desc:  p.description,
-      blob: [p.name, p.category, p.description, p.sku].join(' ').toLowerCase()
+      blob: [p.name, p.category, cat?.title, p.description, p.sku, ...madeIn(p)].join(' ').toLowerCase(),
+      product: p.status === 'available' ? p : null,
+      status: 'Coming soon'
     });
   });
 
@@ -80,7 +95,9 @@ function buildIndex(){
       name: b.sku,
       sub:  b.tagline,
       desc: `${b.tagline} ${b.plants}`,
-      blob: [b.sku, b.name, b.tagline, b.plants].join(' ').toLowerCase()
+      blob: [b.sku, b.name, b.tagline, b.plants, 'chamber terrarium'].join(' ').toLowerCase(),
+      product: null,
+      status: volumeTwo.status
     });
   });
 
@@ -90,10 +107,27 @@ function buildIndex(){
     name: volumeThree.title,
     sub:  volumeThree.subtitle,
     desc: volumeThree.description,
-    blob: [volumeThree.title, volumeThree.subtitle, volumeThree.description].join(' ').toLowerCase()
+    blob: [volumeThree.title, volumeThree.subtitle, volumeThree.description].join(' ').toLowerCase(),
+    product: null,
+    status: volumeThree.status
   });
 
   return items;
+}
+
+// Each result says what it costs or that it isn't orderable yet; orderable
+// pieces come first. The price is for the place searched for ("balcony",
+// "asa"), else the shopper's own.
+/** @param {string} q */
+const placeFor = (q) => places.find(x => (q.length >= 3 && x.name.toLowerCase().startsWith(q)) || materials.some(m => m.id === x.material && m.name.toLowerCase() === q)) || savedPlace(places);
+/**
+ * @param {SearchItem} m
+ * @param {import('../data/volume-one.js').Place} place
+ */
+function resultPrice(m, place){
+  if (!m.product) return `<span class="badge">${esc(m.status)}</span>`;
+  const price = priceOf(m.product, place.material);
+  return `<span class="search-result-price">${price ? `${rupees(price)} · ${place.name}` : 'Price on enquiry'}</span>`;
 }
 
 
@@ -117,7 +151,8 @@ function renderSearchResults(query, items){
   }
 
   if (hint) hint.hidden = true;
-  const matches = items.filter(it => it.blob.includes(q));
+  const matches = items.filter(it => it.blob.includes(q))
+    .sort((a, b) => Number(!a.product) - Number(!b.product));   // stable: data order within each group
 
   if (matches.length === 0){
     list.innerHTML = '';
@@ -126,6 +161,7 @@ function renderSearchResults(query, items){
   }
   if (empty) empty.hidden = true;
 
+  const place = placeFor(q);
   list.innerHTML = matches.map(m => `
     <a class="search-result"
        href="/product/${encodeURIComponent(m.sku)}"
@@ -134,6 +170,7 @@ function renderSearchResults(query, items){
       <div class="search-result-meta">
         <h3 class="search-result-name">${m.name}</h3>
         <p class="search-result-desc italic">${m.sub || m.desc}</p>
+        <p class="search-result-status">${resultPrice(m, place)}</p>
       </div>
       <span class="search-result-cta caption">View →</span>
     </a>
