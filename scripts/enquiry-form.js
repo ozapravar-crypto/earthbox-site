@@ -78,6 +78,10 @@ export function enquiryAltHTML(product = '', message = ''){
 // ─── Submission payload ───
 // Split out so it can be checked without a network call. See
 // enquiry-form.test.mjs.
+/**
+ * @param {{ product?: string, name?: string, email?: string, message?: string, page?: string, botcheck?: string }} fields
+ * @param {string} [key]
+ */
 export function buildPayload(fields, key = WEB3FORMS_ACCESS_KEY){
   const product = fields.product?.trim();
   return {
@@ -98,14 +102,19 @@ export function buildPayload(fields, key = WEB3FORMS_ACCESS_KEY){
 // Delegated so it survives the renderers injecting CTAs after page load.
 export function initEnquiryForm(){
   document.addEventListener('submit', async (e) => {
-    const form = e.target.closest('.enquiry-form');
+    const form = /** @type {HTMLFormElement | null} */ (/** @type {Element} */ (e.target).closest('.enquiry-form'));
     if (!form) return;
     e.preventDefault();
 
-    const wrap   = form.closest('.enquiry-alt');
-    const status = wrap.querySelector('.enquiry-status');
-    const button = form.querySelector('.enquiry-submit');
+    // The form is always rendered inside enquiryAltHTML's markup.
+    const wrap   = /** @type {HTMLElement} */ (form.closest('.enquiry-alt'));
+    const status = /** @type {HTMLElement} */ (wrap.querySelector('.enquiry-status'));
+    const button = /** @type {HTMLButtonElement} */ (form.querySelector('.enquiry-submit'));
 
+    /**
+     * @param {'ok' | 'error' | 'pending'} state
+     * @param {string} msg
+     */
     const say = (state, msg) => { status.dataset.state = state; status.textContent = msg; };
 
     if (!form.checkValidity()) { form.reportValidity(); return; }

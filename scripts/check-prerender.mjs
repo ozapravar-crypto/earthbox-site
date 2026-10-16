@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MIN_TEXT = 1000;   // nav + footer alone is ~525
 
-const strip = (h) => h
+const strip = (/** @type {string} */ h) => h
   .replace(/<(script|style)[\s\S]*?<\/\1>/g, '')
   .replace(/<[^>]+>/g, ' ')
   .replace(/\s+/g, ' ')

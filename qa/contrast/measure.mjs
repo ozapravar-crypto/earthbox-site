@@ -11,10 +11,21 @@
 
 import sharp from 'sharp';
 
-const lin = (v) => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; };
+/** @typedef {import('@playwright/test').Page} Page */
+/** @typedef {import('./scan.js').Finding} Finding */
+/** @typedef {{ data: Buffer, info: import('sharp').OutputInfo }} Raw  a decoded screenshot */
+/** @typedef {{ px: Uint8Array, w: number, h: number }} Crop  RGB pixels of one box */
+/** @typedef {{ id: number, pinned: boolean, top: number, left: number, w: number, h: number }} Geo */
+/** @typedef {Finding & { _g?: Geo, _px?: Crop, _ink?: Crop, _skip?: boolean }} Item  a finding plus batch scratch fields */
+
+const lin = (/** @type {number} */ v) => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; };
+/** @type {(r: number, g: number, b: number) => number} */
 export const luminance = (r, g, b) => .2126 * lin(r) + .7152 * lin(g) + .0722 * lin(b);
+/** @type {(l1: number, l2: number) => number} */
 export const contrast = (l1, l2) => { const [a, b] = l1 > l2 ? [l1, l2] : [l2, l1]; return (a + .05) / (b + .05); };
+/** @type {(h: string) => number[]} */
 export const hexToRgb = (h) => { const n = parseInt(h.slice(1, 7), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+/** @type {(r: number, g: number, b: number, _l?: number) => string} */
 const hex = (r, g, b) => '#' + [r, g, b].map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
 
 const HIDE = `[data-cq-hide], [data-cq-hide] * { color: transparent !important; -webkit-text-fill-color: transparent !important; text-shadow: none !important; }
@@ -23,15 +34,19 @@ const HIDE = `[data-cq-hide], [data-cq-hide] * { color: transparent !important; 
 /* While measuring something else, the floating WhatsApp button must not sit in the shot. */
 html.cq-shot .floating-wa:not(:has([data-cq-hide], [data-cq-hide-mark])) { visibility: hidden !important; }`;
 
+/** @param {Page} page @param {Finding} item  a 'review' row (it has fg and threshold) */
 export async function resolveWithPixels(page, item){
   if (item.kind === 'focus-ring') return ringPixels(page, item);
   const el = page.locator(`[data-cq="${item.cq}"]`).first();
   if (!(await el.count())) return { ...item, status: 'review', note: 'element gone before pixel check' };
-  if (!(await page.locator('#cq-hide').count())) await page.addStyleTag({ content: HIDE }).then(h => h.evaluate(e => { e.id = 'cq-hide'; }));
+  if (!(await page.locator('#cq-hide').count())) await page.addStyleTag({ content: HIDE }).then(h => h.evaluate(e => { /** @type {Element} */ (e).id = 'cq-hide'; }));
   const attr = item.kind === 'icon' ? 'data-cq-hide-mark' : 'data-cq-hide';
   await el.evaluate((e, a) => e.setAttribute(a, ''), attr);
   await page.evaluate(() => document.documentElement.classList.add('cq-shot'));
-  let buf, inked;
+  /** @type {Buffer} */
+  let buf;
+  /** @type {Buffer} */
+  let inked;
   try {
     // Shoot the element's screen area, not the element: a hidden icon can't be
     // screenshotted by locator (it waits for visibility and times out).
@@ -50,7 +65,7 @@ export async function resolveWithPixels(page, item){
     await el.evaluate((e, a) => e.setAttribute(a, ''), attr);
     buf = await page.screenshot({ clip, animations: 'disabled', timeout: 5000 });
   }
-  catch (e) { return { ...item, status: 'review', note: `screenshot failed: ${e.message.split('\n')[0]}` }; }
+  catch (e) { return { ...item, status: 'review', note: `screenshot failed: ${/** @type {Error} */ (e).message.split('\n')[0]}` }; }
   finally {
     await el.evaluate((e, a) => e.removeAttribute(a), attr).catch(() => {});
     await page.evaluate(() => document.documentElement.classList.remove('cq-shot')).catch(() => {});
@@ -71,13 +86,14 @@ html.cq-all body *::placeholder { color: transparent !important; }
 html.cq-all [data-cq-icon] { visibility: hidden !important; }
 html.cq-shot .floating-wa:not(:has([data-cq-hide], [data-cq-hide-mark])) { visibility: hidden !important; }`;
 
+/** @param {Page} page @param {Item[]} items  'review' rows */
 export async function resolveBatch(page, items){
   if (!items.length) return [];
   const geo = await page.evaluate((ids) => ids.map(id => {
     const e = document.querySelector(`[data-cq="${id}"]`);
     if (!e) return null;
     let pinned = false;
-    for (let n = e; n && n.nodeType === 1; n = n.parentElement) {
+    for (let n = /** @type {Element | null} */ (e); n?.nodeType === 1; n = n.parentElement) {
       const p = getComputedStyle(n).position;
       if (p === 'fixed' || p === 'sticky' || n.tagName === 'DIALOG') { pinned = true; break; }
     }
@@ -85,9 +101,12 @@ export async function resolveBatch(page, items){
     return { id, pinned, top: r.top + scrollY, left: r.left + scrollX, w: r.width, h: r.height };
   }), items.map(i => i.cq));
 
-  const out = [], loose = [];
+  /** @type {null[]} */
+  const out = [];
+  /** @type {Item[]} */
+  const loose = [];
   items.forEach((it, k) => { const g = geo[k]; if (!g || g.pinned || g.h > 600 || it.kind === 'focus-ring') out.push(null), loose.push(it); else it._g = g; });
-  const flowing = items.filter(i => i._g).sort((a, b) => a._g.top - b._g.top);
+  const flowing = /** @type {(Item & { _g: Geo })[]} */ (items.filter(i => i._g)).sort((a, b) => a._g.top - b._g.top);
 
   const startY = await page.evaluate(() => scrollY);
   // Restore the scroll position (and let scroll listeners such as the header's
@@ -105,7 +124,7 @@ export async function resolveBatch(page, items){
         }
       return { vh: Math.floor(foot), head: Math.ceil(document.querySelector('.runhead')?.getBoundingClientRect().bottom || 0) };
     });
-    if (!(await page.locator('#cq-all').count())) await page.addStyleTag({ content: HIDE_ALL }).then(h => h.evaluate(e => { e.id = 'cq-all'; }));
+    if (!(await page.locator('#cq-all').count())) await page.addStyleTag({ content: HIDE_ALL }).then(h => h.evaluate(e => { /** @type {Element} */ (e).id = 'cq-all'; }));
     await page.evaluate((icons) => { document.documentElement.classList.add('cq-all', 'cq-shot'); for (const id of icons) document.querySelector(`[data-cq="${id}"]`)?.setAttribute('data-cq-icon', ''); },
       flowing.filter(i => i.kind === 'icon').map(i => i.cq));
     let i = 0;
@@ -133,7 +152,7 @@ export async function resolveBatch(page, items){
       // phone items were measured against the preview before this check.
       const ids = flowing.slice(start, i).map(it => it.cq);
       const clear = await page.evaluate((ids) => ids.map(id => {
-        const e = document.querySelector(`[data-cq="${id}"]`), r = e.getBoundingClientRect();
+        const e = /** @type {Element} */ (document.querySelector(`[data-cq="${id}"]`)), r = e.getBoundingClientRect();
         return [[.5, .5], [.15, .5], [.85, .5]].every(([fx, fy]) => {
           const t = document.elementFromPoint(r.left + r.width * fx, r.top + r.height * fy);
           return t && (t === e || e.contains(t) || t.contains(e));
@@ -152,18 +171,20 @@ export async function resolveBatch(page, items){
     await page.evaluate(() => { document.documentElement.classList.remove('cq-all', 'cq-shot'); document.querySelectorAll('[data-cq-icon]').forEach(e => e.removeAttribute('data-cq-icon')); });
   }
   await restore();
+  /** @type {Finding[]} */
   const done = [];
   for (const it of flowing.filter(i => !i._skip)) {
-    const r = fromPixels(it, it._px, it._ink); delete r._g; delete r._px; delete r._ink;
+    const r = fromPixels(/** @type {Item} */ (it), /** @type {Crop} */ (it._px), it._ink); delete r._g; delete r._px; delete r._ink;
     // A batch FAIL is only a candidate: confirm it with the precise per-element
     // shot (batch and single disagreed on 2 of 120 items in testing).
-    if (r.status === 'fail') { const it2 = { ...it }; delete it2._g; delete it2._px; delete it2._ink; const s = await resolveWithPixels(page, it2); done.push({ ...s, note: s.status === 'fail' ? 'confirmed by a per-element shot' : `batch said ${r.ratio}:1; per-element shot ${s.ratio}:1` }); continue; }
+    if (r.status === 'fail') { const it2 = /** @type {Item} */ ({ ...it }); delete it2._g; delete it2._px; delete it2._ink; const s = await resolveWithPixels(page, it2); done.push({ ...s, note: s.status === 'fail' ? 'confirmed by a per-element shot' : `batch said ${String(r.ratio)}:1; per-element shot ${String(s.ratio)}:1` }); continue; }
     done.push(r);
   }
   for (const it of loose) { delete it._g; delete it._skip; done.push(await resolveWithPixels(page, it)); }
   return done;
 }
 
+/** @param {Raw} shot @param {{ x: number, y: number, w: number, h: number }} box @returns {Crop} */
 function crop({ data, info }, { x, y, w, h }){
   const x0 = Math.round(x), y0 = Math.round(y), x1 = Math.min(info.width, Math.round(x + w)), y1 = Math.min(info.height, Math.round(y + h));
   const px = new Uint8Array(Math.max(0, x1 - x0) * Math.max(0, y1 - y0) * 3);   // typed: the machine may be short of memory
@@ -178,18 +199,29 @@ function crop({ data, info }, { x, y, w, h }){
 // empty space around short words would decide the ratio.) If the ink can't
 // be seen at all (same colour as everything behind it), fall back to all
 // pixels — which then correctly fails.
+/**
+ * @template {Finding} T
+ * @param {T} item  a measured row (it has fg and threshold)
+ * @param {Crop} backdrop
+ * @param {Crop | null} [ink]
+ */
 export function fromPixels(item, { px, w, h }, ink = null){
-  const [fr, fg, fb] = hexToRgb(item.fg);
-  const a = item.fg.includes('@') ? parseFloat(item.fg.split('@')[1]) : 1;
+  const fgHex = /** @type {string} */ (item.fg), threshold = /** @type {number} */ (item.threshold);
+  const [fr, fg, fb] = hexToRgb(fgHex);
+  const a = fgHex.includes('@') ? parseFloat(fgHex.split('@')[1]) : 1;
   const blend = item.flags.find(f => f.startsWith('blend:'))?.slice(6);
   const op = item.opAbove ?? 1;
   const ink0 = item.inkCss ? hexToRgb(item.inkCss).map(v => v * (item.grain ?? 1)) : [fr, fg, fb];
   const bg0 = item.bgCss ? hexToRgb(item.bgCss).map(v => v * (item.grain ?? 1)) : [0, 0, 0];
   const ratios = new Float32Array(px.length / 3);
   let nr = 0;
-  let dk = [255, 255, 255, 2], lt = [0, 0, 0, -1];
+  /** @type {[number, number, number, number]} */
+  let dk = [255, 255, 255, 2];
+  /** @type {[number, number, number, number]} */
+  let lt = [0, 0, 0, -1];   // darkest, lightest: r, g, b, luminance
+  /** @type {Uint8Array | null} */
   let mask = null;
-  if (ink && ink.px.length === px.length) {
+  if (ink?.px.length === px.length) {
     mask = new Uint8Array(px.length / 3);
     let n = 0;
     for (let i = 0, k = 0; i < px.length; i += 3, k++)
@@ -219,21 +251,23 @@ export function fromPixels(item, { px, w, h }, ink = null){
   const odd = blend && !['normal', 'difference'].includes(blend);
   return { ...item, method: 'pixels', ratio: Math.round(p10 * 100) / 100, ratioMin: Math.round(sorted[0] * 100) / 100,
     bg: `${hex(...dk)}…${hex(...lt)} (measured under ${mask ? 'glyphs' : 'whole box'}, ${w}×${h}px)`,
-    status: odd ? 'review' : p10 >= item.threshold ? 'pass' : mask ? 'fail' : 'review',
-    note: odd ? `blend mode ${blend} not modelled` : !mask && p10 < item.threshold ? 'glyphs could not be isolated; whole-box measurement is not conclusive' : undefined };
+    status: odd ? 'review' : p10 >= threshold ? 'pass' : mask ? 'fail' : 'review',
+    note: odd ? `blend mode ${blend} not modelled` : !mask && p10 < threshold ? 'glyphs could not be isolated; whole-box measurement is not conclusive' : undefined };
 }
 
 // Focus ring: shoot the control's box plus the ring area with the ring drawn
 // and with it transparent; the pixels that differ are the ring, measured
 // against whatever is really behind them (photo, band, page).
+/** @param {Page} page @param {Finding} item */
 async function ringPixels(page, item){
   const el = page.locator(`[data-cq-ring="${item.cq}"]`).first();
   if (!(await el.count())) return { ...item, status: 'review', note: 'focused element gone' };
   await el.evaluate(e => e.scrollIntoView({ block: 'center', behavior: 'instant' }));   // the scan restores scroll; bring the ring back on screen
   await page.waitForTimeout(100);
-  const box = await el.boundingBox();
+  // ponytail: a ring element with no box (or a page without a viewport) throws here, uncaught.
+  const box = /** @type {NonNullable<Awaited<ReturnType<typeof el.boundingBox>>>} */ (await el.boundingBox());
   const pad = await el.evaluate(e => { const c = getComputedStyle(e); return parseFloat(c.outlineOffset) + parseFloat(c.outlineWidth) + 2; });
-  const vp = page.viewportSize();
+  const vp = /** @type {{ width: number, height: number }} */ (page.viewportSize());
   const x = Math.max(0, box.x - pad), y = Math.max(0, box.y - pad);
   const clip = { x, y, width: Math.min(vp.width - x, box.width + 2 * pad), height: Math.min(vp.height - y, box.height + 2 * pad) };
   await page.evaluate(() => document.documentElement.classList.add('cq-shot'));
@@ -246,7 +280,7 @@ async function ringPixels(page, item){
     const all = { x: 0, y: 0, w: B.info.width, h: B.info.height };
     return fromPixels(item, crop(B, all), crop(A, all));
   } catch (e) {
-    return { ...item, status: 'review', note: `ring screenshot failed: ${e.message.split('\n')[0]}` };
+    return { ...item, status: 'review', note: `ring screenshot failed: ${/** @type {Error} */ (e).message.split('\n')[0]}` };
   } finally {
     await el.evaluate(e => e.style.removeProperty('outline-color')).catch(() => {});
     await page.evaluate(() => document.documentElement.classList.remove('cq-shot')).catch(() => {});

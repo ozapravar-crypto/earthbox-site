@@ -18,6 +18,7 @@ import { elements } from './maker.js';
 // What a kit holds, per plant group. Soils follow the studio's requirements
 // workbook (03 · Taxonomy). Carnivorous plants get no feed: fertiliser
 // burns their roots. The care page says the studio confirms contents.
+/** @type {Record<string, string[]>} */
 const KIT = {
   Earth: ['Aroid mix top-up', 'Slow-release organic feed', 'Pruning snips', 'Care card'],
   Fire:  ['Succulent & cactus mix top-up', 'Low-strength liquid feed', 'Precision watering bottle', 'Care card'],
@@ -36,7 +37,7 @@ export const kits = elements.map(e => ({
   name: `${e.id} refill kit`,
   for: e.heading,
   contents: KIT[e.id],
-  price: null
+  price: /** @type {number | null} */ (null)
 }));
 
 export const visit = {
@@ -51,7 +52,7 @@ export const visit = {
     { id: 'monthly',     label: 'Every month',    perMonth: 1 },
     { id: 'quarterly',   label: 'Every 3 months', perMonth: 1 / 3 }
   ],
-  perVisit: null,                        // rupees per visit, set by the studio
+  perVisit: /** @type {number | null} */ (null),   // rupees per visit, set by the studio
   termDiscount: { '6m': 0, '12m': 0 },   // e.g. 0.05 = 5% off a 6-month plan
   includes: ['Trim, tidy and clean the glass', 'Top up soil and feed', 'Check moisture, light and pests', 'Replace a struggling plant (charged at cost)', 'Photo note after every visit']
 };
@@ -66,6 +67,6 @@ export const subjects = [
 // Mumbai only for visits. Pincodes 400001–400104 are Mumbai; anything else
 // is still accepted and the studio confirms.
 // ponytail: prefix check, swap for an explicit pincode list if the studio covers Thane/Navi Mumbai.
-export const coverage = { city: 'Mumbai', isCovered: (pin) => /^400(0\d\d|10[0-4])$/.test(String(pin)) };
+export const coverage = { city: 'Mumbai', isCovered: (/** @type {string | number} */ pin) => /^400(0\d\d|10[0-4])$/.test(String(pin)) };
 
 export const businessSites = ['Office', 'Café or restaurant', 'Hotel', 'Clinic', 'Retail store', 'Other'];

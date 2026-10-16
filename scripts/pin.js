@@ -18,15 +18,16 @@ const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 export function initPin(){
   if (reduced) return;
 
-  const spacers = document.querySelectorAll('.pin-spacer');
+  const spacers = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.pin-spacer'));
   if (!spacers.length) return;
 
   spacers.forEach(setupSpacer);
 }
 
+/** @param {HTMLElement} spacer */
 function setupSpacer(spacer){
   const targets  = spacer.querySelectorAll('.pin-target');
-  const progress = spacer.querySelector('.pin-progress-fill');
+  const progress = /** @type {HTMLElement | null} */ (spacer.querySelector('.pin-progress-fill'));
   if (!targets.length) return;
 
   let ticking = false;

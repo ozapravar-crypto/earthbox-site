@@ -13,9 +13,10 @@ import { volumeOne, categories as v1Categories } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
 
 // ─── Tab switching ───
+/** @param {string} volNum  '1' | '2' | '3' */
 function setActiveTab(volNum, isUserAction = false){
-  const pills  = document.querySelectorAll('.vol-pill');
-  const panels = document.querySelectorAll('.vol-panel');
+  const pills  = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.vol-pill'));
+  const panels = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.vol-panel'));
 
   pills.forEach(p => {
     const isActive = p.dataset.vol === String(volNum);
@@ -24,7 +25,7 @@ function setActiveTab(volNum, isUserAction = false){
     p.tabIndex = isActive ? 0 : -1;   // one Tab stop; arrows move between tabs
   });
 
-  let activePanel = null;
+  let activePanel = /** @type {HTMLElement | null} */ (null);
   panels.forEach(p => {
     const shouldShow = p.dataset.vol === String(volNum);
     p.hidden = !shouldShow;
@@ -35,18 +36,17 @@ function setActiveTab(volNum, isUserAction = false){
   // reliably fire for elements that are already in viewport when observed
   if (activePanel) {
     requestAnimationFrame(() => {
-      activePanel.querySelectorAll('.reveal, .reveal-clip').forEach(el => {
+      /** @type {HTMLElement} */ (activePanel).querySelectorAll('.reveal, .reveal-clip').forEach(el => {
         el.classList.add('in');
       });
     });
   }
 
-  if (history.replaceState){
-    history.replaceState(null, '', `#vol-${volNum}`);
-  }
+  history.replaceState(null, '', `#vol-${volNum}`);
 
   // GA4: Track volume switches (only user-initiated, not initial load)
   if (isUserAction) {
+    /** @type {Record<string, string | undefined>} */
     const volNames = { 1: 'Volume I - Now', 2: 'Volume II - Next', 3: 'Volume III - Horizon' };
     track('volume_switch', {
       volume_number: volNum,
@@ -57,6 +57,7 @@ function setActiveTab(volNum, isUserAction = false){
 
 
 // ─── Search index — flatten all volumes ───
+/** @typedef {ReturnType<typeof buildIndex>[number]} SearchItem */
 function buildIndex(){
   const items = [];
 
@@ -96,6 +97,10 @@ function buildIndex(){
 }
 
 
+/**
+ * @param {string} query
+ * @param {SearchItem[]} items
+ */
 function renderSearchResults(query, items){
   const list  = document.getElementById('searchResultsList');
   const empty = document.getElementById('searchEmpty');
@@ -140,10 +145,10 @@ function renderSearchResults(query, items){
 
 // ─── Boot ───
 export function initCatalogue(){
-  const pills = document.querySelectorAll('.vol-pill');
+  const pills = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.vol-pill'));
   // Tabs keyboard pattern (iconography audit C1): arrows, Home/End.
   pills.forEach((p, i) => p.addEventListener('keydown', (e) => {
-    const n = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: pills.length - 1 }[e.key];
+    const n = /** @type {Record<string, number | undefined>} */ ({ ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: pills.length - 1 })[e.key];
     if (n === undefined) return;
     e.preventDefault();
     const next = pills[(n + pills.length) % pills.length];
@@ -155,7 +160,7 @@ export function initCatalogue(){
 
   // ─── Pill clicks ───
   pills.forEach(pill => {
-    pill.addEventListener('click', () => setActiveTab(pill.dataset.vol, true));
+    pill.addEventListener('click', () => setActiveTab(/** @type {string} */ (pill.dataset.vol), true));
   });
 
   // ─── Initial tab from URL hash ───
@@ -167,7 +172,7 @@ export function initCatalogue(){
   const searchBtn     = document.getElementById('catalogueSearchBtn');
   const searchOverlay = document.getElementById('catalogueSearchOverlay');
   const searchClose   = document.getElementById('catalogueSearchClose');
-  const searchInput   = document.getElementById('cat-search');
+  const searchInput   = /** @type {HTMLInputElement | null} */ (document.getElementById('cat-search'));
   const backdrop      = searchOverlay?.querySelector('.search-overlay-backdrop');
 
   function openSearch(){
@@ -234,7 +239,7 @@ export function initCatalogue(){
     const sentinel = document.createElement('div');
     sentinel.className = 'sticky-sentinel';
     sentinel.setAttribute('aria-hidden', 'true');
-    catalogueBar.parentNode.insertBefore(sentinel, catalogueBar);
+    /** @type {ParentNode} */ (catalogueBar.parentNode).insertBefore(sentinel, catalogueBar);
     observer.observe(sentinel);
   }
 }

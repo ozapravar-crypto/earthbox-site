@@ -4,9 +4,14 @@ import assert from 'node:assert/strict';
 import { emptyDiscovery, searchPlants, dropChip, clearGuided, matchesQuery, climateOrder } from './plant-search.js';
 import { plants, chambers, chamberElements, guide } from '../data/maker.js';
 
+/** @typedef {import('../data/maker.js').Plant} Plant */
+
+/** @param {Partial<import('./plant-search.js').Discovery>} [patch] */
 const st = (patch = {}) => ({ ...emptyDiscovery(), ...patch });
+/** @param {{ results: Plant[] }} r */
 const ids = (r) => r.results.map(p => p.id);
-const p = (id) => plants.find(x => x.id === id);
+/** @param {string} id @returns {Plant} */
+const p = (id) => { const x = plants.find(x => x.id === id); assert.ok(x, id); return x; };
 
 // Nothing set: all 45, list order.
 assert.equal(searchPlants(st()).results.length, 45);
@@ -56,7 +61,7 @@ assert.deepEqual(clash.relax.map(r => r.key).sort(), ['group:Fire', 'look']);
 assert.ok(clash.relax.every(r => r.count > 0));
 
 // Removing chips one at a time; clearing guided keeps the query and manual filters.
-let s = st({ q: 'moss', f: { groups: ['Moss'], forms: [], fit: true }, g: { look: 'woodland', light: 'low', roles: ['ground'] } });
+const s = st({ q: 'moss', f: { groups: ['Moss'], forms: [], fit: true }, g: { look: 'woodland', light: 'low', roles: ['ground'] } });
 assert.equal(dropChip(s, 'role:ground').g.roles.length, 0);
 assert.equal(dropChip(s, 'group:Moss').f.groups.length, 0);
 assert.equal(dropChip(s, 'q').q, '');
@@ -73,7 +78,7 @@ for (const look of guide.looks) for (const x of searchPlants(st({ g: { look: loo
 // Map order: dry → humid; Earth (Lab only) has no chamber and goes last.
 const order = climateOrder(chambers, chamberElements);
 assert.equal(order[0].id, 'Fire');
-assert.equal(order.at(-1).id, 'Earth');
+assert.equal(order.at(-1)?.id, 'Earth');
 assert.equal(order.length, 9);
 
 console.log('plant-search: all checks passed');

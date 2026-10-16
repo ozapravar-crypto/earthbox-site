@@ -8,7 +8,7 @@
 
 import { PHONE } from '../data/site.js';
 import { icon } from '../data/icons.js';
-import { track, esc, rupees, savedPlace, rememberPlace } from './util.js';
+import { track, esc, rupees, savedPlace, rememberPlace, radioKeys } from './util.js';
 import { syncCartButtons } from './cart.js';
 import { volumeOne, categories as v1Categories, photoPath, places, materials, priceOf } from '../data/volume-one.js';
 import { volumeTwo, volumeThree } from '../data/upcoming.js';
@@ -19,30 +19,50 @@ import { enquiryAltHTML } from './enquiry-form.js';
 // Prices follow the shopper's place (Indoors / Sunny window / Balcony →
 // one material), so a card shows the exact price, not "From ₹…".
 // A piece with sizes shows its first size, the one its page opens on.
+/**
+ * @typedef {import('../data/volume-one.js').Product} Product
+ * @typedef {import('../data/volume-one.js').Place} Place
+ */
+/**
+ * @param {Product} p
+ * @param {Place} place
+ */
 const cardLine = (p, place) => ({ kind: 'product', sku: p.sku, variant: p.variants?.[0]?.id ?? null, material: p.pricing ? place.material : null, qty: 1 });
+/** @param {unknown} o */
 const attr = (o) => esc(JSON.stringify(o));
+/**
+ * @param {Product} p
+ * @param {Place} place
+ */
 const cardPrice = (p, place) => {
   const price = priceOf(p, place.material);
   return price ? rupees(price) : 'Price on enquiry';
 };
-const sizeNote = (p) => (p.variants?.length > 1 ? `${p.variants[0].name} · ${p.variants.length} sizes` : '');
+/** @param {Product} p */
+const sizeNote = (p) => (p.variants && p.variants.length > 1 ? `${p.variants[0].name} · ${p.variants.length} sizes` : '');
 
 // "₹129 – ₹1,799" across every size of the category's orderable pieces, in this place.
+/**
+ * @param {Product[]} products
+ * @param {Place} place
+ */
 function categoryRange(products, place){
-  const all = products.filter(p => p.status === 'available' && p.pricing)
+  const all = /** @type {number[]} */ (products.filter(p => p.status === 'available' && p.pricing)
     .flatMap(p => (p.variants?.length ? p.variants.map(v => priceOf(p, place.material, v.id)) : [priceOf(p, place.material)]))
-    .filter(Boolean);
+    .filter(Boolean));
   if (!all.length) return null;
   const lo = Math.min(...all), hi = Math.max(...all);
   return lo === hi ? rupees(lo) : `${rupees(lo)} – ${rupees(hi)}`;
 }
 
+/** @param {Product[]} products */
 function sortByAvailability(products){
   const available = products.filter(p => p.status === 'available');
   const comingSoon = products.filter(p => p.status === 'coming-soon');
   return { available, comingSoon };
 }
 
+/** @param {string} itemName */
 function enquiryHref(itemName){
   const text = `Hi Aayush, I'm interested in ${itemName}. Could you share availability, customisation, and pricing?`;
   return `https://wa.me/${PHONE}?text=${encodeURIComponent(text)}`;
@@ -69,6 +89,7 @@ function renderVolumeOne(){
 
     // Image-first, quiet card: Save sits on the photo, Add beside the price.
     // Buttons are siblings of the link (a button can't live inside a link).
+    /** @param {Product} p */
     const renderCard = (p) => {
       const soon = p.status === 'coming-soon', line = cardLine(p, place);
       return `
@@ -130,10 +151,12 @@ function renderVolumeOne(){
 // ─── "Where will it live?" ───
 // One choice for the whole catalogue; it sets the material behind every
 // price, Add and Save, and the product pages open on it too.
+/** @param {Place} place */
 const materialNote = (place) => {
-  const m = materials.find(x => x.id === place.material);
+  const m = /** @type {typeof materials[number]} */ (materials.find(x => x.id === place.material));   // every place names a material
   return `Prices in ${m.name}: ${m.description.toLowerCase()}.`;
 };
+/** @param {Place} place */
 function placeSwitchHTML(place){
   return `
     <div class="place-switch">
@@ -144,18 +167,20 @@ function placeSwitchHTML(place){
       <p class="place-note caption" id="placeNote" aria-live="polite">${materialNote(place)}</p>
     </div>`;
 }
+/** @param {HTMLElement} host */
 function initPlaceSwitch(host){
-  const btns = [...host.querySelectorAll('[data-place]')];
+  const btns = [.../** @type {NodeListOf<HTMLElement>} */ (host.querySelectorAll('[data-place]'))];
+  /** @param {HTMLElement} btn */
   const choose = (btn) => {
-    const place = places.find(x => x.id === btn.dataset.place);
+    const place = /** @type {Place} */ (places.find(x => x.id === btn.dataset.place));   // the buttons are drawn from places
     rememberPlace(place.id);
     btns.forEach(b => { const on = b === btn; b.setAttribute('aria-checked', String(on)); b.tabIndex = on ? 0 : -1; });
-    host.querySelector('#placeNote').textContent = materialNote(place);
-    host.querySelectorAll('.v1-card[data-sku]').forEach(card => {
-      const p = volumeOne.find(x => x.sku === card.dataset.sku);
+    /** @type {HTMLElement} */ (host.querySelector('#placeNote')).textContent = materialNote(place);
+    /** @type {NodeListOf<HTMLElement>} */ (host.querySelectorAll('.v1-card[data-sku]')).forEach(card => {
+      const p = /** @type {Product} */ (volumeOne.find(x => x.sku === card.dataset.sku));   // cards are drawn from volumeOne
       const line = JSON.stringify(cardLine(p, place));
-      card.querySelectorAll('[data-add-line]').forEach(b => { b.dataset.addLine = line; });
-      card.querySelectorAll('[data-save-line]').forEach(b => { b.dataset.saveLine = line; });
+      /** @type {NodeListOf<HTMLElement>} */ (card.querySelectorAll('[data-add-line]')).forEach(b => { b.dataset.addLine = line; });
+      /** @type {NodeListOf<HTMLElement>} */ (card.querySelectorAll('[data-save-line]')).forEach(b => { b.dataset.saveLine = line; });
       const amount = card.querySelector('.v1-card-amount');
       if (amount) amount.textContent = cardPrice(p, place);
     });
@@ -166,16 +191,7 @@ function initPlaceSwitch(host){
     syncCartButtons();
     track('place_select', { place: place.id });
   };
-  btns.forEach((btn, i) => {
-    btn.addEventListener('click', () => choose(btn));
-    btn.addEventListener('keydown', (e) => {
-      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
-      if (!step) return;
-      e.preventDefault();
-      const next = btns[(i + step + btns.length) % btns.length];
-      choose(next); next.focus();
-    });
-  });
+  radioKeys(btns, choose);
 }
 
 

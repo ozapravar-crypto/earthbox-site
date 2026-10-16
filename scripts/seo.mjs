@@ -30,25 +30,30 @@ import { esc, rupees } from './util.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CHECK = process.argv.includes('--check');
+/** @type {Map<string, string>} */
 const out = new Map();                                   // file → contents
 
-const ld = (o) => `<!-- seo:ld -->\n  <script type="application/ld+json">${JSON.stringify(o)}</script>\n  <!-- /seo:ld -->`;
-const withLd = (html, o) => html.includes('<!-- seo:ld -->')
+const ld = (/** @type {object} */ o) => `<!-- seo:ld -->\n  <script type="application/ld+json">${JSON.stringify(o)}</script>\n  <!-- /seo:ld -->`;
+const withLd = (/** @type {string} */ html, /** @type {object} */ o) => html.includes('<!-- seo:ld -->')
   ? html.replace(/<!-- seo:ld -->[\s\S]*?<!-- \/seo:ld -->/, () => ld(o))
   : html.replace('</head>', () => `  ${ld(o)}\n</head>`);
-const attr = (s) => esc(s).replace(/"/g, '&quot;');
-const short = (s, n = 158) => (s.length <= n ? s : s.slice(0, s.lastIndexOf(' ', n)) + '…');
+const attr = (/** @type {string} */ s) => esc(s).replace(/"/g, '&quot;');
+const short = (/** @type {string} */ s, n = 158) => (s.length <= n ? s : s.slice(0, s.lastIndexOf(' ', n)) + '…');
 const brand = { '@type': 'Brand', name: 'EarthBox' };
 const seller = { '@type': 'Organization', name: 'EarthBox', url: SITE };
 
 // ── Product pages ────────────────────────────────────────────────────
 const products = allProducts().map(f => ({ ...f, ...productMeta(f), url: `${SITE}/product/${encodeURIComponent(f.data.sku)}` }));
+/** @typedef {typeof products[number]} Product */
+/** @param {Product} f */
 const catName = (f) => f.kind === 'printed' ? categories.find(c => c.slug === f.data.category)?.title
   : f.kind === 'box' ? 'Elemental Boxes' : 'Digital Vivariums';
+/** @param {Product} p */
 const priceText = (p) => !p.available ? 'Coming soon'
   : !p.prices.length ? 'Price on enquiry'
   : `From ${rupees(Math.min(...p.prices))} · made to order, about 1 week`;
 
+/** @param {Product} p */
 function productSchema(p){
   const lo = Math.min(...p.prices), hi = Math.max(...p.prices);
   const offers = p.available && p.prices.length ? {
@@ -67,7 +72,7 @@ function productSchema(p){
 const shell = await readFile(path.join(ROOT, 'product.html'), 'utf8');
 for (const p of products) {
   const title = `EarthBox — ${p.name}`, desc = short(p.description);
-  let html = shell
+  const html = shell
     .replace(/(href|src)="(assets|styles|scripts)\//g, '$1="/$2/')          // the page lives one folder down
     .replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`)
     .replace(/(<meta name="description" content=")[^"]*/, `$1${attr(desc)}`)
@@ -91,7 +96,7 @@ for (const p of products) {
 out.set('product.html', shell.replace(/(<meta name="robots" content=")[^"]*/, '$1noindex, follow'));
 
 // ── Catalogue, Journal, Care schema ──────────────────────────────────
-const edit = async (f, o) => out.set(f, withLd(await readFile(path.join(ROOT, f), 'utf8'), o));
+const edit = async (/** @type {string} */ f, /** @type {object} */ o) => out.set(f, withLd(await readFile(path.join(ROOT, f), 'utf8'), o));
 await edit('products.html', { '@context': 'https://schema.org', '@type': 'ItemList', name: 'EarthBox Catalogue',
   itemListElement: products.map((p, i) => ({ '@type': 'ListItem', position: i + 1, url: p.url, name: p.name })) });
 await edit('blog.html', { '@context': 'https://schema.org', '@type': 'Blog', name: 'EarthBox Journal', url: `${SITE}/blog`,
@@ -105,6 +110,7 @@ await edit('care.html', { '@context': 'https://schema.org', '@type': 'Service', 
     itemOffered: { '@type': 'Product', name: k.name, description: `${k.for}: ${k.contents.join(', ')}` } })) } });
 
 // ── sitemap.xml ──────────────────────────────────────────────────────
+/** @type {{ loc: string, lastmod?: string }[]} */
 const urls = [
   ...NAV.map(n => ({ loc: SITE + (n.href === '/' ? '/' : n.href) })),
   { loc: `${SITE}/privacy` },
@@ -119,6 +125,7 @@ ${urls.map(u => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod}<
 `);
 
 // ── llms.txt (llmstxt.org): what EarthBox is, in plain text, with links ──
+/** @param {string} title @param {string} url @param {string} [note] */
 const line = (title, url, note) => `- [${title}](${url})${note ? `: ${note}` : ''}`;
 out.set('llms.txt', `# EarthBox
 
@@ -134,7 +141,7 @@ ${line('About', `${SITE}/about`, 'the studio and its founder, Aayush Lilani')}
 ${line('Journal', `${SITE}/blog`, 'guides to terrarium care and plants in Mumbai')}
 
 ## Products
-${products.map(p => line(p.name, p.url, `${catName(p)}. ${priceText(p)}. ${short(p.description, 140)}`)).join('\n')}
+${products.map(p => line(p.name, p.url, `${String(catName(p))}. ${priceText(p)}. ${short(p.description, 140)}`)).join('\n')}
 
 ## Journal
 ${articles.map(a => line(a.title, `${SITE}/blog/${a.slug}`, a.keyAnswer)).join('\n')}
@@ -144,6 +151,7 @@ ${line('Privacy', `${SITE}/privacy`)}
 `);
 
 // ── Write, or check ──────────────────────────────────────────────────
+/** @type {string[]} */
 const stale = [];
 const existing = (await readdir(path.join(ROOT, 'product')).catch(() => [])).map(f => `product/${f}`);
 for (const f of existing) if (!out.has(f)) stale.push(f);
@@ -154,6 +162,6 @@ if (CHECK) {
 } else {
   for (const f of existing) if (!out.has(f)) await rm(path.join(ROOT, f));
   await mkdir(path.join(ROOT, 'product'), { recursive: true });
-  for (const f of stale) if (out.has(f)) await writeFile(path.join(ROOT, f), out.get(f), 'utf8');
+  for (const f of stale) if (out.has(f)) await writeFile(path.join(ROOT, f), /** @type {string} */ (out.get(f)), 'utf8');
   console.log(`seo: updated ${stale.length} file(s)`);
 }

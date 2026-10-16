@@ -26,42 +26,47 @@ const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
 const FADE = 'main h2, main .lede, .about-head .italic, .care-lede, .home-care p, .page-intro p';
 const NO_FADE = '#maker, .pd-page, form, dialog, .hero, [data-no-fade]';
 
-const smooth = (t) => t * t * (3 - 2 * t);
-const clamp01 = (x) => Math.min(1, Math.max(0, x));
+const smooth = (/** @type {number} */ t) => t * t * (3 - 2 * t);
+const clamp01 = (/** @type {number} */ x) => Math.min(1, Math.max(0, x));
 
 export async function initScrollMotion(){
   if (reduced) return;
 
+  /** @type {import('./vendor/lenis.js').default | null} */
   let lenis = null;
   if (finePointer) {
     try {
       const { default: Lenis } = await import('./vendor/lenis.js');
-      lenis = new Lenis({
+      const l = lenis = new Lenis({
         lerp: .09,                                   // gentle: "slow enough to feel placed"
         wheelMultiplier: .9,
         allowNestedScroll: true,                     // inner scroll areas scroll themselves
-        prevent: (node) => node.matches?.('dialog, [role=dialog], .mobile-nav, [data-lenis-prevent]'),
+        // Lenis walks the event path, which ends at document and window (no matches()).
+        prevent: (/** @type {{ matches?: (s: string) => boolean }} */ node) => node.matches?.('dialog, [role=dialog], .mobile-nav, [data-lenis-prevent]') ?? false,
         autoRaf: true
       });
       // Pause while a modal is open (cart drawer, guided search, menu).
-      new MutationObserver(() => (document.querySelector('dialog[open], .mobile-nav.open') ? lenis.stop() : lenis.start()))
+      new MutationObserver(() => (document.querySelector('dialog[open], .mobile-nav.open') ? l.stop() : l.start()))
         .observe(document.body, { subtree: true, attributes: true, attributeFilter: ['open', 'class'] });
       window.__earthboxLenis = lenis;                 // tests and debugging
     } catch { lenis = null; }                        // native scroll is the fallback
   }
 
   const vh = () => innerHeight;
-  let items = [], fades = [];
+  /** @type {{ el: HTMLElement, k: number }[]} */
+  let items = [];
+  /** @type {HTMLElement[]} */
+  let fades = [];
   const collect = () => {
-    items = [...document.querySelectorAll('[data-parallax]')].map(el => ({ el, k: Math.min(.2, parseFloat(el.dataset.parallax) || .08) }));
-    fades = [...document.querySelectorAll(FADE)].filter(el => !el.closest(NO_FADE));
+    items = [.../** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('[data-parallax]'))].map(el => ({ el, k: Math.min(.2, parseFloat(/** @type {string} */ (el.dataset.parallax)) || .08) }));
+    fades = [.../** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll(FADE))].filter(el => !el.closest(NO_FADE));
     items.forEach(({ el, k }) => { el.style.willChange = 'transform'; el.style.transform = `scale(${1 + 2 * k})`; });
   };
 
   const frame = () => {
     const h = vh(), y = scrollY;
     for (const { el, k } of items) {
-      const r = el.parentElement.getBoundingClientRect();
+      const r = /** @type {HTMLElement} */ (el.parentElement).getBoundingClientRect();
       if (r.bottom < -100 || r.top > h + 100) continue;
       const t = ((r.top + r.height / 2) - h / 2) / (h / 2 + r.height / 2);   // -1 … 1 across the screen
       el.style.transform = `translate3d(0, ${(-t * k * r.height).toFixed(1)}px, 0) scale(${1 + 2 * k})`;

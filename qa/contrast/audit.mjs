@@ -28,6 +28,23 @@ import { fileURLToPath } from 'node:url';
 import { scanPage, interactiveSignatures } from './scan.js';
 import { resolveBatch } from './measure.mjs';
 
+/** @typedef {import('@playwright/test').Page} Page */
+/** @typedef {(p: Page) => Promise<void>} Step */
+/**
+ * A page state to measure.
+ * @typedef {{ name: string, viewports?: string[], setup?: Step, scope?: string, cart?: boolean, route?: { status: number, body: object } }} State
+ */
+/** @typedef {{ route: string, theme: string, viewport: string }} Ctx */
+/** @typedef {Ctx & { state: string, scanned: boolean, items: number, error?: string }} Coverage */
+/**
+ * A measured row, or an axe-only failure (no text, maybe no cq).
+ * @typedef {Omit<import('./scan.js').Finding, 'cq' | 'text'> & Partial<Ctx> & { cq: number | null, text?: string, source?: string, acceptedReason?: string }} Row
+ */
+/**
+ * @typedef {Ctx & { state: string, axe: string, target: string, cq: number | null, axeFg?: string, axeBg?: string, axeRatio?: number,
+ *   axeExpected?: string, reason?: string, measured?: { status: string, ratio?: number, method: string } | null, resolution?: string }} AxeFinding
+ */
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const QUICK = process.argv.includes('--quick');
 const PORT = 4180;
@@ -38,6 +55,7 @@ const BASE = process.env.BASE_URL || `http://localhost:${PORT}`;
 // layouts). Articles share one template, so they get the default state only;
 // the template's interactive states are covered on the first article.
 const articles = (await readdir(path.join(ROOT, 'blog'))).filter(f => f.endsWith('.html')).sort();
+/** @type {{ path: string, name: string, light?: boolean }[]} */
 const ROUTES = [
   { path: '/index.html', name: 'home' },
   { path: '/products.html', name: 'catalogue' },
@@ -53,6 +71,7 @@ const ROUTES = [
 ];
 
 const THEMES = ['light', 'dark'];
+/** @type {Record<string, import('@playwright/test').BrowserContextOptions>} */
 const VIEWPORTS = {
   desktop: { viewport: { width: 1440, height: 900 } },
   phone: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 }
@@ -65,9 +84,12 @@ const CART = JSON.stringify({ cart: [
   { kind: 'build', code: 'c=MossBox&s=studio&p=PLT-036,PLT-037' }
 ], saved: [{ kind: 'product', sku: 'V1-PLT-001', variant: null, material: null, qty: 1 }] });
 
+/** @type {(sel: string) => Step} */
 const click = (sel) => async (p) => { await p.locator(sel).first().click(); await p.waitForTimeout(250); };
+/** @type {(...steps: Step[]) => Step} */
 const seq = (...steps) => async (p) => { for (const s of steps) await s(p); };
 const openCart = click('.runhead-bag-btn[data-open=cart]');
+/** @type {Step} */
 const fillForm = async (p) => {
   const fold = p.locator('.pd-other-ways:not([open]) > summary');   // product page folds it (iconography audit P4)
   if (await fold.count()) await fold.first().click();
@@ -83,6 +105,7 @@ const fillForm = async (p) => {
 // { name, viewports?, setup(page), scope? }  Every route also gets
 // 'default', 'scrolled-header', and (desktop) hover + focus on each distinct
 // interactive element.
+/** @type {Record<string, State[] | undefined>} routes without extra states have no entry */
 const STATES = {
   home: [],
   catalogue: [
@@ -119,21 +142,32 @@ const STATES = {
   'article:anatomy-earthbox-cradle': [],
   about: []
 };
+/** @type {State[]} */
 const PHONE_STATES = [{ name: 'mobile-menu-open', viewports: ['phone'], setup: click('.hamburger'), scope: '#mobile-nav' }];
 
 // ── Server ───────────────────────────────────────────────────────────
 const server = process.env.BASE_URL ? null : await serve(ROOT, PORT);
 
 const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] });
-const results = [], coverage = [], axeFindings = [];
+/** @type {Row[]} */
+const results = [];
+/** @type {Coverage[]} */
+const coverage = [];
+/** @type {AxeFinding[]} */
+const axeFindings = [];
 let base = 0;
 
+/** @param {Page} page */
 async function prepare(page){
   await page.addStyleTag({ content: '.cursor-ring,.cursor-dot,.loader{display:none!important} *,*::before,*::after{transition:none!important;animation-duration:0s!important;animation-delay:0s!important;caret-color:transparent!important}' });
   await page.evaluate(() => document.querySelectorAll('.reveal,.reveal-line,.reveal-clip').forEach(e => e.classList.add('in')));
   await page.waitForTimeout(150);
 }
 
+/**
+ * @param {Page} page @param {Ctx} ctx
+ * @param {{ scope?: string | null, state: string, axe?: boolean }} opts
+ */
 async function measure(page, ctx, { scope = null, state, axe = false }){
   const found = await page.evaluate(scanPage, { scope, state, base });
   base += found.length + 1;
@@ -143,42 +177,46 @@ async function measure(page, ctx, { scope = null, state, axe = false }){
     const builder = new AxeBuilder({ page }).withRules(['color-contrast']);
     if (scope) builder.include(scope);
     const r = await builder.analyze();
-    for (const [kind, list] of [['violation', r.violations], ['incomplete', r.incomplete]])
+    for (const [kind, list] of /** @type {[string, import('axe-core').Result[]][]} */ ([['violation', r.violations], ['incomplete', r.incomplete]]))
       for (const v of list) for (const n of v.nodes) {
         const target = n.target.join(' ');
         const cq = await page.evaluate(t => document.querySelector(t)?.getAttribute('data-cq') ?? document.querySelector(t)?.closest('[data-cq]')?.getAttribute('data-cq'), target).catch(() => null);
-        const d = n.any?.[0]?.data || {};
+        const d = n.any[0]?.data || {};
         axeFindings.push({ ...ctx, state, axe: kind, target, cq: cq ? +cq : null,
           axeFg: d.fgColor, axeBg: d.bgColor, axeRatio: d.contrastRatio, axeExpected: d.expectedContrastRatio,
-          reason: n.any?.[0]?.message || n.failureSummary?.split('\n').slice(1).join(' ').trim() });
+          reason: n.any[0]?.message || n.failureSummary?.split('\n').slice(1).join(' ').trim() });
       }
   }
   return found.length;
 }
 
+/** @param {typeof ROUTES[number]} route @param {string} theme @param {string} vpName */
 async function run(route, theme, vpName){
   const vp = VIEWPORTS[vpName];
-  const states = [{ name: 'default' }, { name: 'scrolled-header', scope: '.runhead', setup: async p => { await p.evaluate(() => scrollTo(0, 800)); await p.waitForTimeout(200); } },
+  /** @type {State[]} */
+  const states = [{ name: 'default' }, { name: 'scrolled-header', scope: '.runhead', setup: async (/** @type {Page} */ p) => { await p.evaluate(() => scrollTo(0, 800)); await p.waitForTimeout(200); } },
     ...(route.light ? [] : (STATES[route.name] || [])), ...(route.light || !['home', 'article:anatomy-earthbox-cradle'].includes(route.name) ? [] : PHONE_STATES)]
     .filter(s => !s.viewports || s.viewports.includes(vpName));
   if (QUICK) states.splice(1);
 
   for (const st of states) {
-    const ctxBrowser = await browser.newContext({ ...vp, reducedMotion: 'reduce', colorScheme: theme });
+    const ctxBrowser = await browser.newContext({ ...vp, reducedMotion: 'reduce', colorScheme: /** @type {'light' | 'dark'} */ (theme) });
     await ctxBrowser.addInitScript(([t, cart]) => {
       sessionStorage.setItem('earthbox-loader-seen', '1');
       localStorage.setItem('earthbox-theme', t);
       localStorage.setItem('earthbox-consent', 'denied');   // banner audited in contrast.spec (CQ-015)
       if (cart) localStorage.setItem('earthbox-cart', cart); else localStorage.removeItem('earthbox-cart');
-    }, [theme, st.cart ? CART : null]);
+    }, /** @type {[string, string | null]} */ ([theme, st.cart ? CART : null]));
     await ctxBrowser.route('https://wa.me/**', r => r.fulfill({ body: 'wa' }));
     // The home film has no text over it (checked: index.html #film), and streaming it
     // under memory pressure crashed runs, so it isn't loaded.
     await ctxBrowser.route('**/*.mp4', r => r.abort());
     await ctxBrowser.route('https://www.googletagmanager.com/**', r => r.fulfill({ body: '' }));
-    if (st.route) await ctxBrowser.route('https://api.web3forms.com/**', r => r.fulfill({ status: st.route.status, contentType: 'application/json', body: JSON.stringify(st.route.body) }));
+    const mock = st.route;
+    if (mock) await ctxBrowser.route('https://api.web3forms.com/**', r => r.fulfill({ status: mock.status, contentType: 'application/json', body: JSON.stringify(mock.body) }));
     const page = await ctxBrowser.newPage();
     const ctx = { route: route.path, theme, viewport: vpName };
+    /** @type {Coverage} */
     const cov = { ...ctx, state: st.name, scanned: false, items: 0 };
     try {
       // One retry: a cold CI runner occasionally stalls a first load.
@@ -202,14 +240,14 @@ async function run(route, theme, vpName){
               const n = await measure(page, ctx, { scope: `[data-cq-target="${t.i}"]`, state: `${mode}:${t.sig}` });
               coverage.push({ ...ctx, state: `${mode}:${t.sig}`, scanned: true, items: n });
             } catch (e) {
-              coverage.push({ ...ctx, state: `${mode}:${t.sig}`, scanned: false, items: 0, error: e.message.split('\n')[0] });
+              coverage.push({ ...ctx, state: `${mode}:${t.sig}`, scanned: false, items: 0, error: /** @type {Error} */ (e).message.split('\n')[0] });
             }
           }
           await loc.evaluate(e => e.blur()).catch(() => {});
         }
       }
     } catch (e) {
-      cov.error = e.message.split('\n')[0];
+      cov.error = /** @type {Error} */ (e).message.split('\n')[0];
     }
     coverage.push(cov);
     await ctxBrowser.close();
@@ -234,24 +272,25 @@ const byId = new Map(results.map(r => [r.cq, r]));
 for (const a of axeFindings) {
   const m = a.cq != null ? byId.get(a.cq) : null;
   a.measured = m ? { status: m.status, ratio: m.ratio, method: m.method || 'css' } : null;
-  if (a.axe === 'violation' && m && m.status === 'pass') a.resolution = 'DISAGREE: axe fails, measurement passes — review';
+  if (a.axe === 'violation' && m?.status === 'pass') a.resolution = 'DISAGREE: axe fails, measurement passes — review';
   else if (a.axe === 'violation') a.resolution = m ? `confirmed (${m.status})` : 'axe-only violation — counted as fail';
   else a.resolution = m ? `settled by measurement: ${m.status}` : 'not linked to a measured element — review';
 }
 for (const a of axeFindings)
   if (a.axe === 'violation' && !a.measured)
-    results.push({ ...a, kind: 'text', selector: a.target, status: 'fail', source: 'axe-only', fg: a.axeFg, bg: a.axeBg, ratio: a.axeRatio, threshold: parseFloat(a.axeExpected) || 4.5, flags: [] });
+    results.push({ ...a, kind: 'text', selector: a.target, status: 'fail', source: 'axe-only', fg: a.axeFg, bg: a.axeBg, ratio: a.axeRatio, threshold: parseFloat(/** @type {string} */ (a.axeExpected)) || 4.5, flags: [] });
 
 // ── Baseline: accepted findings need a written, verified reason ───────
+/** @type {{ accepted: { key: string, reason: string }[] }} */   // our own committed file
 const baseline = JSON.parse(await readFile(path.join(ROOT, 'qa/contrast/baseline.json'), 'utf8').catch(() => '{"accepted":[]}'));
-const key = (r) => [r.route, r.theme, r.viewport, r.state.split(':')[0], r.selector].join(' | ');
+const key = (/** @type {Row} */ r) => [r.route, r.theme, r.viewport, r.state.split(':')[0], r.selector].join(' | ');
 const accepted = new Map(baseline.accepted.map(a => [a.key, a]));
-for (const r of results) if (r.status === 'fail' && accepted.has(key(r))) { r.status = 'accepted'; r.acceptedReason = accepted.get(key(r)).reason; }
+for (const r of results) if (r.status === 'fail' && accepted.has(key(r))) { r.status = 'accepted'; r.acceptedReason = /** @type {{ reason: string }} */ (accepted.get(key(r))).reason; }
 
 // De-duplicate identical findings (same element/colours across states) for the summary only.
 const fails = results.filter(r => r.status === 'fail');
 const reviews = results.filter(r => r.status === 'review');
-const uniq = (list) => [...new Map(list.map(r => [[r.selector, r.theme, r.viewport, r.fg, r.bg, r.kind].join('|'), r])).values()];
+const uniq = (/** @type {Row[]} */ list) => [...new Map(list.map(r => [[r.selector, r.theme, r.viewport, r.fg, r.bg, r.kind].join('|'), r])).values()];
 
 const report = {
   generated: new Date().toISOString(), base: BASE, quick: QUICK, seconds: Math.round((Date.now() - started) / 1000),
@@ -259,18 +298,19 @@ const report = {
   totals: Object.fromEntries(['pass', 'fail', 'review', 'accepted', 'exempt-disabled', 'covered'].map(s => [s, results.filter(r => r.status === s).length])),
   coverage: { scanned: coverage.filter(c => c.scanned).length, notScanned: coverage.filter(c => !c.scanned) },
   axe: { violations: axeFindings.filter(a => a.axe === 'violation').length, incomplete: axeFindings.filter(a => a.axe === 'incomplete').length,
-    unresolved: axeFindings.filter(a => /review|DISAGREE/.test(a.resolution)) },
+    unresolved: axeFindings.filter(a => /review|DISAGREE/.test(/** @type {string} */ (a.resolution))) },
   failures: uniq(fails), review: uniq(reviews), axeFindings, coverageLog: coverage, results
 };
 await mkdir(path.join(ROOT, 'qa/reports'), { recursive: true });
 await writeFile(path.join(ROOT, 'qa/reports/contrast-report.json'), JSON.stringify(report, null, 1));
 // Committed summary: everything except the per-element pass rows.
+/** @type {Partial<typeof report>} */
 const summary = { ...report };
 delete summary.results;
 summary.coverageLog = coverage.map(c => ({ route: c.route, theme: c.theme, viewport: c.viewport, state: c.state, scanned: c.scanned, items: c.items, error: c.error }));
 await writeFile(path.join(ROOT, 'qa/reports/contrast-summary.json'), JSON.stringify(summary, null, 1));
 
-const row = (r) => `| ${r.route} | ${r.theme}/${r.viewport} | ${r.state} | \`${r.selector}\` | ${r.text ?? ''} | ${r.fg} | ${r.bg} | ${r.ratio} | ${r.threshold} | ${r.status}${r.method === 'pixels' ? ' (pixels)' : ''} |`;
+const row = (/** @type {Row} */ r) => `| ${String(r.route)} | ${String(r.theme)}/${String(r.viewport)} | ${r.state} | \`${r.selector}\` | ${r.text ?? ''} | ${String(r.fg)} | ${String(r.bg)} | ${String(r.ratio)} | ${String(r.threshold)} | ${r.status}${r.method === 'pixels' ? ' (pixels)' : ''} |`;
 const md = [
   `# Contrast report · ${report.generated}`, '',
   `Base: ${BASE} · ${report.seconds}s · ${report.quick ? '**QUICK run: default states only**' : 'full run'}`, '',

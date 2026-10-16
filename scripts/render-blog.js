@@ -5,16 +5,21 @@
 import { articles, categories } from '../data/articles.js';
 import { observeReveals } from './reveal.js';
 
+/** @typedef {import('../data/articles.js').Article} Article */
+
+/** @param {string} dateStr */
 const formatDate = (dateStr) => {
   const d = new Date(dateStr);
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
+/** @param {string} slug */
 const getCategoryTitle = (slug) => {
   const cat = categories.find(c => c.slug === slug);
   return cat ? cat.title : slug;
 };
 
+/** @param {Article} article */
 function renderArticleCard(article) {
   return `
     <a class="article-card reveal" href="/blog/${article.slug}" data-category="${article.category}">
@@ -42,17 +47,19 @@ function renderFilters() {
 
   host.innerHTML = allBtn + catBtns;
 
-  host.querySelectorAll('.filter-btn').forEach(btn => {
+  host.querySelectorAll('.filter-btn').forEach(el => {
+    const btn = /** @type {HTMLButtonElement} */ (el);
     btn.addEventListener('click', () => {
       host.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('is-active'));
       btn.classList.add('is-active');
-      filterArticles(btn.dataset.filter);
+      filterArticles(/** @type {string} */ (btn.dataset.filter));
     });
   });
 }
 
+/** @param {string} category */
 function filterArticles(category) {
-  const cards = document.querySelectorAll('.article-card');
+  const cards = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.article-card'));
   cards.forEach(card => {
     if (category === 'all' || card.dataset.category === category) {
       card.style.display = '';
@@ -67,7 +74,7 @@ function renderArticleGrid() {
   if (!host) return;
 
   const sorted = [...articles].sort((a, b) =>
-    new Date(b.publishDate) - new Date(a.publishDate)
+    new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
   );
 
   host.innerHTML = sorted.map(renderArticleCard).join('');

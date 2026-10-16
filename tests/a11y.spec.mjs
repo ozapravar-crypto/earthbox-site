@@ -2,18 +2,19 @@
 // A/AA rules. Colour contrast is measured separately and more strictly by
 // qa/contrast (pixels, not CSS guesses), so it's excluded here.
 import { test, expect } from '@playwright/test';
+import { quietStart } from './helpers.mjs';
 import { AxeBuilder } from '@axe-core/playwright';
 
-test.beforeEach(async ({ context }) => {
-  await context.addInitScript(() => sessionStorage.setItem('earthbox-loader-seen', '1'));
-  await context.route('**/*.mp4', r => r.abort());
-});
+test.beforeEach(quietStart);
 
+/** @typedef {import('@playwright/test').Page} Page */
+
+/** @param {Page} page @param {string | null} [include] */
 const scan = async (page, include) => {
   const b = new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).disableRules(['color-contrast']);
   if (include) b.include(include);
   const r = await b.analyze();
-  return r.violations.map(v => `${v.id} (${v.impact}) ×${v.nodes.length}: ${v.help} — ${v.nodes.slice(0, 3).map(n => n.target.join(' ')).join(' | ')}`);
+  return r.violations.map(v => `${v.id} (${String(v.impact)}) ×${v.nodes.length}: ${v.help} — ${v.nodes.slice(0, 3).map(n => n.target.join(' ')).join(' | ')}`);
 };
 
 const PAGES = ['/index.html', '/products.html', '/product.html#V1-PLT-005', '/product.html#MossBox', '/product.html#VIV-III',
@@ -27,6 +28,7 @@ for (const path of PAGES) {
   });
 }
 
+/** @type {[string, string, (p: Page) => Promise<void>, string | null][]} */
 const STATES = [
   ['cart drawer', '/product.html#V1-PLT-006', async p => { await p.locator('.pd-buy [data-add-line], #pdMobileCta [data-add-line]').first().click(); }, 'dialog.ct'],
   ['saved tab', '/products.html', async p => { await p.locator('[data-open=saved]').click(); }, 'dialog.ct'],
@@ -64,8 +66,8 @@ test('a11y state: mobile menu', async ({ page, isMobile }) => {
 test('a11y self-test: the scan catches planted defects', async ({ page }) => {
   await page.goto('/about.html');
   await page.evaluate(() => {
-    const img = document.createElement('img'); img.src = 'assets/logo.webp'; document.querySelector('main').append(img);   // no alt
-    const b = document.createElement('button'); document.querySelector('main').append(b);                                 // no name
+    const img = document.createElement('img'); img.src = 'assets/logo.webp'; /** @type {HTMLElement} */ (document.querySelector('main')).append(img);   // no alt
+    const b = document.createElement('button'); /** @type {HTMLElement} */ (document.querySelector('main')).append(b);                                 // no name
   });
   const found = (await scan(page)).join('\n');
   expect(found).toContain('image-alt');

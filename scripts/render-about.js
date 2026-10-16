@@ -7,6 +7,7 @@ import { sections, closingStatement } from '../data/about.js';
 import { observeReveals } from './reveal.js';
 
 
+/** @param {import('../data/about.js').Section} s */
 function renderSection(s){
   const body = (s.body || []).map(p => `<p>${p}</p>`).join('');
 
@@ -41,19 +42,6 @@ function renderSection(s){
           <div class="founder-location italic">${p.location}</div>
         </div>
       </div>
-    `;
-  }
-
-  if (s.table){
-    extra = `
-      <dl class="kv-table">
-        ${s.table.map(r => `
-          <div>
-            <dt class="caption">${r.key}</dt>
-            <dd>${r.value}</dd>
-          </div>
-        `).join('')}
-      </dl>
     `;
   }
 

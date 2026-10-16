@@ -15,9 +15,26 @@ import { volumeOne } from '../data/volume-one.js';
 import { volumeTwo } from '../data/upcoming.js';
 import { decodeBuild, chamberOf, plantOf } from './build-codec.js';
 
+/** @typedef {import('./build-codec.js').Chamber} Chamber */
+
+/**
+ * A decoded visit plan (decodePlan). r = a piece's SKU or a build code;
+ * f is null for a one-off visit.
+ * @typedef {{ s: string, d: string, f: string | null, r: string, g: string[], n: number, p: string }} Plan
+ */
+
+/**
+ * @template {{ id: string }} T
+ * @param {readonly T[]} list
+ * @param {unknown} id
+ */
 const byId = (list, id) => list.find(x => x.id === id);
 const GROUPS = elements.map(e => e.id);
 
+/**
+ * @param {string} durationId
+ * @param {string | null} freqId
+ */
 export function visitsFor(durationId, freqId){
   const d = byId(visit.durations, durationId), f = byId(visit.frequencies, freqId);
   if (!d) return 0;
@@ -26,36 +43,45 @@ export function visitsFor(durationId, freqId){
 }
 
 // Rupees, or null = "On enquiry" (no rate yet, or a custom box).
+/** @param {Pick<Plan, 's' | 'd' | 'f'> | null | undefined} plan */
 export function planPrice(plan){
   if (!plan || plan.s === 'custom' || !visit.perVisit) return null;
   const n = visitsFor(plan.d, plan.f);
-  return n ? Math.round(visit.perVisit * n * (1 - (visit.termDiscount[plan.d] || 0))) : null;
+  return n ? Math.round(visit.perVisit * n * (1 - (/** @type {Record<string, number | undefined>} */ (visit.termDiscount)[plan.d] || 0))) : null;
 }
 
 // Which plant groups a piece or build belongs to → which refill kit fits.
+/**
+ * @param {string | undefined} ref  a SKU, plant id or build code
+ * @returns {string[]}
+ */
 export function groupsOf(ref){
   const box = volumeTwo.boxes.find(b => b.sku === ref);
   if (box) { const e = chamberElements[box.sku]; return e === 'all' ? [] : e; }   // Lab: any group, so ask
   const plant = plants.find(p => p.id === ref);
   if (plant) return [plant.element];
   const b = decodeBuild(ref);
-  if (b) return [...new Set(b.plants.map(id => plantOf(id)?.element).filter(Boolean))];
+  if (b) return [...new Set(/** @type {string[]} */ (b.plants.map(id => plantOf(id)?.element).filter(Boolean)))];
   return [];
 }
+/** @param {string} group */
 export const kitFor = (group) => kits.find(k => k.element === group) || null;
 
 // The thing being looked after, for the cart and the order message.
+/** @param {Plan} plan */
 export function refLabel(plan){
+  // A decoded build's chamber always exists, hence the Chamber cast.
   if (plan.s === 'own') return `${plan.n} of my own plant${plan.n > 1 ? 's' : ''}`;
-  if (plan.s === 'custom') { const b = decodeBuild(plan.r); return b ? (b.name || `${chamberOf(b).name} world`) : ''; }
+  if (plan.s === 'custom') { const b = decodeBuild(plan.r); return b ? (b.name || `${/** @type {Chamber} */ (chamberOf(b)).name} world`) : ''; }
   const v1 = volumeOne.find(p => p.sku === plan.r);
   const box = volumeTwo.boxes.find(b => b.sku === plan.r);
   return v1 ? v1.name : box ? `${box.name} chamber` : '';
 }
 
+/** @param {Pick<Plan, 's' | 'd'> & Partial<Plan>} plan  n and p only matter for 'own' plans */
 export function encodePlan(plan){
   const q = new URLSearchParams({ s: plan.s, d: plan.d });
-  if (plan.d !== 'once') q.set('f', plan.f);
+  if (plan.d !== 'once') q.set('f', /** @type {string} */ (plan.f));
   if (plan.r) q.set('r', plan.r);
   if (plan.g?.length) q.set('g', plan.g.join(','));
   if (plan.s === 'own') q.set('n', String(plan.n));
@@ -64,16 +90,21 @@ export function encodePlan(plan){
 }
 
 // Untrusted input (cart storage, URL): keep only what we know, else null.
+/**
+ * @param {string | null | undefined} str
+ * @returns {Plan | null}
+ */
 export function decodePlan(str){
   const q = new URLSearchParams(String(str || '').replace(/^#/, ''));
-  const plan = { s: q.get('s'), d: q.get('d'), f: q.get('f') || null, r: q.get('r') || '', g: [], n: 1, p: '' };
+  // s and d may still be null here; the checks below return null if so.
+  const plan = /** @type {Plan} */ ({ s: q.get('s'), d: q.get('d'), f: q.get('f') || null, r: q.get('r') || '', g: [], n: 1, p: '' });
   if (!byId(subjects, plan.s) || !byId(visit.durations, plan.d)) return null;
   if (plan.d === 'once') plan.f = null;
   else if (!byId(visit.frequencies, plan.f)) return null;
   plan.g = [...new Set((q.get('g') || '').split(',').filter(g => GROUPS.includes(g)))];
   if (plan.s === 'own') {
     plan.r = '';
-    plan.n = Math.min(500, Math.max(1, parseInt(q.get('n'), 10) || 1));
+    plan.n = Math.min(500, Math.max(1, parseInt(/** @type {string} */ (q.get('n')), 10) || 1));
   } else if (!refLabel(plan) || (plan.s === 'custom') !== !!decodeBuild(plan.r)) return null;
   const pin = q.get('p') || '';
   plan.p = /^\d{6}$/.test(pin) ? pin : '';
@@ -81,8 +112,11 @@ export function decodePlan(str){
 }
 
 // One plan → one human line, used by the cart and the order message.
+/** @param {Pick<Plan, 'd' | 'f' | 'g' | 'p'> & Partial<Plan>} plan */
 export function planSummary(plan){
-  const d = byId(visit.durations, plan.d), f = byId(visit.frequencies, plan.f);
+  // A decoded plan's duration exists, and so does its frequency unless it's 'once'.
+  const d = /** @type {typeof visit.durations[number]} */ (byId(visit.durations, plan.d));
+  const f = /** @type {typeof visit.frequencies[number]} */ (byId(visit.frequencies, plan.f));
   const n = visitsFor(plan.d, plan.f);
   return [
     plan.d === 'once' ? 'One visit' : `${d.label}, ${f.label.toLowerCase()} (${n} visit${n > 1 ? 's' : ''})`,

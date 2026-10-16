@@ -7,6 +7,9 @@ import { emptyBuild, capacity, togglePlant, swapChamber, done, canEnter,
 import { chambers, plants, substrates, recipes } from '../data/maker.js';
 import { sceneSpec } from './maker.js';
 
+/** @typedef {import('./build-codec.js').Build} Build */
+
+/** @param {string} sku */
 const box = (sku) => chambers.find(c => c.sku === sku);
 const aroid = substrates.find(s => s.id === 'SOIL-001');
 
@@ -16,12 +19,13 @@ assert.equal(capacity(box('WaterBox')), 8);
 assert.equal(capacity(box('MossBox')), 5);
 
 // Plants: suited only, no duplicates, capped at capacity.
+/** @type {Build} */
 let b = { ...emptyBuild(), chamber: 'BiteBox', substrate: 'studio' };
 assert.ok(togglePlant(b, 'PLT-008').error, 'a Fire plant must not go in Bite');
-for (const id of ['PLT-031', 'PLT-032', 'PLT-033', 'PLT-034']) b = togglePlant(b, id).build;
+for (const id of ['PLT-031', 'PLT-032', 'PLT-033', 'PLT-034']) b = /** @type {Build} */ (togglePlant(b, id).build);
 assert.equal(b.plants.length, 4);
-assert.match(togglePlant(b, 'PLT-035').error, /holds 4/);
-assert.deepEqual(togglePlant(b, 'PLT-031').build.plants, ['PLT-032', 'PLT-033', 'PLT-034'], 'toggle removes');
+assert.match(/** @type {string} */ (togglePlant(b, 'PLT-035').error), /holds 4/);
+assert.deepEqual(togglePlant(b, 'PLT-031').build?.plants, ['PLT-032', 'PLT-033', 'PLT-034'], 'toggle removes');
 
 // Swapping chamber keeps what fits, reports the rest, clears an unsuited foundation.
 b = { ...emptyBuild(), chamber: 'LabBox', substrate: 'SOIL-001', plants: ['PLT-041', 'PLT-008', 'PLT-042'] };
@@ -44,8 +48,10 @@ assert.equal(furthest(emptyBuild()), 'chamber');
 const r = recipes[0];
 b = { ...emptyBuild(), name: r.name, chamber: r.chamber, substrate: r.substrate, plants: r.plants };
 const back = decodeBuild(encodeBuild(b));
+assert.ok(back);
 assert.deepEqual([back.chamber, back.substrate, back.plants, back.name], [b.chamber, b.substrate, b.plants, b.name]);
 const evil = decodeBuild('c=FireBox&s=SOIL-001&p=PLT-008,PLT-008,PLT-031,<img>&n=' + 'x'.repeat(200));
+assert.ok(evil);
 assert.deepEqual(evil.plants, ['PLT-008']);
 assert.equal(evil.substrate, null);
 assert.equal(evil.name.length, 60);
@@ -55,11 +61,11 @@ assert.equal(decodeBuild('c=NotABox'), null);
 for (const rc of recipes) {
   const rb = { ...emptyBuild(), chamber: rc.chamber, substrate: rc.substrate, plants: rc.plants };
   assert.equal(furthest(rb), 'review', `recipe ${rc.id} must reach review`);
-  assert.deepEqual(decodeBuild(encodeBuild(rb)).plants, rc.plants, `recipe ${rc.id} plants all suit`);
+  assert.deepEqual(decodeBuild(encodeBuild(rb))?.plants, rc.plants, `recipe ${rc.id} plants all suit`);
 }
 
 // Enquiry text carries the price range and every plant, and never a fake total.
-const text = enquiryText({ ...b, space: { room: 'Study', household: ['Pets'], maturity: '', note: '' } });
+const text = enquiryText({ ...b, space: { room: 'Study', household: ['Pets'], maturity: '', note: '', care: '' } });
 assert.match(text, /Chamber: Moss \(₹6,000 – ₹9,000\)/);
 assert.match(text, /Pillow Moss, Java Moss, Mood Moss/);
 assert.match(text, /Lives in: Study/);

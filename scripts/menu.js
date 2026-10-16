@@ -76,6 +76,8 @@ export function initMenu(){
   }, 0);
 
   // ─── Open / close behaviour ───
+  const closeBtn = /** @type {HTMLButtonElement} */ (panel.querySelector('.mobile-nav-close'));
+  /** @param {boolean} open */
   const setOpen = (open) => {
     document.body.classList.toggle('menu-open', open);
     panel.classList.toggle('is-open', open);
@@ -85,14 +87,14 @@ export function initMenu(){
     overlay.setAttribute('aria-hidden', String(!open));
     // Keyboard focus stays in the open menu (UX audit C-04): the page behind
     // is inert, focus moves in, and returns to the menu button on close.
-    for (const el of document.body.children) if (el !== panel && el !== overlay && el.tagName !== 'DIALOG') el.inert = open;
-    if (open) panel.querySelector('.mobile-nav-close').focus();
+    for (const el of document.body.children) if (el !== panel && el !== overlay && el.tagName !== 'DIALOG') /** @type {HTMLElement} */ (el).inert = open;
+    if (open) closeBtn.focus();
     else if (panel.contains(document.activeElement) || document.activeElement === document.body) ham.focus();
   };
 
   ham.addEventListener('click', () => setOpen(!panel.classList.contains('is-open')));
   overlay.addEventListener('click', () => setOpen(false));
-  panel.querySelector('.mobile-nav-close').addEventListener('click', () => setOpen(false));
+  closeBtn.addEventListener('click', () => setOpen(false));
 
   // Close on link click (so navigation looks responsive)
   panel.querySelectorAll('a').forEach(a => {

@@ -10,7 +10,11 @@ const PAGES = ['/', '/products.html', '/product.html#V1-PLT-005', '/product.html
   '/maker.html', '/blog.html', '/blog/designing-drainage.html', '/about.html', '/privacy.html', '/care.html'];
 
 // Collect page errors + failed requests for the whole test.
+/** @typedef {import('@playwright/test').Response} Response */
+
+/** @param {import('@playwright/test').Page} page */
 function watch(page){
+  /** @type {string[]} */
   const problems = [];
   page.on('pageerror', e => problems.push(`error: ${e.message}`));
   // The local server sends vercel.json's CSP (no inline scripts): any block is a bug.
@@ -25,7 +29,7 @@ test.beforeEach(async ({ page }) => {
 
 for (const path of PAGES) {
   test(`loads clean: ${path}`, async ({ page }) => {
-    const problems = watch(page), heavy = [];
+    const problems = watch(page), heavy = /** @type {string[]} */ ([]);
     page.on('request', r => { if (/plants3d\/|GLTFLoader|three\.module/.test(r.url())) heavy.push(r.url()); });
     await page.goto(path);
     await expect(page.locator('h1:visible').first()).toBeVisible();
@@ -49,7 +53,7 @@ test('Journal diagrams load inside /blog/ (were 404: relative paths)', async ({ 
   const imgs = page.locator('#articleBody img');
   expect(await imgs.count()).toBeGreaterThan(0);
   // Ask the server for each one (SVGs can report naturalWidth 0 even when fine).
-  for (const src of await imgs.evaluateAll(list => list.map(i => i.src)))
+  for (const src of await imgs.evaluateAll(list => list.map(i => /** @type {HTMLImageElement} */ (i).src)))
     expect((await page.request.get(src)).status(), src).toBe(200);
   await expect(page.locator('.related-section')).toHaveCount(1);       // prerender once duplicated it
 });
@@ -100,7 +104,7 @@ test('guided search opens centred and its answers filter the list', async ({ pag
   const g = page.locator('#mkGuide');
   await expect(g).toBeVisible();
   if (!isMobile) {                                                      // was stuck top-left
-    const b = await g.boundingBox(), vw = page.viewportSize().width;
+    const b = /** @type {{ x: number, width: number }} */ (await g.boundingBox()), vw = /** @type {{ width: number }} */ (page.viewportSize()).width;
     expect(Math.abs(b.x + b.width / 2 - vw / 2)).toBeLessThan(4);
   }
   await g.locator('input[name=gd-look][value=woodland]').check({ force: true });
@@ -117,7 +121,7 @@ test('Maker preview renders (3D, or the drawing without WebGL)', async ({ page }
 });
 
 test('Maker 3D preview loads its plant models (.glb), no errors', async ({ page }) => {
-  const problems = watch(page), glbs = [];
+  const problems = watch(page), glbs = /** @type {number[]} */ ([]);
   page.on('response', r => { if (r.url().endsWith('.glb')) glbs.push(r.status()); });
   await page.goto('/maker.html#c=DarkBox&s=SOIL-001&p=PLT-041,PLT-042');
   test.skip(!(await page.evaluate(() => !!document.createElement('canvas').getContext('webgl2'))), 'no WebGL here: the drawings are the fallback');
@@ -172,7 +176,7 @@ for (const path of ['/index.html', '/products.html', '/product.html#V1-PLT-005',
     await page.addInitScript(() => {
       sessionStorage.setItem('earthbox-loader-seen', '1');
       window.__cls = 0;
-      new PerformanceObserver(l => l.getEntries().forEach(e => { if (!e.hadRecentInput) window.__cls += e.value; })).observe({ type: 'layout-shift', buffered: true });
+      new PerformanceObserver(l => l.getEntries().forEach(entry => { const e = /** @type {PerformanceEntry & { hadRecentInput: boolean, value: number }} */ (entry); if (!e.hadRecentInput) window.__cls = /** @type {number} */ (window.__cls) + e.value; })).observe({ type: 'layout-shift', buffered: true });
     });
     await page.route('**/*.mp4', r => r.abort());
     await page.goto(path);
@@ -186,13 +190,14 @@ for (const path of ['/index.html', '/products.html', '/product.html#V1-PLT-005',
 // "/", "/products", "/blog/<slug>", never to "index.html" or "*.html".
 // Locally qa/serve.mjs resolves them like Vercel does.
 test('clean URLs: pages load without .html, and no internal link exposes .html', async ({ page }) => {
+  /** @type {string[]} */
   const bad = [];
   for (const path of ['/', '/products', '/product#V1-PLT-005', '/maker', '/care', '/blog', '/blog/designing-drainage', '/about', '/privacy']) {
-    const res = await page.goto(path);
+    const res = /** @type {Response} */ (await page.goto(path));
     expect(res.status(), path).toBe(200);
     await expect(page.locator('h1:visible').first()).toBeVisible();
     await page.waitForLoadState('networkidle');
-    const links = await page.locator('a[href]').evaluateAll(as => as.map(a => a.getAttribute('href')));
+    const links = /** @type {string[]} */ (await page.locator('a[href]').evaluateAll(as => as.map(a => a.getAttribute('href'))));   // a[href]: never null
     bad.push(...links.filter(h => /\.html(\b|#|\?|$)/.test(h) && !/^(https?:)?\/\/(?!(www\.)?earthbox\.in)/.test(h)).map(h => `${path} → ${h}`));
   }
   expect([...new Set(bad)]).toEqual([]);
@@ -201,7 +206,7 @@ test('clean URLs: pages load without .html, and no internal link exposes .html',
 // Unknown address → the branded 404 (site-ez9), with a real 404 status so
 // search engines don't index it, and a way back into the site.
 test('unknown address shows the branded 404 with a way back', async ({ page }) => {
-  const res = await page.goto('/this-page-does-not-exist');
+  const res = /** @type {Response} */ (await page.goto('/this-page-does-not-exist'));
   expect(res.status()).toBe(404);
   await expect(page.locator('h1')).toHaveText('Nothing grows here');
   await expect(page.getByRole('link', { name: 'Browse the catalogue' })).toHaveAttribute('href', '/products');
@@ -216,11 +221,11 @@ test('product pages are readable without JavaScript', async ({ request, page }) 
   const html = await (await request.get('/product/V1-PLT-005')).text();
   expect(html).toContain('<link rel="canonical" href="https://www.earthbox.in/product/V1-PLT-005"');
   expect(html).toMatch(/<h1>[^<]+<\/h1>/);
-  const ld = JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/)[1]);
+  const ld = JSON.parse(/** @type {RegExpMatchArray} */ (html.match(/<script type="application\/ld\+json">(.*?)<\/script>/))[1]);
   expect(ld['@graph'][0]).toMatchObject({ '@type': 'Product', sku: 'V1-PLT-005' });
   for (const f of ['/sitemap.xml', '/llms.txt']) expect((await request.get(f)).status(), f).toBe(200);
   // An unknown piece is a real 404, and the branded page still has its styles.
-  const res = await page.goto('/product/NOPE');
+  const res = /** @type {Response} */ (await page.goto('/product/NOPE'));
   expect(res.status()).toBe(404);
   await expect(page.locator('h1')).toHaveText('Nothing grows here');
   expect(await page.evaluate(() => getComputedStyle(document.body).fontFamily)).not.toMatch(/^"?Times/);

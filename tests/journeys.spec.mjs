@@ -2,7 +2,11 @@
 // External services are mocked (Web3Forms, wa.me); nothing real is sent.
 import { test, expect } from '@playwright/test';
 
+/** @typedef {import('@playwright/test').Page} Page */
+
+/** @param {Page} page */
 const errorsOf = (page) => {
+  /** @type {string[]} */
   const errs = [];
   page.on('pageerror', e => errs.push(e.message));
   return errs;
@@ -16,6 +20,7 @@ test.beforeEach(async ({ context }, info) => {
 });
 
 // ── Enquiry form (Web3Forms) ─────────────────────────────────────────
+/** @param {Page} page */
 async function openForm(page){
   await page.goto('/product.html#V1-PLT-005');
   await page.locator('.pd-other-ways > summary').click();          // folded under "Other ways to order"
@@ -23,28 +28,31 @@ async function openForm(page){
   await wrap.locator('summary').click();
   return wrap;
 }
+/** Fill the email form with valid details and submit it. @param {import('@playwright/test').Locator} f */
+const fillAndSend = async (f) => {
+  await f.locator('input[name=name]').fill('QA');
+  await f.locator('input[name=email]').fill('qa@example.com');
+  await f.locator('button[type=submit]').click();
+};
 test.describe('enquiry form', () => {
   test.skip(({ isMobile }) => isMobile, 'the email form is the desktop route; phones use WhatsApp');
 
   test('success: thanks the visitor and hides the form', async ({ page }) => {
-    let body;
-    await page.route('https://api.web3forms.com/**', r => { body = r.request().postDataJSON(); r.fulfill({ status: 200, contentType: 'application/json', body: '{"success":true}' }); });
+    /** @type {Record<string, string> | undefined} */
+    let body;   // set by the mocked request
+    await page.route('https://api.web3forms.com/**', async r => { body = r.request().postDataJSON(); await r.fulfill({ status: 200, contentType: 'application/json', body: '{"success":true}' }); });
     const f = await openForm(page);
-    await f.locator('input[name=name]').fill('QA');
-    await f.locator('input[name=email]').fill('qa@example.com');
-    await f.locator('button[type=submit]').click();
+    await fillAndSend(f);
     await expect(f.locator('.enquiry-status')).toContainText('Thank you');
     await expect(f.locator('form')).toBeHidden();
-    expect(body.product).toContain('Stackable');            // the message carries what was asked about
-    expect(body.botcheck).toBe('');
+    expect(/** @type {Record<string, string>} */ (body).product).toContain('Stackable');            // the message carries what was asked about
+    expect(/** @type {Record<string, string>} */ (body).botcheck).toBe('');
   });
 
   test('server error: says so, offers email, lets them retry', async ({ page }) => {
     await page.route('https://api.web3forms.com/**', r => r.fulfill({ status: 500, contentType: 'application/json', body: '{"success":false,"message":"down"}' }));
     const f = await openForm(page);
-    await f.locator('input[name=name]').fill('QA');
-    await f.locator('input[name=email]').fill('qa@example.com');
-    await f.locator('button[type=submit]').click();
+    await fillAndSend(f);
     await expect(f.locator('.enquiry-status')).toContainText('aayush.lilani@gmail.com');
     await expect(f.locator('button[type=submit]')).toBeEnabled();
   });
@@ -52,15 +60,13 @@ test.describe('enquiry form', () => {
   test('offline: network failure is reported, not swallowed', async ({ page }) => {
     await page.route('https://api.web3forms.com/**', r => r.abort('internetdisconnected'));
     const f = await openForm(page);
-    await f.locator('input[name=name]').fill('QA');
-    await f.locator('input[name=email]').fill('qa@example.com');
-    await f.locator('button[type=submit]').click();
+    await fillAndSend(f);
     await expect(f.locator('.enquiry-status')).toContainText('aayush.lilani@gmail.com');
   });
 
   test('invalid input is not sent', async ({ page }) => {
     let sent = 0;
-    await page.route('https://api.web3forms.com/**', r => { sent++; r.fulfill({ status: 200, body: '{"success":true}' }); });
+    await page.route('https://api.web3forms.com/**', async r => { sent++; await r.fulfill({ status: 200, body: '{"success":true}' }); });
     const f = await openForm(page);
     await f.locator('input[name=email]').fill('not-an-email');
     await f.locator('button[type=submit]').click();
@@ -120,7 +126,7 @@ test('cart thumbnails load (a catalogue piece)', async ({ page }) => {
   await expect(imgs.first()).toBeVisible();
   for (const img of await imgs.all()) {
     expect(await img.getAttribute('src')).toMatch(/^\/assets\//);
-    await expect.poll(() => img.evaluate(el => el.complete && el.naturalWidth)).toBeGreaterThan(0);
+    await expect.poll(() => img.evaluate(el => /** @type {HTMLImageElement} */ (el).complete && /** @type {HTMLImageElement} */ (el).naturalWidth)).toBeGreaterThan(0);
   }
 });
 
@@ -131,7 +137,7 @@ test('price, WhatsApp message and cart line follow the chosen size + material', 
   await page.locator('[data-variant="small-circle"]').click();
   await page.locator('[data-material="asa"]').click();
   await expect(page.locator('#pdPrice')).toHaveText('₹799');
-  const wa = decodeURIComponent(await page.locator('#pdEnquiryCta').getAttribute('href'));
+  const wa = decodeURIComponent(/** @type {string} */ (await page.locator('#pdEnquiryCta').getAttribute('href')));
   expect(wa).toContain('Stackable Planter (Small Circle) in ASA');
   expect(wa).toContain('₹799');
   await page.locator(isMobile ? '#pdMobileCta [data-add-line]' : '.pd-buy [data-add-line]').click();
@@ -155,7 +161,8 @@ test('catalogue search: results, empty state, close with Escape', async ({ page 
 // site-ksq: on a slow phone the button shows before catalogue.js has wired
 // it; that early tap used to do nothing. Here catalogue.js is held back.
 test('catalogue search: a tap before the script loads still opens search', async ({ page }) => {
-  let release;
+  /** @type {((v?: unknown) => void) | undefined} */
+  let release;   // set synchronously by the Promise executor
   const held = new Promise(r => { release = r; });
   await page.route('**/scripts/catalogue.js', async (route) => { await held; await route.continue(); });
   const asked = page.waitForRequest('**/scripts/catalogue.js');                // main.js is booting
@@ -163,7 +170,7 @@ test('catalogue search: a tap before the script loads still opens search', async
   await asked;
   await page.locator('#catalogueSearchBtn').click();
   await expect(page.locator('#catalogueSearchOverlay')).toBeHidden();
-  release();
+  /** @type {() => void} */ (release)();
   await expect(page.locator('#cat-search')).toBeVisible();
 });
 
@@ -173,7 +180,7 @@ test('theme choice survives a reload and another page', async ({ page, isMobile 
   const before = await page.locator('html').getAttribute('data-theme');
   if (isMobile) { await page.locator('.hamburger').click(); await page.locator('.theme-toggle-mobile').click(); }
   else await page.locator('.runhead .theme-toggle').click();
-  const after = await page.locator('html').getAttribute('data-theme');
+  const after = /** @type {string} */ (await page.locator('html').getAttribute('data-theme'));
   expect(after).not.toBe(before);
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', after);
@@ -214,7 +221,7 @@ test('mobile menu: focus moves in, stays in, and returns to the menu button', as
   await expect(page.locator('.mobile-nav-close')).toBeFocused();
   for (let i = 0; i < 12; i++) {
     await page.keyboard.press('Tab');
-    expect(await page.evaluate(() => !!document.activeElement.closest('main, footer, .runhead'))).toBe(false);   // never the page behind
+    expect(await page.evaluate(() => !!/** @type {Element} */ (document.activeElement).closest('main, footer, .runhead'))).toBe(false);   // never the page behind
   }
   await page.keyboard.press('Escape');
   await expect(page.locator('.hamburger')).toBeFocused();
@@ -228,10 +235,10 @@ test('cart drawer by keyboard: opens, takes focus, Escape returns focus', async 
   await btn.focus();
   await page.keyboard.press('Enter');
   await expect(page.locator('dialog.ct')).toBeVisible();
-  expect(await page.evaluate(() => !!document.activeElement.closest('dialog.ct'))).toBe(true);
+  expect(await page.evaluate(() => !!/** @type {Element} */ (document.activeElement).closest('dialog.ct'))).toBe(true);
   await page.keyboard.press('Escape');
   await expect(page.locator('dialog.ct')).toBeHidden();
-  expect(await page.evaluate(() => document.activeElement?.dataset.open)).toBe('cart');
+  expect(await page.evaluate(() => /** @type {HTMLElement | null} */ (document.activeElement)?.dataset.open)).toBe('cart');
 });
 
 test('guided search by keyboard: Escape closes and returns focus', async ({ page, isMobile }) => {
@@ -243,10 +250,10 @@ test('guided search by keyboard: Escape closes and returns focus', async ({ page
   await open.focus();
   await page.keyboard.press('Enter');
   await expect(page.locator('#mkGuide')).toBeVisible();
-  expect(await page.evaluate(() => !!document.activeElement.closest('#mkGuide'))).toBe(true);
+  expect(await page.evaluate(() => !!/** @type {Element} */ (document.activeElement).closest('#mkGuide'))).toBe(true);
   await page.keyboard.press('Escape');
   await expect(page.locator('#mkGuide')).toBeHidden();
-  expect(await page.evaluate(() => document.activeElement?.dataset.act)).toBe('guide');
+  expect(await page.evaluate(() => /** @type {HTMLElement | null} */ (document.activeElement)?.dataset.act)).toBe('guide');
 });
 
 // ── Cart storage ─────────────────────────────────────────────────────
@@ -299,7 +306,7 @@ test('Maker: a shared link never overwrites my design, and its edits survive a r
   test.slow();   // software 3D on CI
   await page.goto('/maker.html');
   await page.locator('[data-act=recipe]').first().click();
-  const mine = await page.evaluate(() => JSON.parse(localStorage.getItem('earthbox-maker')).code);
+  const mine = await page.evaluate(() => JSON.parse(/** @type {string} */ (localStorage.getItem('earthbox-maker'))).code);
   // Same page, new link: the Maker reloads itself to open it (M-19). PLT-001 is an Earth plant: doesn't fit Moss.
   await page.goto('/maker.html#c=MossBox&s=studio&p=PLT-036,PLT-001&n=Shared');
   await expect(page.locator('.mk-notice').first()).toContainText('Your own saved design is kept', { timeout: 15_000 });
@@ -308,7 +315,7 @@ test('Maker: a shared link never overwrites my design, and its edits survive a r
   await page.locator('.mk-add[data-id=PLT-037]').click();
   await page.reload();
   await expect(page.locator('.mk-sum')).toContainText('2 plants', { timeout: 15_000 });
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('earthbox-maker')).code)).toBe(mine);   // untouched
+  expect(await page.evaluate(() => JSON.parse(/** @type {string} */ (localStorage.getItem('earthbox-maker'))).code)).toBe(mine);   // untouched
   await page.getByRole('button', { name: 'Open mine' }).click();
   await expect(page).not.toHaveURL(/#c=/);
   await expect(page.locator('#mkPanelBody')).toContainText('Back to your own design');
@@ -371,10 +378,10 @@ test('unknown product link shows "not found" with a way back', async ({ page }) 
 // Google Analytics must not load until "Accept". Fresh visitor = no choice.
 test.describe('cookie choice', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
-  const gaHits = (page) => { const hits = []; page.route('https://www.googletagmanager.com/**', r => { hits.push(r.request().url()); r.fulfill({ body: '' }); }); return hits; };
+  const gaHits = async (/** @type {Page} */ page) => { const hits = /** @type {string[]} */ ([]); await page.route('https://www.googletagmanager.com/**', async r => { hits.push(r.request().url()); await r.fulfill({ body: '' }); }); return hits; };
 
   test('no analytics before a choice; Accept loads it and is remembered', async ({ page }) => {
-    const hits = gaHits(page);
+    const hits = await gaHits(page);
     await page.goto('/about.html');
     const banner = page.locator('.consent');
     await expect(banner).toBeVisible();
@@ -389,7 +396,7 @@ test.describe('cookie choice', () => {
   });
 
   test('Decline: analytics never loads, on any page; the privacy page can reopen the choice', async ({ page }) => {
-    const hits = gaHits(page);
+    const hits = await gaHits(page);
     await page.goto('/index.html');
     await page.locator('.consent').getByRole('button', { name: 'Decline' }).click();
     await page.goto('/blog/designing-drainage.html');
@@ -412,8 +419,8 @@ test.describe('cookie choice', () => {
 });
 
 // ── Care (care.html, CARE-PLAN.md) ───────────────────────────────────
-const cartDrawer = (page) => page.locator('dialog.ct');
-const openCart = async (page, isMobile) => { if (!(await cartDrawer(page).isVisible())) await page.locator(isMobile ? '.runhead-bag [data-open=cart], [data-open=cart]' : '[data-open=cart]').first().click(); };
+const cartDrawer = (/** @type {Page} */ page) => page.locator('dialog.ct');
+const openCart = async (/** @type {Page} */ page, /** @type {boolean} */ isMobile) => { if (!(await cartDrawer(page).isVisible())) await page.locator(isMobile ? '.runhead-bag [data-open=cart], [data-open=cart]' : '[data-open=cart]').first().click(); };
 
 // UX audit S-03: after sending, the main action is Clear cart, not a second send.
 test('cart after sending: Clear cart leads, "Send again" stays small, an edit re-arms Send', async ({ page, context, isMobile }) => {
@@ -466,7 +473,7 @@ test('Care: visits for my own plants → plan in cart and in the order message',
   await expect(line).toHaveCount(1);
   await expect(line.locator('.ct-title')).toHaveText('Care visits · 8 of my own plants');
   await expect(line.locator('.ct-qty')).toHaveCount(0);                         // a plan has no quantity
-  const wa = decodeURIComponent(await cartDrawer(page).locator('[data-ct=send]').getAttribute('href'));
+  const wa = decodeURIComponent(/** @type {string} */ (await cartDrawer(page).locator('[data-ct=send]').getAttribute('href')));
   expect(wa).toContain('6 months, every 2 weeks (12 visits) · Bite · pincode 400101');
   expect(errs).toEqual([]);
 });
@@ -508,8 +515,9 @@ test('Cart suggests the matching kit and visits; adding the kit removes it from 
 test.describe('Care business form', () => {
   test.skip(({ isMobile }) => isMobile, 'same form on phones; network paths checked once');
   test('sends company details in the message; errors and invalid input handled', async ({ page }) => {
-    let body;
-    await page.route('https://api.web3forms.com/**', r => { body = r.request().postDataJSON(); r.fulfill({ status: 200, contentType: 'application/json', body: '{"success":true}' }); });
+    /** @type {Record<string, string> | undefined} */
+    let body;   // set by the mocked request
+    await page.route('https://api.web3forms.com/**', async r => { body = r.request().postDataJSON(); await r.fulfill({ status: 200, contentType: 'application/json', body: '{"success":true}' }); });
     await page.goto('/care.html#business');
     const f = page.locator('#careBusiness');
     await f.getByRole('button', { name: 'Ask for a quote' }).click();
@@ -523,10 +531,10 @@ test.describe('Care business form', () => {
     await f.locator('[name=pin]').fill('400053');
     await f.getByRole('button', { name: 'Ask for a quote' }).click();
     await expect(page.locator('.care-biz .enquiry-status')).toContainText('Thank you');
-    expect(body.product).toBe('Care · business');
-    expect(body.message).toContain('Company: Blue Tokai Andheri');
-    expect(body.message).toContain('Visits wanted: Every month');
-    expect(body.message).toContain('Pincode: 400053');
+    expect(/** @type {Record<string, string>} */ (body).product).toBe('Care · business');
+    expect(/** @type {Record<string, string>} */ (body).message).toContain('Company: Blue Tokai Andheri');
+    expect(/** @type {Record<string, string>} */ (body).message).toContain('Visits wanted: Every month');
+    expect(/** @type {Record<string, string>} */ (body).message).toContain('Pincode: 400053');
   });
   test('server error: says so and offers email', async ({ page }) => {
     await page.route('https://api.web3forms.com/**', r => r.fulfill({ status: 500, contentType: 'application/json', body: '{"success":false}' }));
@@ -547,7 +555,7 @@ test('points: hover opens one panel, leaving closes; keyboard and tap work', asy
   await expect(panels.first()).toBeHidden();                         // default: nothing open
   await w.scrollIntoViewIfNeeded();
   // Layout height of the points area (transforms from reveal animations don't count).
-  const below = () => w.evaluate(e => e.offsetHeight);
+  const below = () => w.evaluate(e => /** @type {HTMLElement} */ (e).offsetHeight);
   const y0 = await below();
   if (isMobile) {
     await pts.nth(0).tap();
@@ -632,7 +640,7 @@ test('header: heart + bag, counts hidden at zero, read as "Cart 1 items"', async
   await page.keyboard.press('Escape');
   await expect(cart.locator('[data-cart-count]')).toHaveText('1');
   await expect(cart).toHaveAccessibleName(/^Cart\s*1\s*items$/);
-  const labelWidth = (await cart.locator('.rb-label').boundingBox()).width;      // icon-only on phones, still read aloud
+  const labelWidth = /** @type {{ width: number }} */ (await cart.locator('.rb-label').boundingBox()).width;      // icon-only on phones, still read aloud
   if (isMobile) expect(labelWidth).toBeLessThanOrEqual(1); else expect(labelWidth).toBeGreaterThan(10);
 });
 
@@ -688,7 +696,7 @@ test('cart: a Maker design shows its chamber drawing, not a letter', async ({ pa
 // phones a tap landed on a button replaced mid-press and did nothing (CI
 // flake site-ktu, 12 Oct 2026). Delay 3D, tag the button, let 3D arrive.
 test('Maker: the 3D view arriving late does not rebuild buttons', async ({ page }) => {
-  await page.route('**/scripts/maker-3d.js', async r => { await new Promise(res => setTimeout(res, 2500)); await r.continue(); });
+  await page.route('**/scripts/maker-3d.js', async r => { await new Promise(res => { setTimeout(res, 2500); }); await r.continue(); });
   await page.goto('/maker#c=MossBox&s=studio&p=PLT-036');
   await page.locator('.mk-step[data-to=plants]').click();
   const guide = page.locator('[data-act=guide]');

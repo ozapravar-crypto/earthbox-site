@@ -16,20 +16,22 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const css = await readFile(path.join(ROOT, 'styles/tokens.css'), 'utf8');
 
 // First block = light (:root), the [data-theme="dark"] block = dark.
+/** @type {(re: RegExp) => Record<string, string>} */
 const block = (re) => Object.fromEntries([...(css.match(re)?.[1] ?? '').matchAll(/--([\w-]+):\s*(#[0-9a-f]{6})/gi)].map(m => [m[1], m[2]]));
 const light = block(/:root\s*\{([^}]*)\}/);
 const dark = { ...light, ...block(/\[data-theme="dark"\]\s*\{([^}]*)\}/) };
 
-const lum = (hex) => {
+const lum = (/** @type {string} */ hex) => {
   const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
     .map(c => (c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4));
   return .2126 * r + .7152 * g + .0722 * b;
 };
+/** @type {(a: string, b: string) => number} */
 export const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + .05) / (y + .05); };
 // The site-wide paper grain (atmosphere.css body::before) multiplies every
 // pixel by up to (1 − .83 × .06 × .35). Check pairs under that worst case.
 const GRAIN = 1 - .83 * .06 * .35;
-const grained = (hex) => '#' + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * GRAIN).toString(16).padStart(2, '0')).join('');
+const grained = (/** @type {string} */ hex) => '#' + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * GRAIN).toString(16).padStart(2, '0')).join('');
 
 // Every text token × every surface it appears on. --accent is decorative
 // (rules, borders, icons) and deliberately not in this list.
@@ -37,7 +39,7 @@ const TEXT = ['ink', 'ink-soft', 'mute', 'accent-text'];
 const SURFACES = ['bg', 'bg-tint'];
 
 let fail = 0;
-for (const [mode, t] of [['light', light], ['dark', dark]])
+for (const [mode, t] of /** @type {[string, Record<string, string>][]} */ ([['light', light], ['dark', dark]]))
   for (const fg of TEXT) for (const bg of SURFACES) {
     if (!t[fg] || !t[bg]) { console.error(`missing token --${!t[fg] ? fg : bg} (${mode})`); fail++; continue; }
     const r = ratio(grained(t[fg]), grained(t[bg]));

@@ -14,9 +14,15 @@ import { NAV } from '../data/site.js';
 import { decodeBuild, encodeBuild } from './build-codec.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+/**
+ * @template T
+ * @param {readonly T[]} list
+ * @param {keyof T & string} key
+ * @param {string} what
+ */
 const unique = (list, key, what) => {
   const seen = new Set();
-  for (const x of list) { assert.ok(!seen.has(x[key]), `${what}: duplicate ${key} "${x[key]}"`); seen.add(x[key]); }
+  for (const x of list) { assert.ok(!seen.has(x[key]), `${what}: duplicate ${key} "${String(x[key])}"`); seen.add(x[key]); }
 };
 
 // ── Volume I products ────────────────────────────────────────────────
@@ -28,15 +34,16 @@ for (const p of volumeOne) {
   assert.ok(CAT.includes(p.category), `${at}: category "${p.category}" not in categories`);
   assert.ok(['available', 'coming-soon'].includes(p.status), `${at}: status "${p.status}"`);
   assert.match(p.photo, /\.webp$/, `${at}: photo is a .webp file name`);
-  if (p.pricing === null || p.pricing === undefined) continue;          // price on enquiry
+  if (p.pricing == null) continue;          // price on enquiry
   // Fixed price: { material: rupees } or, with variants, { variant: { material: rupees } }.
-  const tables = p.variants?.length ? p.variants.map(v => [v.id, p.pricing[v.id]]) : [['', p.pricing]];
+  /** @type {[string, unknown][]} */
+  const tables = p.variants?.length ? p.variants.map(v => [v.id, /** @type {Record<string, unknown>} */ (p.pricing)[v.id]]) : [['', p.pricing]];
   if (p.variants?.length) assert.deepEqual(Object.keys(p.pricing).sort(), p.variants.map(v => v.id).sort(), `${at}: one price table per variant`);
   for (const [v, t] of tables) {
     assert.ok(t && typeof t === 'object', `${at}${v && ` (${v})`}: price table`);
     for (const [m, rs] of Object.entries(t)) {
       assert.ok(MAT.includes(m), `${at}: unknown material "${m}"`);
-      assert.ok(Number.isInteger(rs) && rs > 0, `${at}: ${m} price must be whole rupees, got ${rs}`);
+      assert.ok(Number.isInteger(rs) && rs > 0, `${at}: ${m} price must be whole rupees, got ${String(rs)}`);
     }
   }
 }
@@ -46,7 +53,7 @@ unique(volumeTwo.boxes, 'sku', 'upcoming boxes');
 for (const b of volumeTwo.boxes) {
   const at = `chamber ${b.sku}`;
   assert.match(b.price, /^₹[\d,]+ – ₹[\d,]+$/, `${at}: price is a "₹a – ₹b" range (the cart parses it)`);
-  for (const k of ['name', 'lead', 'capacity', 'photo']) assert.ok(b[k], `${at}: ${k}`);
+  for (const k of /** @type {const} */ (['name', 'lead', 'capacity', 'photo'])) assert.ok(b[k], `${at}: ${k}`);
   assert.ok(chamberElements[b.sku], `${at}: no entry in chamberElements (which plant groups it takes)`);
 }
 
@@ -58,7 +65,7 @@ for (const p of plants) {
   assert.ok(EL.includes(p.element), `plant ${p.id}: group "${p.element}"`);
   assert.ok(forms[p.form], `plant ${p.id}: shape "${p.form}" has no label in forms`);
   assert.ok(p.name && p.botanical, `plant ${p.id}: name + botanical`);
-  if ('price' in p) assert.ok(Number.isInteger(p.price) && p.price > 0, `plant ${p.id}: price is whole rupees`);
+  if ('price' in p) assert.ok(Number.isInteger(p.price) && /** @type {number} */ (p.price) > 0, `plant ${p.id}: price is whole rupees`);
 }
 for (const [sku, els] of Object.entries(chamberElements)) {
   assert.ok(volumeTwo.boxes.some(b => b.sku === sku), `chamberElements: "${sku}" is not a chamber`);
@@ -66,21 +73,25 @@ for (const [sku, els] of Object.entries(chamberElements)) {
 }
 for (const s of SOILLESS) assert.ok(chamberElements[s], `SOILLESS: "${s}" is not a chamber`);
 unique(substrates, 'id', 'substrates');
-for (const s of substrates) if ('price' in s) assert.ok(Number.isInteger(s.price) && s.price > 0, `substrate ${s.id}: price`);
+for (const s of substrates) if ('price' in s) assert.ok(Number.isInteger(s.price) && /** @type {number} */ (s.price) > 0, `substrate ${s.id}: price`);
 unique(recipes, 'id', 'recipes');
 for (const r of recipes) {
   // A recipe must survive the share-link codec unchanged: every plant fits its chamber.
-  const b = decodeBuild(encodeBuild({ name: '', chamber: r.chamber, substrate: r.substrate, plants: r.plants, space: {} }));
+  const b = decodeBuild(encodeBuild({ name: '', chamber: r.chamber, substrate: r.substrate, plants: r.plants, space: /** @type {import('./build-codec.js').Space} */ ({}) }));
   assert.ok(b, `recipe ${r.id}: chamber "${r.chamber}"`);
   assert.deepEqual(b.plants, r.plants, `recipe ${r.id}: a plant doesn't fit ${r.chamber} or the chamber is over capacity`);
 }
 
 // Plant models: keys are real forms / plant ids; entries well formed (files: check-assets).
 assert.ok(typeof models.base === 'string' && models.base.endsWith('/'), 'models.base ends in /');
+/**
+ * @param {string} at
+ * @param {import('../data/maker.js').PlantModel | null} m
+ */
 const checkModel = (at, m) => {
   if (m === null) return;                                              // null = procedural plant
   assert.match(m.file, /^[a-z0-9-]+\.glb$/, `${at}: file is a .glb name`);
-  if ('scale' in m) assert.ok(m.scale > 0 && m.scale <= 2, `${at}: scale`);
+  if ('scale' in m) assert.ok(/** @type {number} */ (m.scale) > 0 && /** @type {number} */ (m.scale) <= 2, `${at}: scale`);
   if ('yaw' in m) assert.ok(Number.isFinite(m.yaw), `${at}: yaw`);
   if ('tint' in m) assert.equal(typeof m.tint, 'boolean', `${at}: tint`);
   if ('textured' in m) assert.equal(typeof m.textured, 'boolean', `${at}: textured`);   // realistic scan keeping its texture
@@ -128,9 +139,9 @@ for (const n of NAV) {
 // orderable piece has an exact price in every place (the card shows it).
 for (const pl of places) assert.ok(materials.some(m => m.id === pl.material), `place ${pl.id}: unknown material ${pl.material}`);
 for (const p of volumeOne.filter(x => x.status === 'available'))
-  for (const pl of places) assert.ok(priceOf(p, pl.material) > 0, `${p.sku}: no ${pl.name} (${pl.material}) price`);
-assert.equal(priceOf(volumeOne.find(p => p.sku === 'V1-PLT-005'), 'asa', 'small-circle'), 799);
-assert.equal(priceOf(volumeOne.find(p => p.sku === 'V1-PLT-005'), 'petg'), 1399);   // first size
-assert.equal(priceOf(volumeOne.find(p => p.status === 'coming-soon'), 'petg'), null);
+  for (const pl of places) assert.ok(/** @type {number} */ (priceOf(p, pl.material)) > 0, `${p.sku}: no ${pl.name} (${pl.material}) price`);
+assert.equal(priceOf(/** @type {import('../data/volume-one.js').Product} */ (volumeOne.find(p => p.sku === 'V1-PLT-005')), 'asa', 'small-circle'), 799);
+assert.equal(priceOf(/** @type {import('../data/volume-one.js').Product} */ (volumeOne.find(p => p.sku === 'V1-PLT-005')), 'petg'), 1399);   // first size
+assert.equal(priceOf(/** @type {import('../data/volume-one.js').Product} */ (volumeOne.find(p => p.status === 'coming-soon')), 'petg'), null);
 
 console.log(`data: all checks passed (${volumeOne.length} products, ${volumeTwo.boxes.length} chambers, ${plants.length} plants, ${articles.length} articles)`);

@@ -16,7 +16,7 @@ const LERP   = 0.18;
 export function initMagnetic(){
   if (reduced || !fine) return;
 
-  const items = Array.from(document.querySelectorAll('.magnetic'));
+  const items = /** @type {HTMLElement[]} */ (Array.from(document.querySelectorAll('.magnetic')));
   if (!items.length) return;
 
   // Per-element animation state
@@ -27,7 +27,7 @@ export function initMagnetic(){
     active: false
   }));
 
-  const update = (e) => {
+  const update = (/** @type {MouseEvent} */ e) => {
     state.forEach(s => {
       const r = s.el.getBoundingClientRect();
       const cx = r.left + r.width / 2;

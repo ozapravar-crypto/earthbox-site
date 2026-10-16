@@ -8,17 +8,19 @@
     "check:prerender": "node scripts/check-prerender.mjs",
     "check:assets": "node scripts/check-assets.mjs",
     "test:unit": "node --test scripts/*.test.mjs",
-    "test": "npm run test:unit && npm run lint && node scripts/includes.mjs --check && npm run check:prerender && node scripts/seo.mjs --check && npm run check:assets && npm run check:contrast",
+    "test": "npm run test:unit && npm run lint && npm run typecheck && npm run check:unused && npm run check:dupes && node scripts/includes.mjs --check && npm run check:prerender && node scripts/seo.mjs --check && npm run check:assets && npm run check:contrast",
     "build": "node scripts/includes.mjs && node scripts/prerender.mjs && node scripts/seo.mjs && npm test && node scripts/dist.mjs",
     "dist": "node scripts/dist.mjs",
     "includes": "node scripts/includes.mjs",
     "test:e2e": "playwright test",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "check:contrast": "node scripts/check-contrast.mjs",
     "check:unused": "knip",
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
     "qa:contrast": "node qa/contrast/audit.mjs",
-    "qa:contrast:quick": "node qa/contrast/audit.mjs --quick"
+    "qa:contrast:quick": "node qa/contrast/audit.mjs --quick",
+    "typecheck": "tsc -p .",
+    "check:dupes": "jscpd"
   },
   "repository": {
     "type": "git",
@@ -36,9 +38,16 @@
     "@axe-core/playwright": "4.13.0",
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.58.2",
+    "@types/node": "^22.20.5",
+    "@types/three": "^0.160.0",
+    "axe-core": "^4.13.0",
     "eslint": "10.12.0",
     "globals": "17.13.0",
+    "jscpd": "^4.3.0",
     "knip": "6.41.0",
-    "sharp": "0.35.5"
+    "lenis": "^1.3.26",
+    "sharp": "0.35.5",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.71.2"
   }
 }

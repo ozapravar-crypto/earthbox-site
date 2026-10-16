@@ -61,8 +61,13 @@ const HOME_STUDY = [
 // are clean and root-absolute ("/about", served from about.html: cleanUrls in
 // vercel.json), so they need no prefix. `current` is the NAV href of this
 // page (or null), marked aria-current.
+/**
+ * @param {string} prefix
+ * @param {string} h
+ */
 const link = (prefix, h) => (h.startsWith('#') || h.startsWith('/') ? h : prefix + h);
 // "about.html" → "/about", "index.html" → "/", "blog/x.html" → "/blog/x".
+/** @param {string} file */
 export const cleanPath = (file) => `/${file.replace(/\.html$/, '').replace(/(^|\/)index$/, '')}`;
 
 // Analytics waits for consent: Google's script only loads after "Accept"
@@ -77,6 +82,7 @@ export const analyticsHTML = ({ prefix = '' } = {}) => `<!-- Analytics -->
   <script src="${prefix}scripts/consent.js" defer></script>
   <!-- /Analytics -->`;
 
+/** @param {{ prefix?: string, current?: string | null }} [opts]  current: this page's NAV href */
 export function runheadHTML({ prefix = '', current = null } = {}){
   return `<header class="runhead" role="banner">
   <a href="/" class="runhead-left caption">EarthBox</a>
@@ -88,7 +94,7 @@ ${TOP_NAV.map(n => `    <a href="${link(prefix, n.href)}"${n.href === current ? 
 
 export function footerHTML({ prefix = '', home = false } = {}){
   const first = home ? { title: 'The Study', links: HOME_STUDY } : { title: 'Browse', links: NAV };
-  const li = (items) => items.map(t => `        <li>${t}</li>`).join('\n');
+  const li = (/** @type {string[]} */ items) => items.map(t => `        <li>${t}</li>`).join('\n');
   return `<footer class="colophon">
   <div class="colo-main">
     <div class="colo-mark">

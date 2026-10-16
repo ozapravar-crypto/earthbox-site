@@ -10,6 +10,7 @@ import { designNotesArticles } from './article-bodies/design-notes.js';
 import { plantFundamentalsArticles } from './article-bodies/plant-fundamentals.js';
 
 // Merge all article bodies into single lookup
+/** @type {Record<string, string>} */
 const articleBodies = {
   ...terrariumCareArticles,
   ...printingArticles,
@@ -26,7 +27,7 @@ export const categories = [
   { slug: 'plant-fundamentals', title: 'Fundamentals', description: 'Core plant care knowledge' }
 ];
 
-export const articles = [
+const entries = [
 
   // ═══════════════════════════════════════════════════════════════════
   // CATEGORY 1: TERRARIUM CARE (4 articles)
@@ -560,6 +561,15 @@ export const articles = [
     relatedArticles: ['reading-plant-health-signs', 'understanding-light-guide']
   }
 ];
+
+/**
+ * The SEO extras, FAQs, related links and subtitle are optional per article:
+ * every entry has them today, but the renderers fall back when one doesn't.
+ * @typedef {'subtitle' | 'metaTitle' | 'metaDescription' | 'keywords' | 'faqs' | 'relatedArticles'} OptionalArticleField
+ * @typedef {Omit<typeof entries[number], OptionalArticleField> & Partial<Pick<typeof entries[number], OptionalArticleField>> & { body?: string }} Article  body merged in below
+ */
+/** @type {Article[]} */
+export const articles = entries;
 
 // Merge body content into each article
 articles.forEach(article => {

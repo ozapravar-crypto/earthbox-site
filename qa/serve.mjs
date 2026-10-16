@@ -5,6 +5,7 @@ import http from 'node:http';
 import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 
+/** @type {Record<string, string>} */
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css',
   '.json': 'application/json', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.png': 'image/png',
   '.mp4': 'video/mp4', '.glb': 'model/gltf-binary', '.xml': 'application/xml', '.txt': 'text/plain', '.ico': 'image/x-icon' };
@@ -13,14 +14,16 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '
 // the same rules as production: a script the CSP blocks fails here too.
 const SITE_HEADERS = (() => {
   try {
-    const cfg = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
+    /** @type {{ headers: { source: string, headers?: { key: string, value: string }[] }[] }} */
+    const cfg = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));   // our own config; a bad shape throws → []
     return (cfg.headers.find(h => h.source === '/(.*)')?.headers || []).filter(h => h.key !== 'Strict-Transport-Security').map(h => [h.key, h.value]);
   } catch { return []; }
 })();
 
+/** @param {string} root @param {number} port @returns {Promise<http.Server>} */
 export function serve(root, port){
   const server = http.createServer((req, res) => {
-    const rel = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+    const rel = decodeURIComponent(new URL(/** @type {string} */ (req.url), 'http://x').pathname);
     let file = path.join(root, rel.endsWith('/') ? rel + 'index.html' : rel);
     // Clean URLs, as on Vercel (cleanUrls in vercel.json): /about → about.html.
     // A page beats a same-named folder: /blog is blog.html, not the blog/ folder of articles.
@@ -46,5 +49,5 @@ export function serve(root, port){
       createReadStream(file).on('error', () => res.destroy()).pipe(res);   // a failed read drops one response, not the server
     }
   });
-  return new Promise(r => server.listen(port, () => r(server)));
+  return new Promise(r => { server.listen(port, () => r(server)); });
 }

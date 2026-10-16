@@ -30,6 +30,7 @@ const pages = [
   ...(await readdir(path.join(ROOT, 'blog'))).filter((f) => f.endsWith('.html')).map((f) => `blog/${f}`)
 ];
 
+/** @type {string[]} */
 const stale = [];
 for (const f of pages.sort()) {
   const p = path.join(ROOT, f);
@@ -39,11 +40,11 @@ for (const f of pages.sort()) {
   const current = inBlog ? '/blog' : (NAV.some((n) => n.href === cleanPath(f)) ? cleanPath(f) : null);
 
   let html = before;
-  for (const [re, block] of [
+  for (const [re, block] of /** @type {[RegExp, string][]} */ ([
     [/<!-- Analytics -->[\s\S]*?<!-- \/Analytics -->/, analyticsHTML({ prefix })],
     [/<header class="runhead"[\s\S]*?<\/header>/, runheadHTML({ prefix, current })],
     [/<footer class="colophon">[\s\S]*?<\/footer>/, footerHTML({ prefix, home: f === 'index.html' })]
-  ]) {
+  ])) {
     if (!re.test(html)) { console.error(`includes: ${f} has no ${re.source.slice(1, 16)}… block`); process.exit(1); }
     html = html.replace(re, () => block);
   }

@@ -7,6 +7,7 @@
 const STORAGE_KEY = 'earthbox-loader-seen';
 const TOTAL_DURATION = 2500;
 
+/** @param {() => void} [onComplete] */
 export function initLoader(onComplete) {
   const loader = document.querySelector('.loader');
   if (!loader) {

@@ -35,37 +35,78 @@ import { SITE } from '../data/site.js';
 import { esc, rupees, track, art } from './util.js';
 import { icon } from '../data/icons.js';
 
+/**
+ * @typedef {import('./build-codec.js').Chamber} Chamber
+ * @typedef {import('./build-codec.js').Plant} Plant
+ * @typedef {import('./build-codec.js').Substrate} Substrate
+ * @typedef {import('../data/volume-one.js').PriceTable} PriceTable
+ * @typedef {{ price?: number }} Priced  maker.js adds `price` once the workbook has one
+ *
+ * @typedef {'cart' | 'saved'} List
+ * @typedef {{ kind: 'product', sku: string, variant?: string | null, material?: string | null, qty: number }} ProductLine
+ * @typedef {{ code: string, sku?: undefined, qty?: number }} CodeLineBase
+ * @typedef {(CodeLineBase & { kind: 'build' }) | (CodeLineBase & { kind: 'care' })} CodeLine  a Maker build or a care plan; no quantity
+ * @typedef {ProductLine | CodeLine} Line  a stored line: ids only
+ * @typedef {CodeLine | (Omit<ProductLine, 'qty'> & { qty?: number })} NewLine  a line being added (qty defaults to 1)
+ * @typedef {{ cart: Line[], saved: Line[] }} CartState
+ *
+ * @typedef {{ label: string, price: number | null, range?: [number, number] | null, note?: string }} Part
+ * @typedef {{ key: string, qty: number, title: string, sub: string, href: string, img: string | null, status: string,
+ *   care?: boolean, cartable?: boolean, range?: [number, number] | null, note?: string }} RowBase
+ * @typedef {RowBase & { kind: 'fixed', unit: number }} FixedRow
+ * @typedef {RowBase & { kind: 'enquiry', unit: null }} EnquiryRow
+ * @typedef {RowBase & { kind: 'custom', parts: Part[] }} CustomRow
+ * @typedef {FixedRow | EnquiryRow | CustomRow} Row  a resolved line: what the drawer and the order message show
+ */
+
 const STORE = 'earthbox-cart';
 const MAX_QTY = 20;
 
 // "₹8,000 – ₹12,000" → [8000, 12000]
+/**
+ * @param {string | null | undefined} s
+ * @returns {[number, number] | null}
+ */
 export const parseRange = (s) => {
   const n = String(s || '').replace(/,/g, '').match(/\d+/g);
   return n ? [+n[0], +n[n.length - 1]] : null;
 };
+/** @param {unknown} v */
 const num = (v) => (typeof v === 'number' && v > 0 ? v : null);
 
 
 // ═══ RULES (pure) ═════════════════════════════════════════════════════
 
+/** @returns {CartState} */
 export const emptyCart = () => ({ cart: [], saved: [] });
 
 // A line's identity: the same piece in another size or material is a new line.
+/** @param {NewLine} l */
 export const keyOf = (l) => l.kind === 'build' ? `build:${l.code}` : l.kind === 'care' ? `care:${l.code}`
   : [l.sku, l.variant, l.material].filter(Boolean).join('|');
+/**
+ * @param {{ kind?: unknown }} l
+ * @returns {l is CodeLine}
+ */
 const ONE_OFF = (l) => l.kind === 'build' || l.kind === 'care';   // no quantity
 
 // Line (ids) → everything the drawer and the order message need.
+/**
+ * @param {NewLine} l  a stored line, or one being added (qty may be unset)
+ * @param {List} [list]
+ * @returns {Row | null}
+ */
 export function resolve(l, list = 'cart'){
   if (l.kind === 'build') {
     const b = decodeBuild(l.code);
     if (!b) return null;
-    const ch = chamberOf(b), sub = substrates.find(s => s.id === b.substrate);
+    // A decoded build's chamber and plants always exist.
+    const ch = /** @type {Chamber} */ (chamberOf(b)), sub = /** @type {(Substrate & Priced) | undefined} */ (substrates.find(s => s.id === b.substrate));
     const parts = [
       { label: `${ch.name} chamber`, price: null, range: parseRange(ch.price), note: ch.price },
       isSoilless(ch.sku) ? { label: 'No foundation, soil-free', price: 0, note: '—' }
         : { label: sub ? sub.name : 'Foundation · studio’s choice', price: num(sub?.price) },
-      ...b.plants.map(id => ({ label: plantOf(id).name, price: num(plantOf(id).price) }))
+      ...b.plants.map(id => ({ label: /** @type {Plant} */ (plantOf(id)).name, price: num(/** @type {Plant & Priced} */ (plantOf(id)).price) }))
     ];
     return { kind: 'custom', key: keyOf(l), qty: 1, title: b.name || `${ch.name} world`, sub: 'Custom build · Maker',
       // The chamber's own line art, not a letter (audit K4): botanical art, not an icon.
@@ -75,13 +116,15 @@ export function resolve(l, list = 'cart'){
     const plan = decodePlan(l.code);
     if (!plan) return null;
     const price = planPrice(plan);
-    return { kind: price ? 'fixed' : 'enquiry', care: true, key: keyOf(l), qty: 1, title: `Care visits · ${refLabel(plan)}`,
+    return /** @type {FixedRow | EnquiryRow} */ ({ kind: price ? 'fixed' : 'enquiry', care: true, key: keyOf(l), qty: 1, title: `Care visits · ${refLabel(plan)}`,
       sub: planSummary(plan), href: `/care#${encodePlan(plan)}`, img: null, unit: price,
-      status: plan.s === 'custom' ? 'Quoted for custom boxes' : 'Mumbai · studio confirms dates' };
+      status: plan.s === 'custom' ? 'Quoted for custom boxes' : 'Mumbai · studio confirms dates' });
   }
+  // Stored lines always carry qty; a line still being added may not, and
+  // add() only checks that it resolves.
   const kit = kits.find(k => k.sku === l.sku);
-  if (kit) return { kind: kit.price ? 'fixed' : 'enquiry', care: true, key: keyOf(l), qty: l.qty, title: kit.name,
-    sub: kit.for, href: '/care', img: null, unit: kit.price, status: 'Studio confirms contents · about 1 week' };
+  if (kit) return /** @type {FixedRow | EnquiryRow} */ ({ kind: kit.price ? 'fixed' : 'enquiry', care: true, key: keyOf(l), qty: /** @type {number} */ (l.qty), title: kit.name,
+    sub: kit.for, href: '/care', img: null, unit: kit.price, status: 'Studio confirms contents · about 1 week' });
   const p = volumeOne.find(x => x.sku === l.sku);
   // Coming-soon pieces can't be ordered yet (UX audit S-01, 16 Oct 2026), as
   // with chambers: an old cart line is dropped; the Saved list keeps them.
@@ -89,27 +132,29 @@ export function resolve(l, list = 'cart'){
   if (p) {
     const variant = p.variants?.find(v => v.id === l.variant);
     if (p.variants?.length && !variant) return null;
-    const table = p.pricing ? (variant ? p.pricing[variant.id] : p.pricing) : null;
-    if (table && !table[l.material]) return null;
+    const table = /** @type {Record<string, number> | null} */ (p.pricing ? (variant ? /** @type {Record<string, PriceTable>} */ (p.pricing)[variant.id] : p.pricing) : null);
+    const material = /** @type {string} */ (l.material);   // a missing material finds no price
+    if (table && !table[material]) return null;
     const mat = materials.find(m => m.id === l.material);
-    return { kind: table ? 'fixed' : 'enquiry', key: keyOf(l), qty: l.qty, title: p.name,
+    return /** @type {FixedRow | EnquiryRow} */ ({ kind: table ? 'fixed' : 'enquiry', key: keyOf(l), qty: /** @type {number} */ (l.qty), title: p.name,
       sub: [variant?.name, mat?.name].filter(Boolean).join(' · ') || 'Volume I',
       href: `/product/${encodeURIComponent(p.sku)}`, img: p.photo ? photoPath(p, '300') : null,
-      unit: table ? table[l.material] : null,
+      unit: table ? table[material] : null,
       cartable: p.status !== 'coming-soon',
-      status: p.status === 'coming-soon' ? 'Coming soon' : 'Made to order · about 1 week' };
+      status: p.status === 'coming-soon' ? 'Coming soon' : 'Made to order · about 1 week' });
   }
   // Coming-soon chambers never resolve, so they can't be added and any old
   // cart line is dropped (studio decision, 12 Oct 2026). Saved list keeps them.
   const box = volumeTwo.boxes.find(x => x.sku === l.sku);
   if (box && list === 'cart' && volumeTwo.status === 'Coming soon') return null;
-  if (box) return { kind: 'enquiry', cartable: volumeTwo.status !== 'Coming soon', key: keyOf(l), qty: l.qty, title: `${box.name} chamber`, sub: `Elemental Box · ${box.edition}`,
+  if (box) return { kind: 'enquiry', cartable: volumeTwo.status !== 'Coming soon', key: keyOf(l), qty: /** @type {number} */ (l.qty), title: `${box.name} chamber`, sub: `Elemental Box · ${box.edition}`,
     href: `/product/${encodeURIComponent(box.sku)}`, img: box.photo ? `/assets/boxes/${box.photo}` : null,
     unit: null, range: parseRange(box.price), note: box.price, status: `${volumeTwo.status} · ${box.lead}` };
   return null;
 }
 
 // A build's own total: priced parts summed, the chamber range carried, the rest counted.
+/** @param {CustomRow} r */
 export function buildTotal(r){
   const fixed = r.parts.reduce((s, p) => s + (p.price || 0), 0);
   const range = r.parts.find(p => p.range)?.range || [0, 0];
@@ -118,6 +163,7 @@ export function buildTotal(r){
 
 // The whole cart. `fixed` is exact; low/high add the guide ranges; `quoted`
 // counts lines (or build parts) the studio still has to price.
+/** @param {Row[]} lines */
 export function totals(lines){
   let fixed = 0, low = 0, high = 0, quoted = 0, items = 0;
   for (const r of lines) {
@@ -130,16 +176,21 @@ export function totals(lines){
 }
 
 // Untrusted storage → only lines that still resolve, qty clamped, no duplicates.
+/** @param {unknown} raw */
 export function clean(raw){
   const out = emptyCart();
-  for (const list of ['cart', 'saved']) {
+  for (const list of /** @type {const} */ (['cart', 'saved'])) {
     const seen = new Set();
-    for (const l of Array.isArray(raw?.[list]) ? raw[list] : []) {
-      if (!l || typeof l !== 'object') continue;
+    const got = /** @type {{ [list: string]: unknown } | null | undefined} */ (raw)?.[list];
+    for (const item of Array.isArray(got) ? /** @type {unknown[]} */ (got) : []) {
+      if (!item || typeof item !== 'object') continue;
+      const l = /** @type {Record<string, unknown>} */ (item);
+      // variant and material are kept as given: resolve() drops ones it can't price.
+      /** @type {Line} */
       const line = ONE_OFF(l)
         ? { kind: l.kind, code: String(l.code || '') }
-        : { kind: 'product', sku: String(l.sku || ''), variant: l.variant || null, material: l.material || null,
-            qty: Math.min(MAX_QTY, Math.max(1, parseInt(l.qty, 10) || 1)) };
+        : { kind: 'product', sku: typeof l.sku === 'string' ? l.sku : '', variant: /** @type {string | null} */ (l.variant || null), material: /** @type {string | null} */ (l.material || null),
+            qty: Math.min(MAX_QTY, Math.max(1, parseInt(/** @type {string} */ (l.qty), 10) || 1)) };
       if (!resolve(line, list) || seen.has(keyOf(line))) continue;
       seen.add(keyOf(line)); out[list].push(line);
     }
@@ -147,6 +198,11 @@ export function clean(raw){
   return out;
 }
 
+/**
+ * @param {CartState} state
+ * @param {List} list
+ * @param {NewLine} line
+ */
 export function add(state, list, line){
   if (!resolve(line, list)) return state;   // e.g. a coming-soon chamber can be saved, not carted
   const s = structuredClone(state), k = keyOf(line);
@@ -155,19 +211,36 @@ export function add(state, list, line){
   else if (!hit) s[list].push(ONE_OFF(line) ? line : { qty: 1, ...line });
   return s;
 }
+/**
+ * @param {CartState} state
+ * @param {List} list
+ * @param {string} key
+ * @returns {CartState}
+ */
 export const remove = (state, list, key) => ({ ...state, [list]: state[list].filter(l => keyOf(l) !== key) });
+/**
+ * @param {CartState} state
+ * @param {string} key
+ * @param {number} qty
+ */
 export function setQty(state, key, qty){
   const s = structuredClone(state);
   const l = s.cart.find(x => keyOf(x) === key);
-  if (l && l.kind === 'product') l.qty = Math.min(MAX_QTY, Math.max(1, qty));
+  if (l?.kind === 'product') l.qty = Math.min(MAX_QTY, Math.max(1, qty));
   return s;
 }
+/**
+ * @param {CartState} state
+ * @param {List} from
+ * @param {string} key
+ */
 export function move(state, from, key){
   const l = state[from].find(x => keyOf(x) === key);
   if (!l || !resolve(l, from === 'cart' ? 'saved' : 'cart')) return state;   // never lose a line it can't move
   return add(remove(state, from, key), from === 'cart' ? 'saved' : 'cart', l);
 }
 
+/** @param {Row[]} lines */
 export function orderText(lines){
   const t = totals(lines);
   const out = ['Hi Aayush, I’d like to order from EarthBox.', ''];
@@ -200,25 +273,45 @@ let state = emptyCart();
 const read = () => { try { state = clean(JSON.parse(localStorage.getItem(STORE) || 'null')); } catch { state = emptyCart(); } };
 const write = () => { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch { /* private mode: lives for this page only */ } };
 
-let dlg, tab = 'cart', lastFocus;
+/** @type {HTMLDialogElement | undefined} set by initCart; stays unset on a page without the header */
+let dlg;
+/** @type {List} */
+let tab = 'cart';
+/** @type {(Element & { focus?: () => void }) | null} the focused element can be one without focus() */
+let lastFocus;
 // One-line status at the top of the drawer. `undo` holds the whole previous
 // state, so Undo works the same for remove, clear and move.
+/** @type {{ text: string, undo?: CartState, clear?: boolean } | null} */
 let notice = null;
 
+/**
+ * @param {List} list
+ * @param {NewLine} line
+ * @param {{ open?: boolean }} [opts]
+ */
 function addLine(list, line, { open = true } = {}){
   state = add(state, list, line);
   write(); refresh();
   track(list === 'cart' ? 'cart_add' : 'saved_add', { kind: line.kind, sku: line.sku || line.kind });
   if (open) openDrawer(list);
 }
+/**
+ * @param {List} list
+ * @param {NewLine} line
+ */
 const has = (list, line) => state[list].some(l => keyOf(l) === keyOf(line));
 
 
+/** @param {Row} r */
 function priceCell(r){
   if (r.kind === 'fixed') return `<span class="ct-price">${rupees(r.unit * r.qty)}</span>${r.qty > 1 ? `<span class="ct-each">${rupees(r.unit)} each</span>` : ''}`;
   return `<span class="ct-price ct-price--enquiry">On enquiry</span>${r.note ? `<span class="ct-each">Guide ${esc(r.note)}</span>` : ''}`;
 }
 
+/**
+ * @param {Row} r
+ * @param {List} list
+ */
 function lineHTML(r, list){
   const k = esc(r.key);
   const thumb = r.img ? `<img src="${esc(r.img)}" alt="" width="72" height="72" loading="lazy">`
@@ -267,14 +360,21 @@ function suggestHTML(){
   </section>`;
 }
 
+/** @param {string} text */
 const waHref = (text) => `https://wa.me/${ENQUIRY_PHONE}?text=${encodeURIComponent(text)}`;
 // The cart as it was when last sent (memory only). While it's unchanged, the
 // main action is Clear cart, not another send (UX audit S-03).
+/** @type {string | null} */
 let sentKey = null;
 const isSent = () => sentKey === JSON.stringify(state.cart);
 
+/** @param {Row[]} lines */
 function summaryHTML(lines){
   const t = totals(lines), text = orderText(lines);
+  /**
+   * @param {string} a
+   * @param {string} b
+   */
   const row = (a, b, cls = '') => `<p class="ct-row ${cls}"><span>${a}</span><span>${b}</span></p>`;
   return `<div class="ct-summary">
     ${t.fixed ? row('Priced items', rupees(t.fixed)) : ''}
@@ -293,8 +393,14 @@ function summaryHTML(lines){
 }
 
 function drawerHTML(){
-  const lines = { cart: state.cart.map(l => resolve(l, 'cart')), saved: state.saved.map(l => resolve(l, 'saved')) };
+  // clean() kept only lines that resolve, so none is null here.
+  const lines = /** @type {Record<List, Row[]>} */ ({ cart: state.cart.map(l => resolve(l, 'cart')), saved: state.saved.map(l => resolve(l, 'saved')) });
+  /** @param {List} l */
   const count = (l) => l === 'cart' ? state.cart.reduce((n, x) => n + (x.qty || 1), 0) : state.saved.length;
+  /**
+   * @param {List} id
+   * @param {string} label
+   */
   const tabBtn = (id, label) => `<button type="button" role="tab" id="ct-tab-${id}" aria-controls="ct-panel" aria-selected="${tab === id}" data-ct="tab" data-tab="${id}" ${tab === id ? '' : 'tabindex="-1"'}>${label} <span>(${count(id)})</span></button>`;
   const list = lines[tab];
   const empty = tab === 'cart'
@@ -316,23 +422,27 @@ function drawerHTML(){
 
 function refresh(){
   const n = state.cart.reduce((s, x) => s + (x.qty || 1), 0);
-  document.querySelectorAll('[data-cart-count]').forEach(el => { el.textContent = n || ''; });   // hidden at 0
-  document.querySelectorAll('[data-saved-count]').forEach(el => { el.textContent = state.saved.length || ''; });
-  document.querySelectorAll('[data-save-line]').forEach(btn => {
-    const on = has('saved', JSON.parse(btn.dataset.saveLine));
-    btn.setAttribute('aria-pressed', on);   // the label stays "Save"; the heart fills (iconography audit P2)
+  document.querySelectorAll('[data-cart-count]').forEach(el => { el.textContent = String(n || ''); });   // hidden at 0
+  document.querySelectorAll('[data-saved-count]').forEach(el => { el.textContent = String(state.saved.length || ''); });
+  /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('[data-save-line]')).forEach(btn => {
+    const on = has('saved', JSON.parse(/** @type {string} */ (btn.dataset.saveLine)));
+    btn.setAttribute('aria-pressed', String(on));   // the label stays "Save"; the heart fills (iconography audit P2)
   });
   if (dlg?.open) {
-    const focusKey = document.activeElement?.closest('[data-ct]') && [document.activeElement.dataset.ct, document.activeElement.dataset.k, document.activeElement.dataset.d, document.activeElement.dataset.tab].join();
+    const active = /** @type {HTMLElement | null} */ (document.activeElement);
+    const focusKey = active?.closest('[data-ct]') && [active.dataset.ct, active.dataset.k, active.dataset.d, active.dataset.tab].join();
     dlg.innerHTML = drawerHTML();
-    const back = focusKey && [...dlg.querySelectorAll('[data-ct]')].find(el => [el.dataset.ct, el.dataset.k, el.dataset.d, el.dataset.tab].join() === focusKey && !el.disabled);
-    (back || dlg.querySelector('.ct-notice button') || dlg.querySelector('[role=tab][aria-selected=true]')).focus();
+    const back = focusKey && [.../** @type {NodeListOf<HTMLElement & { disabled?: boolean }>} */ (dlg.querySelectorAll('[data-ct]'))].find(el => [el.dataset.ct, el.dataset.k, el.dataset.d, el.dataset.tab].join() === focusKey && !el.disabled);
+    // A tab is always there to fall back on.
+    /** @type {HTMLElement} */ (back || dlg.querySelector('.ct-notice button') || dlg.querySelector('[role=tab][aria-selected=true]')).focus();
   }
 }
 
+/** @type {CartState | null} */
 let lastUndo = null;
 // After sending, the order is with the studio but the cart stays until the
 // visitor clears it, in case WhatsApp didn't open or they want to resend.
+/** @param {'whatsapp' | 'form'} method */
 function sent(method){
   track('cart_send', { method, items: state.cart.length });
   sentKey = JSON.stringify(state.cart);
@@ -341,12 +451,14 @@ function sent(method){
   refresh();
 }
 
+/** @param {List} [which] */
 function openDrawer(which = 'cart'){
   notice = null;
   tab = which; lastFocus = document.activeElement;
-  dlg.innerHTML = drawerHTML();
-  if (!dlg.open) dlg.showModal();
-  dlg.querySelector(`#ct-tab-${tab}`).focus();
+  const d = /** @type {HTMLDialogElement} */ (dlg);   // only reached from buttons initCart wired up
+  d.innerHTML = drawerHTML();
+  if (!d.open) d.showModal();
+  /** @type {HTMLElement} */ (d.querySelector(`#ct-tab-${tab}`)).focus();
   track('cart_open', { tab });
 }
 
@@ -367,45 +479,50 @@ export function initCart(){
   const toggle = runhead.querySelector('.theme-toggle-desktop');
   runhead.insertBefore(end, toggle);
   end.append(btns, ...(toggle ? [toggle] : []));
-  btns.addEventListener('click', (e) => { const b = e.target.closest('[data-open]'); if (b) openDrawer(b.dataset.open); });
+  btns.addEventListener('click', (e) => { const b = /** @type {HTMLElement | null} */ (/** @type {Element} */ (e.target).closest('[data-open]')); if (b) openDrawer(/** @type {List} */ (b.dataset.open)); });
 
-  dlg = document.createElement('dialog');
-  dlg.className = 'ct'; dlg.id = 'cartDrawer';
-  dlg.setAttribute('aria-labelledby', 'ct-title');
-  document.body.appendChild(dlg);
+  const drawer = document.createElement('dialog');
+  dlg = drawer;
+  drawer.className = 'ct'; drawer.id = 'cartDrawer';
+  drawer.setAttribute('aria-labelledby', 'ct-title');
+  document.body.appendChild(drawer);
 
-  dlg.addEventListener('click', (e) => {
-    if (e.target === dlg) return dlg.close();   // backdrop
-    const b = e.target.closest('[data-ct]');
+  drawer.addEventListener('click', (e) => {
+    if (e.target === drawer) return drawer.close();   // backdrop
+    const b = /** @type {HTMLElement | null} */ (/** @type {Element} */ (e.target).closest('[data-ct]'));
     if (!b) return;
-    const { ct, k, from } = b.dataset;
-    if (ct === 'close') return dlg.close();
+    // k and from are on line buttons only (not close, tab, clear, undo).
+    const { ct, k, from } = /** @type {{ ct?: string, k?: string, from?: List }} */ (b.dataset);
+    if (ct === 'close') return drawer.close();
     if (ct === 'send') { sent('whatsapp'); return; }   // let the link open
-    if (ct === 'tab') { tab = b.dataset.tab; notice = null; return refresh(); }
-    const before = state, title = k && resolve(state[from || 'cart'].find(x => keyOf(x) === k), from || 'cart')?.title;
+    if (ct === 'tab') { tab = /** @type {List} */ (b.dataset.tab); notice = null; return refresh(); }
+    const before = state, title = k && resolve(/** @type {Line} */ (state[from || 'cart'].find(x => keyOf(x) === k)), from || 'cart')?.title;
     notice = null;
-    if (ct === 'qty') { const l = state.cart.find(x => keyOf(x) === k); state = setQty(state, k, l.qty + +b.dataset.d); }
-    if (ct === 'remove') { state = remove(state, from, k); notice = { text: `Removed ${title}.`, undo: before }; }
-    if (ct === 'move') { state = move(state, from, k); notice = { text: `${title} moved to ${from === 'cart' ? 'Saved' : 'your cart'}.`, undo: before }; }
+    if (ct === 'qty') { const l = /** @type {ProductLine} */ (state.cart.find(x => keyOf(x) === k)); state = setQty(state, /** @type {string} */ (k), l.qty + +/** @type {string} */ (b.dataset.d)); }
+    if (ct === 'remove') { state = remove(state, /** @type {List} */ (from), /** @type {string} */ (k)); notice = { text: `Removed ${String(title)}.`, undo: before }; }
+    if (ct === 'move') { state = move(state, /** @type {List} */ (from), /** @type {string} */ (k)); notice = { text: `${String(title)} moved to ${from === 'cart' ? 'Saved' : 'your cart'}.`, undo: before }; }
     if (ct === 'clear') { state = { ...state, cart: [] }; notice = { text: 'Cart cleared.', undo: before }; }
     if (ct === 'undo') state = lastUndo || state;
     lastUndo = notice?.undo || null;
     write(); refresh();
   });
   // Arrow keys between the two tabs (WAI-ARIA tabs pattern).
-  dlg.addEventListener('keydown', (e) => {
-    if (!e.target.matches('[role=tab]') || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+  drawer.addEventListener('keydown', (e) => {
+    if (!/** @type {Element} */ (e.target).matches('[role=tab]') || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
     tab = tab === 'cart' ? 'saved' : 'cart'; refresh();
   });
-  dlg.addEventListener('enquiry:sent', () => sent('form'));
-  dlg.addEventListener('close', () => lastFocus?.focus?.());
+  drawer.addEventListener('enquiry:sent', () => sent('form'));
+  drawer.addEventListener('close', () => lastFocus?.focus?.());
 
   // Any page can carry add/save buttons: data-add-line / data-save-line = JSON line.
   document.addEventListener('click', (e) => {
-    const add = e.target.closest('[data-add-line]'), save = e.target.closest('[data-save-line]');
-    if (add) addLine('cart', JSON.parse(add.dataset.addLine));
+    const target = /** @type {Element} */ (e.target);
+    const add = /** @type {HTMLElement | null} */ (target.closest('[data-add-line]')), save = /** @type {HTMLElement | null} */ (target.closest('[data-save-line]'));
+    // The page's own markup: add() drops a line that doesn't resolve.
+    if (add) addLine('cart', JSON.parse(/** @type {string} */ (add.dataset.addLine)));
     if (save) {
-      const line = JSON.parse(save.dataset.saveLine);
+      /** @type {NewLine} */
+      const line = JSON.parse(/** @type {string} */ (save.dataset.saveLine));
       if (has('saved', line)) { state = remove(state, 'saved', keyOf(line)); write(); refresh(); }
       else addLine('saved', line, { open: false });
     }

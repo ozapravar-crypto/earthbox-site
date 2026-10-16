@@ -4,21 +4,23 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 
 const src = readFileSync(new URL('./theme-early.js', import.meta.url), 'utf8');
-const load = (store = {}) => {
+const load = (/** @type {Record<string, string>} */ store = {}) => {
+  /** @type {Record<string, string>} */
   const attrs = {};
+  /** @type {{ ebTheme?: EbTheme }} */
   const window = {};
   vm.runInNewContext(src, { window, Math, Number, Date,
-    localStorage: { getItem: (k) => store[k] ?? null },
-    document: { documentElement: { setAttribute: (k, v) => { attrs[k] = v; } } } });
-  return { t: window.ebTheme, attrs };
+    localStorage: { getItem: (/** @type {string} */ k) => store[k] ?? null },
+    document: { documentElement: { setAttribute: (/** @type {string} */ k, /** @type {string} */ v) => { attrs[k] = v; } } } });
+  return { t: /** @type {EbTheme} */ (window.ebTheme), attrs };   // the script always sets it
 };
-const ist = (s) => Date.parse(`${s}+05:30`);
+const ist = (/** @type {string} */ s) => Date.parse(`${s}+05:30`);
 const { t } = load();
-const hm = (ms) => new Date(ms + 5.5 * 36e5).toISOString().slice(11, 16);
+const hm = (/** @type {number} */ ms) => new Date(ms + 5.5 * 36e5).toISOString().slice(11, 16);
 
 // Published Mumbai times (timeanddate): 21 Jun rise 06:02 set 19:17; 21 Dec rise 07:09 set 18:05.
 const jun = t.sun(ist('2026-06-21T12:00')), dec = t.sun(ist('2026-12-21T12:00'));
-for (const [got, want] of [[jun.rise, '06:02'], [jun.set, '19:17'], [dec.rise, '07:09'], [dec.set, '18:05']]) {
+for (const [got, want] of /** @type {[number, string][]} */ ([[jun.rise, '06:02'], [jun.set, '19:17'], [dec.rise, '07:09'], [dec.set, '18:05']])) {
   const diff = Math.abs(Date.parse(`2000-01-01T${hm(got)}Z`) - Date.parse(`2000-01-01T${want}Z`)) / 6e4;
   assert.ok(diff <= 3, `sun time ${hm(got)} vs published ${want}`);
 }
