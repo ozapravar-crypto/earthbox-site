@@ -51,7 +51,7 @@ const entries = [
       { question: 'Do closed terrariums need watering?', answer: 'Closed terrariums rarely need watering after initial setup. The sealed environment recycles water through evaporation and condensation. Add water only if condensation stops appearing.' },
       { question: 'How long can a closed terrarium survive without opening?', answer: 'A properly balanced closed terrarium can survive for years, even decades. The oldest known closed terrarium has thrived since 1960 with minimal intervention.' }
     ],
-    relatedProducts: ['TER-001'],
+    relatedProducts: [],
     relatedArticles: ['open-vs-closed-terrariums', 'first-30-days-terrarium']
   },
 
@@ -73,7 +73,7 @@ const entries = [
       { question: 'Why is my terrarium foggy all the time?', answer: 'Constant heavy fogging indicates excess moisture. Remove the lid for a few hours daily until condensation appears only in the morning.' },
       { question: 'Is white mold in terrarium dangerous?', answer: 'White fuzzy mold is common and usually harmless in small amounts. Remove affected material, improve airflow, and reduce moisture. It often resolves naturally.' }
     ],
-    relatedProducts: ['TER-001'],
+    relatedProducts: [],
     relatedArticles: ['closed-terrarium-water-cycle', 'terrarium-soil-guide']
   },
 
@@ -95,7 +95,7 @@ const entries = [
       { question: 'Can succulents go in closed terrariums?', answer: 'No. Succulents need dry conditions and airflow. The humidity in closed terrariums causes them to rot. Use open terrariums for succulents.' },
       { question: 'Which terrarium is easier to maintain?', answer: 'Closed terrariums are easier once established—they water themselves. Open terrariums need regular watering but are more forgiving of mistakes.' }
     ],
-    relatedProducts: ['TER-001'],
+    relatedProducts: [],
     relatedArticles: ['closed-terrarium-water-cycle', 'choosing-first-terrarium-plant']
   },
 
@@ -117,7 +117,7 @@ const entries = [
       { question: 'Should I open my new terrarium?', answer: 'Only if condensation is so heavy you cannot see inside. Otherwise, leave it sealed for the first 2-3 weeks to let the ecosystem stabilize.' },
       { question: 'Why are my terrarium leaves turning yellow?', answer: 'Some yellowing is normal as plants shed older leaves and adapt. If more than 20% of foliage yellows, check for overwatering or insufficient light.' }
     ],
-    relatedProducts: ['TER-001'],
+    relatedProducts: [],
     relatedArticles: ['closed-terrarium-water-cycle', 'reading-plant-health-signs']
   },
 
@@ -140,10 +140,10 @@ const entries = [
     metaDescription: 'The design philosophy behind EarthBox\'s 3D printed plant accessories. Precision, customization, and craft.',
     keywords: ['3D printed planters', 'custom plant pots Mumbai', '3D printed plant accessories'],
     faqs: [
-      { question: 'Are 3D printed planters durable?', answer: 'Yes. We use ABS and ASA plastics rated for outdoor use. With proper care, our planters last for years without degradation.' },
+      { question: 'Are 3D printed planters durable?', answer: 'Yes. We print in PETG for indoor pieces, ABS for sunny windows and ASA, which resists UV, for balconies. With proper care, our planters last for years.' },
       { question: 'Can you 3D print custom designs?', answer: 'Yes. Contact us with your specifications. We can modify existing designs or create entirely new forms for your space.' }
     ],
-    relatedProducts: ['PLT-001'],
+    relatedProducts: ['V1-PLT-005', 'V1-PLT-006'],
     relatedArticles: ['pla-vs-abs-plant-accessories', 'designing-drainage']
   },
 
@@ -157,15 +157,15 @@ const entries = [
     author: 'Aayush Lilani',
     excerpt: 'Different 3D printing materials have different properties. Understanding them helps you choose accessories that last.',
     keyQuestion: 'Which 3D printing material is best for planters?',
-    keyAnswer: 'ABS and ASA are best for planters—they resist UV, moisture, and temperature changes. PLA is biodegradable and may degrade with constant moisture. PETG offers a middle ground with good durability and easier printing.',
+    keyAnswer: 'PETG suits most indoor planters: it resists moisture and prints cleanly. ABS handles more heat, which suits sunny windows, and ASA resists UV, which suits balconies. PLA absorbs moisture and softens in heat, so it is a poor choice for long-term planters.',
     metaTitle: 'PLA vs ABS for Planters: 3D Printing Material Guide | EarthBox',
     metaDescription: 'Compare 3D printing materials for plant accessories. UV resistance, moisture tolerance, and plant safety explained.',
     keywords: ['3D printing materials plants', 'PLA vs ABS planters', 'plant-safe filament'],
     faqs: [
-      { question: 'Is PLA safe for plants?', answer: 'PLA is non-toxic and plant-safe, but it degrades with moisture over time. For outdoor or high-humidity use, choose ABS or ASA instead.' },
-      { question: 'Will 3D printed planters leach chemicals?', answer: 'Quality ABS, ASA, and PLA are food-safe grades and do not leach harmful chemicals. We use only certified materials.' }
+      { question: 'Is PLA safe for plants?', answer: 'Solid printed PLA is generally considered fine around plants, but it absorbs moisture and softens in heat over time. For humid, sunny or outdoor spots, PETG, ABS or ASA last longer.' },
+      { question: 'Will 3D printed planters leach chemicals?', answer: 'Solid printed plastics are generally considered stable around plants. Standard printing filaments and printed parts are not certified food-safe, so our pieces are made for plants, not for food or drink.' }
     ],
-    relatedProducts: ['PLT-001'],
+    relatedProducts: ['V1-PLT-006', 'V1-SUP-003'],
     relatedArticles: ['why-we-3d-print-planters', 'designing-drainage']
   },
 
@@ -187,7 +187,7 @@ const entries = [
       { question: 'Do your planters need drainage holes?', answer: 'Most of our planters include integrated drainage. For closed designs, we add internal reservoirs and wicking systems.' },
       { question: 'Can I use your planters without saucers?', answer: 'We recommend saucers for indoor use. Some designs include integrated catch trays that eliminate the need for separate saucers.' }
     ],
-    relatedProducts: ['PLT-001'],
+    relatedProducts: ['V1-PLT-005', 'V1-PLT-006'],
     relatedArticles: ['why-we-3d-print-planters', 'terrarium-soil-guide']
   },
 
@@ -235,7 +235,7 @@ const entries = [
       { question: 'Should I open my terrarium during monsoon?', answer: 'Yes, briefly. Open closed terrariums for 2-3 hours daily to release excess humidity and prevent mold growth.' },
       { question: 'Why does my terrarium get moldy in monsoon?', answer: 'High ambient humidity plus warmth creates perfect mold conditions. Increase ventilation and reduce watering during monsoon months.' }
     ],
-    relatedProducts: ['TER-001'],
+    relatedProducts: [],
     relatedArticles: ['rescue-overwatered-terrarium', 'mumbai-summer-indoor-plants']
   },
 
@@ -249,15 +249,15 @@ const entries = [
     author: 'Aayush Lilani',
     excerpt: 'Native plants adapt better to local conditions. These five Indian species make excellent terrarium inhabitants.',
     keyQuestion: 'Which Indian plants grow well in terrariums?',
-    keyAnswer: 'Selaginella (Indian spikemoss), Peperomia species native to Western Ghats, Pilea (aluminum plant), native ferns like Adiantum, and Indian fig (Ficus pumila) all thrive in terrarium conditions and are available locally.',
+    keyAnswer: 'Native spikemosses (Selaginella), Peperomia tetraphylla from the Western Ghats, maidenhair ferns (Adiantum), local mosses and brake ferns (Pteris) all suit terrarium conditions. Pilea cadierei and Ficus pumila are popular here too, but they are not native.',
     metaTitle: 'Indian Terrarium Plants: 5 Native Species Guide | EarthBox',
     metaDescription: 'Best native Indian plants for terrariums. Species from Western Ghats and tropical India that thrive in glass.',
     keywords: ['Indian terrarium plants', 'native plants terrariums India', 'Western Ghats terrarium'],
     faqs: [
-      { question: 'Where can I buy native terrarium plants in Mumbai?', answer: 'Visit nurseries in Dadar flower market, Matunga, or Versova. Local sellers often have Selaginella and native ferns.' },
-      { question: 'Are imported terrarium plants better?', answer: 'Not necessarily. Native plants adapt faster and require less adjustment. They also support local biodiversity.' }
+      { question: 'Where can I buy native terrarium plants in Mumbai?', answer: 'Visit nurseries in Dadar flower market, Matunga, or Versova. Local sellers often have Selaginella and ferns; ask which species, since many nursery spikemosses are not native.' },
+      { question: 'Are imported terrarium plants better?', answer: 'Not necessarily. Native plants often adapt faster and need less adjustment. They also support local biodiversity.' }
     ],
-    relatedProducts: ['TER-001'],
+    relatedProducts: [],
     relatedArticles: ['choosing-first-terrarium-plant', 'monsoon-terrarium-care-mumbai']
   },
 
@@ -279,7 +279,7 @@ const entries = [
       { question: 'How often should I water plants in Mumbai summer?', answer: 'Most indoor plants need water every 2-3 days in summer, compared to weekly in winter. Check soil moisture—water when the top inch is dry.' },
       { question: 'Should I run AC for my plants?', answer: 'Plants tolerate heat better than sudden temperature changes. If using AC, keep plants away from direct airflow and avoid drastic temperature swings.' }
     ],
-    relatedProducts: ['PLT-001'],
+    relatedProducts: ['V1-ACC-002', 'V1-ACC-001'],
     relatedArticles: ['understanding-light-guide', 'monsoon-terrarium-care-mumbai']
   },
 
@@ -293,15 +293,15 @@ const entries = [
     author: 'Aayush Lilani',
     excerpt: 'Finding quality terrarium materials in Mumbai requires knowing where to look. This guide covers moss, soil, and containers.',
     keyQuestion: 'Where can I buy terrarium supplies in Mumbai?',
-    keyAnswer: 'Dadar flower market for plants and moss. Crawford Market for glass containers. Matunga and Versova nurseries for specialty soil. Online: Ugaoo and Nurserylive deliver terrarium kits to Mumbai.',
+    keyAnswer: 'Dadar flower market for plants and moss. Crawford Market for glass containers. Matunga and Versova nurseries for specialty soil. Online plant nurseries also deliver supplies to Mumbai.',
     metaTitle: 'Terrarium Supplies Mumbai: Complete Sourcing Guide | EarthBox',
     metaDescription: 'Where to buy terrarium moss, soil, plants, and containers in Mumbai. Local markets and online options.',
     keywords: ['terrarium supplies Mumbai', 'moss buy Mumbai', 'terrarium materials India'],
     faqs: [
-      { question: 'Can I collect moss from Mumbai?', answer: 'Yes, during monsoon. Look in shaded areas of Sanjay Gandhi National Park edges or Aarey Colony. Collect sustainably—take small patches only.' },
+      { question: 'Can I collect moss from Mumbai?', answer: 'Only from your own garden or a space where you have permission—never from Sanjay Gandhi National Park, Aarey or other protected areas. The simplest option is to buy moss from a nursery. If you do collect, take small patches only.' },
       { question: 'Where to buy terrarium glass in Mumbai?', answer: 'Crawford Market has glass vendors. For premium containers, check Amazon or specialty home stores in Bandra and Khar.' }
     ],
-    relatedProducts: ['TER-001'],
+    relatedProducts: [],
     relatedArticles: ['native-indian-terrarium-plants', 'terrarium-soil-guide']
   },
 
@@ -327,7 +327,7 @@ const entries = [
       { question: 'What does quiet design mean?', answer: 'Quiet design creates objects that integrate into spaces without demanding attention. They reveal their qualities through use, not display.' },
       { question: 'Why focus on terrariums?', answer: 'Terrariums embody our philosophy—they are worlds contained in objects. They require patience, reward attention, and improve with time.' }
     ],
-    relatedProducts: ['TER-001'],
+    relatedProducts: [],
     relatedArticles: ['limited-editions-philosophy', 'designing-for-decades']
   },
 
@@ -349,7 +349,7 @@ const entries = [
       { question: 'Will sold-out designs return?', answer: 'No. When an edition sells out, it closes permanently. This ensures each piece remains special.' },
       { question: 'Can I request a custom version of old designs?', answer: 'Occasionally. Contact us to discuss—custom commissions are considered case by case.' }
     ],
-    relatedProducts: ['TER-001', 'PLT-001'],
+    relatedProducts: [],
     relatedArticles: ['quiet-objects-manifesto', 'specimen-card-documentation']
   },
 
@@ -371,7 +371,7 @@ const entries = [
       { question: 'Why include paper documentation?', answer: 'Digital records disappear. A physical card stays with the object, connecting future owners to its origin.' },
       { question: 'What information is on the specimen card?', answer: 'Edition number (e.g., 23/50), production date, materials, dimensions, care instructions, and maker signature.' }
     ],
-    relatedProducts: ['TER-001', 'PLT-001'],
+    relatedProducts: [],
     relatedArticles: ['limited-editions-philosophy', 'quiet-objects-manifesto']
   },
 
@@ -393,7 +393,7 @@ const entries = [
       { question: 'Why are EarthBox products neutral colors?', answer: 'Neutral colors integrate into any space and do not date. Trends in color change yearly—neutrals remain relevant for decades.' },
       { question: 'How do you test if a design is timeless?', answer: 'We compare against archival images. If a form echoes dated aesthetics from any era, we simplify further.' }
     ],
-    relatedProducts: ['TER-001', 'PLT-001'],
+    relatedProducts: [],
     relatedArticles: ['quiet-objects-manifesto', 'limited-editions-philosophy']
   },
 
@@ -419,7 +419,7 @@ const entries = [
       { question: 'What is bright indirect light?', answer: 'Bright indirect light means strong ambient light without direct sun rays hitting leaves. Near a sunny window but not in the sun beam.' },
       { question: 'Can plants survive in windowless rooms?', answer: 'Very few plants survive without natural light. Pothos and snake plants tolerate low light but need some. Grow lights can supplement completely dark spaces.' }
     ],
-    relatedProducts: ['PLT-001'],
+    relatedProducts: [],
     relatedArticles: ['mumbai-summer-indoor-plants', 'reading-plant-health-signs']
   },
 
@@ -433,15 +433,15 @@ const entries = [
     author: 'Aayush Lilani',
     excerpt: 'Terrarium soil must balance drainage and moisture retention. The wrong mix causes root rot or dehydration.',
     keyQuestion: 'What soil should I use for a terrarium?',
-    keyAnswer: 'Mix equal parts potting soil, perlite, and orchid bark for drainage. Add activated charcoal to prevent odors. Closed terrariums need more drainage; open terrariums can be slightly denser. Avoid garden soil—it compacts and may contain pests.',
+    keyAnswer: 'Mix 2 parts coco coir, 1 part perlite, 1 part finely chopped orchid bark and ½ part worm castings, over a drainage layer. A thin layer of activated charcoal may help absorb odours. Avoid garden soil—it compacts and may carry pests—and don\'t use plain potting mix on its own, which holds too much water.',
     metaTitle: 'Terrarium Soil Mix Guide: Perfect Substrate | EarthBox',
     metaDescription: 'How to create the ideal terrarium soil mix. Drainage, moisture retention, and preventing root rot.',
     keywords: ['terrarium soil mix', 'substrate terrarium', 'terrarium drainage layer'],
     faqs: [
-      { question: 'Do I need charcoal in terrarium soil?', answer: 'Charcoal is not essential but helps absorb odors and toxins in closed terrariums. Add a thin layer above drainage rocks.' },
-      { question: 'Can I use regular potting soil for terrariums?', answer: 'Yes, but amend it. Mix with perlite and bark for better drainage. Pure potting soil retains too much moisture for closed terrariums.' }
+      { question: 'Do I need charcoal in terrarium soil?', answer: 'Charcoal is not essential. It may help absorb odours in closed terrariums, though the evidence is limited. If you use it, add a thin layer above the drainage layer.' },
+      { question: 'Can I use regular potting soil for terrariums?', answer: 'Not on its own—plain potting mix holds too much water for a closed terrarium. If it is what you have, amend it generously with perlite and bark. Our coir-based mix is the more reliable choice.' }
     ],
-    relatedProducts: ['TER-001'],
+    relatedProducts: [],
     relatedArticles: ['closed-terrarium-water-cycle', 'terrarium-supplies-mumbai']
   },
 
@@ -463,7 +463,7 @@ const entries = [
       { question: 'Why are my plant leaves turning yellow?', answer: 'Most commonly overwatering. Check soil—if wet, reduce watering. Yellow leaves with green veins suggest nutrient deficiency.' },
       { question: 'Why does my plant have brown leaf tips?', answer: 'Usually low humidity or underwatering. Crispy tips indicate the plant is losing moisture faster than roots absorb it.' }
     ],
-    relatedProducts: ['PLT-001'],
+    relatedProducts: ['V1-ACC-001', 'V1-ACC-002'],
     relatedArticles: ['understanding-light-guide', 'rescue-overwatered-terrarium']
   },
 
@@ -485,7 +485,7 @@ const entries = [
       { question: 'Is moss good for beginners?', answer: 'Yes. Moss thrives in terrarium humidity, spreads naturally, and indicates moisture levels—it browns when too dry, greens when watered.' },
       { question: 'Should I start with one plant or several?', answer: 'Start with 2-3 small plants. This creates visual interest while leaving room for growth. Overcrowding causes problems as plants mature.' }
     ],
-    relatedProducts: ['TER-001'],
+    relatedProducts: [],
     relatedArticles: ['native-indian-terrarium-plants', 'first-30-days-terrarium']
   },
 

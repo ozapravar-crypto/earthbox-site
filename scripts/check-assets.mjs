@@ -24,9 +24,6 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // ponytail: remove an entry the day its file lands, or the check goes blind to it.
 /** @type {Record<string, string>} */
 const KNOWN_MISSING = {
-  'assets/v1/bird-feeder.webp': 'site-tue',
-  'assets/v1/bird-feeder-300.webp': 'site-tue',
-  'assets/v1/bird-feeder-600.webp': 'site-tue'
 };
 
 const exists = (/** @type {string} */ p) => access(path.join(ROOT, p)).then(() => true, () => false);

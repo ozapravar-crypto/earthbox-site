@@ -226,7 +226,7 @@ export const designNotesArticles = {
 
     <p><strong>Substrate composition.</strong> The specific mix of materials forming the foundation layer. Knowing this helps if you ever need to refresh the substrate or troubleshoot drainage issues.</p>
 
-    <p><strong>Vessel specifications.</strong> Dimensions, material (which PLA formulation, from which supplier), print settings. Complete transparency about what the object is made of.</p>
+    <p><strong>Vessel specifications.</strong> Dimensions, material (which filament, from which supplier), print settings. Complete transparency about what the object is made of.</p>
 
     <p><strong>Care instructions.</strong> Condensed guidance specific to this exact configuration of plants and vessel, not generic terrarium advice.</p>
 
@@ -346,7 +346,7 @@ export const designNotesArticles = {
 
     <p><strong>Glass.</strong> Our terrarium vessels use borosilicate glass—the same type used in laboratory equipment. It's more expensive than standard soda-lime glass, but it resists thermal shock, doesn't cloud with age, and maintains clarity indefinitely. A borosilicate terrarium will look the same in fifty years as it does today.</p>
 
-    <p><strong>PLA for printed components.</strong> We use high-quality PLA bioplastic specifically because it's stable. Unlike some biodegradable alternatives that break down unpredictably, properly formulated PLA maintains its structure for decades under normal conditions. It only degrades in industrial composting environments.</p>
+    <p><strong>Plastics matched to place.</strong> We print in PETG for indoor pieces, ABS for sunny windows and ASA for balconies, choosing each plastic for the heat, moisture and sun it will face rather than for what is cheapest to print.</p>
 
     <figure>
       <div class="image-placeholder">Material samples showing aging characteristics</div>

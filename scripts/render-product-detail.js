@@ -14,7 +14,7 @@ import { esc, rupees, track, savedPlace, rememberPlace, radioKeys } from './util
 import { volumeOne as v1Products, categories as v1Categories, materials, photoPath, places } from '../data/volume-one.js';
 import { volumeTwo } from '../data/upcoming.js';
 import { findProduct, productMeta } from './product-meta.js';
-import { getReviews, getAverageRating } from '../data/reviews.js';
+import { getReviews, getAverageRating, REVIEWS_CONFIRMED } from '../data/reviews.js';
 import { observeReveals } from './reveal.js';
 import { enquiryAltHTML } from './enquiry-form.js';
 import { syncCartButtons } from './cart.js';
@@ -204,7 +204,7 @@ function renderReviewsSection(sku){
             </header>
             <div class="pd-review-rating">${renderStars(r.rating)}</div>
             <p class="pd-review-text">${r.text}</p>
-            ${r.verified ? `
+            ${REVIEWS_CONFIRMED && r.verified ? `
               <span class="pd-review-verified">
                 <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false"><path d="M10 3L4.5 8.5 2 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Verified Purchase
@@ -659,21 +659,21 @@ function renderProduct(id){
   host.querySelectorAll('article, .pd-mobile-cta').forEach(el => el.remove());
 
   if (!id){
-    document.getElementById('pdLoading')?.setAttribute('hidden', 'true');
+    document.getElementById('pdLoading')?.remove();   // removed, not hidden: its crawler copy has an h1 (one h1 per page)
     document.getElementById('pdNotFound')?.removeAttribute('hidden');
     return;
   }
 
   const found = findProduct(id);
   if (!found){
-    document.getElementById('pdLoading')?.setAttribute('hidden', 'true');
+    document.getElementById('pdLoading')?.remove();   // removed, not hidden: its crawler copy has an h1 (one h1 per page)
     document.getElementById('pdNotFound')?.removeAttribute('hidden');
     return;
   }
 
-  const { name, description, photo } = productMeta(found);
+  const { name, title, description, photo } = productMeta(found);
 
-  document.title = `EarthBox — ${name}`;
+  document.title = title;
 
   // Update meta tags for social sharing
   /**
@@ -685,7 +685,7 @@ function renderProduct(id){
     if (el) el.setAttribute('content', content);
   };
   updateMeta('meta[name="description"]', description.slice(0, 160));
-  updateMeta('meta[property="og:title"]', `EarthBox — ${name}`);
+  updateMeta('meta[property="og:title"]', title);
   updateMeta('meta[property="og:description"]', description.slice(0, 160));
   updateMeta('meta[property="og:image"]', `${SITE}${photo}`);
   updateMeta('meta[name="twitter:title"]', `EarthBox — ${name}`);
@@ -697,8 +697,8 @@ function renderProduct(id){
   else                             html = renderVivarium(found.data);
 
   // Hide, don't remove: a later bad id must still be able to show "not found".
-  document.getElementById('pdLoading')?.setAttribute('hidden', 'true');
-  document.getElementById('pdNotFound')?.setAttribute('hidden', 'true');
+  document.getElementById('pdLoading')?.remove();   // removed, not hidden: its crawler copy has an h1 (one h1 per page)
+  document.getElementById('pdNotFound')?.remove();
   host.insertAdjacentHTML('beforeend', html);
 
   // Initialize reveals for dynamically added content

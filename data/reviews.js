@@ -10,6 +10,12 @@
 //   - verified: boolean (purchased through EarthBox)
 // ─────────────────────────────────────────────────────────────────────
 
+// Whether the studio has confirmed these are real customers (Aayush, question 11).
+// Until then no review is badged "Verified Purchase": India's fake-review rules
+// (2023 standard) apply, and the reviews stay out of schema (seo.mjs).
+/** @type {boolean} */
+export const REVIEWS_CONFIRMED = false;
+
 const reviews = {
   // ═══ Volume I · 3D Printed Products ═══
 

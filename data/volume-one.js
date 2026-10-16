@@ -22,8 +22,11 @@ export const categories = [
  * @param {{ category: string, photo: string }} p
  * @param {string} [size]  '300' | '600' for the responsive copies
  */
+// A piece still waiting for its photo (photo: '') shows the studio mark rather
+// than a broken image, in the catalogue, cart, share card and schema.
 export const photoPath = (p, size = '') =>
-  `${p.category === 'plant-packets' ? '/assets/plants' : '/assets/v1'}/${size ? p.photo.replace('.webp', `-${size}.webp`) : p.photo}`;
+  !p.photo ? `/assets/logo_with_white_bg${size ? `-${size}` : ''}.webp`
+  : `${p.category === 'plant-packets' ? '/assets/plants' : '/assets/v1'}/${size ? p.photo.replace('.webp', `-${size}.webp`) : p.photo}`;
 
 export const materials = [
   { id: 'petg', name: 'PETG', description: 'Standard indoor, glossy finish' },
@@ -252,7 +255,7 @@ export const volumeOne = [
     name: 'Bird Feeder',
     category: 'accessories',
     description: 'A minimalist bird feeder designed to attract small birds to your garden or balcony. Simple, functional design that blends into modern outdoor spaces while providing a reliable feeding station for local wildlife.',
-    photo: 'bird-feeder.webp',
+    photo: '',   // photo still to come (Aayush, question 15; bead site-tue)
     pricing: { petg: 399, abs: 499, asa: 599 },
     status: 'available'
   },

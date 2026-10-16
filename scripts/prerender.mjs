@@ -26,7 +26,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const { SITE } = /** @type {typeof import('../data/site.js')} */ (await import(path.join(ROOT, 'data/site.js')));
 const { articles, categories } = /** @type {typeof import('../data/articles.js')} */ (await import(path.join(ROOT, 'data/articles.js')));
 
-const { esc } = /** @type {typeof import('./util.js')} */ (await import(path.join(ROOT, 'scripts/util.js')));
+const { esc, rupees } = /** @type {typeof import('./util.js')} */ (await import(path.join(ROOT, 'scripts/util.js')));
+const { findProduct, productMeta } = /** @type {typeof import('./product-meta.js')} */ (await import(path.join(ROOT, 'scripts/product-meta.js')));
 
 /** @typedef {import('../data/articles.js').Article} Article */
 
@@ -78,7 +79,34 @@ function body(a) {
       </div>
     </section>` : '';
 
-  return (a.body ?? '') + faqs + related;
+  return (a.body ?? '') + faqs + studioHTML(a) + related;
+}
+
+// "From the studio": the orderable pieces an article is about, plus the
+// studio's own route for its topic (SEO audit P1-3: no article linked to
+// anything EarthBox sells). Plain links, written at build time, so crawlers
+// that don't run JavaScript follow them too.
+/** @type {Record<string, { href: string, text: string }[]>} */
+const STUDIO = {
+  'terrarium-care':     [{ href: '/maker', text: 'Design your own terrarium in the Maker' }, { href: '/care', text: 'Care: refill kits and visits in Mumbai' }],
+  'plant-fundamentals': [{ href: '/maker', text: 'Design your own terrarium in the Maker' }, { href: '/care', text: 'Care: refill kits and visits in Mumbai' }],
+  'mumbai-plants':      [{ href: '/care', text: 'Care: refill kits and visits in Mumbai' }, { href: '/products', text: 'The catalogue' }],
+  '3d-printing':        [{ href: '/products', text: 'The catalogue: 3D-printed pieces, made to order' }],
+  'design-notes':       [{ href: '/products', text: 'The catalogue' }, { href: '/maker', text: 'The Maker' }]
+};
+/** @param {Article} a */
+function studioHTML(a){
+  const pieces = a.relatedProducts.map(sku => findProduct(sku)).filter(f => f !== null).map(f => ({ f, m: productMeta(f) })).filter(({ m }) => m.available);
+  const routes = STUDIO[a.category] ?? [];
+  if (!pieces.length && !routes.length) return '';
+  return `
+    <section class="studio-section">
+      <h2>From the studio</h2>
+      <ul class="studio-links">
+        ${pieces.map(({ f, m }) => `<li><a href="/product/${encodeURIComponent(f.data.sku)}">${esc(m.name)}</a> <span class="caption">from ${rupees(Math.min(...m.prices))} · made to order</span></li>`).join('')}
+        ${routes.map(r => `<li><a href="${r.href}">${esc(r.text)}</a></li>`).join('')}
+      </ul>
+    </section>`;
 }
 
 /** @param {Article & { featuredImage?: string, updatedDate?: string }} a  neither is set yet: per-article images are bead site-13o.6 */

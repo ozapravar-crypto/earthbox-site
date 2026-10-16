@@ -21,7 +21,7 @@
 import { readFile, writeFile, readdir, mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SITE, EMAIL, PHONE_DISPLAY, ADDRESS, NAV } from '../data/site.js';
+import { SITE, EMAIL, PHONE, PHONE_DISPLAY, ADDRESS, NAV } from '../data/site.js';
 import { articles } from '../data/articles.js';
 import { categories } from '../data/volume-one.js';
 import { kits, visit, coverage } from '../data/care.js';
@@ -40,7 +40,31 @@ const withLd = (/** @type {string} */ html, /** @type {object} */ o) => html.inc
 const attr = (/** @type {string} */ s) => esc(s).replace(/"/g, '&quot;');
 const short = (/** @type {string} */ s, n = 158) => (s.length <= n ? s : s.slice(0, s.lastIndexOf(' ', n)) + '…');
 const brand = { '@type': 'Brand', name: 'EarthBox' };
-const seller = { '@type': 'Organization', name: 'EarthBox', url: SITE };
+// One business entity, one @id, referenced everywhere (SEO audit P2-4: the
+// home and About pages described it twice, differently).
+const BUSINESS_ID = `${SITE}/#business`;
+const seller = { '@type': 'Organization', '@id': BUSINESS_ID, name: 'EarthBox', url: SITE };
+/** @param {boolean} catalogue */
+const business = (catalogue) => ({
+  '@context': 'https://schema.org', '@type': 'LocalBusiness', '@id': BUSINESS_ID,
+  name: 'EarthBox', alternateName: 'EarthBox Mumbai', url: SITE,
+  description: 'Mumbai-based studio making terrariums and 3D-printed plant accessories as design objects, with a terrarium Maker and plant care.',
+  image: `${SITE}/assets/logo.webp`, logo: `${SITE}/assets/logo.webp`,
+  founder: { '@type': 'Person', name: 'Aayush Lilani', sameAs: ['https://www.linkedin.com/in/aayush-lilani-13a329292/'] },
+  address: { '@type': 'PostalAddress', streetAddress: 'Kandivali', addressLocality: 'Mumbai', addressRegion: 'Maharashtra', postalCode: '400101', addressCountry: 'IN' },
+  geo: { '@type': 'GeoCoordinates', latitude: 19.2047, longitude: 72.8567 },
+  telephone: `+${PHONE}`, email: EMAIL,
+  sameAs: ['https://www.instagram.com/earthbox_india'],
+  areaServed: { '@type': 'City', name: coverage.city },
+  ...(catalogue && { hasOfferCatalog: { '@type': 'OfferCatalog', name: 'EarthBox Catalogue', itemListElement: [
+    { '@type': 'OfferCatalog', name: 'Volume I · 3D-printed plant accessories', url: `${SITE}/products` },
+    { '@type': 'OfferCatalog', name: 'Volume II · Elemental Boxes (coming soon)', url: `${SITE}/products` },
+    { '@type': 'OfferCatalog', name: 'Care · refill kits and plant-care visits', url: `${SITE}/care` },
+    { '@type': 'OfferCatalog', name: 'The Maker · design your own terrarium', url: `${SITE}/maker` }] } })
+});
+/** @param {string} html @param {object} o */
+const withBusiness = (html, o) => html.replace(/<!-- LocalBusiness Schema -->\s*<script type="application\/ld\+json">[\s\S]*?<\/script>/,
+  () => `<!-- LocalBusiness Schema -->\n  <script type="application/ld+json">${JSON.stringify(o)}</script>`);
 
 // ── Product pages ────────────────────────────────────────────────────
 const products = allProducts().map(f => ({ ...f, ...productMeta(f), url: `${SITE}/product/${encodeURIComponent(f.data.sku)}` }));
@@ -71,7 +95,7 @@ function productSchema(p){
 
 const shell = await readFile(path.join(ROOT, 'product.html'), 'utf8');
 for (const p of products) {
-  const title = `EarthBox — ${p.name}`, desc = short(p.description);
+  const title = p.title, desc = short(p.description);
   const html = shell
     .replace(/(href|src)="(assets|styles|scripts)\//g, '$1="/$2/')          // the page lives one folder down
     .replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`)
@@ -96,18 +120,31 @@ for (const p of products) {
 out.set('product.html', shell.replace(/(<meta name="robots" content=")[^"]*/, '$1noindex, follow'));
 
 // ── Catalogue, Journal, Care schema ──────────────────────────────────
-const edit = async (/** @type {string} */ f, /** @type {object} */ o) => out.set(f, withLd(await readFile(path.join(ROOT, f), 'utf8'), o));
+// The catalogue and Journal draw their cards with JavaScript. Until then
+// (and for crawlers that never run it) their list hosts hold the same items
+// as plain links, which the page script replaces (SEO audit P1-3).
+/** @param {string} html @param {string} id @param {string} items */
+const seedList = (html, id, items) => html.replace(new RegExp(`(<div id="${id}"[^>]*>)[\\s\\S]*?(</div>)`), (_, open, close) => `${open}\n        <ul class="seo-list">${items}</ul>\n      ${close}`);
+/** @param {string} f @param {object} o @param {(html: string) => string} [seed] */
+const edit = async (f, o, seed = (/** @type {string} */ h) => h) => out.set(f, withLd(seed(await readFile(path.join(ROOT, f), 'utf8')), o));
 await edit('products.html', { '@context': 'https://schema.org', '@type': 'ItemList', name: 'EarthBox Catalogue',
-  itemListElement: products.map((p, i) => ({ '@type': 'ListItem', position: i + 1, url: p.url, name: p.name })) });
+  itemListElement: products.map((p, i) => ({ '@type': 'ListItem', position: i + 1, url: p.url, name: p.name })) },
+  (h) => seedList(h, 'volumeOneList', products.map(p => `<li><a href="/product/${encodeURIComponent(p.data.sku)}">${esc(p.name)}</a> · ${esc(priceText(p))}</li>`).join('')));
 await edit('blog.html', { '@context': 'https://schema.org', '@type': 'Blog', name: 'EarthBox Journal', url: `${SITE}/blog`,
   publisher: seller, blogPost: articles.map(a => ({ '@type': 'BlogPosting', headline: a.title, url: `${SITE}/blog/${a.slug}`,
-    datePublished: a.publishDate, author: { '@type': 'Person', name: a.author } })) });
+    datePublished: a.publishDate, author: { '@type': 'Person', name: a.author } })) },
+  (h) => seedList(h, 'journalGrid', articles.map(a => `<li><a href="/blog/${a.slug}">${esc(a.title)}</a></li>`).join('')));
 await edit('care.html', { '@context': 'https://schema.org', '@type': 'Service', name: 'EarthBox Care',
   serviceType: 'Terrarium and indoor plant maintenance', url: `${SITE}/care`, provider: seller,
   areaServed: { '@type': 'City', name: coverage.city },
   description: `Home visit plans (one visit, or 3, 6 or 12 months; every 2 weeks, monthly or quarterly) and refill kits matched to your plants. Each visit: ${visit.includes.join('; ').toLowerCase()}. Businesses get a quote.`,
   hasOfferCatalog: { '@type': 'OfferCatalog', name: 'Refill kits', itemListElement: kits.map(k => ({ '@type': 'Offer',
     itemOffered: { '@type': 'Product', name: k.name, description: `${k.for}: ${k.contents.join(', ')}` } })) } });
+
+for (const [f, cat] of /** @type {[string, boolean][]} */ ([['index.html', true], ['about.html', false]])) {
+  const html = out.get(f) ?? await readFile(path.join(ROOT, f), 'utf8');
+  out.set(f, withBusiness(html, business(cat)));
+}
 
 // ── sitemap.xml ──────────────────────────────────────────────────────
 /** @type {{ loc: string, lastmod?: string }[]} */

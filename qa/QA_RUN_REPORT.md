@@ -216,3 +216,7 @@ QA-001 to QA-007, QA-009 and QA-013. Details, root causes and evidence are in `Q
   - Visual baselines were refreshed on purpose, all 39 of them. Reviewed: product, cart, cookie banner, Journal, Maker plants.
   - Full Playwright suite: 323 passed and 1 failed (the Maker review phone screenshot). It passed when rerun alone, the known load flake.
 - **Note:** the home phone baseline shows no hero text. That's a test artefact: `visual.spec` turns animations off, so the hero fade-in never runs. The live site shows the text.
+
+## Follow-up · SEO/GEO/AEO audit fixes, 16 Oct 2026 (QA-019, site-1c6)
+- **What changed:** see QA-019.
+- **Checks:** `npm test` and `npm run build` pass, including the new related-product check. Full Playwright suite (desktop, phone, tablet): 327 passed, 78 skipped (the live-only ones), 0 failed.

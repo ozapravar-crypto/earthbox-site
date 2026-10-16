@@ -16,7 +16,7 @@ export const mumbaiPlantsArticles = {
   <figcaption>Monthly humidity variation in Mumbai. Monsoon months (June-September) show sustained 85-95% levels.</figcaption>
 </figure>
 
-<p>This matters because the terrarium water cycle depends on humidity differential. When internal and external humidity equalize:</p>
+<p>This matters because condensation—the visible part of the terrarium water cycle—forms when the glass is cooler than the humid air inside. In monsoon the room, the glass and the air inside sit at similar temperatures, and the air outside is nearly as humid as the air inside. As a result:</p>
 <ul>
   <li>Condensation patterns change or disappear</li>
   <li>Water doesn't cycle as efficiently</li>
@@ -60,7 +60,7 @@ export const mumbaiPlantsArticles = {
 <p><strong>If mold appears:</strong></p>
 <ul>
   <li>Remove affected material with tweezers</li>
-  <li>Spray with diluted hydrogen peroxide (1:4 with water)</li>
+  <li>Spray lightly with diluted hydrogen peroxide (1 part 3% peroxide to 4 parts water)</li>
   <li>Leave lid open for 24-48 hours</li>
   <li>Monitor closely for recurrence</li>
 </ul>
@@ -140,22 +140,22 @@ export const mumbaiPlantsArticles = {
 `,
 
 'native-indian-terrarium-plants': `
-<p><strong>Which Indian plants grow well in terrariums?</strong> Selaginella (Indian spikemoss), Peperomia species native to Western Ghats, Pilea (aluminum plant), native ferns like Adiantum, and Indian fig (Ficus pumila) all thrive in terrarium conditions and are available locally.</p>
+<p><strong>Which Indian plants grow well in terrariums?</strong> Native spikemosses (Selaginella), Peperomia tetraphylla from the Western Ghats, maidenhair ferns (Adiantum), local mosses and brake ferns (Pteris) all suit terrarium conditions. Pilea cadierei and Ficus pumila are popular here too, but they are not native.</p>
 
-<p>Why import plants from Southeast Asian nurseries when India's own forests contain perfect terrarium candidates? Native Indian plants adapt faster, need less adjustment, and connect your terrarium to local ecology. Here are five species—all available in Mumbai—that excel in closed glass environments.</p>
+<p>Why import plants from Southeast Asian nurseries when India's own forests contain perfect terrarium candidates? Native Indian plants often settle in faster, need less adjustment, and connect your terrarium to local ecology. Here are five native plants that do well in closed glass environments, most of which you can find in Mumbai nurseries.</p>
 
 <h2>1. Selaginella (Indian Spikemoss)</h2>
 
-<p>Multiple Selaginella species grow wild in India's Western Ghats—the same mountains visible from Mumbai on clear days. These feathery, prehistoric-looking plants thrive in terrarium humidity.</p>
+<p>Several Selaginella species grow wild in India, including in the Western Ghats—the same mountains visible from Mumbai on clear days. The best known is <em>Selaginella bryopteris</em>, known as sanjeevani. These feathery, prehistoric-looking plants thrive in terrarium humidity.</p>
 
 <figure>
   <div class="image-placeholder">Photo: Selaginella species comparison</div>
-  <figcaption>Three Selaginella varieties commonly found in Mumbai nurseries: S. kraussiana, S. uncinata, S. moellendorffii.</figcaption>
+  <figcaption>The spikemosses most common in Mumbai nurseries, S. kraussiana (from Africa) and S. uncinata (from China), are not native. Ask for local species where you can.</figcaption>
 </figure>
 
 <p><strong>Why it works:</strong></p>
 <ul>
-  <li>Native to humid Indian forests—no adjustment period</li>
+  <li>Native species already know India's heat and monsoon</li>
   <li>Tolerates low light (forest floor plant)</li>
   <li>Spreads to fill spaces naturally</li>
   <li>Indicates moisture levels (curls when dry)</li>
@@ -163,25 +163,24 @@ export const mumbaiPlantsArticles = {
 
 <p><strong>Care notes:</strong></p>
 <ul>
-  <li>Keep consistently moist—doesn't tolerate drying</li>
+  <li>Keep consistently moist—most species brown if left to dry</li>
   <li>Avoid direct sunlight</li>
   <li>Trim if it becomes too vigorous</li>
 </ul>
 
 <h2>2. Peperomia Species</h2>
 
-<p>Several Peperomia species are native to India, including varieties from the Western Ghats and Northeastern states. These compact plants with interesting foliage are terrarium staples worldwide—and some of the best are Indian.</p>
+<p>Several Peperomia species are native to India, including species from the Western Ghats and Northeastern states. These compact plants with interesting foliage are terrarium staples worldwide.</p>
 
-<p><strong>Recommended species:</strong></p>
+<p><strong>Species to know:</strong></p>
 <ul>
-  <li><strong>Peperomia pellucida:</strong> Translucent stems, heart-shaped leaves</li>
-  <li><strong>Peperomia reflexa:</strong> Trailing habit, small leaves</li>
-  <li><strong>Peperomia tetraphylla:</strong> Four-leaf clusters, compact</li>
+  <li><strong>Peperomia tetraphylla:</strong> Native. Small leaves in clusters of four, compact; grows on mossy trees and rocks in the Western Ghats</li>
+  <li><strong>Peperomia pellucida:</strong> Not native—it comes from the tropical Americas—but it has naturalised across India as a monsoon weed. Translucent stems, heart-shaped leaves</li>
 </ul>
 
 <figure>
   <div class="image-placeholder">Photo: Native Peperomia varieties</div>
-  <figcaption>Native Peperomia species showing range of leaf shapes and textures.</figcaption>
+  <figcaption>Peperomia species showing a range of leaf shapes and textures.</figcaption>
 </figure>
 
 <p><strong>Care notes:</strong></p>
@@ -192,7 +191,7 @@ export const mumbaiPlantsArticles = {
 </ul>
 
 <blockquote>
-  <p>"People import exotic Peperomia when native species grow as weeds in Matheran. Local plants know local conditions."</p>
+  <p>"People import exotic Peperomia when native species grow on the mossy trees of the Western Ghats. Local plants know local conditions."</p>
 </blockquote>
 
 <h2>3. Adiantum (Maidenhair Fern)</h2>
@@ -223,56 +222,61 @@ export const mumbaiPlantsArticles = {
   <p>Look for Adiantum at Dadar flower market during monsoon season. Also grows wild at the edges of Aarey Colony—observe rather than collect from protected areas.</p>
 </div>
 
-<h2>4. Pilea (Aluminum Plant)</h2>
+<h2>4. Local Mosses</h2>
 
-<p>Pilea cadierei—called aluminum plant for its silvery leaf markings—has naturalized in parts of India. It combines ease of care with striking visual interest.</p>
+<p>The mosses that turn Mumbai's walls and tree trunks green each monsoon are local plants. In a closed terrarium they carpet soil and stone, and their colour tells you how moist the system is.</p>
 
 <p><strong>Why it works:</strong></p>
 <ul>
-  <li>Tolerates terrarium humidity without issues</li>
-  <li>Compact growth suits small containers</li>
-  <li>Silver markings add visual contrast to green companions</li>
-  <li>Readily available in Mumbai nurseries</li>
+  <li>Thrives in the humidity a closed terrarium holds</li>
+  <li>Needs little light and no feeding</li>
+  <li>Shows moisture at a glance—greens when moist, browns when dry</li>
 </ul>
 
 <figure>
-  <div class="image-placeholder">Photo: Pilea cadierei detail</div>
-  <figcaption>Silvery patterns on Pilea leaves—natural artwork requiring no effort.</figcaption>
+  <div class="image-placeholder">Photo: Moss carpet in terrarium</div>
+  <figcaption>A moss carpet softening stone and soil.</figcaption>
 </figure>
 
 <p><strong>Care notes:</strong></p>
 <ul>
-  <li>Pinch growing tips to encourage bushiness</li>
-  <li>Appreciates slightly more light than ferns</li>
-  <li>Propagates easily from stem cuttings</li>
+  <li>Press firmly onto moist soil so it makes contact</li>
+  <li>Avoid direct sunlight</li>
+  <li>Quarantine new moss for a week or two to check for pests</li>
 </ul>
 
-<h2>5. Ficus pumila (Indian Fig)</h2>
+<div class="callout">
+  <div class="callout-title">Sourcing Moss</div>
+  <p>Buy moss from a nursery, or collect only from your own garden or a space where you have permission. Never collect from Sanjay Gandhi National Park, Aarey or any other protected area.</p>
+</div>
 
-<p>The creeping fig—Ficus pumila—climbs walls throughout Indian cities. In a terrarium, it provides living architecture, climbing backgrounds and covering surfaces.</p>
+<h2>5. Pteris (Brake Ferns)</h2>
+
+<p>Brake ferns are common in Indian nurseries, and <em>Pteris cretica</em> grows wild in India's hill forests. Compact forms with white-striped fronds suit terrariums.</p>
 
 <p><strong>Why it works:</strong></p>
 <ul>
-  <li>Vigorous grower—establishes quickly</li>
-  <li>Creates vertical interest other plants can't</li>
-  <li>Native adaptation to Indian humidity patterns</li>
+  <li>Enjoys the steady humidity of a closed terrarium</li>
+  <li>Tolerates the lower light of an indoor shelf</li>
+  <li>Adds height and a different leaf shape to moss and spikemoss</li>
 </ul>
 
 <figure>
-  <div class="image-placeholder">Photo: Ficus pumila climbing in terrarium</div>
-  <figcaption>Ficus pumila climbing a branch, creating living architecture.</figcaption>
+  <div class="image-placeholder">Photo: Pteris fern in terrarium</div>
+  <figcaption>A brake fern adding height behind a moss foreground.</figcaption>
 </figure>
 
 <p><strong>Care notes:</strong></p>
 <ul>
-  <li>Requires regular trimming—grows fast</li>
-  <li>Can dominate smaller terrariums if unchecked</li>
-  <li>Works best in larger containers with vertical elements</li>
+  <li>Keep the soil moist but not waterlogged</li>
+  <li>Trim old fronds at the base</li>
+  <li>Best in medium to large containers—it can outgrow small jars</li>
 </ul>
 
-<blockquote>
-  <p>"Ficus pumila grows on every other building in Mumbai. It knows this climate. In a terrarium, it performs even better with consistent humidity."</p>
-</blockquote>
+<div class="callout">
+  <div class="callout-title">Popular, but Not Native</div>
+  <p>Two plants often sold as local terrarium plants are not native to India. Pilea cadierei (aluminum plant) comes from Vietnam and China. Ficus pumila (creeping fig) comes from East Asia, and it is not the "Indian fig". Both are widely grown here and do well in terrariums—just choose them knowing where they're from.</p>
+</div>
 
 <h2>Where to Source Native Plants</h2>
 
@@ -282,7 +286,7 @@ export const mumbaiPlantsArticles = {
   <li><strong>Dadar flower market:</strong> Best selection during monsoon</li>
   <li><strong>Matunga nurseries:</strong> Several shops specialize in foliage plants</li>
   <li><strong>Versova nurseries:</strong> Good for ferns and moisture-loving species</li>
-  <li><strong>Online:</strong> Ugaoo and Nurserylive ship to Mumbai</li>
+  <li><strong>Online plant nurseries:</strong> Many ship to Mumbai</li>
 </ul>
 
 <p>When purchasing, look for:</p>
@@ -294,7 +298,7 @@ export const mumbaiPlantsArticles = {
 
 <h2>The Case for Native Plants</h2>
 
-<p>Imported plants look exotic but often struggle with local conditions. Native species know Mumbai's heat, humidity patterns, and light quality. They need less adjustment, show less stress, and connect your terrarium to the ecology outside your window.</p>
+<p>Imported plants look exotic but can struggle with local conditions. Native species know Mumbai's heat, humidity patterns, and light quality. They need less adjustment, show less stress, and connect your terrarium to the ecology outside your window.</p>
 
 <p>Every terrarium containing native plants is a small conservation act—appreciation of Indian biodiversity, support for local nurseries, and proof that beauty doesn't require importation.</p>
 `,
@@ -450,7 +454,7 @@ export const mumbaiPlantsArticles = {
 `,
 
 'terrarium-supplies-mumbai': `
-<p><strong>Where can I buy terrarium supplies in Mumbai?</strong> Dadar flower market for plants and moss. Crawford Market for glass containers. Matunga and Versova nurseries for specialty soil. Online: Ugaoo and Nurserylive deliver terrarium kits to Mumbai.</p>
+<p><strong>Where can I buy terrarium supplies in Mumbai?</strong> Dadar flower market for plants and moss. Crawford Market for glass containers. Matunga and Versova nurseries for specialty soil. Online plant nurseries also deliver supplies to Mumbai.</p>
 
 <p>Building a terrarium in Mumbai means sourcing glass, soil, drainage materials, plants, and decorative elements. No single shop stocks everything—this guide maps where to find each component across the city.</p>
 
@@ -528,9 +532,8 @@ export const mumbaiPlantsArticles = {
 
 <p><strong>Online delivery:</strong></p>
 <ul>
-  <li>Ugaoo: wide selection, reliable quality</li>
-  <li>Nurserylive: good for bulk orders</li>
-  <li>The Plant Company: premium specimens</li>
+  <li>Online plant nurseries: wider selection, delivered</li>
+  <li>Check reviews and packing for live plants before ordering</li>
 </ul>
 
 <h2>Soil and Substrates</h2>
@@ -553,8 +556,7 @@ export const mumbaiPlantsArticles = {
 
 <p><strong>Pre-mixed options:</strong></p>
 <ul>
-  <li>Ugaoo Terrarium Soil Mix</li>
-  <li>TrustBasket Terrarium Potting Mix</li>
+  <li>Some nurseries and online plant stores sell ready terrarium mixes</li>
   <li>DIY remains cheaper for multiple terrariums</li>
 </ul>
 
@@ -599,7 +601,8 @@ export const mumbaiPlantsArticles = {
 
 <p><strong>Collecting moss:</strong></p>
 <ul>
-  <li>Legal in non-protected areas if done sustainably</li>
+  <li>Collect only from your own garden or a space where you have permission</li>
+  <li>Never from Sanjay Gandhi National Park, Aarey or other protected areas</li>
   <li>Take small patches only—allow regrowth</li>
   <li>Best during monsoon when moss is abundant</li>
   <li>Quarantine collected moss before terrarium use (pests)</li>
@@ -632,13 +635,7 @@ export const mumbaiPlantsArticles = {
 
 <h2>Complete Kits</h2>
 
-<p>For beginners, complete kits simplify sourcing:</p>
-
-<ul>
-  <li><strong>Ugaoo Terrarium DIY Kit:</strong> Container, soil, plants, tools—delivered</li>
-  <li><strong>EarthBox Starter Kit:</strong> Premium components, detailed guide (by enquiry)</li>
-  <li><strong>MyBageecha Terrarium Set:</strong> Budget-friendly option</li>
-</ul>
+<p>For beginners, complete kits simplify sourcing. Online plant nurseries and some local nurseries sell DIY terrarium kits with a container, soil, plants and tools.</p>
 
 <p>Kits cost more than DIY sourcing but save time and ensure compatible components.</p>
 
