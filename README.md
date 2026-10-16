@@ -68,13 +68,15 @@ Feature docs: **`MAKER.md`** (terrarium Maker, discovery, 3D) · **`CART.md`** (
 | Command | On deploy | Fails when |
 |---|---|---|
 | `npm run test:unit` | ✓ | Maker/search/cart/form rules break, or **data shape** is wrong (`data.test.mjs`) |
-| `npm run lint` | ✓ | Unused/undefined names, stray `console.log` (correctness only, no style rules) |
+| `npm run lint` | ✓ | Correctness, not style. Core: unused/undefined names, `==`, `var`, stray `console.log`. Type-aware (typescript-eslint): promises left unhandled, conditions that can't be false, casts that do nothing, `[object Object]` in text. Any warning or stale `eslint-disable` fails |
+| `npm run typecheck` | ✓ | TypeScript in strict mode finds a type error in the JavaScript (`tsconfig.json`: `checkJs`, no compiling, the site ships as written). Types come from inference + JSDoc; the vendored libraries are typed by the `.d.ts` beside them |
+| `npm run check:unused` | ✓ | knip: an unused file, export or dependency |
+| `npm run check:dupes` | ✓ | jscpd: a copy-pasted block of 50+ tokens (`.jscpd.json`, threshold 0) |
 | `node scripts/includes.mjs --check` | ✓ | A page's header/footer differs from `data/site.js` |
 | `npm run check:prerender` | ✓ | An article page has no `<h1>`, too little text, or duplicated sections |
 | `npm run check:assets` | ✓ | Any `src`/`href`/product photo/Maker plant model points at a missing file |
 | `npm run check:contrast` | ✓ | A text colour token falls below 4.5:1 on `--bg` or `--bg-tint`, light or dark |
 | `npm run test:e2e` | — (no browser on Vercel) | A page errors, 404s or scrolls sideways; a fixed bug comes back |
-| `npm run check:unused` | — (advisory) | Unused files, exports or dependencies |
 | `npm run qa:contrast` | CI (GitHub Actions) | Any text, placeholder, icon or focus ring under WCAG AA on any page × theme × size × state, measured from real pixels (see `qa/CONTRAST.md`) |
 | `.github/workflows/qa.yml` | every push / PR | Runs `npm test`, the Playwright suite (incl. `tests/contrast.spec.mjs`) and the full contrast audit; reports are uploaded as artifacts |
 
@@ -125,6 +127,8 @@ Only in `styles/tokens.css`, for both light and dark. `check:contrast` tells you
   - the build codec: `build-codec.js`
 
   Don't retype a number that already lives somewhere.
+- **Types, not comments.** New code passes `npm run typecheck` with no `any`, `@ts-ignore` or `@ts-nocheck`; `@ts-expect-error` only with a reason. Data shapes are inferred from `data/` and imported as `@typedef`s (`Plant`, `Build`, `Line`, …), not retyped.
+- **No dead or duplicate code.** knip and jscpd run in `npm test`; delete instead of commenting out.
 - **Pure rules get a test.** Anything that decides (fits, costs, matches, parses untrusted input) lives in a DOM-free function with a `*.test.mjs`.
 - **Untrusted input is validated at the edge.** URL hashes, localStorage and the share link go through `decodeBuild` / `clean()` / `cleanDisc`, which keep known ids only.
 - **Page code loads only where it's used** (`PAGE_MODULES`). A heavy dependency (three.js) loads only on its page and only when it can run, with a fallback.

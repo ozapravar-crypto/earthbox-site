@@ -583,7 +583,7 @@ function spacePanel(b){
       <div class="mk-choices">${spaceQuestions.household.map(v => choice('household', v, 'checkbox', s.household.includes(v))).join('')}</div></fieldset>
     <fieldset><legend>How grown should it arrive?</legend>
       <div class="mk-choices mk-choices-wide">${spaceQuestions.maturity.map(v =>
-        `<label class="mk-choice has-art is-row"><input type="radio" name="maturity" value="${esc(v)}" ${s.maturity === v ? 'checked' : ''}><span>${art(answerArt.maturity[v])}${esc(v)}</span></label>`).join('')}</div></fieldset>
+        `<label class="mk-choice has-art is-row"><input type="radio" name="maturity" value="${esc(v)}" ${s.maturity === v ? 'checked' : ''}><span>${art(answerArt.maturity?.[v])}${esc(v)}</span></label>`).join('')}</div></fieldset>
     <label class="mk-field"><span>A mood or story, if you have one</span>
       <textarea name="note" rows="3" maxlength="400" placeholder="“A misted Himalayan dawn”">${esc(s.note)}</textarea></label>
   </form>`;
