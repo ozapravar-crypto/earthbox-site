@@ -20,3 +20,15 @@ export async function openMakerAt(page, code, step){
   await page.locator(`.mk-step[data-to=${step}]`).click();
   await expect(page.locator('#maker')).toHaveAttribute('data-stage', step);
 }
+
+/**
+ * Journey set-up: storage cleared once per test, the cookie choice made
+ * (`consent`, or none for the banner's own tests), intro skipped, film and
+ * WhatsApp mocked (nothing real is sent).
+ * @param {import('@playwright/test').BrowserContext} context @param {string | null} consent
+ */
+export async function cleanStart(context, consent){
+  await context.addInitScript((c) => { if (!sessionStorage.getItem('qa')) { localStorage.clear(); if (c) localStorage.setItem('earthbox-consent', c); sessionStorage.setItem('qa', '1'); } sessionStorage.setItem('earthbox-loader-seen', '1'); }, consent);
+  await context.route('**/*.mp4', r => r.abort());
+  await context.route('https://wa.me/**', r => r.fulfill({ body: 'wa' }));
+}

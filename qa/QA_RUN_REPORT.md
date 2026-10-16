@@ -252,3 +252,37 @@ QA-001 to QA-007, QA-009 and QA-013. Details, root causes and evidence are in `Q
   - New specs: `tests/phase2-shop.spec.mjs` (15 journeys) and `tests/phase2-maker.spec.mjs` (10), plus unit tests.
   - Visual baselines refreshed on purpose, after review (product, cart, chamber, Maker plants and review, desktop and phone).
   - Full Playwright suite: 374 passed, 79 skipped (the live-only ones), 0 failed.
+
+## Follow-up · UX audit Phase 3: Home, catalogue, Care, remaining Maker steps, polish, 16–17 Oct 2026 (site-bhr.4)
+- **Home (spec D5):**
+  - A 4-piece tease with the finish named. Its counts come from data: "32 pieces · 23 coming soon · chambers on enquiry".
+  - One trust row. The unconfirmed ★4.8 rating and the unsourced "50+ pieces delivered" are removed.
+  - The lone "02" is gone, and "Disposition" is now "Price".
+  - Principles and Purpose are merged into one band, and the film is quieter.
+  - The internal brand note is gone from the footer of every page.
+  - The cookie banner is one compact row on phones, with Accept and Decline still equal.
+- **Catalogue:**
+  - "Prices for: <place>" stays in the sticky bar.
+  - No filler blocks, and Plant Packets fold behind "Show all".
+  - Search matches materials and places, shows price or status, and lists available pieces first.
+  - The category header stacks on phones, and the price chips are gone.
+- **Care:**
+  - A plan link from a coming-soon piece no longer shows the wrong piece.
+  - Plant groups get plain names, and are asked only for kits.
+  - The pincode field has a plain hint and a coverage note, and the wording is fixed.
+- **Maker:**
+  - **Chamber cards:** readable compatibility with real plant names, plus availability. A "Help me choose a chamber" helper reuses guided search.
+  - **Foundation:** "Recommended" on the studio's mix, "Suits …" on both, and the unsuitable mix stays keyboard-reachable with its reason.
+  - **Your space:** it now owns room, light, care, household, maturity and the note. Light goes in the enquiry.
+  - **Resume:** returns to the last step ("Continue: Moss · 3 plants").
+  - **Undo:** it lasts until dismissed.
+  - **Search:** "cactus" finds succulents.
+  - **Recipes:** cards show "from ₹6,000".
+- **Polish:**
+  - Chamber text sits below the photo.
+  - Vivarium pages get an email route.
+  - Email form errors show inline.
+- **Checks:**
+  - `npm test` and `npm run build` pass, after one duplicate removed into `tests/helpers.mjs` `cleanStart`.
+  - New specs: `tests/phase3-site.spec.mjs` and `tests/phase3-maker.spec.mjs`.
+  - Full Playwright run: 404 passed. The only 17 failures were screenshot comparisons; I reviewed them (catalogue, chamber, Care, cookie banner, footer, product points) and refreshed the baselines on purpose, then 63/63 visual tests passed.
