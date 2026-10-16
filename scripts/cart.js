@@ -83,6 +83,9 @@ export function resolve(l, list = 'cart'){
   if (kit) return { kind: kit.price ? 'fixed' : 'enquiry', care: true, key: keyOf(l), qty: l.qty, title: kit.name,
     sub: kit.for, href: '/care', img: null, unit: kit.price, status: 'Studio confirms contents · about 1 week' };
   const p = volumeOne.find(x => x.sku === l.sku);
+  // Coming-soon pieces can't be ordered yet (UX audit S-01, 16 Oct 2026), as
+  // with chambers: an old cart line is dropped; the Saved list keeps them.
+  if (p && list === 'cart' && p.status === 'coming-soon') return null;
   if (p) {
     const variant = p.variants?.find(v => v.id === l.variant);
     if (p.variants?.length && !variant) return null;
@@ -93,6 +96,7 @@ export function resolve(l, list = 'cart'){
       sub: [variant?.name, mat?.name].filter(Boolean).join(' · ') || 'Volume I',
       href: `/product/${encodeURIComponent(p.sku)}`, img: p.photo ? photoPath(p, '300') : null,
       unit: table ? table[l.material] : null,
+      cartable: p.status !== 'coming-soon',
       status: p.status === 'coming-soon' ? 'Coming soon' : 'Made to order · about 1 week' };
   }
   // Coming-soon chambers never resolve, so they can't be added and any old
@@ -258,10 +262,16 @@ function suggestHTML(){
     <ul>${list.map(s => `<li>
       <span class="ct-suggest-text"><span class="ct-suggest-name">${esc(s.title)}</span><span class="ct-suggest-why">${esc(s.reason)}</span></span>
       ${s.line ? `<button type="button" class="ct-link" data-add-line='${esc(JSON.stringify(s.line))}'>Add<span class="u-sr-only"> ${esc(s.title)}</span></button>`
-        : `<a class="ct-link" href="${esc(s.href)}">Plan<span class="u-sr-only"> ${esc(s.title)}</span></a>`}
+        : `<a class="ct-link" href="${esc(s.href)}">${s.href.startsWith('/care') ? 'Plan visits' : 'View'}<span class="u-sr-only"> ${esc(s.title)}</span></a>`}
     </li>`).join('')}</ul>
   </section>`;
 }
+
+const waHref = (text) => `https://wa.me/${ENQUIRY_PHONE}?text=${encodeURIComponent(text)}`;
+// The cart as it was when last sent (memory only). While it's unchanged, the
+// main action is Clear cart, not another send (UX audit S-03).
+let sentKey = null;
+const isSent = () => sentKey === JSON.stringify(state.cart);
 
 function summaryHTML(lines){
   const t = totals(lines), text = orderText(lines);
@@ -273,8 +283,12 @@ function summaryHTML(lines){
     ${row('Estimated total', t.ranged ? `${rupees(t.low)} – ${rupees(t.high)}` : t.fixed ? rupees(t.fixed) : 'On enquiry', 'ct-row--total')}
     ${t.quoted && (t.fixed || t.ranged) ? `<p class="ct-note">+ ${t.quoted} item${t.quoted > 1 ? 's' : ''} on enquiry, added when the studio quotes.</p>` : ''}
     <p class="ct-note">Nothing is charged here. The studio confirms the final total, delivery within Mumbai and lead time, then sends you a secure payment link.</p>
-    <a class="cta cta-block" data-ct="send" href="https://wa.me/${ENQUIRY_PHONE}?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">Send order on WhatsApp ${icon('arrow-up-right', { size: 'xs' })}</a>
-    ${enquiryAltHTML(`Cart · ${t.items} item${t.items > 1 ? 's' : ''}`, text)}
+    ${isSent() ? `
+    <button type="button" class="cta cta-block" data-ct="clear">Clear cart</button>
+    <p class="ct-note">Didn't open? <a class="ct-link" data-ct="send" href="${waHref(text)}" target="_blank" rel="noopener">Send again on WhatsApp</a></p>` : `
+    ${sentKey ? '<p class="ct-note">Changed since you sent it.</p>' : ''}
+    <a class="cta cta-block" data-ct="send" href="${waHref(text)}" target="_blank" rel="noopener">Send order on WhatsApp ${icon('arrow-up-right', { size: 'xs' })}</a>
+    ${enquiryAltHTML(`Cart · ${t.items} item${t.items > 1 ? 's' : ''}`, text)}`}
   </div>`;
 }
 
@@ -321,8 +335,9 @@ let lastUndo = null;
 // visitor clears it, in case WhatsApp didn't open or they want to resend.
 function sent(method){
   track('cart_send', { method, items: state.cart.length });
-  notice = { text: method === 'whatsapp' ? 'WhatsApp opened with your order. Once the studio replies, you can clear your cart.'
-    : 'Thank you, your order is with the studio. We usually reply within a day. You can clear your cart now.', clear: true };
+  sentKey = JSON.stringify(state.cart);
+  notice = { text: method === 'whatsapp' ? '✓ Sent to the studio on WhatsApp. They usually reply within a day with the final price and delivery.'
+    : '✓ Thank you, your order is with the studio. They usually reply within a day with the final price and delivery.' };
   refresh();
 }
 

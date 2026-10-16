@@ -125,3 +125,27 @@ Severity: **critical** (blocks a core task) · **major** (harms many users or th
 - **Why tests missed it:** the visual tests shoot only the first screen, and the smoke tests don't check opacity.
 - **Fix:** both renderers call `observeReveals`.
 - **Guard:** a new smoke test, "every scroll reveal shows", wheel-scrolls 7 pages and fails if any reveal is still hidden. It fails without the fix on /blog and /about.
+
+### QA-018 · UX audit Phase 0: wrong promises and lost work · major · fixed 16 Oct 2026
+From `_audits/2026-10-16_ux-ia-density-audit.md`. Each item has a test that fails without its fix.
+- **S-01 (coming-soon pieces):** a coming-soon piece could be added to the cart and ordered.
+  - Its page now offers Register interest + Save, with no lead time, no Care and no phone sticky bar.
+  - The cart drops coming-soon pieces, as it already does for chambers; the Saved list keeps them.
+- **S-03 (sending twice):** after sending, the cart still led with Send.
+  - It now leads with Clear cart, with a small "Send again" link, and the email form isn't offered again.
+  - Editing the cart brings Send back, with "Changed since you sent it".
+- **S-06 (suggestion label):** a cart suggestion that opens a product was labelled "Plan". It now says View, or Plan visits for Care.
+- **M-01, M-02, M-19, M-20 (Maker share links):**
+  - A shared link no longer overwrites the visitor's own saved design. A bar offers "Open mine" or "Keep this one instead".
+  - Edits to a shared design survive a reload, because the link follows the edits.
+  - A link pasted into the same tab opens.
+  - Plants that don't fit are named in a notice, not dropped silently.
+- **M-03, M-04 (Maker plants):**
+  - Adding and removing plants is spoken through one fixed line (`#mkLive`), along with "chamber full" and change notices.
+  - Removing a plant from the tray or Review moves focus to the next plant, not the page.
+- **C-03 (hero delay):** on repeat visits the hero no longer waits out the intro's 2.6–3.3 s delays.
+- **C-04 (phone menu):** the open phone menu takes focus, makes the page behind it unreachable, and returns focus to the menu button.
+- **C-05, C-08, C-18 (small fixes):**
+  - The home footer's "Philosophy" link now goes to `/about#philosophy`.
+  - Journal cards are now h2 and the About attributes h3, with no visual change.
+  - Smooth scrolling is off under reduced motion.

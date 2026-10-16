@@ -172,3 +172,16 @@ QA-001 to QA-007, QA-009 and QA-013. Details, root causes and evidence are in `Q
   - **Unit tests:** `theme-early.test.mjs` checks sunrise and sunset against published Mumbai times for 21 Jun and 21 Dec (within 3 minutes), plus day/night edges, when the next change falls, and how a saved choice resolves.
   - **New journey (desktop and phone), with the clock set:** noon → light; 21:00 → dark; the switch holds through a reload and lapses after the next sunset.
   - **Full Playwright suite (desktop, phone, tablet):** 308 passed, 63 skipped (the live-only ones).
+
+## Follow-up · UX audit Phase 0, 16 Oct 2026 (QA-018)
+- **What changed:** see QA-018.
+- **Checks:**
+  - `npm test` passes, including the updated cart unit tests (coming soon is not in the cart).
+  - New journeys:
+    - sent cart
+    - shared link over my design
+    - plants announced + focus
+    - phone menu focus
+    - coming-soon page registers interest
+  - Full Playwright suite (desktop, phone, tablet) on its own port (`E2E_PORT`, see the note below): 319 passed and 1 failed. The failure was the new share-link test racing the app's own reload; after the fix it passed 3 runs out of 3.
+- **Note:** another checkout on this machine served :4173, and Playwright's `reuseExistingServer` would have tested its code. `playwright.config.mjs` now takes `E2E_PORT`.

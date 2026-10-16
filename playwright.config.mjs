@@ -4,7 +4,10 @@
 // Against the live site: BASE_URL=https://www.earthbox.in npm run test:e2e
 import { defineConfig, devices } from '@playwright/test';
 
-const BASE = process.env.BASE_URL || 'http://localhost:4173';
+// E2E_PORT: another checkout's server on 4173 would be reused silently
+// (reuseExistingServer), so a second copy of the site can pick its own port.
+const PORT = Number(process.env.E2E_PORT) || 4173;
+const BASE = process.env.BASE_URL || `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: 'tests',
@@ -24,7 +27,7 @@ export default defineConfig({
   use: { baseURL: BASE, reducedMotion: 'reduce',
     storageState: { cookies: [], origins: [{ origin: new URL(BASE).origin, localStorage: [{ name: 'earthbox-consent', value: 'denied' }] }] } },
   // Tests run against dist/, the allow-listed copy Vercel serves (scripts/dist.mjs).
-  webServer: { command: 'node scripts/dist.mjs && node qa/serve-cli.mjs 4173 dist', port: 4173, reuseExistingServer: true, stdout: 'ignore', stderr: 'ignore' },
+  webServer: { command: `node scripts/dist.mjs && node qa/serve-cli.mjs ${PORT} dist`, port: PORT, reuseExistingServer: true, stdout: 'ignore', stderr: 'ignore' },
   projects: [
     { name: 'desktop', use: { viewport: { width: 1440, height: 900 } } },
     { name: 'phone', use: { ...devices['Pixel 7'], browserName: 'chromium' } },

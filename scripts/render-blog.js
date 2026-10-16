@@ -23,7 +23,7 @@ function renderArticleCard(article) {
           <span class="article-category">${getCategoryTitle(article.category)}</span>
           <span class="article-date">${formatDate(article.publishDate)}</span>
         </div>
-        <h3>${article.title}</h3>
+        <h2>${article.title}</h2>
         <p class="article-excerpt">${article.excerpt}</p>
         <span class="article-read">${article.readTime} read →</span>
       </div>

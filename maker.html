@@ -110,6 +110,9 @@
     <div class="mk-stage">
       <figure class="mk-preview" id="mkPreview"></figure>
       <div class="mk-panel">
+        <!-- One fixed spoken-update line: the panel is redrawn, so its own live
+             regions are unreliable (UX audit M-03). -->
+        <p id="mkLive" class="u-sr-only" aria-live="polite"></p>
         <div id="mkPanelBody"></div>
         <div class="mk-bar" id="mkBar"></div>
       </div>

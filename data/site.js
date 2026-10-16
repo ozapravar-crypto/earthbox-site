@@ -51,7 +51,7 @@ const SOCIAL = [
 
 // The home page's first footer column links to its own sections.
 const HOME_STUDY = [
-  { href: '#philosophy', label: 'Philosophy' }, { href: '#principles', label: 'Principles' },
+  { href: '/about#philosophy', label: 'Philosophy' }, { href: '#principles', label: 'Principles' },
   { href: '/products', label: 'Catalogue' }, { href: '/maker', label: 'Maker' },
   { href: '/blog', label: 'Journal' }, { href: '#purpose', label: 'Purpose' },
   { href: '/about', label: 'About' }

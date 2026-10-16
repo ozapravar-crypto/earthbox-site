@@ -206,6 +206,20 @@ test('theme follows day and night; a switch holds until the sky changes', async 
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');           // the old choice has lapsed
 });
 
+// UX audit C-04: the open phone menu keeps keyboard focus; closing returns it.
+test('mobile menu: focus moves in, stays in, and returns to the menu button', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'the menu button shows at ≤1080 px');
+  await page.goto('/about.html');
+  await page.locator('.hamburger').click();
+  await expect(page.locator('.mobile-nav-close')).toBeFocused();
+  for (let i = 0; i < 12; i++) {
+    await page.keyboard.press('Tab');
+    expect(await page.evaluate(() => !!document.activeElement.closest('main, footer, .runhead'))).toBe(false);   // never the page behind
+  }
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.hamburger')).toBeFocused();
+});
+
 // ── Keyboard ─────────────────────────────────────────────────────────
 test('cart drawer by keyboard: opens, takes focus, Escape returns focus', async ({ page, isMobile }) => {
   test.skip(isMobile, 'keyboard journey');
@@ -277,6 +291,42 @@ test('Maker: a shared link opens the same design; a bad link is ignored safely',
   await page.goto('/maker.html#c=NotAChamber&p=<img>');
   await expect(page.locator('#maker')).toBeVisible();
   expect(errs).toEqual([]);
+});
+
+// UX audit M-01/M-02/M-20: a shared link keeps the visitor's own design,
+// names the plants it had to leave out, and keeps edits through a reload.
+test('Maker: a shared link never overwrites my design, and its edits survive a reload', async ({ page }) => {
+  test.slow();   // software 3D on CI
+  await page.goto('/maker.html');
+  await page.locator('[data-act=recipe]').first().click();
+  const mine = await page.evaluate(() => JSON.parse(localStorage.getItem('earthbox-maker')).code);
+  // Same page, new link: the Maker reloads itself to open it (M-19). PLT-001 is an Earth plant: doesn't fit Moss.
+  await page.goto('/maker.html#c=MossBox&s=studio&p=PLT-036,PLT-001&n=Shared');
+  await expect(page.locator('.mk-notice').first()).toContainText('Your own saved design is kept', { timeout: 15_000 });
+  await expect(page.locator('#mkPanelBody')).toContainText(/1 plant in this link doesn't fit the .* chamber/);
+  await page.locator('.mk-step[data-to=plants]').click();
+  await page.locator('.mk-add[data-id=PLT-037]').click();
+  await page.reload();
+  await expect(page.locator('.mk-sum')).toContainText('2 plants', { timeout: 15_000 });
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('earthbox-maker')).code)).toBe(mine);   // untouched
+  await page.getByRole('button', { name: 'Open mine' }).click();
+  await expect(page).not.toHaveURL(/#c=/);
+  await expect(page.locator('#mkPanelBody')).toContainText('Back to your own design');
+});
+
+// UX audit M-03/M-04: selection changes are spoken; removing a plant keeps focus nearby.
+test('Maker: adding and removing plants is announced, and focus stays in the tray', async ({ page }) => {
+  test.slow();   // software 3D on CI
+  await page.goto('/maker.html#c=MossBox&s=studio&p=PLT-036,PLT-037&n=QA');
+  await page.locator('.mk-step[data-to=plants]').click();
+  const live = page.locator('#mkLive');
+  await page.locator('.mk-add[data-id=PLT-038]').click();
+  await expect(live).toHaveText(/^Added .+\. 3 of \d+ plants\.$/);
+  const first = page.locator('[data-key^="tray-"]').first();
+  await first.focus();
+  await page.keyboard.press('Enter');
+  await expect(live).toHaveText(/^Removed .+\. 2 of \d+ plants\.$/);
+  await expect(page.locator(':focus')).toHaveAttribute('data-key', /^tray-/);   // the next plant, not the page
 });
 
 test('Maker: if 3D files fail to load, the drawing preview is shown', async ({ page }) => {
@@ -353,6 +403,24 @@ test.describe('cookie choice', () => {
 const cartDrawer = (page) => page.locator('dialog.ct');
 const openCart = async (page, isMobile) => { if (!(await cartDrawer(page).isVisible())) await page.locator(isMobile ? '.runhead-bag [data-open=cart], [data-open=cart]' : '[data-open=cart]').first().click(); };
 
+// UX audit S-03: after sending, the main action is Clear cart, not a second send.
+test('cart after sending: Clear cart leads, "Send again" stays small, an edit re-arms Send', async ({ page, context, isMobile }) => {
+  await page.goto('/product.html#V1-PLT-006');
+  await page.locator(isMobile ? '#pdMobileCta [data-add-line]' : '.pd-buy [data-add-line]').click();
+  const d = cartDrawer(page);
+  const popup = context.waitForEvent('page');
+  await d.locator('a.cta[data-ct=send]').click();
+  await (await popup).close();
+  await expect(d.locator('.ct-notice')).toContainText('Sent to the studio');
+  await expect(d.locator('button.cta[data-ct=clear]')).toBeVisible();
+  await expect(d.locator('a.cta[data-ct=send]')).toHaveCount(0);
+  await expect(d.locator('a.ct-link[data-ct=send]')).toHaveText('Send again on WhatsApp');
+  await expect(d.locator('.enquiry-form')).toHaveCount(0);              // the email form isn't offered again
+  await d.locator('[data-ct=qty][data-d="1"]').click();                       // the cart changed: Send is back
+  await expect(d.locator('a.cta[data-ct=send]')).toBeVisible();
+  await expect(d.locator('.ct-summary')).toContainText('Changed since you sent it');
+});
+
 test('Care: a refill kit for my plants goes in the cart as a kit line', async ({ page, isMobile }) => {
   const errs = errorsOf(page);
   await page.goto('/care.html');
@@ -422,6 +490,7 @@ test('Cart suggests the matching kit and visits; adding the kit removes it from 
   await sug.getByRole('button', { name: /Add/ }).click();
   await expect(cartDrawer(page).locator('.ct-line')).toHaveCount(2);
   await expect(sug.locator('.ct-suggest-name')).toHaveText(['Care visits']);
+  await expect(sug.getByRole('link', { name: 'Plan visits Care visits' })).toHaveAttribute('href', /^\/care#/);   // labelled by what it does (S-06)
 });
 
 test.describe('Care business form', () => {

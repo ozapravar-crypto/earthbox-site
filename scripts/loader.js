@@ -18,6 +18,8 @@ export function initLoader(onComplete) {
   const alreadySeen = sessionStorage.getItem(STORAGE_KEY) === '1';
 
   if (reducedMotion || alreadySeen) {
+    // No intro this time: the hero mustn't wait out the intro's delays (UX audit C-03).
+    document.documentElement.classList.add('no-intro');
     loader.remove();
     document.body.classList.remove('is-loading');
     onComplete?.();

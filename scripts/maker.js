@@ -605,14 +605,19 @@ function cleanDisc(d){
 }
 
 function load(){
-  const fromHash = location.hash.length > 3 ? decodeBuild(location.hash) : null;
-  if (fromHash) return { build: fromHash, shared: true };
+  let own = null;
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || 'null');
     const b = saved && decodeBuild(saved.code);
-    if (b) return { build: { ...b, space: { ...emptyBuild().space, ...saved.space } }, disc: cleanDisc(saved.disc) };
+    if (b) own = { build: { ...b, space: { ...emptyBuild().space, ...saved.space } }, disc: cleanDisc(saved.disc) };
   } catch { /* private mode / corrupt — start clean */ }
-  return null;
+  const fromHash = location.hash.length > 3 ? decodeBuild(location.hash) : null;
+  if (!fromHash) return own;
+  // A shared link never replaces the visitor's own saved design (UX audit M-01),
+  // and plants that don't fit its chamber are named, not dropped silently (M-20).
+  const asked = new Set((new URLSearchParams(location.hash.slice(1)).get('p') || '').split(',').filter(Boolean)).size;
+  return { build: fromHash, shared: true, dropped: Math.max(0, asked - fromHash.plants.length),
+           own: own && encodeBuild(own.build) !== encodeBuild(fromHash) ? own : null };
 }
 
 export function initMaker(){
@@ -624,10 +629,19 @@ export function initMaker(){
   const restored = load();
   let b = restored?.build || emptyBuild();
   let stage = 'start';
-  let ui = { fresh: null, error: '', notice: null, disc: restored?.disc || emptyDiscovery(), pin: null, refineOpen: false, gd: null };
+  let ui = { fresh: null, error: '', notice: null, disc: restored?.disc || emptyDiscovery(), pin: null, refineOpen: false, gd: null,
+             shared: !!restored?.shared, own: restored?.own || null };
+  if (restored?.dropped) {
+    const n = restored.dropped;
+    ui.notice = { text: `${n} plant${n > 1 ? 's' : ''} in this link ${n > 1 ? "don't" : "doesn't"} fit the ${find(chambers, b.chamber, 'sku').name} chamber and ${n > 1 ? 'were' : 'was'} left out.` };
+  }
   const dialog = $('mkGuide');
 
   const save = () => {
+    // While a shared design is open, the link follows the edits, so a reload
+    // keeps them (M-02); the visitor's own saved design stays untouched (M-01).
+    if (ui.shared) history.replaceState(null, '', `${location.pathname}#${encodeBuild(b)}`);
+    if (ui.own) return;
     try { localStorage.setItem(STORE, JSON.stringify({ code: encodeBuild(b), space: b.space, disc: ui.disc })); } catch { /* private mode / full storage: the build lives for this page only */ }
   };
 
@@ -660,8 +674,13 @@ export function initMaker(){
   function closeGuide(){ ui.gd = null; if (dialog.open) dialog.close(); }   // the draft is dropped; search + plants untouched
   dialog?.addEventListener('close', () => { ui.gd = null; root.querySelector('[data-key="guide"]')?.focus({ preventScroll: true }); });
 
+  // Say what changed (M-03). Cleared first so the same words are re-read.
+  const say = (text) => { const el = $('mkLive'); if (!el) return; el.textContent = ''; setTimeout(() => { el.textContent = text; }, 50); };
+  let focusNext = null;   // a key to focus after the redraw, when the pressed control goes away (M-04)
+
   function render(){
-    const key = document.activeElement?.dataset?.key;
+    const key = focusNext || document.activeElement?.dataset?.key;
+    focusNext = null;
     root.dataset.stage = stage;
     start.hidden = stage !== 'start';
     build.hidden = stage === 'start';
@@ -673,13 +692,16 @@ export function initMaker(){
     const panel = { chamber: chamberPanel, foundation: foundationPanel, plants: plantsPanel, space: spacePanel, review: reviewPanel }[stage];
     const notice = ui.notice ? `<div class="mk-notice" role="status"><p>${ui.notice.text}</p>
       ${ui.notice.undo ? '<button type="button" class="cta cta-secondary cta-small" data-act="undo" data-key="undo">Undo</button>' : ''}</div>` : '';
-    $('mkPanelBody').innerHTML = notice + panel(b, ui);
+    const sharedBar = ui.own ? `<div class="mk-notice"><p>You're looking at a shared design. Your own saved design is kept.</p>
+      <button type="button" class="cta cta-secondary cta-small" data-act="own" data-key="own">Open mine</button>
+      <button type="button" class="cta cta-secondary cta-small" data-act="adopt" data-key="adopt">Keep this one instead</button></div>` : '';
+    $('mkPanelBody').innerHTML = sharedBar + notice + panel(b, ui);
     $('mkBar').innerHTML = barHTML(b, stage, ui.error);
     ui.fresh = null;
     syncCartButtons();
     if (stage === 'plants') startThumbs();
 
-    if (key) document.querySelector(`[data-key="${key}"]:not([disabled])`)?.focus({ preventScroll: true });
+    if (key) (document.querySelector(`[data-key="${key}"]:not([disabled])`) || (/^(tray|rv)-/.test(key) && root.querySelector('.mk-title')))?.focus({ preventScroll: true });
   }
 
   // The preview only (3D, or the drawing). Called on its own when the 3D view
@@ -746,6 +768,7 @@ export function initMaker(){
     b = next;
     ui.error = '';
     ui.notice = opts.notice ?? null;
+    if (ui.notice) say(ui.notice.text);
     if (opts.stage) stage = opts.stage;
     if (opts.fresh) ui.fresh = opts.fresh;
     save();
@@ -784,10 +807,30 @@ export function initMaker(){
     if (act === 'substrate') commit({ ...b, substrate: id });
     if (act === 'plant') {
       const res = togglePlant(b, id);
-      if (res.error) { ui.error = res.error; render(); }
-      else commit(res.build, { fresh: res.build.plants.includes(id) ? id : null });
+      if (res.error) { ui.error = res.error; render(); say(res.error); return; }
+      const added = res.build.plants.includes(id);
+      // Removing from the tray or Review: focus the next plant there, else the heading.
+      const k = el.dataset.key, prefix = k?.match(/^(tray|rv)-/)?.[0];
+      if (prefix && !added) {
+        const keys = [...root.querySelectorAll(`[data-key^="${prefix}"]`)].map(x => x.dataset.key), i = keys.indexOf(k);
+        focusNext = keys[i + 1] || keys[i - 1] || `${prefix}none`;
+      }
+      commit(res.build, { fresh: added ? id : null });
+      say(`${added ? 'Added' : 'Removed'} ${plantOf(id).name}. ${res.build.plants.length} of ${capacity(chamberOf(res.build))} plants.`);
     }
     if (act === 'undo' && ui.notice?.undo) commit(ui.notice.undo);
+    // Shared design over the visitor's own: go back to theirs, or replace it on purpose.
+    if (act === 'own' && ui.own) {
+      const own = ui.own;
+      ui.own = null; ui.shared = false; ui.disc = own.disc || ui.disc;
+      history.replaceState(null, '', location.pathname);
+      commit(own.build, { stage: furthest(own.build), notice: { text: 'Back to your own design.' } });
+    }
+    if (act === 'adopt' && ui.own) {
+      ui.own = null; ui.shared = false;
+      history.replaceState(null, '', location.pathname);
+      commit(b, { notice: { text: 'This design is now yours. It replaced your earlier one.' } });
+    }
     // Discovery
     if (act === 'view')  { ui.disc = { ...ui.disc, view: id }; renderResults(); }
     if (act === 'pin')   { ui.pin = ui.pin === id ? null : id; renderResults(); }
@@ -828,9 +871,11 @@ export function initMaker(){
       root.querySelector('.mk-sent').textContent = 'WhatsApp opened with your design. It is sent once you press send there.';
     }
     if (act === 'copy') copyLink();
-    if (act === 'reset' && confirm('Start over? This clears your design.')) {
+    if (act === 'reset' && confirm(ui.own ? 'Close this shared design? Your own design is kept.' : 'Start over? This clears your design.')) {
       history.replaceState(null, '', location.pathname);
-      commit(emptyBuild(), { stage: 'start' });
+      ui.shared = false;
+      const own = ui.own; ui.own = null;
+      commit(own ? own.build : emptyBuild(), { stage: 'start' });
     }
   });
 
@@ -916,6 +961,12 @@ export function initMaker(){
     if (b.chamber !== boxParam) { pickChamber(boxParam); return; }
   }
   if (restored?.shared) { stage = furthest(b); track('maker_open_shared'); }
+  // A different design link pasted into this tab opens it (M-19). Our own
+  // replaceState calls don't fire this, so edits don't loop.
+  window.addEventListener('hashchange', () => {
+    const next = decodeBuild(location.hash);
+    if (next && encodeBuild(next) !== encodeBuild(b)) location.reload();
+  });
   render();
   load3D();
 
