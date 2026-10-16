@@ -141,6 +141,7 @@ export const spaceQuestions = {
 
 // Botanical art for each answer: assets/illustrations/<id>.webp (what each one is,
 // and how it was made, is in that folder's manifest.json). Keys are the stored values.
+/** @type {Record<string, Record<string, string | undefined> | undefined>} */
 export const answerArt = {
   room:      { 'Living room': 'room-living-room', Study: 'room-study', Foyer: 'room-foyer', Bedroom: 'room-bedroom',
                Office: 'room-office', Gallery: 'room-gallery', Other: 'room-other' },
