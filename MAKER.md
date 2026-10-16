@@ -71,6 +71,10 @@ Source brief: `Downloads/terrarium_maker_ux_brief_for_fable.md`. Adapted to the 
 
 ## Plants step: discovery (added 10 Oct 2026)
 
+**Two modes (16 Oct 2026, UX audit M-06):**
+- **Simple:** shown when 8 or fewer plants fit the chosen chamber, which is 9 of the 10 chambers. It lists the plants that fit straight away, with no search, filters, map or guided search. "Explore plants from other chambers" opens explore mode.
+- **Explore:** what's described below. The Lab chamber opens in it, since every plant fits. In explore mode, "Showing plants for the X chamber · Show all climates" replaces the old fits-only checkbox. The mode is saved with the other discovery settings.
+
 Search, **List / Map** views and **Guided search** live inside the Plants step, not on a separate page, so there's one flow and one `build`.
 
 | Piece | Where | Does |

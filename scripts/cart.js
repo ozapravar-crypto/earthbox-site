@@ -23,7 +23,7 @@
 // cart.test.mjs.
 // ─────────────────────────────────────────────────────────────────────
 
-import { volumeOne, materials, photoPath } from '../data/volume-one.js';
+import { volumeOne, materials, photoPath, places } from '../data/volume-one.js';
 import { volumeTwo } from '../data/upcoming.js';
 import { substrates } from '../data/maker.js';
 import { kits } from '../data/care.js';
@@ -135,9 +135,11 @@ export function resolve(l, list = 'cart'){
     const table = /** @type {Record<string, number> | null} */ (p.pricing ? (variant ? /** @type {Record<string, PriceTable>} */ (p.pricing)[variant.id] : p.pricing) : null);
     const material = /** @type {string} */ (l.material);   // a missing material finds no price
     if (table && !table[material]) return null;
-    const mat = materials.find(m => m.id === l.material);
+    const mat = materials.find(m => m.id === l.material), place = places.find(x => x.material === l.material);
+    // "Big Block · Balcony (ASA)": the size, then the place the material is for (UX audit D1).
+    const finish = mat && (place ? `${place.name} (${mat.name})` : mat.name);
     return /** @type {FixedRow | EnquiryRow} */ ({ kind: table ? 'fixed' : 'enquiry', key: keyOf(l), qty: /** @type {number} */ (l.qty), title: p.name,
-      sub: [variant?.name, mat?.name].filter(Boolean).join(' · ') || 'Volume I',
+      sub: [variant?.name, finish].filter(Boolean).join(' · ') || 'Volume I',
       href: `/product/${encodeURIComponent(p.sku)}`, img: p.photo ? photoPath(p, '300') : null,
       unit: table ? table[material] : null,
       cartable: p.status !== 'coming-soon',
@@ -149,7 +151,8 @@ export function resolve(l, list = 'cart'){
   if (box && list === 'cart' && volumeTwo.status === 'Coming soon') return null;
   if (box) return { kind: 'enquiry', cartable: volumeTwo.status !== 'Coming soon', key: keyOf(l), qty: /** @type {number} */ (l.qty), title: `${box.name} chamber`, sub: `Elemental Box · ${box.edition}`,
     href: `/product/${encodeURIComponent(box.sku)}`, img: box.photo ? `/assets/boxes/${box.photo}` : null,
-    unit: null, range: parseRange(box.price), note: box.price, status: `${volumeTwo.status} · ${box.lead}` };
+    // A lead time only for what can be ordered (UX audit rule E4).
+    unit: null, range: parseRange(box.price), note: box.price, status: volumeTwo.status === 'Coming soon' ? volumeTwo.status : `${volumeTwo.status} · ${box.lead}` };
   return null;
 }
 
@@ -163,16 +166,36 @@ export function buildTotal(r){
 
 // The whole cart. `fixed` is exact; low/high add the guide ranges; `quoted`
 // counts lines (or build parts) the studio still has to price.
+// Counts a visitor sees are pieces, never a build's parts (UX audit S-07):
+// `priced` = pieces with an exact price, `toQuote` = pieces the studio still
+// prices (a build with any unpriced part counts once).
 /** @param {Row[]} lines */
 export function totals(lines){
-  let fixed = 0, low = 0, high = 0, quoted = 0, items = 0;
+  let fixed = 0, low = 0, high = 0, quoted = 0, items = 0, priced = 0, toQuote = 0;
   for (const r of lines) {
     items += r.qty;
-    if (r.kind === 'fixed') { fixed += r.unit * r.qty; continue; }
-    if (r.kind === 'custom') { const t = buildTotal(r); low += t.low; high += t.high; quoted += t.quoted; continue; }
-    if (r.range) { low += r.range[0] * r.qty; high += r.range[1] * r.qty; } else quoted += r.qty;
+    if (r.kind === 'fixed') { fixed += r.unit * r.qty; priced += r.qty; continue; }
+    if (r.kind === 'custom') { const t = buildTotal(r); low += t.low; high += t.high; quoted += t.quoted; if (t.quoted) toQuote += 1; continue; }
+    if (r.range) { low += r.range[0] * r.qty; high += r.range[1] * r.qty; } else { quoted += r.qty; toQuote += r.qty; }
   }
-  return { items, fixed, low: fixed + low, high: fixed + high, ranged: high > 0, quoted };
+  return { items, fixed, low: fixed + low, high: fixed + high, ranged: high > 0, quoted, priced, toQuote };
+}
+
+/** @param {number} n */
+export const pieces = (n) => `${n} piece${n === 1 ? '' : 's'}`;
+
+// The one estimate line (UX audit S-04, rule E3): it says how firm it is, in
+// the same words wherever it shows.
+//   "Estimate so far ₹9,598 – ₹12,598 + 3 to quote" · all priced: "Estimate so far ₹9,598"
+//   nothing priced: "To be quoted · 3 pieces", no rupee figure.
+/**
+ * @param {ReturnType<typeof totals>} t
+ * @returns {{ label: string, value: string }}
+ */
+export function estimateLine(t){
+  if (!t.fixed && !t.ranged) return { label: 'To be quoted', value: pieces(t.toQuote || t.items) };
+  const amount = t.ranged && t.high !== t.low ? `${rupees(t.low)} – ${rupees(t.high)}` : rupees(t.low);
+  return { label: 'Estimate so far', value: `${amount}${t.toQuote ? ` + ${t.toQuote} to quote` : ''}` };
 }
 
 // Untrusted storage → only lines that still resolve, qty clamped, no duplicates.
@@ -240,8 +263,13 @@ export function move(state, from, key){
   return add(remove(state, from, key), from === 'cart' ? 'saved' : 'cart', l);
 }
 
-/** @param {Row[]} lines */
-export function orderText(lines){
+// `contact` is what the visitor typed in the email form, if anything: the
+// WhatsApp message carries their name and pincode too (UX audit S-09).
+/**
+ * @param {Row[]} lines
+ * @param {{ name?: string, pincode?: string }} [contact]
+ */
+export function orderText(lines, contact = {}){
   const t = totals(lines);
   const out = ['Hi Aayush, I’d like to order from EarthBox.', ''];
   lines.forEach((r, i) => {
@@ -258,7 +286,9 @@ export function orderText(lines){
   out.push('');
   if (t.fixed) out.push(`Priced items: ${rupees(t.fixed)}`);
   if (t.ranged) out.push(`Estimate incl. chamber ranges: ${rupees(t.low)} – ${rupees(t.high)}`);
-  if (t.quoted) out.push(`Still to quote: ${t.quoted} item${t.quoted > 1 ? 's' : ''}`);
+  if (t.toQuote) out.push(`Still to quote: ${pieces(t.toQuote)}`);
+  const name = contact.name?.trim(), pin = contact.pincode?.trim();
+  if (name || pin) out.push('', ...(name ? [`Name: ${name}`] : []), ...(pin ? [`Pincode: ${pin}`] : []));
   out.push('', 'Could you confirm the total, delivery and lead time?');
   return out.join('\n');
 }
@@ -302,20 +332,18 @@ function addLine(list, line, { open = true } = {}){
 const has = (list, line) => state[list].some(l => keyOf(l) === keyOf(line));
 
 
-/** @param {Row} r */
-function priceCell(r){
-  if (r.kind === 'fixed') return `<span class="ct-price">${rupees(r.unit * r.qty)}</span>${r.qty > 1 ? `<span class="ct-each">${rupees(r.unit)} each</span>` : ''}`;
-  return `<span class="ct-price ct-price--enquiry">On enquiry</span>${r.note ? `<span class="ct-each">Guide ${esc(r.note)}</span>` : ''}`;
-}
-
+// Lines read top-down (UX audit D1, S-10): title + price, then what it is
+// ("Big Block · Balcony (ASA)") + the unit price, then the status on its own
+// quiet line. No kind label: the price already says how firm it is.
 /**
  * @param {Row} r
  * @param {List} list
  */
 function lineHTML(r, list){
   const k = esc(r.key);
+  // Icons, not letters, where there's no photo (S-10): a visit plan, a kit, a build.
   const thumb = r.img ? `<img src="${esc(r.img)}" alt="" width="72" height="72" loading="lazy">`
-    : `<span class="ct-thumb-mark" aria-hidden="true">${r.kind === 'custom' ? 'M' : r.care ? 'C' : 'E'}</span>`;
+    : `<span class="ct-thumb-mark" aria-hidden="true">${icon(r.kind === 'custom' ? 'sprout' : r.key.startsWith('care:') ? 'calendar-clock' : 'package', { size: 'lg' })}</span>`;
   const qty = list === 'cart' && r.kind !== 'custom' && !r.key.startsWith('care:') ? `
       <div class="ct-qty" role="group" aria-label="Quantity of ${esc(r.title)}">
         <button type="button" data-ct="qty" data-k="${k}" data-d="-1" ${r.qty <= 1 ? 'disabled' : ''} aria-label="One fewer">−</button>
@@ -327,22 +355,28 @@ function lineHTML(r, list){
     return `<ul class="ct-parts">${r.parts.map(p => `<li><span>${esc(p.label)}</span><span>${p.price ? rupees(p.price) : p.price === 0 ? '—' : esc(p.note || 'On enquiry')}</span></li>`).join('')}
       <li class="ct-parts-total"><span>Build estimate</span><span>${t.high ? `${rupees(t.low)} – ${rupees(t.high)}` : '—'}${t.quoted ? ` + ${t.quoted} quoted` : ''}</span></li></ul>`;
   })() : '';
+  // A coming-soon piece in Saved: its guide and its status, said once (S-19).
+  const soon = list === 'saved' && r.cartable === false;
+  const price = r.kind === 'custom' || soon ? ''
+    : r.kind === 'fixed' ? `<span class="ct-price">${rupees(list === 'cart' ? r.unit * r.qty : r.unit)}</span>`
+    : '<span class="ct-price ct-price--enquiry">On enquiry</span>';
+  const each = r.kind === 'fixed' ? `<span class="ct-each">${rupees(r.unit)} each</span>`
+    : r.note && !soon ? `<span class="ct-each">Guide ${esc(r.note)}</span>` : '';
+  const status = soon && r.note ? `Guide ${esc(r.note)} · ${esc(r.status)}` : esc(r.status);
   return `<li class="ct-line ct-line--${r.kind}">
     <a class="ct-thumb" href="${esc(r.href)}" tabindex="-1" aria-hidden="true">${thumb}</a>
     <div class="ct-body">
-      <span class="ct-kind caption">${r.care ? 'Care' : { fixed: 'Ready to order', enquiry: 'Price on enquiry', custom: 'Custom build' }[r.kind]}</span>
-      <a class="ct-title" href="${esc(r.href)}">${esc(r.title)}</a>
-      <span class="ct-sub">${esc(r.sub)} · ${esc(r.status)}</span>
+      <div class="ct-top"><a class="ct-title" href="${esc(r.href)}">${esc(r.title)}</a>${price}</div>
+      <div class="ct-meta"><span class="ct-sub">${esc(r.sub)}</span>${each}</div>
+      <span class="ct-status">${status}</span>
       ${parts}
       ${qty}
       <div class="ct-actions">
         ${r.kind === 'custom' ? `<a class="ct-link" href="${esc(r.href)}">Edit design</a>` : r.key.startsWith('care:') ? `<a class="ct-link" href="${esc(r.href)}">Change plan</a>` : ''}
-        ${list === 'saved' && r.cartable === false ? '<span class="ct-sub">Coming soon · not yet in the cart</span>'
-          : `<button type="button" class="ct-link" data-ct="move" data-from="${list}" data-k="${k}">${list === 'cart' ? 'Save for later' : 'Move to cart'}</button>`}
+        ${soon ? '' : `<button type="button" class="ct-link" data-ct="move" data-from="${list}" data-k="${k}">${list === 'cart' ? 'Save for later' : 'Move to cart'}</button>`}
         <button type="button" class="ct-link" data-ct="remove" data-from="${list}" data-k="${k}">Remove<span class="u-sr-only"> ${esc(r.title)}</span></button>
       </div>
     </div>
-    ${r.kind === 'custom' ? '' : `<div class="ct-cost">${list === 'cart' ? priceCell(r) : r.kind === 'fixed' ? `<span class="ct-price">${rupees(r.unit)}</span>` : '<span class="ct-price ct-price--enquiry">On enquiry</span>'}</div>`}
   </li>`;
 }
 
@@ -367,41 +401,59 @@ const waHref = (text) => `https://wa.me/${ENQUIRY_PHONE}?text=${encodeURICompone
 /** @type {string | null} */
 let sentKey = null;
 const isSent = () => sentKey === JSON.stringify(state.cart);
+// What the visitor typed in the email form (memory only): the drawer redraws
+// on every change, and the WhatsApp message carries name + pincode (S-09).
+/** @type {import('./enquiry-form.js').Contact} */
+const contact = {};
+let emailOpen = false;
 
-/** @param {Row[]} lines */
-function summaryHTML(lines){
-  const t = totals(lines), text = orderText(lines);
+// Breakdown, in the scrolling list (S-04): each kind of certainty on its own row.
+/** @param {ReturnType<typeof totals>} t */
+function breakdownHTML(t){
   /**
    * @param {string} a
    * @param {string} b
    */
-  const row = (a, b, cls = '') => `<p class="ct-row ${cls}"><span>${a}</span><span>${b}</span></p>`;
-  return `<div class="ct-summary">
-    ${t.fixed ? row('Priced items', rupees(t.fixed)) : ''}
-    ${t.ranged ? row('Chambers &amp; builds (guide)', `${rupees(t.low - t.fixed)} – ${rupees(t.high - t.fixed)}`) : ''}
-    ${t.quoted ? row('On enquiry', `${t.quoted} item${t.quoted > 1 ? 's' : ''}, quoted by the studio`) : ''}
-    ${row('Estimated total', t.ranged ? `${rupees(t.low)} – ${rupees(t.high)}` : t.fixed ? rupees(t.fixed) : 'On enquiry', 'ct-row--total')}
-    ${t.quoted && (t.fixed || t.ranged) ? `<p class="ct-note">+ ${t.quoted} item${t.quoted > 1 ? 's' : ''} on enquiry, added when the studio quotes.</p>` : ''}
-    <p class="ct-note">Nothing is charged here. The studio confirms the final total, delivery within Mumbai and lead time, then sends you a secure payment link.</p>
-    ${isSent() ? `
-    <button type="button" class="cta cta-block" data-ct="clear">Clear cart</button>
-    <p class="ct-note">Didn't open? <a class="ct-link" data-ct="send" href="${waHref(text)}" target="_blank" rel="noopener">Send again on WhatsApp</a></p>` : `
-    ${sentKey ? '<p class="ct-note">Changed since you sent it.</p>' : ''}
-    <a class="cta cta-block" data-ct="send" href="${waHref(text)}" target="_blank" rel="noopener">Send order on WhatsApp ${icon('arrow-up-right', { size: 'xs' })}</a>
-    ${enquiryAltHTML(`Cart · ${t.items} item${t.items > 1 ? 's' : ''}`, text)}`}
+  const row = (a, b) => `<p class="ct-row"><span>${a}</span><span>${b}</span></p>`;
+  return `<div class="ct-breakdown">
+    ${t.fixed ? row(`Priced pieces · ${t.priced}`, rupees(t.fixed)) : ''}
+    ${t.ranged ? row('Chamber &amp; build guide', `${rupees(t.low - t.fixed)} – ${rupees(t.high - t.fixed)}`) : ''}
+    ${t.toQuote ? row('To be quoted', pieces(t.toQuote)) : ''}
+    ${row('Delivery', 'Mumbai · confirmed by the studio')}
   </div>`;
 }
 
+// Sticky footer (S-11): the estimate and the send routes stay in reach
+// however long the list is. Email is a quiet link at every width (S-08).
+/** @param {Row[]} lines */
+function footHTML(lines){
+  const t = totals(lines), text = orderText(lines), est = estimateLine(t);
+  return `<div class="ct-summary ct-foot">
+    <p class="ct-row ct-row--total"><span>${est.label}</span><span>${est.value}</span></p>
+    <p class="ct-note">Nothing is charged here. The studio confirms the final total, delivery within Mumbai and lead time, then sends you a secure payment link.</p>
+    ${isSent() ? `
+    <button type="button" class="cta cta-block" data-ct="clear">Clear cart</button>
+    <p class="ct-note">Didn't open? <a class="ct-link" data-ct="send" href="${waHref(orderText(lines, contact))}" target="_blank" rel="noopener">Send again on WhatsApp</a></p>` : `
+    ${sentKey ? '<p class="ct-note">Changed since you sent it.</p>' : ''}
+    <a class="cta cta-block" data-ct="send" href="${waHref(orderText(lines, contact))}" target="_blank" rel="noopener">Send order on WhatsApp ${icon('arrow-up-right', { size: 'xs' })}</a>
+    ${enquiryAltHTML(`Cart · ${pieces(t.items)}`, text, { order: true, values: contact })}`}
+  </div>`;
+}
+
+// clean() kept only lines that resolve, so none is null here.
+/** @param {List} list */
+const rows = (list) => /** @type {Row[]} */ (state[list].map(l => resolve(l, list)));
+
 function drawerHTML(){
-  // clean() kept only lines that resolve, so none is null here.
-  const lines = /** @type {Record<List, Row[]>} */ ({ cart: state.cart.map(l => resolve(l, 'cart')), saved: state.saved.map(l => resolve(l, 'saved')) });
+  const lines = { cart: rows('cart'), saved: rows('saved') };
   /** @param {List} l */
   const count = (l) => l === 'cart' ? state.cart.reduce((n, x) => n + (x.qty || 1), 0) : state.saved.length;
   /**
    * @param {List} id
    * @param {string} label
    */
-  const tabBtn = (id, label) => `<button type="button" role="tab" id="ct-tab-${id}" aria-controls="ct-panel" aria-selected="${tab === id}" data-ct="tab" data-tab="${id}" ${tab === id ? '' : 'tabindex="-1"'}>${label} <span>(${count(id)})</span></button>`;
+  // "Cart · 5 pieces | Saved · 2" (UX audit D1): pieces, not a build's parts.
+  const tabBtn = (id, label) => `<button type="button" role="tab" id="ct-tab-${id}" aria-controls="ct-panel" aria-selected="${tab === id}" data-ct="tab" data-tab="${id}" ${tab === id ? '' : 'tabindex="-1"'}>${label} <span>· ${id === 'cart' ? pieces(count(id)) : count(id)}</span></button>`;
   const list = lines[tab];
   const empty = tab === 'cart'
     ? `${art('system-cart-empty', 'ct-art')}<p class="ct-empty">Your cart is empty.</p><p class="ct-note">Add pieces from the <a href="/products">catalogue</a>, or design your own in the <a href="/maker">Maker</a>.</p>`
@@ -416,8 +468,15 @@ function drawerHTML(){
         ${notice.undo ? '<button type="button" class="ct-link" data-ct="undo">Undo</button>' : ''}
         ${notice.clear ? '<button type="button" class="ct-link" data-ct="clear">Clear cart</button>' : ''}` : ''}</p>
       ${list.length ? `<ul class="ct-lines">${list.map(r => lineHTML(r, tab)).join('')}</ul>` : empty}
-      ${tab === 'cart' && list.length ? suggestHTML() + summaryHTML(list) : ''}
+      ${tab === 'cart' && list.length ? suggestHTML() + breakdownHTML(totals(list)) + footHTML(list) : ''}
     </div>`;
+}
+
+// Draw the drawer, keeping the email form open if the visitor opened it.
+/** @param {HTMLDialogElement} d */
+function paint(d){
+  d.innerHTML = drawerHTML();
+  if (emailOpen) d.querySelector('.enquiry-alt--order')?.setAttribute('open', '');
 }
 
 function refresh(){
@@ -431,7 +490,7 @@ function refresh(){
   if (dlg?.open) {
     const active = /** @type {HTMLElement | null} */ (document.activeElement);
     const focusKey = active?.closest('[data-ct]') && [active.dataset.ct, active.dataset.k, active.dataset.d, active.dataset.tab].join();
-    dlg.innerHTML = drawerHTML();
+    paint(dlg);
     const back = focusKey && [.../** @type {NodeListOf<HTMLElement & { disabled?: boolean }>} */ (dlg.querySelectorAll('[data-ct]'))].find(el => [el.dataset.ct, el.dataset.k, el.dataset.d, el.dataset.tab].join() === focusKey && !el.disabled);
     // A tab is always there to fall back on.
     /** @type {HTMLElement} */ (back || dlg.querySelector('.ct-notice button') || dlg.querySelector('[role=tab][aria-selected=true]')).focus();
@@ -456,7 +515,8 @@ function openDrawer(which = 'cart'){
   notice = null;
   tab = which; lastFocus = document.activeElement;
   const d = /** @type {HTMLDialogElement} */ (dlg);   // only reached from buttons initCart wired up
-  d.innerHTML = drawerHTML();
+  emailOpen = false;
+  paint(d);
   if (!d.open) d.showModal();
   /** @type {HTMLElement} */ (d.querySelector(`#ct-tab-${tab}`)).focus();
   track('cart_open', { tab });
@@ -512,6 +572,23 @@ export function initCart(){
     tab = tab === 'cart' ? 'saved' : 'cart'; refresh();
   });
   drawer.addEventListener('enquiry:sent', () => sent('form'));
+  // Typing in the email form: remember it, and put name + pincode in the
+  // WhatsApp message too (S-09). Only what was typed; nothing is invented.
+  drawer.addEventListener('input', (e) => {
+    const el = /** @type {HTMLInputElement} */ (e.target);
+    if (!el.closest('.enquiry-alt--order') || !['name', 'phone', 'pincode', 'email'].includes(el.name)) return;
+    contact[/** @type {keyof typeof contact} */ (el.name)] = el.value;
+    const href = waHref(orderText(rows('cart'), contact));
+    /** @type {NodeListOf<HTMLAnchorElement>} */ (drawer.querySelectorAll('a[data-ct=send]')).forEach(a => { a.href = href; });
+  });
+  // "Send by email instead" opens the form and moves focus into it. toggle
+  // doesn't bubble, so listen while it travels down (capture).
+  drawer.addEventListener('toggle', (e) => {
+    const fold = /** @type {HTMLDetailsElement} */ (e.target);
+    if (!fold.matches('.enquiry-alt--order')) return;
+    if (fold.open && !emailOpen) /** @type {HTMLElement | null} */ (fold.querySelector('input[name=name]'))?.focus();
+    emailOpen = fold.open;
+  }, true);
   drawer.addEventListener('close', () => lastFocus?.focus?.());
 
   // Any page can carry add/save buttons: data-add-line / data-save-line = JSON line.

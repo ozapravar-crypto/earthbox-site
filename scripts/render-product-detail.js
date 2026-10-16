@@ -11,7 +11,7 @@
 
 import { SITE, PHONE } from '../data/site.js';
 import { esc, rupees, track, savedPlace, rememberPlace, radioKeys } from './util.js';
-import { volumeOne as v1Products, categories as v1Categories, materials, photoPath, places } from '../data/volume-one.js';
+import { volumeOne as v1Products, categories as v1Categories, materials, photoPath, places, priceOf } from '../data/volume-one.js';
 import { volumeTwo } from '../data/upcoming.js';
 import { findProduct, productMeta } from './product-meta.js';
 import { getReviews, getAverageRating, REVIEWS_CONFIRMED } from '../data/reviews.js';
@@ -52,15 +52,13 @@ function enquiryHref(opts){
     text += `Please let me know when it can be ordered.\n\n${productUrl}`;
   }
   else if (volume === 1) {
-    // V1: 3D Printed products — warm craftsman tone
-    text = `Hi — I was just looking at the ${name}`;
+    // V1: 3D Printed products. The customer sends it, so it's in their
+    // voice, not the studio's (UX audit S-23).
+    text = `Hi, I'm looking at the ${name}`;
     if (variant) text += ` (${variant})`;
     if (material) text += ` in ${material.toUpperCase()}`;
-    text += `.\n\n`;
-    text += `It's one of my favourites from Volume I. `;
-    text += `Each is 3D-printed here in Mumbai, takes about a week.\n\n`;
-    if (price) text += `Noted price: ${price}\n\n`;
-    text += `Happy to answer any questions or talk through material options.\n\n`;
+    if (price) text += `, listed at ${price}`;
+    text += `.\n\nI have a question about it before I order.\n\n`;
     text += `${productUrl}`;
   }
   else if (volume === 2) {
@@ -91,6 +89,10 @@ function enquiryHref(opts){
 /** @param {unknown} o */
 const attr = (o) => /** @type {string} */ (JSON.stringify(o)).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 const ARROW = icon('arrow-long');
+// One line under Add (UX audit D2): how it's made and where it goes. The
+// "~1 week" already shown here stays once; it isn't confirmed, so it isn't
+// repeated or added elsewhere (AAYUSH-QUESTIONS.md, Q3).
+const MADE = `<p class="pd-lead-time">${icon('truck')}<span>Made to order · ~1 week · delivered in Mumbai</span></p>`;
 /**
  * @param {NewLine} line
  * @param {string} waHref
@@ -102,6 +104,7 @@ function buyHTML(line, waHref, name){
       <button type="button" class="cta magnetic pd-cta" data-add-line="${attr(line)}" data-cursor="ADD">Add to cart ${ARROW}</button>
       <button type="button" class="cta cta-secondary save-btn" data-save-line="${attr(line)}" aria-pressed="false">${icon('heart')}<span>Save</span><span class="u-sr-only"> ${name}</span></button>
     </div>
+    ${MADE}
     <details class="pd-other-ways">
       <summary>Other ways to order ${icon('chevron-down', { size: 'xs' })}</summary>
       <a class="pd-alt-wa" id="pdEnquiryCta" href="${waHref}" target="_blank" rel="noopener">Ask a question on WhatsApp ${icon('arrow-up-right', { size: 'xs' })}</a>
@@ -126,17 +129,47 @@ function interestHTML(line, waHref, name){
       ${enquiryAltHTML(name)}
     </details>`;
 }
-// Phone sticky bar shows the price beside the button (audit P8): it follows
-// size/material via updatePrice().
+// Phone sticky bar: "₹1,399 · Big Block · Indoors [Add]" (audit P8, D2). It
+// follows size/material via updatePrice(), and shows only once the real Add
+// has scrolled away (initMobileBar).
 /**
  * @param {NewLine} line
  * @param {string | null} price
+ * @param {string} what  size and place, e.g. "Big Block · Indoors"
  */
-const mobileBuyHTML = (line, price) => `
-    <div class="pd-mobile-cta" id="pdMobileCta">
-      <span class="pd-mobile-price" id="pdMobilePrice">${String(price)}</span>
-      <button type="button" class="cta" data-add-line="${attr(line)}">Add to cart ${ARROW}</button>
+const mobileBuyHTML = (line, price, what) => `
+    <div class="pd-mobile-cta" id="pdMobileCta" data-shown="false">
+      <span class="pd-mobile-what"><span class="pd-mobile-price" id="pdMobilePrice">${String(price)}</span><span class="pd-mobile-meta" id="pdMobileMeta">${what ? ` · ${esc(what)}` : ''}</span></span>
+      <button type="button" class="cta" data-add-line="${attr(line)}">Add<span class="u-sr-only"> to cart</span> ${ARROW}</button>
     </div>`;
+
+// What a price is for (rule E3): "Big Block · Indoors (PETG)". `short` drops
+// the material, for the phone bar.
+/**
+ * @param {string | null | undefined} variant  the size's name
+ * @param {string | undefined} material  a material id
+ * @param {boolean} [short]
+ */
+function priceFor(variant, material, short = false){
+  const mat = materials.find(m => m.id === material), place = places.find(x => x.material === material);
+  const finish = place ? (short || !mat ? place.name : `${place.name} (${mat.name})`) : mat?.name;
+  return [variant, finish].filter(Boolean).join(' · ');
+}
+
+// The bar shows only while the inline Add is above the screen (scrolled
+// past), never on top of it. One observer per page; a re-render replaces it.
+/** @type {IntersectionObserver | null} */
+let barWatch = null;
+/** @param {HTMLElement} host */
+function initMobileBar(host){
+  barWatch?.disconnect(); barWatch = null;
+  const bar = document.getElementById('pdMobileCta'), inline = host.querySelector('.pd-buy');
+  if (!bar || !inline || bar.dataset.shown === undefined) return;
+  // The root reaches far below the screen, so "not intersecting" means only
+  // "above it", and a jump from below to above (a fling, a #link) still fires.
+  barWatch = new IntersectionObserver(([e]) => { bar.dataset.shown = String(!e.isIntersecting); }, { rootMargin: '0px 0px 100000px 0px' });
+  barWatch.observe(inline);
+}
 
 /** @param {number | null | undefined} price */
 const formatPrice = (price) => (price ? rupees(price) : null);
@@ -264,10 +297,12 @@ function renderPrinted(p){
   // Catalogue does, so the price here matches the card they tapped.
   const startMat = startMaterial(availableMaterials);
 
-  // Related products from same category
+  // Related: same category, pieces you can order first (UX audit S-12).
   const related = v1Products
     .filter(o => o.sku !== p.sku && o.category === p.category)
+    .sort((a, b) => Number(a.status === 'coming-soon') - Number(b.status === 'coming-soon'))
     .slice(0, 4);
+  const startPlace = savedPlace(places);
 
   // Reviews summary for trust signal
   const reviews = getReviews(p.sku);
@@ -278,8 +313,8 @@ function renderPrinted(p){
   const line = { kind: 'product', sku: p.sku, variant: hasVariants ? variants[0].id : null,
                  material: startMat || null, qty: 1 };
 
-  // Extract key points from description (first sentence or up to 100 chars)
-  const shortDesc = p.description.split('.')[0] + '.';
+  const startPrice = hasPricing ? formatPrice(hasVariants ? tables[variants[0].id][startMat] : table[startMat]) : null;
+  const firstSize = hasVariants ? variants[0].name : null;
 
   return `
     <article class="pd-page pd-page--printed">
@@ -294,22 +329,25 @@ function renderPrinted(p){
         <span class="pd-breadcrumb-current">${p.name}</span>
       </nav>
 
-      <header class="pd-head reveal">
-        <span class="eyebrow">Volume I &nbsp;·&nbsp; ${cat ? cat.title : '3D Printed'}</span>
-        <h1 class="pd-title scramble">${p.name}</h1>
-        ${p.unit ? `<p class="pd-unit caption">${p.unit}</p>` : ''}
-      </header>
-
       <section class="pd-showcase">
         <div class="pd-hero reveal">
           <div class="pd-hero-frame">
             <img src="${photoPath(p)}" alt="${esc(p.name)}" width="1200" height="900" data-parallax="0.05" data-fallback="parent:pd-hero-frame--placeholder"/>
           </div>
         </div>
-        <aside class="pd-body-side reveal" style="--d:120ms">
-
-          <!-- Short description -->
-          <p class="pd-short-desc">${shortDesc}</p>
+        <!-- The buying column (UX audit S-05): heading, rating, price, choices
+             and Add sit together at the fold. The breadcrumb is the only thing above. -->
+        <div class="pd-body-side pd-buycol reveal" style="--d:120ms">
+          <header class="pd-head pd-head--buy">
+            <h1 class="pd-title scramble">${p.name}</h1>
+            ${p.unit ? `<p class="pd-unit caption">${p.unit}</p>` : ''}
+            ${reviewCount > 0 ? `
+              <a href="#reviews" class="pd-rating-badge">
+                <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false"><path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="currentColor"/></svg>
+                <span>${String(avgRating)} · ${reviewCount} ${reviewCount === 1 ? 'review' : 'reviews'}</span>
+              </a>
+            ` : ''}
+          </header>
 
           ${isComingSoon ? `
             <div class="pd-coming-soon">
@@ -317,6 +355,15 @@ function renderPrinted(p){
             </div>
             ${interestHTML(line, enquiryHref({ name: p.name, sku: p.sku, soon: true }), p.name)}
           ` : `
+          <div class="pd-price-display">
+            ${hasPricing ? `
+              <span class="pd-price" id="pdPrice">${String(startPrice)}</span>
+              <span class="pd-price-for" id="pdPriceFor">${esc(priceFor(firstSize, startMat))}</span>
+            ` : `
+              <span class="pd-price pd-price--enquiry">Price on enquiry</span>
+            `}
+          </div>
+
           ${hasVariants ? `
             <div class="pd-selector" data-selector="variant">
               <span class="caption" id="pdVariantLabel">Size / Variant</span>
@@ -349,46 +396,16 @@ function renderPrinted(p){
             </div>
           ` : ''}
 
-          <div class="pd-price-display">
-            ${hasPricing ? `
-              <span class="pd-price" id="pdPrice">
-                ${String(hasVariants
-                  ? formatPrice(tables[variants[0].id][startMat])
-                  : formatPrice(table[startMat]))}
-              </span>
-            ` : `
-              <span class="pd-price pd-price--enquiry">Price on enquiry</span>
-            `}
-          </div>
-
           ${buyHTML(line, enquiryHref({
                name: p.name,
                sku: p.sku,
                material: startMat,
-               variant: hasVariants ? variants[0].name : null,
-               price: hasPricing ? formatPrice(hasVariants ? tables[variants[0].id][startMat] : table[startMat]) : null,
+               variant: firstSize,
+               price: startPrice,
                volume: 1
              }), p.name)}
           `}
-
-          <!-- Trust signals -->
-          <div class="pd-trust-signals">
-            ${isComingSoon ? '' : `<div class="pd-lead-time">
-              ${icon('clock')}
-              <span>Made to order · ~1 week</span>
-            </div>`}
-            ${reviewCount > 0 ? `
-              <a href="#reviews" class="pd-rating-badge">
-                <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false"><path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="currentColor"/></svg>
-                <span>${String(avgRating)} · ${reviewCount} ${reviewCount === 1 ? 'review' : 'reviews'}</span>
-              </a>
-            ` : ''}
-            <div class="pd-delivery">
-              ${icon('truck')}
-              <span>Delivery within Mumbai</span>
-            </div>
-          </div>
-        </aside>
+        </div>
       </section>
 
       <section class="pd-intro reveal">
@@ -401,23 +418,25 @@ ${!isComingSoon && ['planters', 'plant-packets', 'plant-support'].includes(p.cat
       ${renderReviewsSection(p.sku)}
 
       ${related.length ? `
-        <section class="pd-related reveal">
+        <section class="pd-related reveal" aria-labelledby="pdRelatedTitle">
           <header class="pd-related-head">
-            <h2 class="u-sr-only">More ${cat ? cat.title : 'products'}</h2>
+            <h2 class="pd-related-title" id="pdRelatedTitle">More ${cat ? cat.title.toLowerCase() : 'pieces'}</h2>
           </header>
           <div class="pd-related-grid">
-            ${related.map(o => `
+            ${related.map(o => {
+              // A price (in the shopper's place, first size) or a status on every card.
+              const price = o.status === 'coming-soon' ? null : priceOf(o, startPlace.material);
+              return `
               <a class="pd-related-card" href="/product/${encodeURIComponent(o.sku)}" data-cursor="VIEW">
                 <div class="pd-related-img">
                   <img src="${photoPath(o, '600')}" alt="${esc(o.name)}" loading="lazy" data-fallback="hide"/>
                 </div>
                 <div class="pd-related-meta">
-                  <span class="caption">Volume I</span>
                   <h3>${o.name}</h3>
-                  ${o.status === 'coming-soon' ? '<p class="italic">Coming soon</p>' : ''}
+                  <p class="pd-related-price">${o.status === 'coming-soon' ? 'Coming soon' : price ? `${rupees(price)} · ${startPlace.name}` : 'Price on enquiry'}</p>
                 </div>
-              </a>
-            `).join('')}
+              </a>`;
+            }).join('')}
           </div>
         </section>
       ` : ''}
@@ -425,7 +444,7 @@ ${!isComingSoon && ['planters', 'plant-packets', 'plant-support'].includes(p.cat
     </article>
 
     <!-- Mobile sticky CTA (none for coming soon: there's nothing to add) -->
-    ${isComingSoon ? '' : mobileBuyHTML(line, hasPricing ? formatPrice(hasVariants ? tables[variants[0].id][startMat] : table[startMat]) : 'Price on enquiry')}
+    ${isComingSoon ? '' : mobileBuyHTML(line, startPrice || 'Price on enquiry', hasPricing ? priceFor(firstSize, startMat, true) : '')}
   `;
 }
 
@@ -458,6 +477,9 @@ function initPrintedSelectors(p){
     if (mobilePrice) mobilePrice.textContent = /** @type {HTMLElement} */ (priceEl).textContent;
 
     const variantName = hasVariants ? variants.find(v => v.id === currentVariant)?.name : null;
+    const priceForEl = document.getElementById('pdPriceFor'), mobileMeta = document.getElementById('pdMobileMeta');
+    if (priceForEl) priceForEl.textContent = priceFor(variantName, currentMaterial);
+    if (mobileMeta) mobileMeta.textContent = ` · ${priceFor(variantName, currentMaterial, true)}`;
     const href = enquiryHref({
       name: p.name,
       sku: p.sku,
@@ -551,6 +573,7 @@ function renderBox(b){
         <span class="eyebrow">Volume II &nbsp;·&nbsp; Elemental Boxes</span>
         <h1 class="pd-title scramble">${b.sku}</h1>
         <p class="pd-tagline italic">${b.tagline}</p>
+        <p class="pd-guide">Guide ${b.price} · final price on enquiry</p>
       </header>
 
       <section class="pd-intro reveal">
@@ -598,7 +621,7 @@ function renderBox(b){
 
     <!-- Mobile sticky CTA -->
     <div class="pd-mobile-cta" id="pdMobileCta">
-      <span class="pd-mobile-price">${b.price}</span>
+      <span class="pd-mobile-price">Guide ${b.price}</span>
       <a class="cta" href="${enquiryHref({ name: b.sku, sku: b.sku, volume: 2 })}" target="_blank" rel="noopener">Register interest ${icon('arrow-up-right', { size: 'xs' })}</a>
     </div>
   `;
@@ -710,6 +733,7 @@ function renderProduct(id){
   if (found.kind === 'printed') {
     initPrintedSelectors(found.data);
   }
+  initMobileBar(host);
 
   // Scroll to top when navigating to new product
   window.scrollTo({ top: 0, behavior: 'smooth' });

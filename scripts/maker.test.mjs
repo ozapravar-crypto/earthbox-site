@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { emptyBuild, capacity, togglePlant, swapChamber, done, canEnter,
          furthest, encodeBuild, decodeBuild, enquiryText, substrateSuits, previewSVG } from './maker.js';
 import { chambers, plants, substrates, recipes } from '../data/maker.js';
-import { sceneSpec } from './maker.js';
+import { sceneSpec, fitting, roomFor, exploring } from './maker.js';
 
 /** @typedef {import('./build-codec.js').Build} Build */
 
@@ -37,6 +37,25 @@ s = swapChamber(b, 'AirBox');
 assert.equal(s.build.substrate, null, 'Air is soil-free');
 assert.equal(s.clearedSubstrate, true);
 assert.equal(substrateSuits(aroid, 'MossBox'), false);
+
+// A recipe's name goes with its chamber (UX audit M-12); a name of your own stays.
+const jungle = /** @type {typeof recipes[number]} */ (recipes.find(rc => rc.id === 'tiny-jungle'));
+b = { ...emptyBuild(), name: jungle.name, chamber: jungle.chamber, substrate: jungle.substrate, plants: [...jungle.plants] };
+s = swapChamber(b, 'FireBox');
+assert.equal(s.build.name, '');
+assert.equal(s.clearedName, 'Tiny Jungle');
+assert.equal(swapChamber({ ...b, name: 'My Fern Den' }, 'FireBox').build.name, 'My Fern Den');
+assert.equal(swapChamber({ ...b, chamber: 'LabBox' }, 'DarkBox').build.name, 'Tiny Jungle', 'back to its own chamber: kept');
+
+// Plants step modes (M-06): 8 or fewer fit → the short list; only the Lab explores by default.
+for (const c of chambers) {
+  const n = fitting(c.sku).length;
+  assert.equal(exploring({ ...emptyBuild(), chamber: c.sku }, false), n > 8, `${c.sku} mode`);
+  if (n) assert.ok(roomFor(c) <= n && roomFor(c) <= capacity(c));
+}
+assert.equal(chambers.filter(c => !exploring({ ...emptyBuild(), chamber: c.sku }, false)).length, 9, '9 of 10 chambers are simple');
+assert.equal(exploring({ ...emptyBuild(), chamber: 'MossBox' }, true), true, 'asked to explore');
+assert.equal(roomFor(/** @type {typeof chambers[number]} */ (box('WaterBox'))), 5, 'Water holds 8, but 5 plants fit (M-23)');
 
 // Required steps: soil-free skips foundation; Spore needs no plants.
 assert.equal(done({ ...emptyBuild(), chamber: 'AeroBox' }, 'foundation'), true);

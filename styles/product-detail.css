@@ -217,42 +217,39 @@
   text-align:center;
 }
 
-/* ─── SHORT DESCRIPTION ─── */
-.pd-short-desc{
+/* ─── BUYING COLUMN · heading + price + Add at the fold (UX audit S-05) ─── */
+/* primitives.css pads every section; the breadcrumb is right above here */
+.pd-page--printed .pd-showcase{padding-top:0}
+.pd-head--buy{margin-bottom:1.25rem;text-align:left}
+.pd-head--buy .pd-title{font-size:clamp(2rem,3.2vw,3rem);margin-top:0}
+.pd-head--buy .pd-rating-badge{margin-top:.6rem}
+@media (min-width: 768px){
+  .pd-head.pd-head--buy{text-align:left}
+}
+/* Chambers: the published range, with how firm it is (S-02) */
+.pd-guide{
   font-family:var(--body);
-  font-size:.95rem;
-  line-height:1.6;
-  color:var(--ink-soft);
-  margin-bottom:1.25rem;
-  padding-bottom:1.25rem;
-  border-bottom:1px solid var(--rule);
+  font-size:clamp(1rem,1.4vw,1.15rem);
+  color:var(--ink);
+  margin-top:1rem;
+  font-variant-numeric:tabular-nums;
 }
 
-/* ─── TRUST SIGNALS ─── */
-.pd-trust-signals{
-  margin-top:1.25rem;
-  padding-top:1.25rem;
-  border-top:1px solid var(--rule);
-  display:flex;
-  flex-direction:column;
-  gap:.75rem;
-}
-.pd-lead-time,
-.pd-delivery{
+/* One line under Add: how it's made and where it goes */
+.pd-lead-time{
   display:flex;
   align-items:center;
   gap:.5rem;
-  font-family:var(--sans);
-  font-size:.62rem;
-  letter-spacing:.15em;
+  margin-top:.9rem;
+  font-family:var(--body);
+  font-size:.88rem;
   color:var(--mute);
 }
-.pd-lead-time svg,
-.pd-delivery svg{
+.pd-lead-time svg{
   width:16px;
   height:16px;
   flex-shrink:0;
-  color:var(--accent);
+  color:var(--ink-soft);
 }
 .pd-rating-badge{
   display:inline-flex;
@@ -443,6 +440,7 @@
   padding-top:clamp(3rem,6vh,5rem);
 }
 .pd-related-head{margin-bottom:2rem}
+.pd-related-title{font-size:clamp(1.6rem,3vw,2.2rem)}
 .pd-related-grid{
   display:grid;
   grid-template-columns:repeat(4, 1fr);
@@ -477,18 +475,13 @@
 .pd-related-meta{
   padding:.85rem 1rem 1rem;
 }
-.pd-related-meta .caption{
-  font-size:.62rem;
-  letter-spacing:.32em;
-  color:var(--accent-text);
-}
 .pd-related-meta h3{
   font-family:var(--serif);
   font-weight:400;
   font-size:1rem;
-  margin-top:.4rem;
   line-height:1.1;
 }
+.pd-related-meta .pd-related-price{color:var(--ink-soft);font-size:.85rem}
 .pd-related-meta p{
   font-family:var(--body);
   font-size:.78rem;
@@ -612,9 +605,17 @@
 
 /* ─── Price Display ─── */
 .pd-price-display{
-  margin:1.5rem 0 1rem;
+  margin:0 0 1.25rem;
   padding-top:1rem;
   border-top:1px solid var(--rule);
+}
+/* What the price is for: "Big Block · Indoors (PETG)" (rule E3) */
+.pd-price-for{
+  display:block;
+  margin-top:.45rem;
+  font-family:var(--body);
+  font-size:.88rem;
+  color:var(--ink-soft);
 }
 .pd-price{
   font-family:var(--serif);
@@ -668,11 +669,16 @@
     padding-bottom:calc(1rem + env(safe-area-inset-bottom, 0px));
   }
   .pd-mobile-cta{display:flex;align-items:center;gap:1rem}
+  .pd-mobile-what{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.88rem;color:var(--ink-soft)}
   .pd-mobile-price{font-family:var(--serif);font-size:1.15rem;color:var(--ink);white-space:nowrap}
   .pd-mobile-cta .cta{
     flex:1;
     justify-content:center;
   }
+  .pd-mobile-what + .cta{flex:none}
+  /* Printed pieces: only once the real Add has scrolled away (UX audit D2) */
+  .pd-mobile-cta{transition:transform var(--dur-fast) var(--ease-archival),visibility 0s}
+  .pd-mobile-cta[data-shown="false"]{transform:translateY(100%);visibility:hidden;transition:transform var(--dur-fast) var(--ease-archival),visibility 0s var(--dur-fast)}
 
   /* Add bottom padding to main content so it doesn't hide behind sticky bar */
   .product-detail{

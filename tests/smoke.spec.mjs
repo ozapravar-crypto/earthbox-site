@@ -66,9 +66,9 @@ test('review badge scrolls, keeps the product (was a blank page)', async ({ page
   await expect(page.locator('#reviews')).toBeInViewport();
 });
 
-test('cart tallies a priced piece and a Maker build; coming-soon pieces register interest instead', async ({ page, isMobile }) => {
+test('cart tallies a priced piece and a Maker build; coming-soon pieces register interest instead', async ({ page }) => {
   test.slow();   // the Maker draws 3D in software on CI: ~30 s of the 45 s budget already on main (bead: Maker CI speed)
-  const add = isMobile ? '#pdMobileCta [data-add-line]' : '.pd-buy [data-add-line]';
+  const add = '.pd-buy [data-add-line]';   // the phone bar shows only once this has scrolled away (UX audit D2)
   await page.goto('/product.html#V1-PLT-006');                          // Capsule Planter, PETG ₹429
   await page.locator(add).click();
   await expect(page.locator('dialog.ct .ct-line--fixed')).toHaveCount(1);
@@ -100,6 +100,7 @@ test('guided search opens centred and its answers filter the list', async ({ pag
   await page.goto('/maker.html');
   await page.locator('[data-act=recipe]').first().click();
   await page.locator('[data-act=goto][data-to=plants]').click();
+  await page.locator('[data-act=explore]').click();                    // guided search lives in explore mode (UX audit M-06)
   await page.locator('[data-act=guide]').click();
   const g = page.locator('#mkGuide');
   await expect(g).toBeVisible();

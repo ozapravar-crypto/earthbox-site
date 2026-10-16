@@ -220,3 +220,35 @@ QA-001 to QA-007, QA-009 and QA-013. Details, root causes and evidence are in `Q
 ## Follow-up · SEO/GEO/AEO audit fixes, 16 Oct 2026 (QA-019, site-1c6)
 - **What changed:** see QA-019.
 - **Checks:** `npm test` and `npm run build` pass, including the new related-product check. Full Playwright suite (desktop, phone, tablet): 327 passed, 78 skipped (the live-only ones), 0 failed.
+
+## Follow-up · UX audit Phase 2: cart, product page, Maker Plants + Review, 16 Oct 2026 (site-bhr.3)
+- **Cart drawer (spec D1):**
+  - **Lines:** title and price first, then "Size · Place (MATERIAL)" with the unit price, then the status on its own line. No kind labels; icons instead of letters.
+  - **Counts:** they count pieces, not parts.
+  - **Breakdown:** includes "To be quoted" and "Delivery · Mumbai · confirmed by the studio".
+  - **Sticky footer:** "Estimate so far ₹X + n to quote", with the qualifier at the same size, then Send on WhatsApp and "Send by email instead" at every width.
+  - **Email order form:** name, phone and pincode (with the Mumbai hint), plus optional email.
+  - **Saved chamber:** shows its guide price.
+- **Product page (spec D2):**
+  - The heading and price sit in the buying column, so Add is above the fold at 1440×900.
+  - "Size · Place (MATERIAL)" under the price, and one line under Add.
+  - No duplicate description.
+  - The related row is "More planters": available pieces first, with prices.
+  - Chamber guide prices show on desktop and on the Volume II cards.
+  - The phone sticky bar appears only once the inline Add has scrolled away.
+  - The WhatsApp prefill is in the customer's voice.
+- **Maker Plants (spec D3):**
+  - **Simple mode** when 8 or fewer plants fit (9 of 10 chambers): the plants are listed straight away. "Explore other chambers" opens the full tools.
+  - **Explore mode:** a visible climate line, a quiet Guided search, and named map pins.
+  - **Selected and full states:** "Added ✓", with the accessible name unchanged, and a reason when the chamber is full.
+  - **Phone:** the 3D preview is a strip with "View 3D", and the count is in the bottom bar.
+- **Maker Review (spec D4):**
+  - "Made to order · availability confirmed with your quote", and "What happens next" in 3 steps.
+  - Actions run Add to cart → send this design → Care → Copy link · Start over.
+  - Edit from Review says "Back to review".
+  - The recipe name clears when the chamber changes.
+- **Checks:**
+  - `npm test` and `npm run build` pass.
+  - New specs: `tests/phase2-shop.spec.mjs` (15 journeys) and `tests/phase2-maker.spec.mjs` (10), plus unit tests.
+  - Visual baselines refreshed on purpose, after review (product, cart, chamber, Maker plants and review, desktop and phone).
+  - Full Playwright suite: 374 passed, 79 skipped (the live-only ones), 0 failed.

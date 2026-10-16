@@ -108,7 +108,11 @@
   <section class="mk-build" id="mkBuild" hidden>
     <nav class="mk-steps" id="mkSteps" aria-label="Maker steps"></nav>
     <div class="mk-stage">
-      <figure class="mk-preview" id="mkPreview"></figure>
+      <!-- Phones, Plants step: a thin strip with "View 3D", so the list gets the screen (UX audit M-05). -->
+      <div class="mk-view" id="mkView">
+        <figure class="mk-preview" id="mkPreview"></figure>
+        <button type="button" class="mk-view-toggle cta cta-secondary cta-small" id="mkViewToggle" data-act="view3d" data-key="view3d" aria-controls="mkPreview" aria-expanded="false">View 3D</button>
+      </div>
       <div class="mk-panel">
         <!-- One fixed spoken-update line: the panel is redrawn, so its own live
              regions are unreliable (UX audit M-03). -->

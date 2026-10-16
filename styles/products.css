@@ -566,6 +566,14 @@
   line-height:1.55;
   margin-bottom:1.25rem;
 }
+/* The published range, with how firm it is (UX audit S-02, rule E3) */
+.box-guide{
+  font-family:var(--body);
+  font-size:.92rem;
+  color:var(--ink);
+  margin:-.5rem 0 1.25rem;
+  font-variant-numeric:tabular-nums;
+}
 /* Whole card is now a link; CTA below is a label, not an anchor */
 .box-card-link{
   display:flex;
