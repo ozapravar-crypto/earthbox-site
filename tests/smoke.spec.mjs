@@ -62,7 +62,7 @@ test('review badge scrolls, keeps the product (was a blank page)', async ({ page
   await expect(page.locator('#reviews')).toBeInViewport();
 });
 
-test('cart tallies a priced piece, an enquiry piece and a Maker build', async ({ page, isMobile }) => {
+test('cart tallies a priced piece and a Maker build; coming-soon pieces register interest instead', async ({ page, isMobile }) => {
   test.slow();   // the Maker draws 3D in software on CI: ~30 s of the 45 s budget already on main (bead: Maker CI speed)
   const add = isMobile ? '#pdMobileCta [data-add-line]' : '.pd-buy [data-add-line]';
   await page.goto('/product.html#V1-PLT-006');                          // Capsule Planter, PETG ₹429
@@ -71,23 +71,24 @@ test('cart tallies a priced piece, an enquiry piece and a Maker build', async ({
   await page.keyboard.press('Escape');
   await page.goto('/product.html#MossBox');                             // coming soon: register interest, no cart button
   await expect(page.locator('.pd-buy [data-add-line], #pdMobileCta [data-add-line]')).toHaveCount(0);
-  await page.goto('/product.html#V1-PLT-001');                          // TerraMesh Planter: price on enquiry
-  await page.locator(add).click();
-  await page.keyboard.press('Escape');
+  await page.goto('/product.html#V1-PLT-001');                          // TerraMesh Planter: coming soon (UX audit S-01)
+  await expect(page.locator('.pd-buy [data-add-line], #pdMobileCta [data-add-line]')).toHaveCount(0);
+  await expect(page.locator('.pd-buy #pdEnquiryCta')).toContainText('Register interest');
+  await expect(page.locator('.pd-lead-time')).toHaveCount(0);
   await page.goto('/maker.html');
   await page.locator('[data-act=recipe]').first().click();
   for (let i = 0; i < 6 && await page.locator('[data-act=next]').count(); i++) await page.locator('[data-act=next]').click();
   await page.locator('.mk-send [data-add-line]').click();
   const d = page.locator('dialog.ct');
-  await expect(d.locator('.ct-line')).toHaveCount(3);
+  await expect(d.locator('.ct-line')).toHaveCount(2);
   await expect(d.locator('.ct-line--custom .ct-parts-total')).toContainText('Build estimate');
-  await expect(d.locator('.ct-row--total')).toContainText('₹6,429');    // 429 + the build's 6,000 (Misty Forest = Moss); TerraMesh quoted
-  await expect(page.locator('[data-cart-count]').first()).toHaveText('3');
+  await expect(d.locator('.ct-row--total')).toContainText('₹6,429');    // 429 + the build's 6,000 (Misty Forest = Moss)
+  await expect(page.locator('[data-cart-count]').first()).toHaveText('2');
   // Remove → Undo puts it back.
   await d.locator('[data-ct=remove]').first().click();
-  await expect(d.locator('.ct-line')).toHaveCount(2);
+  await expect(d.locator('.ct-line')).toHaveCount(1);
   await d.locator('[data-ct=undo]').click();
-  await expect(d.locator('.ct-line')).toHaveCount(3);
+  await expect(d.locator('.ct-line')).toHaveCount(2);
 });
 
 test('guided search opens centred and its answers filter the list', async ({ page, isMobile }) => {

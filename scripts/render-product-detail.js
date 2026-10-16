@@ -28,12 +28,17 @@ const startMaterial = (mats) => { const m = savedPlace(places).material; return 
 
 
 function enquiryHref(opts = {}){
-  const { name, sku, material, variant, price, volume = 1 } = opts;
+  const { name, sku, material, variant, price, volume = 1, soon = false } = opts;
   const productUrl = sku ? `${SITE}/product/${encodeURIComponent(sku)}` : '';
 
   let text;
 
-  if (volume === 1) {
+  if (soon) {
+    // Coming-soon printed piece: no order yet, just a note to be told when.
+    text = `Hi — I'd like to register interest in the ${name} (coming soon). `;
+    text += `Please let me know when it can be ordered.\n\n${productUrl}`;
+  }
+  else if (volume === 1) {
     // V1: 3D Printed products — warm craftsman tone
     text = `Hi — I was just looking at the ${name}`;
     if (variant) text += ` (${variant})`;
@@ -270,10 +275,10 @@ function renderPrinted(p){
 
           ${isComingSoon ? `
             <div class="pd-coming-soon">
-              <p class="caption">This product is in development. Register your interest below.</p>
+              <p class="caption">Coming soon. This piece is still in development. Register interest and the studio will message you when it can be ordered.</p>
             </div>
-          ` : ''}
-
+            ${interestHTML(line, enquiryHref({ name: p.name, sku: p.sku, soon: true }), p.name)}
+          ` : `
           ${hasVariants ? `
             <div class="pd-selector" data-selector="variant">
               <span class="caption" id="pdVariantLabel">Size / Variant</span>
@@ -327,13 +332,14 @@ function renderPrinted(p){
                price: hasPricing ? formatPrice(hasVariants ? p.pricing[p.variants[0].id][startMat] : p.pricing[startMat]) : null,
                volume: 1
              }), p.name)}
+          `}
 
           <!-- Trust signals -->
           <div class="pd-trust-signals">
-            <div class="pd-lead-time">
+            ${isComingSoon ? '' : `<div class="pd-lead-time">
               ${icon('clock')}
               <span>Made to order · ~1 week</span>
-            </div>
+            </div>`}
             ${reviewCount > 0 ? `
               <a href="#reviews" class="pd-rating-badge">
                 <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false"><path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="currentColor"/></svg>
@@ -353,7 +359,7 @@ function renderPrinted(p){
           <p>${p.description}</p>
         </div>
       </section>
-${['planters', 'plant-packets', 'plant-support'].includes(p.category) ? careHTML(p.sku) : ''}
+${!isComingSoon && ['planters', 'plant-packets', 'plant-support'].includes(p.category) ? careHTML(p.sku) : ''}
 
       ${renderReviewsSection(p.sku)}
 
@@ -381,8 +387,8 @@ ${['planters', 'plant-packets', 'plant-support'].includes(p.category) ? careHTML
 
     </article>
 
-    <!-- Mobile sticky CTA -->
-    ${mobileBuyHTML(line, hasPricing ? formatPrice(hasVariants ? p.pricing[p.variants[0].id][startMat] : p.pricing[startMat]) : 'Price on enquiry')}
+    <!-- Mobile sticky CTA (none for coming soon: there's nothing to add) -->
+    ${isComingSoon ? '' : mobileBuyHTML(line, hasPricing ? formatPrice(hasVariants ? p.pricing[p.variants[0].id][startMat] : p.pricing[startMat]) : 'Price on enquiry')}
   `;
 }
 

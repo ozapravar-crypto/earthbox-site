@@ -6,7 +6,8 @@ import { encodeBuild, emptyBuild } from './build-codec.js';
 
 const capsule = { kind: 'product', sku: 'V1-PLT-006', material: 'abs', qty: 1 };          // ₹529
 const stack   = { kind: 'product', sku: 'V1-PLT-005', variant: 'big', material: 'asa', qty: 1 }; // ₹1,799
-const soon    = { kind: 'product', sku: 'V1-PLT-001', qty: 1 };                             // no price
+const soon    = { kind: 'product', sku: 'V1-PLT-001', qty: 1 };                             // coming soon
+const kit     = { kind: 'product', sku: 'KIT-EARTH', qty: 1 };                              // on enquiry (no price yet)
 const moss    = { kind: 'product', sku: 'MossBox', qty: 1 };                                // range
 const build   = { kind: 'build', code: encodeBuild({ ...emptyBuild(), chamber: 'MossBox', substrate: null, plants: ['PLT-036'] }) };
 
@@ -14,7 +15,10 @@ const build   = { kind: 'build', code: encodeBuild({ ...emptyBuild(), chamber: '
 assert.equal(resolve(capsule).kind, 'fixed');
 assert.equal(resolve(capsule).unit, 529);
 assert.equal(resolve(stack).unit, 1799);
-assert.equal(resolve(soon).kind, 'enquiry');
+// Coming-soon pieces: savable, never in the cart (UX audit S-01, 16 Oct 2026).
+assert.equal(resolve(soon), null);
+assert.equal(resolve(soon, 'saved').cartable, false);
+assert.equal(resolve(kit).kind, 'enquiry');
 // Coming-soon chambers: savable, never in the cart (studio decision, 12 Oct 2026).
 assert.equal(resolve(moss), null);
 assert.deepEqual(resolve(moss, 'saved').range, parseRange('₹6,000 – ₹9,000'));
@@ -48,7 +52,7 @@ assert.equal(setQty(s, keyOf(capsule), 99).cart[0].qty, 20);
 // Totals: fixed exact, ranges carried, unpriced counted.
 const r = (lines) => totals(lines.map(resolve));
 assert.deepEqual(r([capsule, stack]), { items: 2, fixed: 2328, low: 2328, high: 2328, ranged: false, quoted: 0 });
-const mixed = r([{ ...capsule, qty: 2 }, soon, build]);       // the build carries the chamber's range
+const mixed = r([{ ...capsule, qty: 2 }, kit, build]);       // the build carries the chamber's range
 assert.equal(mixed.fixed, 1058);
 assert.equal(mixed.low, 1058 + 6000);
 assert.equal(mixed.high, 1058 + 9000);
@@ -73,9 +77,9 @@ assert.deepEqual(c.saved, []);
 assert.deepEqual(clean(null), emptyCart());
 
 // Order text carries every line, how it's priced, and the tallies.
-const text = orderText([{ ...capsule, qty: 2 }, soon, build].map(l => resolve(l)));
+const text = orderText([{ ...capsule, qty: 2 }, kit, build].map(l => resolve(l)));
 assert.match(text, /Capsule Planter · ABS: ₹529 × 2 = ₹1,058/);
-assert.match(text, /TerraMesh Planter.*on enquiry/);
+assert.match(text, /Earth refill kit.*on enquiry/);
 assert.match(text, /custom build/);
 assert.match(text, /earthbox\.in\/maker#c=MossBox/);
 assert.match(text, /Priced items: ₹1,058/);

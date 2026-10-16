@@ -82,7 +82,8 @@
   font-size:.72rem;
   color:var(--mute);
 }
-.article-card h3{
+.article-card h2{   /* h2: cards sit right under the page h1 (UX audit C-08) */
+  letter-spacing:normal;
   font-family:var(--serif);
   font-size:clamp(1.25rem,2.5vw,1.5rem);
   font-weight:400;
@@ -90,7 +91,7 @@
   margin-bottom:.75rem;
   transition:color .25s ease;
 }
-.article-card:hover h3{
+.article-card:hover h2{
   color:var(--accent-text);
 }
 .article-excerpt{

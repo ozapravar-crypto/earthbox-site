@@ -83,6 +83,11 @@ export function initMenu(){
     ham.setAttribute('aria-expanded', String(open));
     panel.setAttribute('aria-hidden', String(!open));
     overlay.setAttribute('aria-hidden', String(!open));
+    // Keyboard focus stays in the open menu (UX audit C-04): the page behind
+    // is inert, focus moves in, and returns to the menu button on close.
+    for (const el of document.body.children) if (el !== panel && el !== overlay && el.tagName !== 'DIALOG') el.inert = open;
+    if (open) panel.querySelector('.mobile-nav-close').focus();
+    else if (panel.contains(document.activeElement) || document.activeElement === document.body) ham.focus();
   };
 
   ham.addEventListener('click', () => setOpen(!panel.classList.contains('is-open')));
