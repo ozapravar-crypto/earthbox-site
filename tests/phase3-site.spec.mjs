@@ -7,19 +7,14 @@ import { volumeOne } from '../data/volume-one.js';
 import { volumeTwo } from '../data/upcoming.js';
 import { coverage } from '../data/care.js';
 import { encodePlan } from '../scripts/care.js';
+import { cleanStart } from './helpers.mjs';
 
 /** @typedef {import('@playwright/test').Page} Page */
 
 test.beforeEach(async ({ context }, info) => {
   // Clean storage once per test; the cookie choice made, except in the banner tests.
   const consent = info.titlePath.some(t => t.includes('cookie banner')) ? null : 'denied';
-  await context.addInitScript((c) => {
-    if (sessionStorage.getItem('qa')) return;
-    localStorage.clear(); if (c) localStorage.setItem('earthbox-consent', c);
-    sessionStorage.setItem('qa', '1'); sessionStorage.setItem('earthbox-loader-seen', '1');
-  }, consent);
-  await context.route('**/*.mp4', r => r.abort());
-  await context.route('https://wa.me/**', r => r.fulfill({ body: 'wa' }));
+  await cleanStart(context, consent);
 });
 
 const soon = volumeOne.filter(p => p.status === 'coming-soon');

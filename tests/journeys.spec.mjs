@@ -1,6 +1,7 @@
 // User journeys and failure paths — the behaviours smoke.spec doesn't reach.
 // External services are mocked (Web3Forms, wa.me); nothing real is sent.
 import { test, expect } from '@playwright/test';
+import { cleanStart } from './helpers.mjs';
 
 /** @typedef {import('@playwright/test').Page} Page */
 
@@ -14,9 +15,7 @@ const errorsOf = (page) => {
 test.beforeEach(async ({ context }, info) => {
   // Start clean; cookie choice already made, except in the cookie tests.
   const consent = info.titlePath.includes('cookie choice') ? null : 'denied';
-  await context.addInitScript((c) => { if (!sessionStorage.getItem('qa')) { localStorage.clear(); if (c) localStorage.setItem('earthbox-consent', c); sessionStorage.setItem('qa', '1'); } sessionStorage.setItem('earthbox-loader-seen', '1'); }, consent);
-  await context.route('**/*.mp4', r => r.abort());
-  await context.route('https://wa.me/**', r => r.fulfill({ body: 'wa' }));
+  await cleanStart(context, consent);
 });
 
 // ── Enquiry form (Web3Forms) ─────────────────────────────────────────
