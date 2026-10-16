@@ -235,6 +235,7 @@ function renderVolumeTwo(){
               <span class="box-num">${String(i + 1).padStart(2, '0')}</span>
               <h3 class="box-name">${b.sku}</h3>
               <p class="box-tagline italic">${b.tagline}</p>
+              <p class="box-guide">Guide ${b.price} · final price on enquiry</p>
               <span class="box-cta caption">View details &nbsp;→</span>
             </div>
           </a>

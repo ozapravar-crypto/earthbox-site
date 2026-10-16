@@ -10,6 +10,7 @@
 //
 // Owns the markup (enquiryAltHTML) and the submit handling (initEnquiryForm).
 // Consumed by render-product-detail.js, render-products.js and main.js.
+// The cart drawer uses its `order` variant at every width (UX audit S-08).
 // ─────────────────────────────────────────────────────────────────────
 
 // ─── Contact details ───
@@ -18,6 +19,7 @@ export { PHONE as ENQUIRY_PHONE } from '../data/site.js';
 import { EMAIL as ENQUIRY_EMAIL, PHONE as ENQUIRY_PHONE, PHONE_DISPLAY as ENQUIRY_PHONE_DISPLAY } from '../data/site.js';
 import { esc as escapeHTML, track } from './util.js';
 import { icon } from '../data/icons.js';
+import { coverage } from '../data/care.js';
 
 // ─── Form service ───
 // Free access key from https://web3forms.com — enter the address that should
@@ -36,19 +38,44 @@ const isConfigured = () => !WEB3FORMS_ACCESS_KEY.startsWith('PASTE_');
 // `product` is the thing being enquired about, used to prefill the message
 // and to label the email subject. Pass '' for a general enquiry.
 // `message` overrides the prefill (the Maker sends the whole design).
-export function enquiryAltHTML(product = '', message = ''){
+// `order` is the cart's route (UX audit S-08/S-09): shown at every width,
+// asks for name, phone and pincode (email optional), and shows the order
+// read-only. `values` refills what the visitor already typed, since the cart
+// redraws itself.
+/**
+ * @typedef {{ name?: string, phone?: string, pincode?: string, email?: string }} Contact
+ * @param {string} [product]
+ * @param {string} [message]
+ * @param {{ order?: boolean, values?: Contact }} [opts]
+ */
+export function enquiryAltHTML(product = '', message = '', { order = false, values = {} } = {}){
   const p = escapeHTML(product);
   const prefill = message || (p ? `I'd like to know more about ${product}.` : '');
+  /** @param {keyof Contact} k */
+  const v = (k) => escapeHTML(values[k] || '');
 
-  return `
-    <details class="enquiry-alt">
-      <summary>Prefer email? Send an enquiry ${icon('chevron-down', { size: 'xs' })}</summary>
-
-      <form class="enquiry-form" novalidate>
-        <input type="hidden" name="product" value="${p}"/>
-        <!-- Honeypot: hidden from people, filled in by bots. -->
-        <input type="text" name="botcheck" class="enquiry-hp" tabindex="-1" autocomplete="off" aria-hidden="true"/>
-
+  const fields = order ? `
+        <label class="enquiry-field">
+          <span>Name</span>
+          <input type="text" name="name" required autocomplete="name" value="${v('name')}"/>
+        </label>
+        <label class="enquiry-field">
+          <span>Phone</span>
+          <input type="tel" name="phone" required autocomplete="tel" inputmode="tel" pattern="[0-9 +]{10,16}" value="${v('phone')}"/>
+        </label>
+        <label class="enquiry-field">
+          <span>Pincode</span>
+          <input type="text" name="pincode" required autocomplete="postal-code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" aria-describedby="enquiryPinHint" value="${v('pincode')}"/>
+        </label>
+        <p class="enquiry-hint" id="enquiryPinHint" aria-live="polite">${pincodeHint(values.pincode || '')}</p>
+        <label class="enquiry-field">
+          <span>Email (optional)</span>
+          <input type="email" name="email" autocomplete="email" value="${v('email')}"/>
+        </label>
+        <label class="enquiry-field">
+          <span>Your order</span>
+          <textarea name="message" rows="6" readonly>${escapeHTML(prefill)}</textarea>
+        </label>` : `
         <label class="enquiry-field">
           <span>Name</span>
           <input type="text" name="name" required autocomplete="name"/>
@@ -60,9 +87,19 @@ export function enquiryAltHTML(product = '', message = ''){
         <label class="enquiry-field">
           <span>Message</span>
           <textarea name="message" rows="${message ? 8 : 3}" required>${escapeHTML(prefill)}</textarea>
-        </label>
+        </label>`;
 
-        <button type="submit" class="cta cta-secondary enquiry-submit">Send enquiry</button>
+  return `
+    <details class="enquiry-alt${order ? ' enquiry-alt--order' : ''}">
+      <summary>${order ? 'Send by email instead' : 'Prefer email? Send an enquiry'} ${icon('chevron-down', { size: 'xs' })}</summary>
+
+      <form class="enquiry-form" novalidate${order ? ' aria-label="Send order by email"' : ''}>
+        <input type="hidden" name="product" value="${p}"/>
+        <!-- Honeypot: hidden from people, filled in by bots. -->
+        <input type="text" name="botcheck" class="enquiry-hp" tabindex="-1" autocomplete="off" aria-hidden="true"/>
+${fields}
+
+        <button type="submit" class="cta cta-secondary enquiry-submit">${order ? 'Send order by email' : 'Send enquiry'}</button>
       </form>
 
       <p class="enquiry-status" role="status" aria-live="polite"></p>
@@ -74,12 +111,22 @@ export function enquiryAltHTML(product = '', message = ''){
     </details>`;
 }
 
+// One quiet line under the pincode: is it inside the delivery area
+// (data/care.js coverage)? Never a refusal: the studio confirms.
+/** @param {string} pin */
+export function pincodeHint(pin){
+  const s = String(pin).trim();
+  if (!/^[0-9]{6}$/.test(s)) return `We deliver within ${coverage.city}.`;
+  return coverage.isCovered(s) ? `${coverage.city} pincode: inside our delivery area.`
+    : `Outside ${coverage.city}: the studio will confirm whether it can deliver.`;
+}
+
 
 // ─── Submission payload ───
 // Split out so it can be checked without a network call. See
 // enquiry-form.test.mjs.
 /**
- * @param {{ product?: string, name?: string, email?: string, message?: string, page?: string, botcheck?: string }} fields
+ * @param {{ product?: string, name?: string, email?: string, phone?: string, pincode?: string, message?: string, page?: string, botcheck?: string }} fields
  * @param {string} [key]
  */
 export function buildPayload(fields, key = WEB3FORMS_ACCESS_KEY){
@@ -90,6 +137,9 @@ export function buildPayload(fields, key = WEB3FORMS_ACCESS_KEY){
     from_name: 'EarthBox website',
     name: fields.name?.trim() || '',
     email: fields.email?.trim() || '',
+    // The cart's order form adds these (UX audit S-09); other forms send ''.
+    phone: fields.phone?.trim() || '',
+    pincode: fields.pincode?.trim() || '',
     message: fields.message?.trim() || '',
     product: product || '',
     page: fields.page || '',
@@ -101,6 +151,11 @@ export function buildPayload(fields, key = WEB3FORMS_ACCESS_KEY){
 // ─── Behaviour ───
 // Delegated so it survives the renderers injecting CTAs after page load.
 export function initEnquiryForm(){
+  document.addEventListener('input', (e) => {
+    const pin = /** @type {Element} */ (e.target).closest('.enquiry-form input[name=pincode]');
+    const hint = pin?.closest('.enquiry-form')?.querySelector('.enquiry-hint');
+    if (pin && hint) hint.textContent = pincodeHint(/** @type {HTMLInputElement} */ (pin).value);
+  });
   document.addEventListener('submit', async (e) => {
     const form = /** @type {HTMLFormElement | null} */ (/** @type {Element} */ (e.target).closest('.enquiry-form'));
     if (!form) return;

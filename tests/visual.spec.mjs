@@ -66,7 +66,7 @@ for (const [name, path] of PAGES) {
 const STATES = [
   ['cart-drawer', '/product.html#V1-PLT-006', async p => { await p.locator('.pd-buy [data-add-line], #pdMobileCta [data-add-line]').first().click(); }],
   ['maker-plants', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); }],
-  ['guided-search', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); await p.locator('[data-act=guide]').click(); }],
+  ['guided-search', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); await p.locator('[data-act=explore]').click(); await p.locator('[data-act=guide]').click(); }],
   ['maker-review', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=review]').click(); }],
   ['care-visits', '/care.html', async p => { const c = p.locator('#carePlanner'); await c.getByText('Visits from the studio').click(); await c.locator('.care-result').scrollIntoViewIfNeeded(); }],
   ['product-points', '/product#SporeBox', async p => { await p.locator('.pd-point').nth(1).click(); await p.locator('[data-points]').scrollIntoViewIfNeeded(); }],

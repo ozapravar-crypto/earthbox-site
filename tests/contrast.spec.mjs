@@ -116,6 +116,7 @@ test('CQ-008 Maker placeholders pass', async ({ page }) => {
   await page.goto('/maker.html');
   await page.locator('[data-act=recipe]').first().click();
   await page.locator('.mk-step[data-to=plants]').click();
+  await page.locator('[data-act=explore]').click();   // search lives in explore mode (UX audit M-06)
   expect(await failures(page, '.mk-search', 'plants')).toEqual([]);
   await page.locator('.mk-step[data-to=space]').click();
   expect(await failures(page, '.mk-space', 'space')).toEqual([]);
@@ -130,6 +131,7 @@ for (const theme of THEMES) {
     await page.goto('/maker.html');
     await page.locator('[data-act=recipe]').first().click();
     await page.locator('.mk-step[data-to=plants]').click();
+    await page.locator('[data-act=explore]').click();
     await page.locator('[data-act=view][data-id=map]').click();
     await page.locator('[data-act=pin]').first().click();
     expect(await failures(page, '.mk-map', 'map-pin')).toEqual([]);

@@ -128,12 +128,12 @@ const STATES = {
   maker: [
     { name: 'chamber-step', setup: click('#mkBegin') },
     { name: 'plants-list', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]')) },
-    { name: 'plants-map', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]'), click('[data-act=view][data-id=map]')) },
-    { name: 'plants-pin-card', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]'), click('[data-act=view][data-id=map]'), click('[data-act=pin]')) },
-    { name: 'plants-refine-open', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]'), click('summary:has-text("Filter")')) },
-    { name: 'plants-no-results', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]'), async p => { await p.fill('input[name=q]', 'zzqx'); await p.waitForTimeout(300); }) },
+    { name: 'plants-map', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]'), click('[data-act=explore]'), click('[data-act=view][data-id=map]')) },
+    { name: 'plants-pin-card', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]'), click('[data-act=explore]'), click('[data-act=view][data-id=map]'), click('[data-act=pin]')) },
+    { name: 'plants-refine-open', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]'), click('[data-act=explore]'), click('summary:has-text("Filter")')) },
+    { name: 'plants-no-results', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]'), click('[data-act=explore]'), async p => { await p.fill('input[name=q]', 'zzqx'); await p.waitForTimeout(300); }) },
     { name: 'plants-error-full', setup: seq(click('[data-act=recipe] >> nth=2'), click('.mk-step[data-to=plants]'), click('[data-act=next]'), click('.mk-step[data-to=plants]')) },
-    ...[1, 2, 3, 4, 5].map(n => ({ name: `guided-step-${n}`, scope: '#mkGuide', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]'), click('[data-act=guide]'),
+    ...[1, 2, 3, 4, 5].map(n => ({ name: `guided-step-${n}`, scope: '#mkGuide', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]'), click('[data-act=explore]'), click('[data-act=guide]'),
       async p => { for (let i = 1; i < n; i++) await p.locator('#mkGuide [data-act=gd-next]').click(); await p.waitForTimeout(200); }) })),
     { name: 'space-step', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=space]')) },
     { name: 'review-step', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=review]')) }

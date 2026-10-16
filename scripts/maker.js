@@ -47,9 +47,10 @@ const find = (list, id, key = 'id') => list.find(x => x[key] === id);
  * @typedef {import('./plant-search.js').Discovery} Discovery
  * @typedef {{ text: string, undo?: Build }} Notice
  * @typedef {{ look: string, light: string, roles: string[], room: string, care: string }} GuideAnswers
- * @typedef {{ build: Build, disc: Discovery }} Saved
+ * @typedef {{ build: Build, disc: Discovery, explore: boolean }} Saved
  * @typedef {{ fresh: string|null, error: string, notice: Notice|null, disc: Discovery, pin: string|null,
- *   refineOpen: boolean, gd: { step: number, a: GuideAnswers }|null, shared: boolean, own: Saved|null }} UI
+ *   refineOpen: boolean, gd: { step: number, a: GuideAnswers }|null, shared: boolean, own: Saved|null,
+ *   explore: boolean, trayOpen: boolean, viewOpen: boolean, returnTo: string|null }} UI
  */
 
 
@@ -78,17 +79,34 @@ export const canEnter = (b, stage) =>
 export const furthest = (b) => /** @type {string} */ ([...STAGES].reverse().find(s => canEnter(b, s)));   // 'start' always qualifies
 
 // Switching chamber keeps every choice that still fits, and reports the rest.
+// A recipe's name describes its own chamber, so it goes when that chamber
+// does: "Tiny Jungle" no longer reaches the studio for a Fire build (M-12).
 /** @param {Build} b @param {string} sku */
 export function swapChamber(b, sku){
   const ch = find(chambers, sku, 'sku');
   const keep = b.plants.filter(id => isSuited(plantOf(id), sku)).slice(0, capacity(ch));
   const subOk = substrateSuits(find(substrates, b.substrate), sku);
+  const recipe = b.name ? recipes.find(r => r.name === b.name) : undefined;
+  const clearedName = recipe && recipe.chamber !== sku ? b.name : '';
   return {
-    build: { ...b, chamber: sku, plants: keep, substrate: subOk ? b.substrate : null },
+    build: { ...b, chamber: sku, plants: keep, substrate: subOk ? b.substrate : null, name: clearedName ? '' : b.name },
     removed: b.plants.filter(id => !keep.includes(id)).map(id => knownPlant(id).name),
-    clearedSubstrate: !!b.substrate && !subOk
+    clearedSubstrate: !!b.substrate && !subOk,
+    clearedName
   };
 }
+
+// The plants on our list that a chamber's climate suits, and how many of
+// them it can take: Water holds 8, but 5 plants fit it (M-23).
+/** @param {string|null} sku */
+export const fitting = (sku) => plants.filter(p => isSuited(p, sku));
+/** @param {Chamber} ch */
+export const roomFor = (ch) => Math.min(capacity(ch), fitting(ch.sku).length);
+// Tools in proportion (rule E5): no search, filters, map or guide for 8 or
+// fewer plants. Only the Lab passes this; anyone can still ask to explore.
+const SIMPLE_MAX = 8;
+/** @param {Build} b @param {boolean} asked */
+export const exploring = (b, asked) => asked || fitting(b.chamber).length > SIMPLE_MAX;
 
 // Add or remove one plant. Returns { build } or { error }.
 /**
@@ -383,9 +401,11 @@ function plantAction(b, p, ch){
   }
   const full = !on && b.plants.length >= capacity(ch);
   // A toggle: the name stays "Add <plant>" and aria-pressed carries the state
-  // (iconography audit M2; the name used to flip to "Remove …" while showing "Added").
+  // (iconography audit M2). The face says "Added ✓" or "Full", and "Full"
+  // points at the line that says why (UX audit M-09).
+  const face = on ? `<span aria-hidden="true">Added</span>${icon('check')}` : full ? '<span aria-hidden="true">Full</span>' : '<span aria-hidden="true">Add</span>';
   return `<button type="button" class="mk-add${on ? ' is-on' : ''}" data-act="plant" data-id="${p.id}" data-key="pl-${p.id}"
-    aria-pressed="${on}" ${full ? 'disabled' : ''}>${on ? icon('check') : ''}<span>${full ? 'Full' : 'Add'}</span><span class="u-sr-only"> ${esc(p.name)}</span></button>`;
+    aria-pressed="${on}" ${full ? 'disabled aria-describedby="mkFull"' : ''}>${face}<span class="u-sr-only">Add ${esc(p.name)}</span></button>`;
 }
 
 // Only what the studio has published. Empty workbook columns say so, never guess.
@@ -398,20 +418,19 @@ function plantDetail(p){
     <div><dt>Shape</dt><dd>${forms[p.form]}</dd></div>
     <div><dt>Climate</dt><dd>${own ? `${home.temp} · ${home.humidity} humidity (${home.name} chamber)` : 'Set by hand in the Lab chamber'}</dd></div>
     <div><dt>Grows in</dt><dd>${fitsIn(p).join(', ')}</dd></div>
-    <div><dt>Light · care</dt><dd>Not rated yet. The studio advises with your quote.</dd></div>
     <div><dt>Price</dt><dd>Quoted on enquiry</dd></div>
   </dl>`;
 }
 
-/** @param {Build} b @param {Plant} p @param {Chamber} ch */
-function plantRow(b, p, ch){
+/** @param {Build} b @param {Plant} p @param {Chamber} ch @param {boolean} [simple] the chamber's own list: its group goes without saying */
+function plantRow(b, p, ch, simple = false){
   const on = b.plants.includes(p.id), ok = isSuited(p, ch.sku);
   return `<li class="mk-plant-row${on ? ' is-on' : ''}${ok ? '' : ' is-off'}">
     ${glyphThumb(p)}
     <span class="mk-card-body">
       <span class="mk-card-name">${esc(p.name)}</span>
       <span class="mk-bot">${esc(p.botanical)}</span>
-      <span class="mk-card-meta">${p.element} · ${forms[p.form]}</span>
+      <span class="mk-card-meta">${simple ? '' : `${p.element} · `}${forms[p.form]}</span>
       ${ok ? '' : `<span class="mk-why">Needs the ${homeOf(p).name} chamber’s climate</span>`}
     </span>
     ${plantAction(b, p, ch)}
@@ -433,8 +452,7 @@ function mapHTML(b, ch, results, ui){
       <p class="mk-region-head"><span class="mk-region-name">${id}</span>${fits.includes(id) ? '<span class="mk-tag">Your chamber</span>' : ''}</p>
       <p class="mk-card-meta">${climateLine(chamber)}</p>
       ${here.length ? `<div class="mk-pins">${here.map(p => `<button type="button" class="mk-pin${b.plants.includes(p.id) ? ' is-on' : ''}"
-          data-act="pin" data-id="${p.id}" data-key="pin-${p.id}" aria-pressed="${p.id === ui.pin}"
-          aria-label="${esc(p.name)}${b.plants.includes(p.id) ? ', added' : ''}" title="${esc(p.name)}">${glyphThumb(p)}</button>`).join('')}</div>`
+          data-act="pin" data-id="${p.id}" data-key="pin-${p.id}" aria-pressed="${p.id === ui.pin}">${glyphThumb(p)}<span class="mk-pin-name">${esc(p.name)}</span>${b.plants.includes(p.id) ? '<span aria-hidden="true">✓</span><span class="u-sr-only">, added</span>' : ''}</button>`).join('')}</div>`
         : '<p class="mk-region-none">No matches</p>'}
       ${pin ? `<div class="mk-pin-card">
           <p class="mk-card-name">${esc(pin.name)}</p><p class="mk-bot">${esc(pin.botanical)}</p>
@@ -455,7 +473,8 @@ const disCtx = (b) => {
 /** @param {Build} b @param {UI} ui */
 function resultsHTML(b, ui){
   const ch = chosenChamber(b), d = ui.disc;
-  const { results, constraints: cs, preferences: prefs, relax } = searchPlants(d, disCtx(b));
+  const { results, constraints: all, preferences: prefs, relax } = searchPlants(d, disCtx(b));
+  const cs = all.filter(c => c.key !== 'fit');   // said on its own line above (M-08)
   const look = find(guide.looks, d.g.look);
   const guided = cs.some(c => c.guided) || prefs.length > 0;
   /** @param {{ key: string, label: string, guided?: boolean }} c */
@@ -481,9 +500,8 @@ function refineHTML(d, ui){
   /** @param {string} kind @param {string} id @param {string} label @param {boolean} on */
   const chipBtn = (kind, id, label, on) => `<button type="button" class="selector-chip${on ? ' active' : ''}" data-act="refine"
     data-id="${kind}:${id}" data-key="rf-${kind}-${id}" aria-pressed="${on}">${label}</button>`;
-  return `<details class="mk-refine"${ui.refineOpen ? ' open' : ''}><summary>${icon('sliders-horizontal', { size: 'xs' })}Filter &amp; sort${icon('chevron-down', { size: 'xs' })}</summary>
+  return `<details class="mk-refine"${ui.refineOpen ? ' open' : ''}><summary>${icon('sliders-horizontal', { size: 'xs' })}Filter${icon('chevron-down', { size: 'xs' })}</summary>
     <div class="mk-refine-body">
-      <label class="mk-check-row"><input type="checkbox" data-act="fit" data-key="fit" ${d.f.fit ? 'checked' : ''}> Only plants that fit my chamber</label>
       <fieldset><legend class="caption">Plant group</legend><div class="mk-filter">${elements.map(e => chipBtn('group', e.id, e.id, d.f.groups.includes(e.id))).join('')}</div></fieldset>
       <fieldset><legend class="caption">Shape</legend><div class="mk-filter">${Object.entries(forms).map(([id, l]) => chipBtn('form', id, l, d.f.forms.includes(id))).join('')}</div></fieldset>
       <label class="mk-sort caption">Sort <select name="sort" data-key="sort">${[['recommended', 'Recommended'], ['name', 'Name A–Z'], ['group', 'Plant group']]
@@ -491,20 +509,43 @@ function refineHTML(d, ui){
     </div></details>`;
 }
 
+// One note for the whole list, in place of "Not rated yet" on every plant (M-25).
+const RATINGS = '<p class="mk-hint mk-ratings">Light and care ratings are coming; the studio advises with your quote.</p>';
+/** @param {Build} b @param {Chamber} ch */
+const fullNote = (b, ch) => (b.plants.length >= capacity(ch) ? '<p class="mk-full" id="mkFull">Chamber full: remove one to add another.</p>' : '');
+
 /** @param {Build} b @param {UI} ui */
 function plantsPanel(b, ui){
   const ch = chosenChamber(b);
   if (!suitedElements(ch.sku).length) return head('Plants', '')
     + `<div class="mk-empty">${art('empty-mushroom')}<p>The ${ch.name} chamber grows mushroom cultures, which aren’t on our plant list.</p>
        <p>The studio chooses the strain with you. Continue to tell us about your space.</p></div>`;
+  return exploring(b, ui.explore) ? explorePanel(b, ui, ch) : simplePanel(b, ch);
+}
 
-  const max = capacity(ch), d = ui.disc;
+// Simple mode: the few plants that fit, straight away (UX audit D3).
+/** @param {Build} b @param {Chamber} ch */
+function simplePanel(b, ch){
+  const list = fitting(ch.sku), more = plants.length - list.length;
+  return head(`Choose up to ${roomFor(ch)} plants`, `These grow in the ${ch.name} chamber’s climate. Plants are quoted on enquiry.`)
+  + fullNote(b, ch)
+  + `<ul class="mk-plants">${list.map(p => plantRow(b, p, ch, true)).join('')}</ul>
+  ${RATINGS}
+  <p class="mk-explore"><button type="button" class="ct-link" data-act="explore" data-key="explore">Explore plants from other chambers (${more} more)</button></p>`;
+}
+
+// Explore mode: every tool, for the Lab chamber or on request.
+/** @param {Build} b @param {UI} ui @param {Chamber} ch */
+function explorePanel(b, ui, ch){
+  const d = ui.disc, own = fitting(ch.sku).length, all = own === plants.length;
+  /** @param {string} label */
+  const fitBtn = (label) => `<button type="button" class="ct-link" data-act="fit" data-key="fit">${label}</button>`;
+  const fitLine = all ? `Showing plants for the ${ch.name} chamber: every group grows in it.`
+    : d.f.fit ? `Showing plants for the ${ch.name} chamber · ${fitBtn('Show all climates')}`
+    : `Showing plants for every climate · ${fitBtn(`Only the ${ch.name} chamber`)}`;
   return head('Add plants', `Search all ${plants.length}, or let us guide you. Each one shows whether it suits the ${ch.name} chamber.`)
-  + `<p class="mk-count"><strong>${b.plants.length}</strong> of ${max} plants${b.plants.length >= max ? ' · chamber full' : ''}</p>
-  ${b.plants.length ? `<ul class="mk-tray" aria-label="Selected plants">${b.plants.map(id => `<li>
-      <span>${esc(knownPlant(id).name)}</span>
-      <button type="button" data-act="plant" data-id="${id}" data-key="tray-${id}" aria-label="Remove ${esc(knownPlant(id).name)}">${icon('x')}</button></li>`).join('')}</ul>` : ''}
-  <div class="mk-disc" role="search">
+  + fullNote(b, ch)
+  + `<div class="mk-disc" role="search">
     <label class="mk-search"><span class="u-sr-only">Search plants</span>
       <input type="search" name="q" value="${esc(d.q)}" placeholder="Search plants, groups or shapes…" autocomplete="off" data-key="q"></label>
     <button type="button" class="mk-guide-btn" data-act="guide" data-key="guide" aria-haspopup="dialog">Guided search</button>
@@ -514,7 +555,10 @@ function plantsPanel(b, ui){
       `<button type="button" data-act="view" data-id="${v}" data-key="view-${v}" aria-pressed="${d.view === v}">${v === 'list' ? 'List' : 'Map'}</button>`).join('')}</div>
     ${refineHTML(d, ui)}
   </div>
-  <div id="mkResults">${resultsHTML(b, ui)}</div>`;
+  <p class="mk-fit-line">${fitLine}</p>
+  <div id="mkResults">${resultsHTML(b, ui)}</div>
+  ${RATINGS}
+  ${all ? '' : `<p class="mk-explore"><button type="button" class="ct-link" data-act="simple" data-key="simple">Back to the ${own} ${ch.name} plants</button></p>`}`;
 }
 
 // ─── Guided search (native <dialog>: focus trap + Esc for free) ──────
@@ -605,6 +649,10 @@ function careGroup(b){
   </section>`;
 }
 
+// What happens after sending (rule E8): who replies, what they confirm, when money moves (M-07).
+const NEXT_STEPS = ['Send the design.', 'The studio replies with a quote, availability and lead time.',
+  'You confirm and get a payment link; nothing is charged until then.'];
+
 /** @param {Build} b */
 function reviewPanel(b){
   const ch = chosenChamber(b), sub = find(substrates, b.substrate), s = b.space;
@@ -612,37 +660,41 @@ function reviewPanel(b){
   const group = (title, stage, body) => `<section class="mk-group">
     <header><h3 class="caption">${title}</h3><button type="button" class="mk-edit" data-act="goto" data-to="${stage}" data-key="edit-${stage}">Edit<span class="u-sr-only"> ${title}</span></button></header>${body}</section>`;
   const spaceBits = [s.room, s.household.join(', '), s.maturity.split(' —')[0], s.care && `${s.care} care`, s.note && `“${s.note}”`].filter(Boolean).map(esc);
-  return head('Your world', '')
+  return head('Review your world', '')
   + `<label class="mk-field mk-name"><span>Name it</span>
       <input type="text" name="name" maxlength="60" value="${esc(b.name)}" placeholder="Untitled world" autocomplete="off"></label>
   ${group('Chamber', 'chamber', `<p class="mk-item"><span>${ch.name}</span><span>${ch.price}</span></p>
-      <p class="mk-sub">${climate(ch)} · lead time ${ch.lead}</p>`)}
-  ${group('Foundation', 'foundation', `<p class="mk-item"><span>${isSoilless(ch.sku) ? 'None, soil-free' : /** @type {Substrate} */ (sub).name}</span><span>${isSoilless(ch.sku) ? '—' : 'On enquiry'}</span></p>`)}
+      <p class="mk-sub">Made to order · availability confirmed with your quote</p>`)}
+  ${group('Foundation', 'foundation', `<p class="mk-item"><span>${isSoilless(ch.sku) ? 'None, soil-free' : /** @type {Substrate} */ (sub).name}</span><span>${isSoilless(ch.sku) ? '—' : 'Quoted on enquiry'}</span></p>`)}
   ${group('Plants', 'plants', b.plants.length ? `<ul class="mk-items">${b.plants.map(id => `<li class="mk-item">
-      <span>${esc(knownPlant(id).name)}</span><span>On enquiry
-      <button type="button" class="mk-x" data-act="plant" data-id="${id}" data-key="rv-${id}" aria-label="Remove ${esc(knownPlant(id).name)}">${icon('x')}</button></span></li>`).join('')}</ul>`
+      <span>${esc(knownPlant(id).name)}</span>
+      <button type="button" class="mk-x" data-act="plant" data-id="${id}" data-key="rv-${id}" aria-label="Remove ${esc(knownPlant(id).name)}">${icon('x')}</button></li>`).join('')}</ul>
+      <p class="mk-sub">Quoted on enquiry</p>`
       : '<p class="mk-sub">The studio chooses with you.</p>')}
   ${group('Your space', 'space', `<p class="mk-sub">${spaceBits.length ? spaceBits.join(' · ') : 'Not given'}</p>`)}
   <div class="mk-total">
     <p class="mk-item"><span>Estimate</span><span>From ${ch.price.split(' – ')[0]}</span></p>
-    <p class="mk-sub">Chamber range ${ch.price}. Plants and foundation are quoted with you. Nothing is charged on this page.</p>
+    <p class="mk-sub">Chamber range ${ch.price}. Plants and foundation are quoted by the studio. Nothing is charged here.</p>
   </div>
-  ${careGroup(b)}
+  <section class="mk-next" aria-labelledby="mkNextHead">
+    <h3 class="caption" id="mkNextHead">What happens next</h3>
+    <ol>${NEXT_STEPS.map(t => `<li>${t}</li>`).join('')}</ol>
+  </section>
   <div class="mk-send">
     <div class="pd-buy">
       <button type="button" class="cta" data-add-line="${esc(JSON.stringify(cartLine(b)))}" data-key="cart">Add to cart ${arrow}</button>
       <button type="button" class="cta cta-secondary save-btn" data-save-line="${esc(JSON.stringify(cartLine(b)))}" aria-pressed="false" data-key="save">${icon('heart')}<span>Save</span><span class="u-sr-only"> design</span></button>
     </div>
-    <p class="mk-sub">The cart tallies this build with anything else you add. Or send just this design:</p>
-    <a class="cta cta-secondary cta-block" href="${whatsappHref(b)}" target="_blank" rel="noopener" data-act="send" data-key="send">Send this design on WhatsApp ${icon('arrow-up-right', { size: 'xs' })}</a>
+    <a class="cta cta-secondary cta-block" href="${whatsappHref(b)}" target="_blank" rel="noopener" data-act="send" data-key="send">Send just this design on WhatsApp ${icon('arrow-up-right', { size: 'xs' })}</a>
     ${enquiryAltHTML(b.name || `Maker · ${ch.name}`, enquiryText(b))}
     <p class="mk-sent" role="status"></p>
-    <div class="mk-secondary">
-      <button type="button" class="cta cta-secondary cta-small" data-act="copy" data-key="copy">Copy design link</button>
-      <button type="button" class="cta cta-secondary cta-small" data-act="reset" data-key="reset">Start over</button>
-    </div>
-    <p class="mk-copied" role="status"></p>
-  </div>`;
+  </div>
+  ${careGroup(b)}
+  <p class="mk-links">
+    <button type="button" class="ct-link" data-act="copy" data-key="copy">Copy design link</button><span aria-hidden="true">·</span>
+    <button type="button" class="ct-link" data-act="reset" data-key="reset">Start over</button>
+  </p>
+  <p class="mk-copied" role="status"></p>`;
 }
 
 /** @type {Record<string, string>} */
@@ -650,18 +702,32 @@ const NEXT = { chamber: 'Continue', foundation: 'Continue to plants', plants: 'C
 /** @type {Record<string, string>} */
 const NEED = { chamber: 'Choose a chamber to continue.', foundation: 'Choose a foundation to continue.', plants: 'Add at least one plant to continue.' };
 
-/** @param {Build} b @param {string} stage @param {string} error */
-function barHTML(b, stage, error){
-  const ch = chamberOf(b);
-  const sum = ch ? `<strong>${ch.name}</strong> · ${ch.price}${b.plants.length ? ` · ${b.plants.length} plant${b.plants.length > 1 ? 's' : ''}` : ''}`
+/** @param {Build} b @param {string} stage @param {UI} ui */
+function barHTML(b, stage, ui){
+  const ch = chamberOf(b), n = b.plants.length;
+  const sum = ch ? `<strong>${ch.name}</strong> · ${ch.price}${n ? ` · ${n} plant${n > 1 ? 's' : ''}` : ''}`
                  : 'Nothing chosen yet';
-  return `<p class="mk-sum">${sum}</p>
-    ${error ? `<p class="mk-error" role="alert">${error}</p>` : ''}
+  // The Plants step's count sits here, in sight on a phone (M-05), with the
+  // chosen plants one tap away: the list itself says which are added.
+  const count = stage === 'plants' && ch && fitting(ch.sku).length
+    ? `<p class="mk-count"><span><strong>${n}</strong> of ${roomFor(ch)} plants${n >= capacity(ch) ? ' · chamber full' : ''}</span>
+        ${n ? `<button type="button" class="ct-link" data-act="tray" data-key="traybtn" aria-expanded="${ui.trayOpen}" aria-controls="mkTray">View / remove</button>` : ''}</p>
+      ${n ? `<ul class="mk-tray" id="mkTray" aria-label="Selected plants"${ui.trayOpen ? '' : ' hidden'}>${b.plants.map(id => `<li>
+        <span>${esc(knownPlant(id).name)}</span>
+        <button type="button" data-act="plant" data-id="${id}" data-key="tray-${id}" aria-label="Remove ${esc(knownPlant(id).name)}">${icon('x')}</button></li>`).join('')}</ul>` : ''}
+      <p class="mk-sum"><strong>${ch.name}</strong> · ${ch.price} · plants quoted</p>`
+    : `<p class="mk-sum">${sum}</p>`;
+  const label = backToReview(b, ui) ? 'Back to review' : NEXT[stage];
+  return `${count}
+    ${ui.error ? `<p class="mk-error" role="alert">${ui.error}</p>` : ''}
     <div class="mk-nav">
       <button type="button" class="cta cta-secondary" data-act="back" data-key="back">Back</button>
-      ${stage === 'review' ? '' : `<button type="button" class="cta" data-act="next" data-key="next">${NEXT[stage]} ${arrow}</button>`}
+      ${stage === 'review' ? '' : `<button type="button" class="cta" data-act="next" data-key="next">${label} ${arrow}</button>`}
     </div>`;
 }
+// Came from Review's Edit, and the design can go straight back there (M-14).
+/** @param {Build} b @param {UI} ui */
+const backToReview = (b, ui) => ui.returnTo === 'review' && canEnter(b, 'review');
 
 
 // ═══ CONTROLLER ═══════════════════════════════════════════════════════
@@ -692,15 +758,19 @@ function cleanDisc(raw){
   };
 }
 
-/** @returns {{ build: Build, disc?: Discovery, shared?: boolean, dropped?: number, own?: Saved|null } | null} */
+/** @returns {{ build: Build, disc?: Discovery, explore?: boolean, shared?: boolean, dropped?: number, own?: Saved|null } | null} */
 function load(){
   /** @type {Saved|null} */
   let own = null;
   try {
-    /** @type {{ code?: unknown, space?: Partial<Build['space']>, disc?: unknown } | null} */
+    /** @type {{ code?: unknown, space?: Partial<Build['space']>, disc?: unknown, explore?: unknown } | null} */
     const saved = JSON.parse(localStorage.getItem(STORE) || 'null');
     const b = saved && decodeBuild(saved.code);
-    if (b) own = { build: { ...b, space: { ...emptyBuild().space, ...saved.space } }, disc: cleanDisc(saved.disc) };
+    const disc = cleanDisc(saved?.disc);
+    // Saves from before explore mode: anyone who had searched, filtered or
+    // mapped was exploring, so they come back to their tools.
+    const explore = typeof saved?.explore === 'boolean' ? saved.explore : JSON.stringify(disc) !== JSON.stringify(emptyDiscovery());
+    if (b) own = { build: { ...b, space: { ...emptyBuild().space, ...saved.space } }, disc, explore };
   } catch { /* private mode / corrupt — start clean */ }
   const fromHash = location.hash.length > 3 ? decodeBuild(location.hash) : null;
   if (!fromHash) return own;
@@ -729,7 +799,8 @@ export function initMaker(){
   let stage = 'start';
   /** @type {UI} */
   const ui = { fresh: null, error: '', notice: null, disc: restored?.disc || emptyDiscovery(), pin: null, refineOpen: false, gd: null,
-             shared: !!restored?.shared, own: restored?.own || null };
+             shared: !!restored?.shared, own: restored?.own || null,
+             explore: !!restored?.explore, trayOpen: false, viewOpen: false, returnTo: null };
   if (restored?.dropped) {
     const n = restored.dropped;
     ui.notice = { text: `${n} plant${n > 1 ? 's' : ''} in this link ${n > 1 ? "don't" : "doesn't"} fit the ${chosenChamber(b).name} chamber and ${n > 1 ? 'were' : 'was'} left out.` };
@@ -741,7 +812,7 @@ export function initMaker(){
     // keeps them (M-02); the visitor's own saved design stays untouched (M-01).
     if (ui.shared) history.replaceState(null, '', `${location.pathname}#${encodeBuild(b)}`);
     if (ui.own) return;
-    try { localStorage.setItem(STORE, JSON.stringify({ code: encodeBuild(b), space: b.space, disc: ui.disc })); } catch { /* private mode / full storage: the build lives for this page only */ }
+    try { localStorage.setItem(STORE, JSON.stringify({ code: encodeBuild(b), space: b.space, disc: ui.disc, explore: ui.explore })); } catch { /* private mode / full storage: the build lives for this page only */ }
   };
 
   // Search typing, view switch, chips: redraw only the results, so the
@@ -796,7 +867,7 @@ export function initMaker(){
       <button type="button" class="cta cta-secondary cta-small" data-act="own" data-key="own">Open mine</button>
       <button type="button" class="cta cta-secondary cta-small" data-act="adopt" data-key="adopt">Keep this one instead</button></div>` : '';
     $('mkPanelBody').innerHTML = sharedBar + notice + /** @type {(b: Build, ui: UI) => string} */ (panel)(b, ui);
-    $('mkBar').innerHTML = barHTML(b, stage, ui.error);
+    $('mkBar').innerHTML = barHTML(b, stage, ui);
     ui.fresh = null;
     syncCartButtons();
     if (stage === 'plants') startThumbs();
@@ -814,6 +885,11 @@ export function initMaker(){
       view3d.show(fig, sceneSpec(b), { fresh: ui.fresh, label: describe(b) });
       fig.append(Object.assign(fig.querySelector('figcaption') || document.createElement('figcaption'), { className: 'caption', textContent: caption }));
     } else fig.innerHTML = previewSVG(b, { fresh: ui.fresh, label: describe(b) }) + `<figcaption class="caption">${caption}</figcaption>`;
+    // Phones, Plants step: the preview is a thin strip until asked for (M-05; CSS).
+    $('mkView').classList.toggle('is-open', ui.viewOpen);
+    const toggle = $('mkViewToggle');
+    toggle.setAttribute('aria-expanded', String(ui.viewOpen));
+    toggle.textContent = `${ui.viewOpen ? 'Hide' : 'View'} ${view3d ? '3D' : 'preview'}`;
   }
 
   // The start screen's big picture: 3D when available, else the drawing.
@@ -872,6 +948,7 @@ export function initMaker(){
     ui.notice = opts.notice ?? null;
     if (ui.notice) say(ui.notice.text);
     if (opts.stage) stage = opts.stage;
+    if (stage === 'review' || stage === 'start') ui.returnTo = null;   // back where the Edit began
     if (opts.fresh) ui.fresh = opts.fresh;
     save();
     render();
@@ -885,10 +962,12 @@ export function initMaker(){
   function pickChamber(sku){
     if (b.chamber === sku) return;
     const before = b;
-    const { build: nb, removed, clearedSubstrate } = swapChamber(b, sku);
+    const { build: nb, removed, clearedSubstrate, clearedName } = swapChamber(b, sku);
     const bits = [];
     if (removed.length) bits.push(`Removed ${removed.join(', ')}: ${removed.length > 1 ? 'they don’t' : 'it doesn’t'} fit the ${chosenChamber(nb).name} chamber.`);
     if (clearedSubstrate) bits.push(`Foundation cleared: it doesn’t suit the ${chosenChamber(nb).name} chamber.`);
+    if (clearedName) bits.push(`The recipe name “${clearedName}” was cleared.`);
+    ui.explore = false;   // a new chamber starts on its own short list
     commit(nb, { notice: bits.length ? { text: bits.join(' '), undo: before } : null });
   }
 
@@ -906,7 +985,10 @@ export function initMaker(){
       track('maker_recipe', { recipe: id });
       commit({ ...emptyBuild(), name: r.name, chamber: r.chamber, substrate: r.substrate, plants: [...r.plants] }, { stage: 'plants' });
     }
-    if (act === 'goto' && canEnter(b, to)) go(to);
+    if (act === 'goto' && canEnter(b, to)) {
+      if (el.dataset.key?.startsWith('edit-')) ui.returnTo = 'review';   // Review's Edit: its step leads back (M-14)
+      go(to);
+    }
     if (act === 'chamber')   pickChamber(id);
     if (act === 'substrate') commit({ ...b, substrate: id });
     if (act === 'plant') {
@@ -921,13 +1003,14 @@ export function initMaker(){
         focusNext = keys[i + 1] || keys[i - 1] || `${prefix}none`;
       }
       commit(built, { fresh: added ? id : null });
-      say(`${added ? 'Added' : 'Removed'} ${knownPlant(id).name}. ${built.plants.length} of ${capacity(chamberOf(built))} plants.`);
+      const ch = chosenChamber(built), n = built.plants.length;
+      say(`${added ? 'Added' : 'Removed'} ${knownPlant(id).name}. ${n} of ${roomFor(ch)} plants.${n >= capacity(ch) ? ' Chamber full: remove one to add another.' : ''}`);
     }
     if (act === 'undo' && ui.notice?.undo) commit(ui.notice.undo);
     // Shared design over the visitor's own: go back to theirs, or replace it on purpose.
     if (act === 'own' && ui.own) {
       const own = ui.own;
-      ui.own = null; ui.shared = false; ui.disc = own.disc;
+      ui.own = null; ui.shared = false; ui.disc = own.disc; ui.explore = own.explore;
       history.replaceState(null, '', location.pathname);
       commit(own.build, { stage: furthest(own.build), notice: { text: 'Back to your own design.' } });
     }
@@ -936,6 +1019,26 @@ export function initMaker(){
       history.replaceState(null, '', location.pathname);
       commit(b, { notice: { text: 'This design is now yours. It replaced your earlier one.' } });
     }
+    // Plants step modes (M-06): the short list, or every tool.
+    if (act === 'explore') {
+      ui.explore = true;
+      ui.disc = { ...ui.disc, f: { ...ui.disc.f, fit: false } };   // asked for other chambers' plants: show them
+      render(); save();
+      focusEl(root.querySelector('[data-key="q"]'))?.focus({ preventScroll: true });
+      say(`Showing all ${plants.length} plants. Search, map or filter them.`);
+    }
+    if (act === 'simple') {
+      ui.explore = false;
+      render(); save();
+      focusEl(root.querySelector('.mk-title'))?.focus({ preventScroll: true });
+    }
+    if (act === 'fit') {
+      ui.disc = { ...ui.disc, f: { ...ui.disc.f, fit: !ui.disc.f.fit } };
+      render(); save();
+      say(ui.disc.f.fit ? `Showing plants for the ${chosenChamber(b).name} chamber.` : 'Showing plants for every climate.');
+    }
+    if (act === 'tray') { ui.trayOpen = !ui.trayOpen; render(); }
+    if (act === 'view3d') { ui.viewOpen = !ui.viewOpen; renderPreview(); }
     // Discovery
     if (act === 'view')  { ui.disc = { ...ui.disc, view: id }; renderResults(); }
     if (act === 'pin')   { ui.pin = ui.pin === id ? null : id; renderResults(); }
@@ -971,7 +1074,7 @@ export function initMaker(){
     if (act === 'back')  go(/** @type {string} */ (STAGES[STAGES.indexOf(stage) - 1]));
     if (act === 'next') {
       if (!done(b, stage)) { ui.error = NEED[stage]; render(); return; }
-      go(/** @type {string} */ (STAGES[STAGES.indexOf(stage) + 1]));
+      go(backToReview(b, ui) ? 'review' : /** @type {string} */ (STAGES[STAGES.indexOf(stage) + 1]));
     }
     if (act === 'send') {
       track('maker_send', { method: 'whatsapp', chamber: b.chamber, plants: b.plants.length });
@@ -991,13 +1094,14 @@ export function initMaker(){
   /** @param {string} id */
   function switchFor(id){
     const p = knownPlant(id), home = homeOf(p), before = b;
-    const { build: nb, removed, clearedSubstrate } = swapChamber(b, home.sku);
+    const { build: nb, removed, clearedSubstrate, clearedName } = swapChamber(b, home.sku);
     const res = togglePlant(nb, id);
     const next = res.build || nb;
     const bits = [`Switched to the ${home.name} chamber${res.build ? ` and added ${p.name}` : ''}.`];
     if (res.error) bits.push(res.error);
     if (removed.length) bits.push(`Removed ${removed.join(', ')}: ${removed.length > 1 ? 'they don’t' : 'it doesn’t'} fit.`);
     if (clearedSubstrate) bits.push('Your foundation doesn’t suit it, so choose one again.');
+    if (clearedName) bits.push(`The recipe name “${clearedName}” was cleared.`);
     const notice = { text: bits.join(' '), undo: before };
     if (!done(next, 'foundation')) commit(next, { notice, stage: 'foundation' });
     else commit(next, { notice, fresh: res.build ? id : null });
@@ -1023,7 +1127,6 @@ export function initMaker(){
     const t = /** @type {HTMLInputElement} */ (e.target);
     if (t.name === 'q') { ui.disc = { ...ui.disc, q: t.value.slice(0, 80) }; renderResults(); return; }
     if (t.name === 'sort') { ui.disc = { ...ui.disc, sort: t.value }; renderResults(); return; }
-    if (t.dataset.act === 'fit') { ui.disc = { ...ui.disc, f: { ...ui.disc.f, fit: t.checked } }; renderResults(); return; }
     if (t.name.startsWith('gd-') && ui.gd) {
       const k = t.name.slice(3);
       /** @type {Record<string, string | string[]>} */ (ui.gd.a)[k] = k === 'roles' ? [...dialog.querySelectorAll('[name=gd-roles]:checked')].map(x => /** @type {HTMLInputElement} */ (x).value) : t.value;

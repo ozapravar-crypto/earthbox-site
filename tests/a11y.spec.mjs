@@ -32,8 +32,8 @@ for (const path of PAGES) {
 const STATES = [
   ['cart drawer', '/product.html#V1-PLT-006', async p => { await p.locator('.pd-buy [data-add-line], #pdMobileCta [data-add-line]').first().click(); }, 'dialog.ct'],
   ['saved tab', '/products.html', async p => { await p.locator('[data-open=saved]').click(); }, 'dialog.ct'],
-  ['guided search', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); await p.locator('[data-act=guide]').click(); }, '#mkGuide'],
-  ['maker map', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); await p.locator('[data-act=view][data-id=map]').click(); }, null],
+  ['guided search', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); await p.locator('[data-act=explore]').click(); await p.locator('[data-act=guide]').click(); }, '#mkGuide'],
+  ['maker map', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); await p.locator('[data-act=explore]').click(); await p.locator('[data-act=view][data-id=map]').click(); }, null],
   ['maker review', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=review]').click(); }, null],
   ['catalogue search', '/products.html', async p => { await p.locator('#catalogueSearchBtn').click(); await p.fill('#cat-search', 'moss'); }, null],
   ['enquiry form open', '/product.html#V1-PLT-005', async p => { await p.locator('.pd-other-ways > summary').click(); await p.locator('.enquiry-alt summary').first().click(); }, null],

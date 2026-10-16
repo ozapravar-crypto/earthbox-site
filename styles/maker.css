@@ -79,9 +79,9 @@
   gap:3rem;
   align-items:start;
 }
+.mk-view{position:sticky;top:calc(var(--mk-top) + 1rem);min-width:0}
+.mk-view-toggle{display:none}   /* phones, Plants step only (below) */
 .mk-preview{
-  position:sticky;
-  top:calc(var(--mk-top) + 1rem);
   height:calc(100vh - var(--mk-top) - 6rem);
   min-height:420px;
   background:var(--mk-plate);
@@ -174,9 +174,9 @@ img.mk-thumb,img.mk-swatch{display:block;object-fit:contain}
 .mk-swatch{width:96px;height:44px;display:block;border:1px solid var(--rule)}
 
 /* Plants */
-.mk-count{font-family:var(--sans);font-size:.64rem;letter-spacing:.22em;text-transform:uppercase;color:var(--mute);margin-bottom:.75rem}
+.mk-count{display:flex;flex-wrap:wrap;align-items:center;gap:0 1rem;font-family:var(--sans);font-size:.64rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft)}
 .mk-count strong{color:var(--ink);font-weight:400}
-.mk-tray{display:flex;flex-wrap:wrap;gap:.4rem;list-style:none;padding:0;margin:0 0 1rem}
+.mk-tray{display:flex;flex-wrap:wrap;gap:.4rem;list-style:none;padding:0;margin:0}
 .mk-tray li{display:flex;align-items:center;gap:.2rem;border:1px solid var(--ink);padding-left:.6rem;font-family:var(--body);font-size:.8rem}
 .mk-tray button{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-soft)}
 .mk-tray button:hover{color:var(--ink);background:var(--bg-tint)}
@@ -193,7 +193,7 @@ img.mk-thumb,img.mk-swatch{display:block;object-fit:contain}
 .mk-thumb{width:56px;height:64px;background:var(--mk-plate);border:1px solid var(--rule)}
 .mk-add{
   display:inline-flex;align-items:center;justify-content:center;gap:.4em;
-  min-width:5.5rem;min-height:44px;
+  min-width:6.75rem;min-height:44px;   /* room for "Added ✓", so the row doesn't jump */
   font-family:var(--sans);font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;
   border:1px solid var(--ink);padding:.5rem .8rem;
   transition:background .25s ease,color .25s ease;
@@ -201,6 +201,11 @@ img.mk-thumb,img.mk-swatch{display:block;object-fit:contain}
 .mk-add:hover:not(:disabled){background:var(--bg-tint)}
 .mk-add.is-on{background:var(--ink);color:var(--bg)}
 .mk-add:disabled{border-color:var(--rule);color:var(--mute)}
+.mk-full{font-family:var(--body);font-size:.88rem;color:var(--ink);border:1px solid var(--rule-stronger);background:var(--bg-tint);padding:.6rem .9rem;margin-bottom:1rem}
+.mk-ratings{margin:1rem 0 0}
+.mk-explore{margin-top:.5rem}
+.mk-fit-line{font-family:var(--body);font-size:.95rem;color:var(--ink);display:flex;flex-wrap:wrap;align-items:center;gap:0 .5rem;margin:-.25rem 0 .75rem}
+.mk-fit-line .ct-link{color:var(--ink)}
 .mk-more{margin-top:1.25rem}
 .mk-more summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-family:var(--sans);font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft)}
 .mk-more summary:hover{color:var(--ink)}
@@ -261,7 +266,11 @@ img.mk-thumb,img.mk-swatch{display:block;object-fit:contain}
 .mk-total{border-top:1px solid var(--ink);padding:1rem 0;margin-top:.25rem}
 .mk-total .mk-item{font-family:var(--serif);font-size:1.4rem}
 .mk-total .mk-item > span:last-child{font-family:var(--serif);font-size:1.4rem;letter-spacing:0;color:var(--ink)}
+.mk-next{border-top:1px solid var(--rule);padding:.9rem 0 1.25rem}
+.mk-next h3{font-size:.62rem;margin-bottom:.5rem}
+.mk-next ol{list-style:decimal;margin:0;padding-left:1.25rem;display:grid;gap:.3rem;font-family:var(--body);font-size:.9rem;line-height:1.5;color:var(--ink-soft)}
 .mk-send{display:grid;gap:.75rem;padding-bottom:1.5rem}
+.mk-links{display:flex;flex-wrap:wrap;align-items:center;gap:0 .75rem;color:var(--mute);padding-top:.5rem}
 .mk-secondary{display:flex;flex-wrap:wrap;gap:.5rem}
 .mk-sent,.mk-copied{font-family:var(--body);font-size:.82rem;color:var(--ink-soft)}
 .mk-sent:empty,.mk-copied:empty{display:none}
@@ -299,12 +308,21 @@ img.mk-thumb,img.mk-swatch{display:block;object-fit:contain}
   .mk-step:not(.is-current) .mk-step-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
   .mk-step{min-width:44px;justify-content:center}   /* bare step numbers were 17 px wide (UX audit M-17) */
   .mk-stage{grid-template-columns:1fr;gap:1rem}
+  .mk-view{top:var(--mk-top);z-index:3}
   .mk-preview{
-    top:var(--mk-top);z-index:3;
     height:34vh;min-height:220px;
     padding:.75rem .75rem .5rem;
     box-shadow:0 1px 0 var(--rule);
   }
+  /* Plants: a ~96px strip (the list had 382 of 844px, UX audit M-05); "View 3D" opens it.
+     Its caption stays: the preview is indicative. */
+  [data-stage="plants"] .mk-view:not(.is-open) .mk-preview{height:96px;min-height:0;padding:.35rem 6.5rem .3rem .5rem}
+  [data-stage="plants"] .mk-view:not(.is-open) .mk-preview figcaption{margin-top:.15rem;letter-spacing:.12em}
+  [data-stage="plants"] .mk-view-toggle{
+    display:inline-flex;position:absolute;top:50%;right:.5rem;transform:translateY(-50%);
+    min-height:44px;--cta-bg:var(--bg);--cta-color:var(--ink);--cta-border:var(--ink);
+  }
+  [data-stage="plants"] .mk-view.is-open .mk-view-toggle{top:auto;bottom:.5rem;transform:none}
   .mk-preview figcaption{margin-top:.35rem;font-size:.62rem;letter-spacing:.18em}
   .mk-nav .cta{flex:1}
   .mk-build{padding-bottom:2rem}
@@ -327,8 +345,8 @@ img.mk-thumb,img.mk-swatch{display:block;object-fit:contain}
 .mk-disc{display:grid;grid-template-columns:minmax(0,1fr) auto;border:1px solid var(--ink);margin-bottom:.6rem}
 .mk-search input{width:100%;min-height:48px;padding:.7rem .9rem;border:0;background:transparent;color:var(--ink);font-family:var(--body);font-size:1rem}
 .mk-search input:focus-visible{outline:1px solid var(--ink);outline-offset:-4px}
-.mk-guide-btn{border-left:1px solid var(--ink);padding:0 1rem;font-family:var(--sans);font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;background:var(--ink);color:var(--bg)}
-.mk-guide-btn:hover{background:var(--ink-soft)}
+.mk-guide-btn{min-height:44px;padding:0 1rem;font-family:var(--sans);font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--rule-stronger)}
+.mk-guide-btn:hover{color:var(--ink);text-decoration-color:currentColor}
 .mk-disc-tools{display:flex;flex-wrap:wrap;align-items:flex-start;gap:.6rem 1rem;margin-bottom:1rem}
 .mk-views{display:inline-flex;gap:1rem}   /* List | Map: two views of the same results, so underline (rule E2) */
 .mk-views button{min-height:44px;padding:0 .25rem;border-bottom:1px solid transparent;font-family:var(--sans);font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft)}
@@ -339,8 +357,6 @@ img.mk-thumb,img.mk-swatch{display:block;object-fit:contain}
 .mk-refine-body{display:grid;gap:.9rem;padding:.6rem 0 .4rem}
 .mk-refine fieldset{border:0;padding:0;margin:0}
 .mk-refine legend{margin-bottom:.4rem}
-.mk-check-row{display:flex;gap:.5rem;align-items:center;font-family:var(--body);font-size:.88rem}
-.mk-check-row input{width:18px;height:18px;accent-color:var(--ink)}
 .mk-sort select{margin-left:.5rem;min-height:44px;border:1px solid var(--rule-stronger);background:var(--bg);color:var(--ink);font-family:var(--body);padding:0 .5rem}
 
 .mk-found{font-family:var(--serif);font-size:1.15rem;color:var(--ink);margin-bottom:.5rem}
@@ -374,11 +390,13 @@ img.mk-thumb,img.mk-swatch{display:block;object-fit:contain}
 .mk-region-head{display:flex;align-items:center;justify-content:space-between;gap:.4rem}
 .mk-region-name{font-family:var(--serif);font-size:1.15rem}
 .mk-region-none{font-family:var(--body);font-size:.8rem;font-style:italic;color:var(--mute)}
-.mk-pins{display:flex;flex-wrap:wrap;gap:.3rem}
-.mk-pin{position:relative;padding:0;line-height:0}
-.mk-pin .mk-thumb{width:40px;height:46px}
+.mk-pins{display:grid;gap:.3rem}
+.mk-pin{display:flex;align-items:center;gap:.55rem;min-height:44px;padding:0;text-align:left}
+.mk-pin .mk-thumb{width:40px;height:46px;flex:none}
+.mk-pin-name{font-family:var(--body);font-size:.82rem;line-height:1.3;color:var(--ink)}
+.mk-pin:hover .mk-pin-name{text-decoration:underline;text-underline-offset:3px}
 .mk-pin[aria-pressed="true"] .mk-thumb{border-color:var(--ink);outline:1px solid var(--ink)}
-.mk-pin.is-on::after{content:"✓";position:absolute;right:-3px;top:-3px;width:15px;height:15px;line-height:15px;font-size:.62rem;text-align:center;background:var(--ink);color:var(--bg)}
+.mk-pin.is-on .mk-pin-name + span{font-size:.8rem;color:var(--ink)}
 .mk-pin-card{border-top:1px solid var(--rule-stronger);padding-top:.6rem;margin-top:.2rem;display:grid;gap:.35rem;justify-items:start}
 .mk-pin-card .mk-card-name{font-size:1.05rem}
 .mk-region.is-fit .mk-card-name,.mk-region.is-fit .mk-region-name{color:#1a1a1a}

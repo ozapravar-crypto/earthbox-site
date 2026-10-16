@@ -131,7 +131,7 @@ test('cart thumbnails load (a catalogue piece)', async ({ page }) => {
 });
 
 // ── Product page ─────────────────────────────────────────────────────
-test('price, WhatsApp message and cart line follow the chosen size + material', async ({ page, isMobile }) => {
+test('price, WhatsApp message and cart line follow the chosen size + material', async ({ page }) => {
   const errs = errorsOf(page);
   await page.goto('/product.html#V1-PLT-005');
   await page.locator('[data-variant="small-circle"]').click();
@@ -140,8 +140,8 @@ test('price, WhatsApp message and cart line follow the chosen size + material', 
   const wa = decodeURIComponent(/** @type {string} */ (await page.locator('#pdEnquiryCta').getAttribute('href')));
   expect(wa).toContain('Stackable Planter (Small Circle) in ASA');
   expect(wa).toContain('₹799');
-  await page.locator(isMobile ? '#pdMobileCta [data-add-line]' : '.pd-buy [data-add-line]').click();
-  await expect(page.locator('dialog.ct .ct-line--fixed .ct-sub')).toContainText('Small Circle · ASA');
+  await page.locator('.pd-buy [data-add-line]').click();               // the phone bar is hidden while this one is in view (D2)
+  await expect(page.locator('dialog.ct .ct-line--fixed .ct-sub')).toContainText('Small Circle · Balcony (ASA)');
   await expect(page.locator('dialog.ct .ct-price').first()).toHaveText('₹799');
   expect(errs).toEqual([]);
 });
@@ -243,9 +243,9 @@ test('cart drawer by keyboard: opens, takes focus, Escape returns focus', async 
 
 test('guided search by keyboard: Escape closes and returns focus', async ({ page, isMobile }) => {
   test.skip(isMobile, 'keyboard journey');
-  await page.goto('/maker.html');
-  await page.locator('[data-act=recipe]').first().click();
+  await page.goto('/maker.html#c=MossBox&s=studio&p=PLT-036');
   await page.locator('.mk-step[data-to=plants]').click();
+  await page.locator('[data-act=explore]').click();                 // guided search lives in explore mode (UX audit M-06)
   const open = page.locator('[data-act=guide]');
   await open.focus();
   await page.keyboard.press('Enter');
@@ -257,19 +257,19 @@ test('guided search by keyboard: Escape closes and returns focus', async ({ page
 });
 
 // ── Cart storage ─────────────────────────────────────────────────────
-test('cart stays in step across two tabs', async ({ context, isMobile }) => {
+test('cart stays in step across two tabs', async ({ context }) => {
   const a = await context.newPage(), b = await context.newPage();
   await a.goto('/product.html#V1-PLT-006');
   await b.goto('/about.html');
-  await a.locator(isMobile ? '#pdMobileCta [data-add-line]' : '.pd-buy [data-add-line]').click();
+  await a.locator('.pd-buy [data-add-line]').click();
   await expect(b.locator('[data-cart-count]').first()).toHaveText('1');
 });
 
-test('private mode (storage throws): the cart still works on the page', async ({ page, isMobile }) => {
+test('private mode (storage throws): the cart still works on the page', async ({ page }) => {
   const errs = errorsOf(page);
   await page.addInitScript(() => { Storage.prototype.setItem = () => { throw new DOMException('QuotaExceededError'); }; });
   await page.goto('/product.html#V1-PLT-006');
-  await page.locator(isMobile ? '#pdMobileCta [data-add-line]' : '.pd-buy [data-add-line]').click();
+  await page.locator('.pd-buy [data-add-line]').click();
   await expect(page.locator('dialog.ct .ct-line')).toHaveCount(1);
   expect(errs).toEqual([]);
 });
@@ -329,6 +329,7 @@ test('Maker: adding and removing plants is announced, and focus stays in the tra
   const live = page.locator('#mkLive');
   await page.locator('.mk-add[data-id=PLT-038]').click();
   await expect(live).toHaveText(/^Added .+\. 3 of \d+ plants\.$/);
+  await page.locator('[data-act=tray]').click();                     // the tray sits in the bottom bar, folded (M-05)
   const first = page.locator('[data-key^="tray-"]').first();
   await first.focus();
   await page.keyboard.press('Enter');
@@ -426,9 +427,9 @@ const cartDrawer = (/** @type {Page} */ page) => page.locator('dialog.ct');
 const openCart = async (/** @type {Page} */ page, /** @type {boolean} */ isMobile) => { if (!(await cartDrawer(page).isVisible())) await page.locator(isMobile ? '.runhead-bag [data-open=cart], [data-open=cart]' : '[data-open=cart]').first().click(); };
 
 // UX audit S-03: after sending, the main action is Clear cart, not a second send.
-test('cart after sending: Clear cart leads, "Send again" stays small, an edit re-arms Send', async ({ page, context, isMobile }) => {
+test('cart after sending: Clear cart leads, "Send again" stays small, an edit re-arms Send', async ({ page, context }) => {
   await page.goto('/product.html#V1-PLT-006');
-  await page.locator(isMobile ? '#pdMobileCta [data-add-line]' : '.pd-buy [data-add-line]').click();
+  await page.locator('.pd-buy [data-add-line]').click();
   const d = cartDrawer(page);
   const popup = context.waitForEvent('page');
   await d.locator('a.cta[data-ct=send]').click();
@@ -639,7 +640,7 @@ test('header: heart + bag, counts hidden at zero, read as "Cart 1 items"', async
   await expect(cart.locator('.icon-shopping-bag')).toHaveCount(1);
   await expect(page.locator('.runhead-bag-btn[data-open=saved] .icon-heart')).toHaveCount(1);
   await expect(cart.locator('[data-cart-count]')).toBeHidden();               // 0 → nothing shown
-  await page.locator(isMobile ? '#pdMobileCta [data-add-line]' : '.pd-buy [data-add-line]').click();
+  await page.locator('.pd-buy [data-add-line]').click();
   await page.keyboard.press('Escape');
   await expect(cart.locator('[data-cart-count]')).toHaveText('1');
   await expect(cart).toHaveAccessibleName(/^Cart\s*1\s*items$/);
@@ -702,10 +703,10 @@ test('Maker: the 3D view arriving late does not rebuild buttons', async ({ page 
   await page.route('**/scripts/maker-3d.js', async r => { await new Promise(res => { setTimeout(res, 2500); }); await r.continue(); });
   await page.goto('/maker#c=MossBox&s=studio&p=PLT-036');
   await page.locator('.mk-step[data-to=plants]').click();
-  const guide = page.locator('[data-act=guide]');
-  await guide.evaluate(el => { el.dataset.qaSame = '1'; });
+  const explore = page.locator('[data-act=explore]');
+  await explore.evaluate(el => { el.dataset.qaSame = '1'; });
   await expect(page.locator('#mkPreview canvas')).toBeVisible({ timeout: 15_000 });   // 3D arrived
-  await expect(guide).toHaveAttribute('data-qa-same', '1');                         // same element, not rebuilt
-  await guide.click();
-  await expect(page.locator('#mkGuide')).toBeVisible();
+  await expect(explore).toHaveAttribute('data-qa-same', '1');                       // same element, not rebuilt
+  await explore.click();
+  await expect(page.locator('[data-act=guide]')).toBeVisible();
 });
