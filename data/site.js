@@ -70,7 +70,10 @@ export const cleanPath = (file) => `/${file.replace(/\.html$/, '').replace(/(^|\
 // into every page's <head> by includes.mjs, between the two markers.
 // No inline script: the gtag queue is set up inside consent.js, so the CSP
 // can forbid inline scripts (production discovery R6).
+// Also carries theme-early.js: a blocking script, so the day/night theme is
+// set before first paint (no flash). It's the one shared <head> block.
 export const analyticsHTML = ({ prefix = '' } = {}) => `<!-- Analytics -->
+  <script src="${prefix}scripts/theme-early.js"></script>
   <script src="${prefix}scripts/consent.js" defer></script>
   <!-- /Analytics -->`;
 

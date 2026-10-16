@@ -181,6 +181,31 @@ test('theme choice survives a reload and another page', async ({ page, isMobile 
   await expect(page.locator('html')).toHaveAttribute('data-theme', after);
 });
 
+// Owner, 16 Oct: light by day, dark at night (Mumbai's sunrise/sunset).
+// A visitor's own switch holds until the next sunrise or sunset.
+test('theme follows day and night; a switch holds until the sky changes', async ({ page, isMobile }) => {
+  const flip = async () => {
+    if (isMobile) { await page.locator('.hamburger').click(); await page.locator('.theme-toggle-mobile').click(); await page.keyboard.press('Escape'); }
+    else await page.locator('.runhead .theme-toggle').click();
+  };
+  await page.clock.install({ time: new Date('2026-10-16T12:00:00+05:30') });
+  await page.goto('/index.html');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');          // noon
+  await page.clock.setSystemTime(new Date('2026-10-16T21:00:00+05:30'));
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');           // night
+  await flip();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');          // the visitor's choice…
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');          // …survives a reload
+  await page.clock.setSystemTime(new Date('2026-10-17T09:00:00+05:30'));
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');          // morning: the sky again (light)
+  await page.clock.setSystemTime(new Date('2026-10-17T21:00:00+05:30'));
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');           // the old choice has lapsed
+});
+
 // ── Keyboard ─────────────────────────────────────────────────────────
 test('cart drawer by keyboard: opens, takes focus, Escape returns focus', async ({ page, isMobile }) => {
   test.skip(isMobile, 'keyboard journey');

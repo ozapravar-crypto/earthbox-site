@@ -162,3 +162,13 @@ QA-001 to QA-007, QA-009 and QA-013. Details, root causes and evidence are in `Q
 - **Checks:**
   - `npm test` passes.
   - The new smoke test "every scroll reveal shows" passes on desktop for 7 pages. It's skipped on phone and tablet, where wheel scrolling isn't available. It failed on /blog and /about before the fix.
+## Follow-up · day/night theme, 16 Oct 2026
+- **What changed:** the theme follows Mumbai's sky. It's light from sunrise to sunset and dark at night, worked out each day (`scripts/theme-early.js`).
+  - The theme is set before the page paints, by a small blocking script in every `<head>`, so there's no flash.
+  - A visitor's switch holds until the next sunrise or sunset. Choices saved before today, which have no end time, are kept.
+  - An open page turns at sunrise and sunset.
+  - The phone's own dark-mode setting no longer decides the theme.
+- **Checks:**
+  - **Unit tests:** `theme-early.test.mjs` checks sunrise and sunset against published Mumbai times for 21 Jun and 21 Dec (within 3 minutes), plus day/night edges, when the next change falls, and how a saved choice resolves.
+  - **New journey (desktop and phone), with the clock set:** noon → light; 21:00 → dark; the switch holds through a reload and lapses after the next sunset.
+  - **Full Playwright suite (desktop, phone, tablet):** 308 passed, 63 skipped (the live-only ones).

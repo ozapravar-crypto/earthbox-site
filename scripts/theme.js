@@ -1,27 +1,22 @@
 // ─────────────────────────────────────────────────────────────────────
 // theme.js · Dark/Light mode toggle (pill switch)
 //
-// Priority: localStorage > prefers-color-scheme > light (default)
-// Stores preference in localStorage as 'earthbox-theme'
+// The theme follows Mumbai's sky: light from sunrise to sunset, dark at
+// night (theme-early.js, which sets it before the page paints). Flipping
+// the switch holds the visitor's choice until the next sunrise or sunset,
+// stored as 'earthbox-theme' + 'earthbox-theme-until'.
 // ─────────────────────────────────────────────────────────────────────
 
 const STORAGE_KEY = 'earthbox-theme';
 
-function getSystemPreference() {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
-function getStoredTheme() {
-  try {
-    return localStorage.getItem(STORAGE_KEY);
-  } catch {
-    return null;
-  }
-}
+const UNTIL_KEY = 'earthbox-theme-until';
+// theme-early.js runs first; the fallback only matters if it failed to load.
+const sky = () => window.ebTheme ?? { resolve: () => 'light', nextChange: (ms) => ms + 12 * 36e5 };
 
 function setStoredTheme(theme) {
   try {
     localStorage.setItem(STORAGE_KEY, theme);
+    localStorage.setItem(UNTIL_KEY, String(sky().nextChange(Date.now())));
   } catch {
     // localStorage unavailable
   }
@@ -73,8 +68,7 @@ export function createToggle(theme) {
 }
 
 export function initTheme() {
-  const stored = getStoredTheme();
-  const theme = stored || getSystemPreference();
+  const theme = sky().resolve(Date.now());
   applyTheme(theme);
 
   // Desktop toggle in runhead (right side)
@@ -87,10 +81,11 @@ export function initTheme() {
 
   // menu.js imports createToggle for the mobile panel.
 
-  // Listen for system preference changes
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    if (!getStoredTheme()) {
-      applyTheme(e.matches ? 'dark' : 'light');
-    }
-  });
+  // Turn at sunrise and sunset while the page is open, and on return to the tab.
+  const follow = () => {
+    const next = sky().resolve(Date.now());
+    if (next !== document.documentElement.getAttribute('data-theme')) applyTheme(next);
+  };
+  setInterval(follow, 60e3);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) follow(); });
 }
