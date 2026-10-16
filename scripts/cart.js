@@ -32,7 +32,7 @@ import { suggest } from './pairings.js';
 import { decodeBuild, encodeBuild, chamberOf, plantOf, isSoilless } from './build-codec.js';
 import { enquiryAltHTML, ENQUIRY_PHONE } from './enquiry-form.js';
 import { SITE } from '../data/site.js';
-import { esc, rupees, track } from './util.js';
+import { esc, rupees, track, art } from './util.js';
 import { icon } from '../data/icons.js';
 
 const STORE = 'earthbox-cart';
@@ -284,8 +284,8 @@ function drawerHTML(){
   const tabBtn = (id, label) => `<button type="button" role="tab" id="ct-tab-${id}" aria-controls="ct-panel" aria-selected="${tab === id}" data-ct="tab" data-tab="${id}" ${tab === id ? '' : 'tabindex="-1"'}>${label} <span>(${count(id)})</span></button>`;
   const list = lines[tab];
   const empty = tab === 'cart'
-    ? `<p class="ct-empty">Your cart is empty.</p><p class="ct-note">Add pieces from the <a href="/products">catalogue</a>, or design your own in the <a href="/maker">Maker</a>.</p>`
-    : `<p class="ct-empty">Nothing saved yet.</p><p class="ct-note">Use “Save” on any piece or design to keep it here.</p>`;
+    ? `${art('system-cart-empty', 'ct-art')}<p class="ct-empty">Your cart is empty.</p><p class="ct-note">Add pieces from the <a href="/products">catalogue</a>, or design your own in the <a href="/maker">Maker</a>.</p>`
+    : `${art('system-saved-empty', 'ct-art')}<p class="ct-empty">Nothing saved yet.</p><p class="ct-note">Use “Save” on any piece or design to keep it here.</p>`;
   return `<header class="ct-head">
       <h2 id="ct-title" class="caption">Your selection</h2>
       <button type="button" class="ct-close" data-ct="close" aria-label="Close">${icon('x', { size: 'md' })}</button>

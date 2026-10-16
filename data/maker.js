@@ -129,6 +129,19 @@ export const spaceQuestions = {
   maturity:  ['Established — full piece on day one', 'Growing — we plant young, you watch it fill in']
 };
 
+// Botanical art for each answer: assets/illustrations/<id>.webp (what each one is,
+// and how it was made, is in that folder's manifest.json). Keys are the stored values.
+export const answerArt = {
+  room:      { 'Living room': 'room-living-room', Study: 'room-study', Foyer: 'room-foyer', Bedroom: 'room-bedroom',
+               Office: 'room-office', Gallery: 'room-gallery', Other: 'room-other' },
+  household: { Pets: 'household-pets', 'Young children': 'household-children', Neither: 'household-neither' },
+  maturity:  { 'Established — full piece on day one': 'maturity-established', 'Growing — we plant young, you watch it fill in': 'maturity-growing' },
+  look:      { woodland: 'look-woodland', minimal: 'look-minimal', tropical: 'look-tropical', colourful: 'look-colourful' },
+  light:     { low: 'light-low', indirect: 'light-bright-indirect', bright: 'light-bright', unsure: 'light-not-sure' },
+  care:      { Easy: 'care-easy', Moderate: 'care-moderate', High: 'care-high' },
+  roles:     { foliage: 'role-lush-foliage', ground: 'role-ground-cover', trail: 'role-trailing-stems', sculpt: 'role-sculptural-accent' }
+};
+
 // ── Discovery (search, map, guided search) ─────────────────────────────
 // The workbook's per-plant Light, Care, Humidity, Price and Photo columns are
 // all empty (tab 04, 0 of 45). So discovery filters on what IS known: the

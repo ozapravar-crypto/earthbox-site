@@ -76,6 +76,18 @@ refs.push({ file: 'data/maker.js (models)', path: models.base + 'CREDITS.md' });
 for (const f of await readdir(path.join(ROOT, 'data/article-bodies')))
   scanMarkup(`data/article-bodies/${f}`, 'blog', await readFile(path.join(ROOT, 'data/article-bodies', f), 'utf8'));
 
+// 5 · Botanical art (assets/illustrations): the Maker's answer map, ids passed to
+// art('…') in scripts, and --art:url(...) in pages and article bodies.
+const { answerArt } = await import(path.join(ROOT, 'data/maker.js'));
+for (const [q, table] of Object.entries(answerArt))
+  for (const id of Object.values(table)) refs.push({ file: `data/maker.js (answerArt.${q})`, path: `assets/illustrations/${id}.webp` });
+for (const f of (await readdir(path.join(ROOT, 'scripts'))).filter((x) => x.endsWith('.js'))) {
+  const src = await readFile(path.join(ROOT, 'scripts', f), 'utf8');
+  for (const m of src.matchAll(/\bart\('([a-z0-9-]+)'/g)) refs.push({ file: `scripts/${f}`, path: `assets/illustrations/${m[1]}.webp` });
+}
+for (const { f } of pages)
+  for (const m of (await readFile(path.join(ROOT, f), 'utf8')).matchAll(/--art:url\(\/?([^)]+)\)/g)) refs.push({ file: f, path: m[1] });
+
 // Report once per missing file.
 // A file that exists here but is excluded from the Vercel upload is missing
 // on the live site (10 Oct 2026: CREDITS.md, dropped by '*.md'). Treat it as
