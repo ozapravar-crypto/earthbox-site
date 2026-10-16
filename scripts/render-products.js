@@ -41,20 +41,6 @@ const cardPrice = (p, place) => {
 /** @param {Product} p */
 const sizeNote = (p) => (p.variants && p.variants.length > 1 ? `${p.variants[0].name} · ${p.variants.length} sizes` : '');
 
-// "₹129 – ₹1,799" across every size of the category's orderable pieces, in this place.
-/**
- * @param {Product[]} products
- * @param {Place} place
- */
-function categoryRange(products, place){
-  const all = /** @type {number[]} */ (products.filter(p => p.status === 'available' && p.pricing)
-    .flatMap(p => (p.variants?.length ? p.variants.map(v => priceOf(p, place.material, v.id)) : [priceOf(p, place.material)]))
-    .filter(Boolean));
-  if (!all.length) return null;
-  const lo = Math.min(...all), hi = Math.max(...all);
-  return lo === hi ? rupees(lo) : `${rupees(lo)} – ${rupees(hi)}`;
-}
-
 /** @param {Product[]} products */
 function sortByAvailability(products){
   const available = products.filter(p => p.status === 'available');
@@ -68,31 +54,16 @@ function enquiryHref(itemName){
   return `https://wa.me/${PHONE}?text=${encodeURIComponent(text)}`;
 }
 
-
-// ─── Volume I · 3D Printed Products by Category ───
-function renderVolumeOne(){
-  const host = document.getElementById('volumeOneList');
-  if (!host) return;
-
-  // Group products by category
-  const grouped = v1Categories.map(cat => ({
-    cat,
-    products: volumeOne.filter(p => p.category === cat.slug)
-  }));
-
-  const place = savedPlace(places);
-  host.innerHTML = placeSwitchHTML(place) + grouped.map(({ cat, products }, catIndex) => {
-    const priceRange = categoryRange(products, place);
-    const { available, comingSoon } = sortByAvailability(products);
-    const hasAvailable = available.length > 0;
-    const hasComingSoon = comingSoon.length > 0;
-
-    // Image-first, quiet card: Save sits on the photo, Add beside the price.
-    // Buttons are siblings of the link (a button can't live inside a link).
-    /** @param {Product} p */
-    const renderCard = (p) => {
-      const soon = p.status === 'coming-soon', line = cardLine(p, place);
-      return `
+// Image-first, quiet card: Save sits on the photo, Add beside the price.
+// Buttons are siblings of the link (a button can't live inside a link).
+// One status signal per card: the badge (UX audit S-17, rule E4).
+/**
+ * @param {Product} p
+ * @param {Place} place
+ */
+function cardHTML(p, place){
+  const soon = p.status === 'coming-soon', line = cardLine(p, place);
+  return `
       <article class="v1-card ${soon ? 'v1-card--soon' : ''}" data-sku="${p.sku}">
         <a class="v1-card-link" href="/product/${encodeURIComponent(p.sku)}" data-cursor="VIEW">
           <div class="v1-card-img">
@@ -115,9 +86,78 @@ function renderVolumeOne(){
         </a>
         <button type="button" class="v1-card-save" data-save-line="${attr(line)}" aria-pressed="false">${icon('heart')}<span class="u-sr-only">Save ${esc(p.name)}</span></button>
         ${soon ? '' : `<button type="button" class="v1-card-add" data-add-line="${attr(line)}">${icon('plus', { size: 'xs' })}Add<span class="u-sr-only"> ${esc(p.name)} to cart</span></button>`}
-      </article>
-    `;
-    };
+      </article>`;
+}
+/**
+ * @param {Product[]} list
+ * @param {Place} place
+ * @param {string} cls
+ */
+const gridHTML = (list, place, cls) => `<div class="v1-grid ${cls}">${list.map(p => cardHTML(p, place)).join('')}</div>`;
+
+// A category with nothing to order yet (Plant Packets: 15 coming soon)
+// shows one row; the rest wait behind a native disclosure (UX audit S-17).
+const FIRST_ROW = 4;
+/**
+ * @param {Product[]} soon
+ * @param {Place} place
+ */
+const foldedHTML = (soon, place) => `
+        ${gridHTML(soon.slice(0, FIRST_ROW), place, 'v1-grid--soon v1-grid--lead')}
+        <details class="v1-more">
+          <summary><span class="v1-more-open">Show all ${soon.length}</span><span class="v1-more-close">Show fewer</span>${icon('chevron-down', { size: 'xs' })}</summary>
+          ${gridHTML(soon.slice(FIRST_ROW), place, 'v1-grid--soon')}
+        </details>`;
+
+// ─── Home · the catalogue tease (UX audit C-02, D5) ───
+// A few orderable pieces, one per category in turn, with the catalogue's
+// size counted from the data, never typed in.
+/** @param {number} n */
+function previewPieces(n){
+  const queues = v1Categories.map(c => volumeOne.filter(p => p.category === c.slug && p.status === 'available'));
+  /** @type {Product[]} */
+  const out = [];
+  while (out.length < n && queues.some(q => q.length)) {
+    for (const q of queues) { const p = q.shift(); if (p && out.length < n) out.push(p); }
+  }
+  return out;
+}
+function catalogueCount(){
+  const soon = volumeOne.filter(p => p.status === 'coming-soon').length;
+  return [`${volumeOne.length} pieces`, `${soon} coming soon`, volumeTwo.boxes.length ? 'chambers on enquiry' : ''].filter(Boolean).join(' · ');
+}
+/**
+ * @param {Place} place
+ * @param {number} n
+ */
+function previewHTML(place, n){
+  const m = materialOf(place);
+  return `
+    <p class="v1-preview-caption">Prices for ${place.name}: ${m.name}, ${m.description.toLowerCase()}.</p>
+    ${gridHTML(previewPieces(n), place, 'v1-grid--preview reveal')}
+    <p class="v1-preview-count" data-catalogue-count>${catalogueCount()}</p>`;
+}
+
+
+// ─── Volume I · 3D Printed Products by Category ───
+function renderVolumeOne(){
+  const host = document.getElementById('volumeOneList');
+  if (!host) return;
+
+  const place = savedPlace(places);
+  const preview = Number(host.dataset.preview) || 0;   // Home: a tease, not the catalogue
+  if (preview) {
+    host.innerHTML = previewHTML(place, preview);
+    observeReveals(host);
+    syncCartButtons();
+    return;
+  }
+
+  host.innerHTML = placeSwitchHTML(place) + v1Categories.map((cat, catIndex) => {
+    const { available, comingSoon } = sortByAvailability(volumeOne.filter(p => p.category === cat.slug));
+    const soonPart = !comingSoon.length ? ''
+      : !available.length && comingSoon.length > FIRST_ROW ? foldedHTML(comingSoon, place)
+      : gridHTML(comingSoon, place, 'v1-grid--soon');
 
     return `
     <section class="v1-category reveal" id="cat-${cat.slug}">
@@ -125,26 +165,16 @@ function renderVolumeOne(){
         <span class="caption v1-cat-num">${String(catIndex + 1).padStart(2, '0')}</span>
         <h2 class="v1-cat-title">${cat.title}</h2>
         <p class="v1-cat-desc">${cat.description}</p>
-        ${priceRange ? `<span class="v1-cat-price">${priceRange}</span>` : ''}
       </header>
-
-      ${hasAvailable ? `
-        <div class="v1-grid v1-grid--available">
-          ${available.map(renderCard).join('')}
-        </div>
-      ` : ''}
-
-      ${hasComingSoon ? `
-        ${hasAvailable ? '<div class="v1-coming-divider"><span class="caption">Coming Soon</span></div>' : ''}
-        <div class="v1-grid v1-grid--soon">
-          ${comingSoon.map(renderCard).join('')}
-        </div>
-      ` : ''}
+      ${available.length ? gridHTML(available, place, 'v1-grid--available') : ''}
+      ${available.length && comingSoon.length ? '<div class="v1-coming-divider"><span class="caption">Coming Soon</span></div>' : ''}
+      ${soonPart}
     </section>
   `;}).join('');
 
   observeReveals(host);
   initPlaceSwitch(host);
+  showBarPlace(place);
   syncCartButtons();
 }
 
@@ -152,10 +182,16 @@ function renderVolumeOne(){
 // One choice for the whole catalogue; it sets the material behind every
 // price, Add and Save, and the product pages open on it too.
 /** @param {Place} place */
-const materialNote = (place) => {
-  const m = /** @type {typeof materials[number]} */ (materials.find(x => x.id === place.material));   // every place names a material
-  return `Prices in ${m.name}: ${m.description.toLowerCase()}.`;
-};
+const materialOf = (place) => /** @type {typeof materials[number]} */ (materials.find(x => x.id === place.material));   // every place names a material
+/** @param {Place} place */
+const materialNote = (place) => { const m = materialOf(place); return `Prices in ${m.name}: ${m.description.toLowerCase()}.`; };
+// The chosen place stays in sight in the sticky bar after the switch has
+// scrolled away (UX audit S-16). catalogue.js shows it on Volume I only.
+/** @param {Place} place */
+function showBarPlace(place){
+  const el = document.getElementById('barPlace');
+  if (el) el.textContent = `Prices for: ${place.name}`;
+}
 /** @param {Place} place */
 function placeSwitchHTML(place){
   return `
@@ -184,10 +220,7 @@ function initPlaceSwitch(host){
       const amount = card.querySelector('.v1-card-amount');
       if (amount) amount.textContent = cardPrice(p, place);
     });
-    v1Categories.forEach(cat => {
-      const el = host.querySelector(`#cat-${cat.slug} .v1-cat-price`);
-      if (el) el.textContent = categoryRange(volumeOne.filter(p => p.category === cat.slug), place) || '';
-    });
+    showBarPlace(place);
     syncCartButtons();
     track('place_select', { place: place.id });
   };

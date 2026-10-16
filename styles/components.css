@@ -155,61 +155,9 @@
   border:1px dashed var(--rule-stronger);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   4. TRUST SIGNALS
-   Social proof strip, rating displays, trust indicators
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.trust-strip{
-  background:var(--bg-tint);
-  border-top:1px solid var(--rule);
-  border-bottom:1px solid var(--rule);
-  padding:1.5rem var(--pad);
-}
-
-.trust-strip-inner{
-  max-width:var(--max);
-  margin:0 auto;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:clamp(2rem,5vw,4rem);
-}
-
-.trust-item{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:.25rem;
-}
-
-.trust-num{
-  font-family:var(--serif);
-  font-size:clamp(1.25rem,2.5vw,1.75rem);
-  color:var(--ink);
-}
-
-.trust-label{
-  font-family:var(--sans);
-  font-size:.62rem;
-  letter-spacing:.2em;
-  text-transform:uppercase;
-  color:var(--mute);
-}
-
-.trust-divider{
-  width:1px;
-  height:2.5rem;
-  background:var(--rule);
-}
-
-@media (max-width:1000px){
-  .trust-strip-inner{gap:1.5rem}
-}
-@media (max-width:560px){
-  .trust-strip-inner{flex-direction:column;gap:1.25rem}
-  .trust-divider{width:3rem;height:1px}
-}
+/* 4. TRUST SIGNALS: the Home trust strip is gone (UX audit C-06). Its
+   unsourced rating and count were removed; what was left merged into the
+   hero's one proof row (home.css .hero-proof). */
 
 /* ═══════════════════════════════════════════════════════════════════════
    5. FLOATING ACTIONS
@@ -575,8 +523,17 @@
 }
 .consent-text a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
 .consent-actions{display:flex;gap:.6rem;margin-top:1rem}
+.consent-actions .cta{min-height:44px}   /* 44 px taps at every width */
+/* Phones (UX audit C-09): one compact row, about 96 px: the short line
+   beside two equal buttons. The second sentence lives on /privacy. While it
+   shows, the WhatsApp button rides above it (--consent-h, set by consent.js). */
 @media (max-width:560px){
-  .consent{left:1rem;right:1rem;bottom:1rem;max-width:none}
+  .consent{left:.5rem;right:.5rem;bottom:.5rem;max-width:none;display:flex;align-items:center;gap:.75rem;padding:.6rem .75rem}
+  .consent-text{flex:1;min-width:0;font-size:.8rem;line-height:1.4}
+  .consent-more{display:none}
+  .consent-actions{margin-top:0;gap:.4rem;flex:none}
+  .consent-actions .cta{padding-inline:.7rem}
+  body:has(> .consent) .floating-wa{bottom:calc(var(--consent-h, 96px) + 1rem)}
 }
 
 
@@ -670,13 +627,6 @@
   letter-spacing:.3em;
   text-transform:uppercase;
   color:var(--mute);
-}
-.colo-bar .quote{
-  font-style:italic;
-  text-transform:none;
-  letter-spacing:.05em;
-  font-family:var(--body);
-  color:var(--ink-soft);
 }
 @media (max-width:1000px){
   .colo-main{grid-template-columns:1fr 1fr;gap:2rem}

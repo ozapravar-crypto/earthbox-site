@@ -8,10 +8,10 @@
 // Rules live in scripts/care.js, data in data/care.js. Plan: CARE-PLAN.md.
 // ─────────────────────────────────────────────────────────────────────
 
-import { visit, subjects, businessSites } from '../data/care.js';
+import { visit, subjects, businessSites, groupNames, coverage } from '../data/care.js';
 import { elements } from '../data/maker.js';
 import { volumeOne } from '../data/volume-one.js';
-import { planPrice, groupsOf, kitFor, encodePlan, decodePlan, planSummary } from './care.js';
+import { planPrice, groupsOf, kitFor, encodePlan, decodePlan, planSummary, refLabel } from './care.js';
 import { decodeBuild, chamberOf } from './build-codec.js';
 import { esc, rupees } from './util.js';
 import { icon } from '../data/icons.js';
@@ -23,6 +23,12 @@ import { icon } from '../data/icons.js';
  */
 
 const GROUP_NOTE = Object.fromEntries(elements.map(e => [e.id, e.heading]));
+// "Mosses (Moss)": the plain name first, the Maker's name second (UX audit S-21).
+/** @param {string} g */
+const groupLabel = (g) => `${groupNames[g] || g} (${g})`;
+// The quiet line under the pincode (UX audit S-24): a hint, never a refusal.
+/** @param {string} pin */
+const pinNote = (pin) => (!pin ? coverage.note.empty : coverage.isCovered(pin) ? coverage.note.inside : coverage.note.outside);
 /** @param {unknown} o */
 const attr = (o) => esc(JSON.stringify(o));
 // Pieces someone can own and that hold plants: available Volume I planters,
@@ -52,6 +58,11 @@ export function initCare(){
   const st = fromLink ? { ...fromLink, mode: 'visits' }
     : { s: 'piece', r: OWNABLE[0]?.sku || '', g: [], n: 1, d: '12m', f: 'monthly', p: '', mode: 'kit' };
   if (st.d === 'once') st.f = 'monthly';   // remembered for when they pick a term
+  // A link for a piece that can't be owned yet (coming soon, or a chamber)
+  // mustn't open on another piece's plan (UX audit S-20): say so, and start
+  // from a piece that can.
+  let blocked = st.s === 'piece' && st.r && !OWNABLE.some(p => p.sku === st.r) ? refLabel(st) : '';
+  if (blocked) { st.r = OWNABLE[0]?.sku || ''; st.g = []; }
 
   // Every id looked up below is in root's own markup.
   /** @param {string} sel */
@@ -80,19 +91,23 @@ export function initCare(){
      * @param {string} name
      */
     const opt = (sku, name) => `<option value="${esc(sku)}"${sku === st.r ? ' selected' : ''}>${esc(name)}</option>`;
-    return `
+    return `${blocked ? `
+      <p class="care-note" data-care-blocked>The ${esc(blocked)} is coming soon, so it can't have a care plan yet. Choose a piece you have, or My own plants.</p>` : ''}
       <label class="care-field"><span>Which piece?</span>
         <select name="r">
           ${OWNABLE.map(p => opt(p.sku, p.name)).join('')}
         </select></label>`;
   }
 
+  // Asked only where the answer changes the result: it picks the kit, but a
+  // visit looks after whatever is there (UX audit S-21).
   function groupsPart(){
-    if (derived().length) return `<p class="care-note">For ${derived().map(g => `<strong>${g}</strong> plants`).join(' and ')}.</p>`;
+    if (st.mode !== 'kit') return '';
+    if (derived().length) return `<p class="care-note">For ${derived().map(g => `<strong>${esc(groupLabel(g))}</strong>`).join(' and ')}.</p>`;
     if (st.s === 'custom' && !st.r) return '';
     return `<fieldset class="care-groups"><legend>Which plants live in it?</legend>
       ${elements.map(e => `<label class="care-check"><input type="checkbox" name="g" value="${e.id}"${st.g.includes(e.id) ? ' checked' : ''}>
-        <span>${e.id}</span><small>${esc(e.heading)}</small></label>`).join('')}</fieldset>`;
+        <span>${esc(groupLabel(e.id))}</span><small>${esc(e.heading)}</small></label>`).join('')}</fieldset>`;
   }
 
   function resultPart(){
@@ -142,7 +157,8 @@ export function initCare(){
         <fieldset class="care-row" id="careFreq"><legend>How often?</legend>
           ${visit.frequencies.map(f => `<label class="care-pill"><input type="radio" name="f" value="${f.id}"${f.id === st.f ? ' checked' : ''}><span>${f.label}</span></label>`).join('')}</fieldset>
         <label class="care-field"><span>${icon('map-pin', { size: 'xs' })} Pincode</span>
-          <input type="text" name="p" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="postal-code" value="${esc(st.p)}" placeholder="400101"></label>
+          <input type="text" name="p" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="postal-code" value="${esc(st.p)}" aria-describedby="carePinNote"></label>
+        <p class="care-note" id="carePinNote" aria-live="polite">${pinNote(st.p)}</p>
         <ul class="care-includes">${visit.includes.map(i => `<li>${esc(i)}</li>`).join('')}</ul>
       </div>
     </fieldset>
@@ -155,10 +171,11 @@ export function initCare(){
     // visitor presses "Add visits to cart"; redrawing then swapped the button
     // out from under the click and nothing was added.
     if (name === 'n' || name === 'p') return;
+    if (name === 's' || name === 'r') { blocked = ''; root.querySelector('[data-care-blocked]')?.remove(); }   // they chose: the notice has done its job
     if (name === 's') { st.s = value; st.g = []; if (value === 'piece') st.r = OWNABLE[0]?.sku || ''; draw.ref(); draw.groups(); }
     else if (name === 'r') { st.r = value; st.g = []; draw.groups(); }
     else if (name === 'g') st.g = [.../** @type {NodeListOf<HTMLInputElement>} */ (root.querySelectorAll('input[name=g]:checked'))].map(i => i.value);
-    else if (name === 'mode') st.mode = value;
+    else if (name === 'mode') { st.mode = value; draw.groups(); }
     else if (name === 'd') st.d = value;
     else if (name === 'f') st.f = value;
     sync(); draw.result();
@@ -166,7 +183,7 @@ export function initCare(){
   root.addEventListener('input', (e) => {
     const input = /** @type {HTMLInputElement} */ (e.target);
     if (input.name === 'n') st.n = Math.min(500, Math.max(1, parseInt(input.value, 10) || 1));
-    else if (input.name === 'p') st.p = /^\d{6}$/.test(input.value) ? input.value : '';
+    else if (input.name === 'p') { st.p = /^\d{6}$/.test(input.value) ? input.value : ''; $('#carePinNote').textContent = pinNote(st.p); }
     else return;
     draw.result();
   });

@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { emptyBuild, capacity, togglePlant, swapChamber, done, canEnter,
          furthest, encodeBuild, decodeBuild, enquiryText, substrateSuits, previewSVG } from './maker.js';
 import { chambers, plants, substrates, recipes } from '../data/maker.js';
-import { sceneSpec, fitting, roomFor, exploring } from './maker.js';
+import { sceneSpec, fitting, roomFor, exploring, suggestChamber, fromPrice } from './maker.js';
 
 /** @typedef {import('./build-codec.js').Build} Build */
 
@@ -84,11 +84,25 @@ for (const rc of recipes) {
 }
 
 // Enquiry text carries the price range and every plant, and never a fake total.
-const text = enquiryText({ ...b, space: { room: 'Study', household: ['Pets'], maturity: '', note: '', care: '' } });
+const text = enquiryText({ ...b, space: { room: 'Study', light: 'low', household: ['Pets'], maturity: '', note: '', care: 'Easy' } });
 assert.match(text, /Chamber: Moss \(₹6,000 – ₹9,000\)/);
 assert.match(text, /Pillow Moss, Java Moss, Mood Moss/);
 assert.match(text, /Lives in: Study/);
 assert.doesNotMatch(text, /Maturity/);
+assert.match(text, /Light there: Low light/, 'light is sent (UX audit M-11)');
+assert.match(text, /Care wanted: Easy/);
+assert.doesNotMatch(enquiryText(b), /Light there/, 'no answer, no line');
+
+// "Help me choose a chamber" (M-15): the guided answers point at the chambers
+// whose own group holds the most matches. Lab (every group) is never "the" fit.
+assert.deepEqual(suggestChamber({ look: 'minimal', light: 'bright', roles: [] }).skus, ['FireBox', 'AeroBox'], 'Fire first: bright light leads');
+assert.deepEqual(suggestChamber({ look: '', light: '', roles: ['ground'] }).skus, ['MossBox']);
+assert.equal(suggestChamber({ look: 'woodland', light: '', roles: ['sculpt'] }).skus.includes('LabBox'), false);
+const noFit = suggestChamber({ look: 'minimal', light: '', roles: ['ground'] });
+assert.deepEqual([noFit.skus, noFit.none], [[], true], 'nothing matches: says so');
+
+// Recipe cards: "from" the low end of the chamber's guide range (M-24).
+assert.equal(fromPrice(/** @type {typeof chambers[number]} */ (box('FireBox'))), '₹4,000');
 
 // Preview renders for every chamber, including the one without a drawing.
 for (const c of chambers) assert.match(previewSVG({ ...emptyBuild(), chamber: c.sku }), /<svg/);

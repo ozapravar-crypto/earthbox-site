@@ -135,24 +135,75 @@
 
 
 <!-- ═══════════════════════════════════════════════════════════════════
-     SOCIAL PROOF STRIP
+     CATALOGUE TEASE (UX audit C-02, D5)
+     Four orderable pieces, not the catalogue: render-products.js reads
+     data-preview, draws the same cards with real prices, and counts the
+     catalogue from data/ for the line under the row. No place switch here.
      ═══════════════════════════════════════════════════════════════════ -->
-<section class="trust-strip">
-  <div class="trust-strip-inner">
-    <div class="trust-item">
-      <span class="trust-num">50+</span>
-      <span class="trust-label">Pieces delivered</span>
+<section class="page volume-i home-vol-preview" id="catalogue-tease">
+  <div class="reveal" style="text-align:center;max-width:680px;margin:0 auto 2.5rem">
+    <h2 class="scramble" style="margin-bottom:1.5rem">Objects for plant life.</h2>
+    <p style="color:var(--mute);max-width:48ch;margin:0 auto">
+      Designed in Mumbai. By enquiry.
+    </p>
+  </div>
+
+  <!-- Renderer fills this from data/volume-one.js · same card as the catalogue page -->
+  <div class="volume-i-list" id="volumeOneList" data-preview="4"></div>
+
+  <div class="reveal" style="text-align:center;margin-top:2.5rem">
+    <a class="cta magnetic" href="/products" data-cursor="VIEW">
+      View full catalogue
+      <svg class="icon icon-arrow-long" viewBox="0 0 16 8" width="16" height="8" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 4 H14 M10 1 L14 4 L10 7"/></svg>
+    </a>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     THE MAKER · invitation to build-your-own (/maker)
+     Motion spec: MOTION.md § Maker invite. Image is a stand-in crop from
+     the reference mockup — replace with the transparent chamber photo.
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="maker-invite" id="maker-invite" aria-labelledby="makerInviteTitle">
+  <svg class="mi-leaves" viewBox="0 0 400 520" aria-hidden="true">
+    <path d="M40 520 C90 380 150 260 260 40" />
+    <ellipse cx="120" cy="380" rx="16" ry="70" transform="rotate(-38 120 380)"/>
+    <ellipse cx="170" cy="300" rx="15" ry="66" transform="rotate(32 170 300)"/>
+    <ellipse cx="190" cy="220" rx="14" ry="62" transform="rotate(-42 190 220)"/>
+    <ellipse cx="235" cy="150" rx="13" ry="58" transform="rotate(28 235 150)"/>
+    <ellipse cx="88" cy="455" rx="15" ry="64" transform="rotate(30 88 455)"/>
+  </svg>
+
+  <div class="mi-inner">
+    <div class="mi-text">
+      <h2 class="mi-title reveal" id="makerInviteTitle">
+        <span class="reveal-line"><span>Build</span></span>
+        <span class="reveal-line" style="--d:120ms"><span>your little</span></span>
+        <span class="reveal-line" style="--d:240ms"><span>world</span></span>
+      </h2>
+      <p class="mi-lede reveal" style="--d:400ms">
+        Design your own terrarium<br>with real plants and materials.<br>We&rsquo;ll bring it to life for you.
+      </p>
+      <a class="cta magnetic mi-cta reveal" style="--d:520ms" href="/maker" data-cursor="MAKE">
+        Start creating
+        <svg class="icon icon-arrow-long" viewBox="0 0 16 8" width="16" height="8" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 4 H14 M10 1 L14 4 L10 7"/></svg>
+      </a>
     </div>
-    <div class="trust-divider"></div>
-    <div class="trust-item">
-      <span class="trust-num">★ 4.8</span>
-      <span class="trust-label">Customer rating</span>
-    </div>
-    <div class="trust-divider"></div>
-    <div class="trust-item">
-      <span class="trust-num">Mumbai</span>
-      <span class="trust-label">Crafted locally</span>
-    </div>
+
+    <figure class="mi-art reveal" style="--d:150ms">
+      <img data-parallax="0.06" src="assets/home/maker-terrarium.webp"
+           srcset="assets/home/maker-terrarium-600.webp 600w, assets/home/maker-terrarium.webp 835w"
+           sizes="(max-width: 900px) 92vw, 46vw"
+           alt="A planted terrarium with ferns, moss and stones, resting on a stone slab in warm daylight"
+           width="835" height="750" loading="lazy" decoding="async">
+    </figure>
+
+    <dl class="mi-spec">
+      <div class="reveal" style="--d:200ms"><dt>Chambers</dt><dd>Ten climates</dd></div>
+      <div class="reveal" style="--d:320ms"><dt>Plants</dt><dd>Forty-five species</dd></div>
+      <div class="reveal" style="--d:440ms"><dt>Price</dt><dd class="small">Quoted by the studio</dd></div>
+    </dl>
   </div>
 </section>
 
@@ -160,7 +211,7 @@
 <!-- ═══════════════════════════════════════════════════════════════════
      SPECIMEN REEL — featured image of an EarthBox in setting
      ═══════════════════════════════════════════════════════════════════ -->
-<section class="video-stage" id="film">
+<section class="video-stage video-stage--quiet" id="film">
   <div class="page reveal">
     <div class="film-frame-header">
       <span class="caption film-frame-caption">Volume III &nbsp;·&nbsp; EarthBox — Living Illusion</span>
@@ -173,17 +224,33 @@
 </section>
 
 
+<!-- ═══ CARE · kits and visits (/care, CARE-PLAN.md) ═══ -->
+<section class="page home-care" id="care" aria-labelledby="homeCareTitle">
+  <div class="reveal" style="text-align:center;max-width:680px;margin:0 auto">
+    <h2 id="homeCareTitle" style="margin-bottom:1.5rem">Care, after it arrives.</h2>
+    <p style="color:var(--mute);max-width:48ch;margin:0 auto 2.5rem">
+      Refill kits matched to your plants, or visits from the studio in Mumbai. For homes and for businesses.
+    </p>
+    <a class="cta cta-secondary" href="/care">
+      Explore care
+      <svg class="icon icon-arrow-long" viewBox="0 0 16 8" width="16" height="8" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 4 H14 M10 1 L14 4 L10 7"/></svg>
+    </a>
+  </div>
+</section>
+
+
 <!-- ═══════════════════════════════════════════════════════════════════
-     PRINCIPLES — Five Quiet Commitments
+     PRINCIPLES + PURPOSE · one quiet band (UX audit D5), then About.
      Cursor-driven · hover any one to highlight, others dim. No pin.
      ═══════════════════════════════════════════════════════════════════ -->
-<section class="page" id="principles">
+<section class="home-ethos" id="principles" aria-labelledby="principlesTitle">
+  <div class="page">
   <div class="reveal" style="max-width:640px;margin:0 auto;text-align:center">
-    <h2 class="scramble">Five Quiet Commitments</h2>
+    <h2 class="scramble" id="principlesTitle">Five Quiet Commitments</h2>
     <p style="margin-top:1.25rem;color:var(--mute);max-width:52ch;margin-inline:auto">Principles that govern every decision, from the curve of a vessel to the weight of a line of type.</p>
   </div>
 
-  <div class="principles principles-hover reveal" style="--d:200ms;margin-top:4rem">
+  <div class="principles principles-hover reveal" style="--d:200ms;margin-top:3.5rem">
     <div class="principle">
       <div class="principle-icon">
         <i class="art" aria-hidden="true" style="--art:url(/assets/illustrations/commit-enclosure.webp)"></i>
@@ -220,104 +287,10 @@
       <p>For nature, materials, viewer. Humility.</p>
     </div>
   </div>
-</section>
 
-
-<!-- ═══════════════════════════════════════════════════════════════════
-     THE MAKER · invitation to build-your-own (/maker)
-     Motion spec: MOTION.md § Maker invite. Image is a stand-in crop from
-     the reference mockup — replace with the transparent chamber photo.
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="maker-invite" id="maker-invite" aria-labelledby="makerInviteTitle">
-  <svg class="mi-leaves" viewBox="0 0 400 520" aria-hidden="true">
-    <path d="M40 520 C90 380 150 260 260 40" />
-    <ellipse cx="120" cy="380" rx="16" ry="70" transform="rotate(-38 120 380)"/>
-    <ellipse cx="170" cy="300" rx="15" ry="66" transform="rotate(32 170 300)"/>
-    <ellipse cx="190" cy="220" rx="14" ry="62" transform="rotate(-42 190 220)"/>
-    <ellipse cx="235" cy="150" rx="13" ry="58" transform="rotate(28 235 150)"/>
-    <ellipse cx="88" cy="455" rx="15" ry="64" transform="rotate(30 88 455)"/>
-  </svg>
-
-  <div class="mi-inner">
-    <div class="mi-text">
-      <span class="mi-num reveal">02<span class="mi-rule"></span></span>
-      <h2 class="mi-title reveal" id="makerInviteTitle">
-        <span class="reveal-line"><span>Build</span></span>
-        <span class="reveal-line" style="--d:120ms"><span>your little</span></span>
-        <span class="reveal-line" style="--d:240ms"><span>world</span></span>
-      </h2>
-      <p class="mi-lede reveal" style="--d:400ms">
-        Design your own terrarium<br>with real plants and materials.<br>We&rsquo;ll bring it to life for you.
-      </p>
-      <a class="cta magnetic mi-cta reveal" style="--d:520ms" href="/maker" data-cursor="MAKE">
-        Start creating
-        <svg class="icon icon-arrow-long" viewBox="0 0 16 8" width="16" height="8" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 4 H14 M10 1 L14 4 L10 7"/></svg>
-      </a>
-    </div>
-
-    <figure class="mi-art reveal" style="--d:150ms">
-      <img data-parallax="0.06" src="assets/home/maker-terrarium.webp"
-           srcset="assets/home/maker-terrarium-600.webp 600w, assets/home/maker-terrarium.webp 835w"
-           sizes="(max-width: 900px) 92vw, 46vw"
-           alt="A planted terrarium with ferns, moss and stones, resting on a stone slab in warm daylight"
-           width="835" height="750" loading="lazy" decoding="async">
-    </figure>
-
-    <dl class="mi-spec">
-      <div class="reveal" style="--d:200ms"><dt>Chambers</dt><dd>Ten climates</dd></div>
-      <div class="reveal" style="--d:320ms"><dt>Plants</dt><dd>Forty-five species</dd></div>
-      <div class="reveal" style="--d:440ms"><dt>Disposition</dt><dd class="small">Quoted by the studio</dd></div>
-    </dl>
-  </div>
-</section>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════
-     VOLUME I PREVIEW
-     The renderer fills #volumeOneList from data/volume-one.js
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="page volume-i home-vol-preview" id="catalogue-tease">
-  <div class="reveal" style="text-align:center;max-width:680px;margin:0 auto 4rem">
-    <h2 class="scramble" style="margin-bottom:1.5rem">Objects for plant life.</h2>
-    <p style="color:var(--mute);max-width:48ch;margin:0 auto">
-      Designed in Mumbai. By enquiry.
-    </p>
-  </div>
-
-  <!-- Renderer fills this from data/volume-one.js · same component as catalogue page -->
-  <div class="volume-i-list" id="volumeOneList"></div>
-
-  <div class="reveal" style="text-align:center;margin-top:3.5rem">
-    <a class="cta magnetic" href="/products" data-cursor="VIEW">
-      View full catalogue
-      <svg class="icon icon-arrow-long" viewBox="0 0 16 8" width="16" height="8" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 4 H14 M10 1 L14 4 L10 7"/></svg>
-    </a>
-  </div>
-</section>
-
-
-<!-- ═══ CARE · kits and visits (/care, CARE-PLAN.md) ═══ -->
-<section class="page home-care" id="care" aria-labelledby="homeCareTitle">
-  <div class="reveal" style="text-align:center;max-width:680px;margin:0 auto">
-    <h2 id="homeCareTitle" style="margin-bottom:1.5rem">Care, after it arrives.</h2>
-    <p style="color:var(--mute);max-width:48ch;margin:0 auto 2.5rem">
-      Refill kits matched to your plants, or visits from the studio in Mumbai. For homes and for businesses.
-    </p>
-    <a class="cta cta-secondary" href="/care">
-      Explore care
-      <svg class="icon icon-arrow-long" viewBox="0 0 16 8" width="16" height="8" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 4 H14 M10 1 L14 4 L10 7"/></svg>
-    </a>
-  </div>
-</section>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════
-     PURPOSE
-     ═══════════════════════════════════════════════════════════════════ -->
-<div class="purpose-wrap" id="purpose">
-  <div class="purpose-inner">
+  <div class="purpose-inner" id="purpose">
     <div class="purpose-left reveal">
-      <h2>A quieter<br>purpose.</h2>
+      <h3 class="purpose-title">A quieter<br>purpose.</h3>
       <span class="rule-s"></span>
       <p class="phrase">
         The final volume is not an object.<br>It is a consequence.
@@ -335,7 +308,11 @@
       </blockquote>
     </div>
   </div>
-</div>
+
+  <p class="home-ethos-more reveal"><a class="ct-link" href="/about">More about the studio</a></p>
+  </div>
+</section>
+
 
 </main>
 
@@ -404,7 +381,6 @@
 
   <div class="colo-bar">
     <span>© 2026 · EarthBox · Kandivali, Mumbai 400101 · <a href="/privacy">Privacy</a></span>
-    <span class="quote">The brand speaks softly, like a crafted object label.</span>
   </div>
 </footer>
 

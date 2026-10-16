@@ -8,8 +8,9 @@
 //   state = { q, f: { groups, forms, fit }, g: { look, light, roles }, sort, view }
 //   ctx   = { suited: [groups the chosen chamber takes], chamber: 'Moss', space: build.space }
 //
-// Room and care live in build.space, not here: they travel with the enquiry
-// and show up on the "Your space" step too.
+// Room, light and care live in build.space, not here: "Your space" owns
+// them, they travel with the enquiry, and guided search writes to them
+// (UX audit M-11). An older save's `g.light` still counts until it moves.
 //
 // Constraints (remove plants): search text, group, shape, "fits my chamber",
 // guided look (→ groups) and guided roles (→ shapes).
@@ -26,7 +27,7 @@ import { plants, elements, forms, guide } from '../data/maker.js';
  * @typedef {{ q: string, sort: string, view: string,
  *   f: { groups: string[], forms: string[], fit: boolean },
  *   g: { look: string, light: string, roles: string[] } }} Discovery
- * @typedef {{ room?: string, care?: string }} SpaceAnswers
+ * @typedef {{ room?: string, care?: string, light?: string }} SpaceAnswers
  * @typedef {{ suited?: string[], chamber?: string, space?: SpaceAnswers }} SearchContext
  * @typedef {{ key: string, label: string, test: (p: Plant) => boolean, same?: string, guided?: boolean }} Constraint
  * @typedef {{ key: string, label: string }} Chip
@@ -54,9 +55,18 @@ const haystack = new Map(plants.map(p => {
   return [p.id, fold([p.name, p.botanical, p.element, el.heading, el.focus, forms[p.form]].join(' '))];
 }));
 
+// Words people type for what the list calls something else (M-22). Only
+// real data: the Fire chamber's own spec says "Succulents, cacti" and its
+// group is "High light & succulents". There's no "easy" here: no plant has
+// a care rating yet (data/maker.js), so "easy" would be a guess.
+/** @type {Record<string, string[]>} */
+const SYNONYMS = { cactus: ['succulent'], cacti: ['succulent'], cactuses: ['succulent'] };
+
 /** @param {Plant} p @param {string} q */
-export const matchesQuery = (p, q) =>
-  fold(q).trim().split(/\s+/).filter(Boolean).every(t => /** @type {string} */ (haystack.get(p.id)).includes(t));
+export const matchesQuery = (p, q) => {
+  const hay = /** @type {string} */ (haystack.get(p.id));
+  return fold(q).trim().split(/\s+/).filter(Boolean).every(t => [t, ...(SYNONYMS[t] ?? [])].some(w => hay.includes(w)));
+};
 
 // The active constraints, each removable on its own (`clear` names the state path).
 /** @param {Discovery} state @param {SearchContext} [ctx] */
@@ -92,7 +102,7 @@ function passes(p, list){
 // Guided answers that never remove a plant, shown as chips so the visitor sees them.
 /** @param {Discovery['g']} g @param {SpaceAnswers} [space] @returns {Chip[]} */
 function preferences(g, space = {}){
-  const light = byId(guide.light, g.light);
+  const light = byId(guide.light, lightOf(g, space));
   const care = byId(guide.care, space.care);
   return [
     light && light.id !== 'unsure' && { key: 'light', label: light.label },
@@ -101,17 +111,19 @@ function preferences(g, space = {}){
   ].filter(/** @returns {c is Chip} */ c => Boolean(c));
 }
 
-/** @param {Plant} p @param {Discovery['g']} g */
-const lightScore = (p, g) => (byId(guide.light, g.light)?.prefers.includes(p.element) ? 1 : 0);
+/** @param {Discovery['g']} g @param {SpaceAnswers} [space] */
+const lightOf = (g, space = {}) => g.light || space.light || '';
+/** @param {Plant} p @param {string} light */
+const lightScore = (p, light) => (byId(guide.light, light)?.prefers.includes(p.element) ? 1 : 0);
 
 /** @param {Discovery} state @param {SearchContext} [ctx] */
 export function searchPlants(state, ctx = {}){
-  const list = constraints(state, ctx);
+  const list = constraints(state, ctx), light = lightOf(state.g, ctx.space);
   /** @param {Plant} a @param {Plant} b */
   const order = (a, b) =>
     state.sort === 'name'  ? a.name.localeCompare(b.name) :
     state.sort === 'group' ? elements.findIndex(e => e.id === a.element) - elements.findIndex(e => e.id === b.element) :
-    lightScore(b, state.g) - lightScore(a, state.g);   // recommended: stable, so list order breaks ties
+    lightScore(b, light) - lightScore(a, light);   // recommended: stable, so list order breaks ties
   const results = plants.filter(p => passes(p, list)).sort(order);
   // No matches: what each single removal would bring back, most useful first.
   const relax = results.length ? [] : list
@@ -131,7 +143,7 @@ export function dropChip(state, key){
   if (kind === 'form') s.f.forms = s.f.forms.filter(x => x !== id);
   if (kind === 'look') s.g.look = '';
   if (kind === 'role') s.g.roles = s.g.roles.filter(x => x !== id);
-  if (kind === 'light') s.g.light = '';   // room + care: the caller clears build.space
+  if (kind === 'light') s.g.light = '';   // room, care + light: the caller clears build.space too
   return s;
 }
 

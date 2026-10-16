@@ -464,8 +464,8 @@ test('Care: visits for my own plants → plan in cart and in the order message',
   const planner = page.locator('#carePlanner');
   await planner.getByText('My own plants').click();
   await planner.locator('input[name=n]').fill('8');
-  await planner.getByText('Bite', { exact: true }).click();
   await planner.getByText('Visits from the studio').click();
+  await expect(planner.locator('input[name=g]')).toHaveCount(0);   // visits don't ask the plant group: it doesn't change the plan (UX audit S-21)
   await planner.getByLabel('6 months').check();
   await planner.getByLabel('Every 2 weeks').check();
   await planner.locator('input[name=p]').fill('400101');
@@ -478,7 +478,7 @@ test('Care: visits for my own plants → plan in cart and in the order message',
   await expect(line.locator('.ct-title')).toHaveText('Care visits · 8 of my own plants');
   await expect(line.locator('.ct-qty')).toHaveCount(0);                         // a plan has no quantity
   const wa = decodeURIComponent(/** @type {string} */ (await cartDrawer(page).locator('[data-ct=send]').getAttribute('href')));
-  expect(wa).toContain('6 months, every 2 weeks (12 visits) · Bite · pincode 400101');
+  expect(wa).toContain('6 months, every 2 weeks (12 visits) · pincode 400101');
   expect(errs).toEqual([]);
 });
 

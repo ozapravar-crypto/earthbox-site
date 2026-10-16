@@ -107,6 +107,9 @@
       </button>
     </nav>
 
+    <!-- The chosen place, in sight after the switch scrolls away (UX audit S-16); filled by render-products.js -->
+    <p class="bar-place" id="barPlace"></p>
+
     <button class="catalogue-search-btn" type="button" id="catalogueSearchBtn" aria-label="Search catalogue">
       <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
         <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
@@ -129,7 +132,7 @@
       <input type="search"
              id="cat-search"
              class="search-overlay-input"
-             placeholder="Search by name, type, or material..."
+             placeholder="Search by name, type, material or place…"
              aria-label="Search the catalogue"
              autocomplete="off"/>
       <button type="button" class="search-overlay-close" id="catalogueSearchClose" aria-label="Close search"><svg class="icon icon-x" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
@@ -140,7 +143,7 @@
         <p class="italic">No pieces match your search.</p>
       </div>
       <div class="search-hint" id="searchHint">
-        <p class="caption">Try: planter, moss pole, terrarium, watering</p>
+        <p class="caption">Try: planter, moss pole, balcony, ASA</p>
       </div>
     </div>
   </div>
@@ -244,7 +247,6 @@
 
   <div class="colo-bar">
     <span>© 2026 · EarthBox · Kandivali, Mumbai 400101 · <a href="/privacy">Privacy</a></span>
-    <span class="quote">The brand speaks softly, like a crafted object label.</span>
   </div>
 </footer>
 

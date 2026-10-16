@@ -576,12 +576,6 @@ function renderBox(b){
         <p class="pd-guide">Guide ${b.price} · final price on enquiry</p>
       </header>
 
-      <section class="pd-intro reveal">
-        <div class="pd-body-text">
-          ${desc}
-        </div>
-      </section>
-
       <section class="pd-showcase">
         <div class="pd-hero reveal">
           <div class="pd-hero-frame">
@@ -594,6 +588,13 @@ function renderBox(b){
           <p class="caption pd-note">Coming soon · not yet in the cart</p>
           <a class="caption pd-maker-link" href="/maker?box=${b.sku}">Design yours in the Maker &rarr;</a>
         </aside>
+      </section>
+
+      <!-- The long text follows the photo, not before it (UX audit S-25) -->
+      <section class="pd-intro reveal">
+        <div class="pd-body-text">
+          ${desc}
+        </div>
       </section>
 
       ${related.length ? `
@@ -644,15 +645,17 @@ function renderVivarium(v){
       <section class="pd-body pd-body--single reveal">
         <p class="lede">${v.description}</p>
         <p class="italic" style="margin-top:1.5rem;color:var(--mute)">${v.note}</p>
+        <!-- Status before the action, and an email route too (UX audit S-26) -->
+        <p class="pd-viv-status" style="margin-top:2rem"><span class="badge">${v.status}</span></p>
         <a class="cta magnetic pd-cta"
-           style="margin-top:2rem"
+           style="margin-top:1rem"
            href="${enquiryHref({ name: 'Digital Vivariums', sku: v.sku, volume: 3 })}"
            target="_blank" rel="noopener"
            data-cursor="ASK">
           Write in on WhatsApp
           ${icon('arrow-up-right', { size: 'xs' })}
         </a>
-        <p class="caption pd-note">${v.status}</p>
+        ${enquiryAltHTML('Digital Vivariums (Volume III)')}
       </section>
 
     </article>

@@ -148,6 +148,25 @@ export function buildPayload(fields, key = WEB3FORMS_ACCESS_KEY){
 }
 
 
+// What's wrong with a form, in words, for its status line (UX audit S-29):
+// no browser pop-ups. The fields keep `required`/`pattern`, so the browser's
+// own check still guards a page whose script didn't load.
+/**
+ * @param {HTMLFormElement} form
+ * @returns {{ field: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement, msg: string } | null}
+ */
+function firstProblem(form){
+  const field = /** @type {HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null} */ (form.querySelector(':invalid:not(fieldset)'));
+  if (!field) return null;
+  const label = field.type === 'tel' ? 'phone number'
+    : (field.closest('label')?.querySelector('span')?.textContent || field.name).replace(/\s*\(optional\)$/i, '').replace(/^your\s+/i, '').trim().toLowerCase();
+  const msg = field.validity.valueMissing ? `Please add your ${label}.`
+    : field.type === 'email' ? `That email doesn’t look right: please check it.`
+    : `Please check your ${label}.`;
+  return { field, msg };
+}
+
+
 // ─── Behaviour ───
 // Delegated so it survives the renderers injecting CTAs after page load.
 export function initEnquiryForm(){
@@ -172,7 +191,14 @@ export function initEnquiryForm(){
      */
     const say = (state, msg) => { status.dataset.state = state; status.textContent = msg; };
 
-    if (!form.checkValidity()) { form.reportValidity(); return; }
+    form.querySelectorAll('[aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'));
+    const problem = firstProblem(form);
+    if (problem) {
+      problem.field.setAttribute('aria-invalid', 'true');
+      say('error', problem.msg);
+      problem.field.focus();
+      return;
+    }
 
     if (!isConfigured()){
       say('error', `Our form isn't live yet — please email ${ENQUIRY_EMAIL}.`);

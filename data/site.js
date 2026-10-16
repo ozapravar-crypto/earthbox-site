@@ -143,7 +143,6 @@ ${li(REFUND)}
 
   <div class="colo-bar">
     <span>© 2026 · EarthBox · ${ADDRESS} · <a href="/privacy">Privacy</a></span>
-    <span class="quote">The brand speaks softly, like a crafted object label.</span>
   </div>
 </footer>`;
 }
