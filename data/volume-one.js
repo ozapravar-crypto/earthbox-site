@@ -18,6 +18,10 @@ export const categories = [
 
 // Where a product's photo lives: plants have their own folder. Every
 // renderer and the cart use this, so the path is decided once.
+/**
+ * @param {{ category: string, photo: string }} p
+ * @param {string} [size]  '300' | '600' for the responsive copies
+ */
 export const photoPath = (p, size = '') =>
   `${p.category === 'plant-packets' ? '/assets/plants' : '/assets/v1'}/${size ? p.photo.replace('.webp', `-${size}.webp`) : p.photo}`;
 
@@ -30,6 +34,7 @@ export const materials = [
 // "Where will it live?" A shopper picks a place, not a plastic. Each place
 // has one material, so every card can show one exact price instead of
 // "From ₹…" (owner brief, 14 Oct 2026; SHOPPING-PLAN.md).
+/** @typedef {typeof places[number]} Place */
 export const places = [
   { id: 'indoors', name: 'Indoors',      material: 'petg' },
   { id: 'window',  name: 'Sunny window', material: 'abs' },
@@ -38,8 +43,14 @@ export const places = [
 
 // The exact price of a piece in one material and size; null = on enquiry.
 // Size defaults to the first, the one the product page opens on.
+/**
+ * @param {Product} p
+ * @param {string} material  a Material id
+ * @param {string} [variant]
+ * @returns {number | null}
+ */
 export const priceOf = (p, material, variant = p.variants?.[0]?.id) =>
-  (variant ? p.pricing?.[variant] : p.pricing)?.[material] ?? null;
+  /** @type {Record<string, number> | null | undefined} */ (variant ? /** @type {Record<string, PriceTable> | null} */ (p.pricing)?.[variant] : p.pricing)?.[material] ?? null;
 
 /**
  * @typedef {'petg'|'abs'|'asa'} Material
@@ -50,6 +61,7 @@ export const priceOf = (p, material, variant = p.variants?.[0]?.id) =>
  * @property {string} category    a categories[].slug
  * @property {string} description
  * @property {string} photo       file name; photoPath() picks the folder, -300/-600 sizes must exist
+ * @property {string} [unit]      pack size, e.g. '30 pieces'
  * @property {'available'|'coming-soon'} status
  * @property {{id:string,name:string,description:string}[]} [variants]
  * @property {null|PriceTable|Record<string, PriceTable>} pricing

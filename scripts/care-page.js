@@ -16,7 +16,14 @@ import { decodeBuild, chamberOf } from './build-codec.js';
 import { esc, rupees } from './util.js';
 import { icon } from '../data/icons.js';
 
+/**
+ * @typedef {import('./care.js').Plan} Plan
+ * @typedef {import('./build-codec.js').Build} Build
+ * @typedef {import('./build-codec.js').Chamber} Chamber
+ */
+
 const GROUP_NOTE = Object.fromEntries(elements.map(e => [e.id, e.heading]));
+/** @param {unknown} o */
 const attr = (o) => esc(JSON.stringify(o));
 // Pieces someone can own and that hold plants: available Volume I planters,
 // plant packets and supports. Chambers are coming soon, so they're not here.
@@ -25,9 +32,14 @@ const OWNABLE = volumeOne.filter(p => p.status !== 'coming-soon' && ['planters',
 // Maker designs the visitor already has (cart or saved), for "A custom box".
 function savedBuilds(){
   try {
+    // Untrusted storage: only lines whose code decodes to a build are kept.
+    /** @type {{ cart?: ({ kind?: unknown, code?: unknown } | null)[], saved?: ({ kind?: unknown, code?: unknown } | null)[] }} */
     const s = JSON.parse(localStorage.getItem('earthbox-cart') || '{}');
     return [...(s.cart || []), ...(s.saved || [])].filter(l => l?.kind === 'build' && decodeBuild(l.code))
-      .map(l => { const b = decodeBuild(l.code); return { code: l.code, name: b.name || `${chamberOf(b).name} world` }; });
+      .map(l => {
+        const line = /** @type {{ code: string }} */ (l), b = /** @type {Build} */ (decodeBuild(line.code));
+        return { code: line.code, name: b.name || `${/** @type {Chamber} */ (chamberOf(b)).name} world` };
+      });
   } catch { return []; }
 }
 
@@ -36,11 +48,14 @@ export function initCare(){
   if (!root) return;
 
   const fromLink = decodePlan(location.hash);
+  /** @type {Plan & { mode: string }} */
   const st = fromLink ? { ...fromLink, mode: 'visits' }
     : { s: 'piece', r: OWNABLE[0]?.sku || '', g: [], n: 1, d: '12m', f: 'monthly', p: '', mode: 'kit' };
   if (st.d === 'once') st.f = 'monthly';   // remembered for when they pick a term
 
-  const $ = (sel) => root.querySelector(sel);
+  // Every id looked up below is in root's own markup.
+  /** @param {string} sel */
+  const $ = (sel) => /** @type {HTMLElement} */ (root.querySelector(sel));
   const plan = () => ({ s: st.s, r: st.s === 'own' ? '' : st.r, d: st.d, f: st.d === 'once' ? null : st.f, g: groups(), n: st.n, p: st.p });
   // Plant groups: known from the piece or design, else chosen by the visitor.
   const derived = () => (st.s === 'own' ? [] : groupsOf(st.r));
@@ -53,13 +68,17 @@ export function initCare(){
     if (st.s === 'custom') {
       const builds = savedBuilds();
       const linked = decodeBuild(st.r);   // arrived from the Maker with a design
-      if (linked && !builds.some(b => b.code === st.r)) builds.unshift({ code: st.r, name: linked.name || `${chamberOf(linked).name} world` });
+      if (linked && !builds.some(b => b.code === st.r)) builds.unshift({ code: st.r, name: linked.name || `${/** @type {Chamber} */ (chamberOf(linked)).name} world` });
       if (!builds.some(b => b.code === st.r)) st.r = builds[0]?.code || '';
       return builds.length ? `
       <label class="care-field"><span>Which design?</span>
         <select name="r">${builds.map(b => `<option value="${esc(b.code)}"${b.code === st.r ? ' selected' : ''}>${esc(b.name)}</option>`).join('')}</select></label>`
         : `<p class="care-note">Design your world in the <a href="/maker">Maker</a> and add it to your cart or saved list. It will appear here.</p>`;
     }
+    /**
+     * @param {string} sku
+     * @param {string} name
+     */
     const opt = (sku, name) => `<option value="${esc(sku)}"${sku === st.r ? ' selected' : ''}>${esc(name)}</option>`;
     return `
       <label class="care-field"><span>Which piece?</span>
@@ -78,7 +97,7 @@ export function initCare(){
 
   function resultPart(){
     if (st.mode === 'kit') {
-      const list = groups().map(kitFor).filter(Boolean);
+      const list = /** @type {NonNullable<ReturnType<typeof kitFor>>[]} */ (groups().map(kitFor).filter(Boolean));
       if (!list.length) return `<p class="care-note">Choose the plants above to see their kits.</p>`;
       return `<ul class="care-kits">${list.map(k => `
         <li class="care-kit">
@@ -131,37 +150,40 @@ export function initCare(){
   draw.ref(); draw.groups(); draw.result(); sync();
 
   root.addEventListener('change', (e) => {
-    const { name, value } = e.target;
+    const { name, value } = /** @type {HTMLInputElement | HTMLSelectElement} */ (e.target);
     // Text fields update on 'input'. Their 'change' fires on blur, i.e. as the
     // visitor presses "Add visits to cart"; redrawing then swapped the button
     // out from under the click and nothing was added.
     if (name === 'n' || name === 'p') return;
     if (name === 's') { st.s = value; st.g = []; if (value === 'piece') st.r = OWNABLE[0]?.sku || ''; draw.ref(); draw.groups(); }
     else if (name === 'r') { st.r = value; st.g = []; draw.groups(); }
-    else if (name === 'g') st.g = [...root.querySelectorAll('input[name=g]:checked')].map(i => i.value);
+    else if (name === 'g') st.g = [.../** @type {NodeListOf<HTMLInputElement>} */ (root.querySelectorAll('input[name=g]:checked'))].map(i => i.value);
     else if (name === 'mode') st.mode = value;
     else if (name === 'd') st.d = value;
     else if (name === 'f') st.f = value;
     sync(); draw.result();
   });
   root.addEventListener('input', (e) => {
-    if (e.target.name === 'n') st.n = Math.min(500, Math.max(1, parseInt(e.target.value, 10) || 1));
-    else if (e.target.name === 'p') st.p = /^\d{6}$/.test(e.target.value) ? e.target.value : '';
+    const input = /** @type {HTMLInputElement} */ (e.target);
+    if (input.name === 'n') st.n = Math.min(500, Math.max(1, parseInt(input.value, 10) || 1));
+    else if (input.name === 'p') st.p = /^\d{6}$/.test(input.value) ? input.value : '';
     else return;
     draw.result();
   });
 
   // Business form: options from data, then fold its fields into the message
   // the shared handler sends.
-  const biz = document.getElementById('careBusiness');
+  const biz = /** @type {HTMLFormElement | null} */ (document.getElementById('careBusiness'));
+  /** @param {string[]} list */
   const opts = (list) => list.map(v => `<option>${esc(v)}</option>`).join('');
   if (biz) {
-    biz.querySelector('#careSite').innerHTML = opts(businessSites);
-    biz.querySelector('#careOften').innerHTML = opts([...visit.frequencies.map(f => f.label), 'Not sure yet']);
+    /** @type {HTMLElement} */ (biz.querySelector('#careSite')).innerHTML = opts(businessSites);
+    /** @type {HTMLElement} */ (biz.querySelector('#careOften')).innerHTML = opts([...visit.frequencies.map(f => f.label), 'Not sure yet']);
   }
   biz?.addEventListener('submit', () => {
-    const f = Object.fromEntries(new FormData(biz));
-    biz.querySelector('[name=message]').value = [
+    // Every field in this form is a text control that is always present (no file inputs).
+    const f = /** @type {Record<'company' | 'site' | 'size' | 'often' | 'pin' | 'note', string>} */ (Object.fromEntries(new FormData(biz)));
+    /** @type {HTMLInputElement} */ (biz.querySelector('[name=message]')).value = [
       'Business care enquiry',
       `Company: ${f.company}`, `Site: ${f.site}`, `Plants or sites: ${f.size}`, `Visits wanted: ${f.often}`, `Pincode: ${f.pin}`,
       f.note ? `\n${f.note}` : ''

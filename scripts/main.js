@@ -10,9 +10,7 @@
 // Order is unchanged: renderers run first, then the motion primitives,
 // so scramble / magnetic / reveal find the rendered DOM.
 //
-// NOTE: Lenis smooth scroll is currently disabled — using native
-// browser scroll. lenis.js + the CDN <script> are still in the
-// codebase but un-imported, ready if we want to switch back.
+// Smooth scroll (Lenis) is loaded by motion-scroll.js from scripts/vendor.
 // ─────────────────────────────────────────────────────────────────────
 
 import { track } from './util.js';
@@ -43,6 +41,7 @@ document.addEventListener('error', (e) => {
 }, true);
 
 // [root selector, loader] · run in this order (catalogue reads what products rendered).
+/** @type {[string, () => Promise<unknown>][]} */
 const PAGE_MODULES = [
   ['#volumeOneList, #volumeTwoList, #volumeThreeBlock', () => import('./render-products.js').then(m => m.initProducts())],
   ['.vol-pills',                                        () => import('./catalogue.js').then(m => m.initCatalogue())],
@@ -64,14 +63,14 @@ async function initPage(){
 const boot = async () => {
   // The catalogue search loads a moment after the page shows: a tap in that
   // gap is remembered and opens search when it's ready, not lost (site-ksq).
-  document.getElementById('catalogueSearchBtn')?.addEventListener('click', (e) => { e.currentTarget.dataset.pending = '1'; }, { once: true });
+  document.getElementById('catalogueSearchBtn')?.addEventListener('click', (e) => { /** @type {HTMLElement} */ (e.currentTarget).dataset.pending = '1'; }, { once: true });
   initTheme();
   initRunhead();
   initCart();         // after initTheme: wraps the desktop toggle
   initMenu();
   initReveal();       // Must run before catalogue so observeReveals() works
   await initPage();
-  initScrollMotion();
+  void initScrollMotion();   // background: Lenis loads after the page is usable
   initPin();
   initCursor();
   initMagnetic();
@@ -99,7 +98,7 @@ const boot = async () => {
   // GA4: Track desktop enquiry-fallback clicks (email / phone under the CTA).
   // Delegated: the CTAs are rendered after this runs.
   document.addEventListener('click', (e) => {
-    const el = e.target.closest('[data-enquiry-fallback]');
+    const el = /** @type {HTMLElement | null} */ (/** @type {Element} */ (e.target).closest('[data-enquiry-fallback]'));
     if (el) track('enquire_fallback_click', {
         method: el.dataset.enquiryFallback,
         page: window.location.pathname

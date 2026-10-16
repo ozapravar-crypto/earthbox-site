@@ -16,13 +16,26 @@ import { volumeOne } from '../data/volume-one.js';
 import { volumeTwo } from '../data/upcoming.js';
 import { groupsOf, kitFor, encodePlan } from './care.js';
 
+/**
+ * @typedef {import('./cart.js').NewLine} NewLine
+ * @typedef {{ key: string, title: string, reason: string }} SuggestionBase
+ * @typedef {SuggestionBase & ({ line: NewLine, href?: undefined } | { href: string, line?: undefined })} Suggestion
+ */
+
 const MAX = 2;
+/** @param {{ status: string }} p */
 const available = (p) => p.status !== 'coming-soon';
 
+/**
+ * @param {NewLine[]} cart
+ * @returns {Suggestion[]}
+ */
 export function suggest(cart){
   const inCart = new Set(cart.map(l => l.sku).filter(Boolean));
   const hasCare = cart.some(l => l.kind === 'care');
+  /** @type {Suggestion[]} */
   const out = [];
+  /** @param {Suggestion} s */
   const push = (s) => { if (out.length < MAX && !out.some(o => o.key === s.key)) out.push(s); };
 
   for (const l of cart) {
@@ -36,7 +49,7 @@ export function suggest(cart){
     }
     if (isBox && !hasCare) {
       const plan = { s: l.kind === 'build' ? 'custom' : 'piece', r: ref, d: '12m', f: 'monthly', g: groupsOf(ref) };
-      push({ key: `care:${ref}`, href: `/care#${encodePlan(plan)}`, title: 'Care visits', reason: 'We come and look after it, in Mumbai.' });
+      push({ key: `care:${String(ref)}`, href: `/care#${encodePlan(plan)}`, title: 'Care visits', reason: 'We come and look after it, in Mumbai.' });
     }
 
     // Planter → something to grow in it.

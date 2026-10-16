@@ -5,7 +5,8 @@
 // harmless until GA loads, and are dropped if it never does.
 // gtag queue: track() calls before or without consent just queue here.
 window.dataLayer = window.dataLayer || [];
-window.gtag = function gtag(){ window.dataLayer.push(arguments); };
+// dataLayer is set on the line above, before gtag can ever run.
+window.gtag = function gtag(){ /** @type {unknown[]} */ (window.dataLayer).push(arguments); };
 window.gtag('js', new Date());
 window.gtag('config', 'G-1HHZETMVWP');
 
@@ -13,6 +14,7 @@ window.gtag('config', 'G-1HHZETMVWP');
   const KEY = 'earthbox-consent';
   const GA = 'https://www.googletagmanager.com/gtag/js?id=G-1HHZETMVWP';
   const get = () => { try { return localStorage.getItem(KEY); } catch { return null; } };
+  /** @param {string} v */
   const set = (v) => { try { localStorage.setItem(KEY, v); } catch { /* private mode: ask again next page */ } };
   const loadGA = () => {
     if (document.querySelector(`script[src="${GA}"]`)) return;
@@ -23,7 +25,7 @@ window.gtag('config', 'G-1HHZETMVWP');
 
   // "Change cookie choice" on the privacy page.
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('[data-consent-reset]')) return;
+    if (!/** @type {Element} */ (e.target).closest('[data-consent-reset]')) return;
     try { localStorage.removeItem(KEY); } catch { /* nothing stored */ }
     location.reload();
   });
@@ -43,9 +45,9 @@ window.gtag('config', 'G-1HHZETMVWP');
         <button type="button" class="cta cta-small cta-secondary" data-consent="denied">Decline</button>
       </div>`;
     box.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-consent]');
+      const b = /** @type {HTMLElement | null} */ (/** @type {Element} */ (e.target).closest('[data-consent]'));
       if (!b) return;
-      set(b.dataset.consent);
+      set(/** @type {string} */ (b.dataset.consent));
       if (b.dataset.consent === 'granted') loadGA();
       box.remove();
     });

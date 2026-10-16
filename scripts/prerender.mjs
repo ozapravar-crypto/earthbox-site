@@ -23,18 +23,21 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const { SITE } = await import(path.join(ROOT, 'data/site.js'));
-const { articles, categories } = await import(path.join(ROOT, 'data/articles.js'));
+const { SITE } = /** @type {typeof import('../data/site.js')} */ (await import(path.join(ROOT, 'data/site.js')));
+const { articles, categories } = /** @type {typeof import('../data/articles.js')} */ (await import(path.join(ROOT, 'data/articles.js')));
 
-const { esc } = await import(path.join(ROOT, 'scripts/util.js'));
+const { esc } = /** @type {typeof import('./util.js')} */ (await import(path.join(ROOT, 'scripts/util.js')));
 
-const catTitle = (slug) => (categories.find((c) => c.slug === slug)?.title) ?? slug;
+/** @typedef {import('../data/articles.js').Article} Article */
 
-const fmtDate = (d) => new Date(d).toLocaleDateString('en-IN',
+const catTitle = (/** @type {string} */ slug) => (categories.find((c) => c.slug === slug)?.title) ?? slug;
+
+const fmtDate = (/** @type {string} */ d) => new Date(d).toLocaleDateString('en-IN',
   { day: 'numeric', month: 'long', year: 'numeric' });
 
-const articleUrl = (slug) => `${SITE}/blog/${slug}`;
+const articleUrl = (/** @type {string} */ slug) => `${SITE}/blog/${slug}`;
 
+/** @param {Article} a */
 function head(a) {
   return `
     <a class="back-link" href="/blog">${icon('arrow-left', { size: 'xs' })}Back to Journal</a>
@@ -46,6 +49,7 @@ function head(a) {
   `;
 }
 
+/** @param {Article} a */
 function body(a) {
   const faqs = a.faqs?.length ? `
     <section class="faq-section">
@@ -58,7 +62,7 @@ function body(a) {
       `).join('')}
     </section>` : '';
 
-  const rel = (a.relatedArticles ?? []).map((s) => articles.find((x) => x.slug === s)).filter(Boolean);
+  const rel = (a.relatedArticles ?? []).map((s) => articles.find((x) => x.slug === s)).filter((x) => x !== undefined);
   const related = rel.length ? `
     <section class="related-section">
       <h2>Continue Reading</h2>
@@ -77,6 +81,7 @@ function body(a) {
   return (a.body ?? '') + faqs + related;
 }
 
+/** @param {Article & { featuredImage?: string, updatedDate?: string }} a  neither is set yet: per-article images are bead site-13o.6 */
 function meta(a) {
   const url = articleUrl(a.slug);
   const img = a.featuredImage
@@ -128,6 +133,7 @@ function meta(a) {
 const START = '<!-- prerender:start -->';
 const END = '<!-- prerender:end -->';
 
+/** @param {string} html @param {string} block */
 function injectHead(html, block) {
   // Replace a previous prerender block, or insert before </head>.
   if (html.includes(START)) {
@@ -143,6 +149,7 @@ function injectHead(html, block) {
 // related), so a lazy match to the first </section> stops inside it and every
 // build appended another copy. The body section is always the last thing in
 // <main>, so it ends at </main>; the head has no nested sections.
+/** @type {(html: string, id: string, inner: string) => string} */
 const fill = (html, id, inner) => id === 'articleBody'
   ? html.replace(/(<section[^>]*id="articleBody"[^>]*>)[\s\S]*?<\/main>/,
                  (_m, open) => `${open}${inner}</section>\n</main>`)
@@ -150,7 +157,9 @@ const fill = (html, id, inner) => id === 'articleBody'
                  (_m, open, close) => `${open}${inner}${close}`);
 
 const files = (await readdir(path.join(ROOT, 'blog'))).filter((f) => f.endsWith('.html'));
-let done = 0, skipped = [];
+let done = 0;
+/** @type {string[]} */
+const skipped = [];
 
 for (const f of files.sort()) {
   const p = path.join(ROOT, 'blog', f);

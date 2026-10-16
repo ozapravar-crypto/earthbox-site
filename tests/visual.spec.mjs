@@ -9,6 +9,9 @@ test.beforeEach(async ({ context }) => {
   await context.route('**/*.mp4', r => r.abort());
 });
 
+/** @typedef {import('@playwright/test').Page} Page */
+
+/** @param {Page} page */
 async function settle(page){
   await page.addStyleTag({ content: `*,*::before,*::after{transition:none!important;animation:none!important;caret-color:transparent!important}
     .cursor-ring,.cursor-dot{display:none!important}` });
@@ -19,7 +22,7 @@ async function settle(page){
   // once showed "Loading…" with no Saved/Cart). Wait for the scripts' marks,
   // then for the page to stop changing for 600 ms (at most 4 s).
   await page.waitForFunction(() => document.querySelector('[data-cart-count]') && ![...document.querySelectorAll('.caption')].some(e => e.textContent.includes('Loading') && e.checkVisibility()));
-  await page.evaluate(() => new Promise(done => { let t; const mo = new MutationObserver(() => { clearTimeout(t); t = setTimeout(() => { mo.disconnect(); done(); }, 600); }); mo.observe(document.body, { subtree: true, childList: true, attributes: true, characterData: true }); t = setTimeout(() => { mo.disconnect(); done(); }, 600); setTimeout(() => { mo.disconnect(); done(); }, 4000); }));   // ponytail: 4 s cap, the Maker's 3D preview never goes quiet (canvas is masked)
+  await page.evaluate(() => /** @type {Promise<void>} */ (new Promise(done => { let t = /** @type {ReturnType<typeof setTimeout> | undefined} */ (undefined); const mo = new MutationObserver(() => { clearTimeout(t); t = setTimeout(() => { mo.disconnect(); done(); }, 600); }); mo.observe(document.body, { subtree: true, childList: true, attributes: true, characterData: true }); t = setTimeout(() => { mo.disconnect(); done(); }, 600); setTimeout(() => { mo.disconnect(); done(); }, 4000); })));   // ponytail: 4 s cap, the Maker's 3D preview never goes quiet (canvas is masked)
   await page.evaluate(() => document.querySelectorAll('.reveal,.reveal-line,.reveal-clip').forEach(e => e.classList.add('in')));
   // fonts.ready resolves even when a font fails to arrive, which once
   // captured a page in system fonts (Google Fonts, before self-hosting). Load each site face explicitly, and fail
@@ -36,7 +39,8 @@ async function settle(page){
   expect(missing, 'site fonts must be loaded before a visual comparison').toEqual([]);
   await page.waitForTimeout(500);
 }
-const mask = (page) => [page.locator('video'), page.locator('canvas')];
+const mask = (/** @type {Page} */ page) => [page.locator('video'), page.locator('canvas')];
+/** @type {{ maxDiffPixelRatio: number, animations: 'disabled' }} */
 const shot = { maxDiffPixelRatio: 0.01, animations: 'disabled' };
 
 const PAGES = [
@@ -58,6 +62,7 @@ for (const [name, path] of PAGES) {
   });
 }
 
+/** @type {[string, string, (p: Page) => Promise<void>][]} */
 const STATES = [
   ['cart-drawer', '/product.html#V1-PLT-006', async p => { await p.locator('.pd-buy [data-add-line], #pdMobileCta [data-add-line]').first().click(); }],
   ['maker-plants', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); }],

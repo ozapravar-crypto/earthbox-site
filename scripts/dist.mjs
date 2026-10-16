@@ -27,6 +27,7 @@ for (const f of await readdir(ROOT)) {
 }
 
 // Folders, filtered by file type: browser code and content only.
+/** @type {Record<string, (f: string) => boolean>} */
 const keep = {
   blog:   (f) => f.endsWith('.html'),
   product: (f) => f.endsWith('.html'),   // one page per piece (seo.mjs)

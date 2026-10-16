@@ -1,0 +1,9 @@
+{
+  "path": ["scripts", "data", "tests", "qa", "styles"],
+  "ignore": ["**/vendor/**", "**/reports/**", "**/article-bodies/**", "**/*.d.ts"],
+  "minTokens": 50,
+  "threshold": 0,
+  "reporters": ["consoleFull"],
+  "silent": false,
+  "exitCode": 1
+}

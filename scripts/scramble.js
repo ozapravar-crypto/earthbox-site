@@ -14,6 +14,7 @@ const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ§†¶·';
 
+/** @param {string} text */
 function seedFor(text){
   let h = 0;
   for (let i = 0; i < text.length; i++){
@@ -21,6 +22,7 @@ function seedFor(text){
   }
   return h >>> 0;
 }
+/** @param {number} seed */
 function mulberry32(seed){
   return () => {
     let t = (seed += 0x6D2B79F5) >>> 0;
@@ -31,6 +33,7 @@ function mulberry32(seed){
 }
 
 
+/** @param {HTMLElement} el */
 function scramble(el){
   if (el.dataset.scrambled) return;
   el.dataset.scrambled = '1';
@@ -48,7 +51,7 @@ function scramble(el){
   const start   = performance.now();
   const perChar = total / Math.max(chars.length, 1);
 
-  const step = (now) => {
+  const step = (/** @type {number} */ now) => {
     const elapsed = now - start;
 
     const out = chars.map((c, i) => {
@@ -90,7 +93,7 @@ export function initScramble(){
   const io = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting){
-        scramble(e.target);
+        scramble(/** @type {HTMLElement} */ (e.target));
         io.unobserve(e.target);
       }
     });

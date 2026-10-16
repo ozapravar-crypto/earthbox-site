@@ -12,8 +12,9 @@
 // scripts/data.test.mjs.
 // ─────────────────────────────────────────────────────────────────────
 
-export const SIZES = { xs: 12, sm: 16, md: 20, lg: 24 };
+const SIZES = { xs: 12, sm: 16, md: 20, lg: 24 };
 
+/** @type {Record<string, string | undefined>} looked up by any name; unknown ones throw in icon() */
 const LUCIDE = {
   'arrow-left': '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
   'arrow-up-right': '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
@@ -44,17 +45,22 @@ const LUCIDE = {
 };
 
 // The site's own long arrow (CTAs): 16×8, kept as the brand glyph.
+/** @type {Record<string, [viewBox: string, body: string] | undefined>} */
 const OWN = {
   'arrow-long': ['0 0 16 8', '<path d="M0 4 H14 M10 1 L14 4 L10 7"/>']
 };
 
 export const ICON_NAMES = [...Object.keys(LUCIDE), ...Object.keys(OWN)];
 
+/**
+ * @param {string} name  one of ICON_NAMES
+ * @param {{ size?: keyof typeof SIZES | number, className?: string }} [opts]  size: a token or px
+ */
 export function icon(name, { size = 'sm', className = '' } = {}) {
   const own = OWN[name];
   const body = own ? own[1] : LUCIDE[name];
   if (!body) throw new Error(`icons.js: no icon "${name}"`);
-  const px = SIZES[size] ?? size;
+  const px = typeof size === 'number' ? size : SIZES[size];   // size is type-checked to a token or a number
   const [vb, w, h] = own ? [own[0], px, px / 2] : ['0 0 24 24', px, px];
   return `<svg class="icon icon-${name}${className ? ` ${className}` : ''}" viewBox="${vb}" width="${w}" height="${h}" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
 }

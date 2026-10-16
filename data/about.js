@@ -3,6 +3,19 @@
 // Simple vertical layout · numbers removed · founder side-by-side.
 // ─────────────────────────────────────────────────────────────────────
 
+/**
+ * One About section. Every field but the title is optional; the renderer
+ * shows whichever extras (steps, person, contact) a section has.
+ * @typedef {{
+ *   title: string,
+ *   body?: string[],
+ *   steps?: { n: string, text: string }[],
+ *   person?: { name: string, role: string, location: string, bio: string },
+ *   contact?: { key: string, value: string }[]
+ * }} Section
+ */
+
+/** @type {Section[]} */
 export const sections = [
 
   {

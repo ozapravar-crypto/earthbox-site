@@ -13,6 +13,9 @@ const UNTIL_KEY = 'earthbox-theme-until';
 // theme-early.js runs first; the fallback only matters if it failed to load.
 const sky = () => window.ebTheme ?? { resolve: () => 'light', nextChange: (ms) => ms + 12 * 36e5 };
 
+/** @typedef {'light' | 'dark'} Theme */
+
+/** @param {Theme} theme */
 function setStoredTheme(theme) {
   try {
     localStorage.setItem(STORAGE_KEY, theme);
@@ -22,11 +25,13 @@ function setStoredTheme(theme) {
   }
 }
 
+/** @param {Theme} theme */
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   updateAllToggles(theme);
 }
 
+/** @param {Theme} theme */
 function updateAllToggles(theme) {
   document.querySelectorAll('.theme-toggle').forEach(toggle => {
     toggle.classList.toggle('is-dark', theme === 'dark');
@@ -41,6 +46,7 @@ function toggleTheme() {
   setStoredTheme(next);
 }
 
+/** @param {string} theme  the current data-theme */
 export function createToggle(theme) {
   const toggle = document.createElement('button');
   toggle.className = 'theme-toggle' + (theme === 'dark' ? ' is-dark' : '');

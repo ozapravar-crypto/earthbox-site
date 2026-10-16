@@ -24,8 +24,22 @@ import * as THREE from './vendor/three.module.min.js';
 import { rng } from './maker.js';
 import { models as MODELS } from '../data/maker.js';
 
+/** @typedef {import('./build-codec.js').Plant} Plant */
+/** @typedef {import('./build-codec.js').Chamber} Chamber */
+/** @typedef {import('../data/maker.js').PlantModel} PlantModel */
+/** @typedef {Pick<Plant, 'id' | 'form' | 'element' | 'name'>} PlantSpec */
+/** @typedef {Pick<Chamber, 'sku' | 'name' | 'size' | 'temp' | 'humidity' | 'light'>} ChamberSpec */
+/**
+ * What maker.js sceneSpec(build) hands this module.
+ * @typedef {{ chamber: ChamberSpec | null, soilless: boolean, substrate: string | null, plants: PlantSpec[] }} SceneSpec
+ */
+/** @typedef {() => number} Rand */
+/** @typedef {[number, number, number]} Vec3 */
+
 // 1 unit = 100 px of the SVG drawing, floor of the chamber at y = 0.
+/** @param {number} x */
 const sx = (x) => (x - 372.5) / 100;
+/** @param {number} y */
 const sy = (y) => (615 - y) / 100;
 const OUT = [[282,131],[463,131],[493,161],[493,585],[463,615],[282,615],[252,585],[252,161]];
 const IN  = [[287,144],[459,144],[480,165],[480,581],[459,602],[287,602],[265,581],[265,165]];
@@ -35,15 +49,20 @@ const FLOOR = sy(602);                       // inside floor
 const HALF_W = (480 - 265) / 200 - .02;      // inside half-width, a hair off the glass
 
 const INK = '#2C2C2B', ACCENT = '#B8A99A';
+/** @param {THREE.ColorRepresentation} hex */
 const col = (hex) => new THREE.Color(hex);
+/** @param {number} v @param {number} a @param {number} b */
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
 // Plant colours by plant group. Inferred: the workbook has no colour data.
+/** @type {Record<string, string>} */
 const GROUP = {
   Earth: '#5f7d45', Fire: '#8b9a6b', Water: '#4d7b52', Air: '#5a7a3e', Aero: '#a2ad98',
   Frost: '#668a7a', Bite: '#7e8d3e', Moss: '#5c7135', Dark: '#30483a'
 };
 // …and the colour a plant's own name states ("Pink Princess", "Black Velvet").
+/** @typedef {{ main?: string, alt?: string, share?: number }} Tint */
+/** @type {[RegExp, Tint][]} */
 const TINTS = [
   [/pink/i,                         { alt: '#c98d97', share: .4 }],
   [/black velvet|dark maria/i,      { main: '#26312b', alt: '#b9c4ad', share: .12 }],
@@ -67,6 +86,11 @@ const glintMat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: tr
 const UP = new THREE.Vector3(0, 1, 0);
 
 // colour: a THREE.Color, or (r) => Color for a per-face choice.
+/**
+ * @param {THREE.BufferGeometry} geo
+ * @param {THREE.Color | ((r: Rand) => THREE.Color)} colour
+ * @param {Rand} r
+ */
 function paint(geo, colour, r, jit = .07){
   const g = geo.index ? geo.toNonIndexed() : geo;
   if (g !== geo) geo.dispose();
@@ -81,6 +105,7 @@ function paint(geo, colour, r, jit = .07){
   return g;
 }
 
+/** @param {THREE.BufferGeometry[]} geos */
 function merge(geos){
   let n = 0;
   for (const g of geos) n += g.attributes.position.count;
@@ -101,12 +126,17 @@ function merge(geos){
 
 const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _v = new THREE.Vector3(), _s = new THREE.Vector3();
 // Tilt (x) first, then turn (y): "lean outwards, facing angle a".
+/**
+ * @param {THREE.BufferGeometry} geo
+ * @param {{ p?: number[], r?: number[], s?: number[] }} [at]  p and s have three numbers
+ */
 function place(geo, { p = [0, 0, 0], r = [0, 0, 0], s = [1, 1, 1] } = {}){
   _e.set(r[0], r[1], r[2], 'YXZ');
-  _m.compose(_v.set(...p), _q.setFromEuler(_e), _s.set(...s));
+  _m.compose(_v.set(.../** @type {Vec3} */ (p)), _q.setFromEuler(_e), _s.set(.../** @type {Vec3} */ (s)));
   return geo.applyMatrix4(_m);
 }
 
+/** @param {number[][]} P points @param {number[]} T indices into P */
 function tris(P, T){
   const a = new Float32Array(T.length * 3);
   T.forEach((v, i) => a.set(P[v], i * 3));
@@ -117,6 +147,7 @@ function tris(P, T){
 
 // A folded leaf blade along +y, eight facets; `lobes` adds the two
 // heart-shaped lobes behind the stalk (aroids).
+/** @param {number} L @param {number} W */
 function blade(L, W, f = .05, lobes = false){
   const P = [[0,0,0],[0,.38*L,f],[0,.72*L,f*.6],[0,L,0],[-W,.32*L,-f*.5],[-.7*W,.7*L,-f*.3],[W,.32*L,-f*.5],[.7*W,.7*L,-f*.3],
     [-.55*W,-.2*L,-f*.4],[.55*W,-.2*L,-f*.4]];
@@ -125,6 +156,7 @@ function blade(L, W, f = .05, lobes = false){
 }
 
 // A stem from a to b (Vector3s).
+/** @param {THREE.Vector3} a @param {THREE.Vector3} b @param {number} r0 */
 function segment(a, b, r0, r1 = r0, sides = 4){
   const d = new THREE.Vector3().subVectors(b, a), len = d.length() || 1e-3;
   const g = new THREE.CylinderGeometry(r1, r0, len, sides, 1, true).translate(0, len / 2, 0);
@@ -133,17 +165,21 @@ function segment(a, b, r0, r1 = r0, sides = 4){
 }
 
 // Push each shared vertex in or out a little: a rock, a moss cushion.
+/** @param {THREE.BufferGeometry} g @param {Rand} r @param {number} amt */
 function lumpy(g, r, amt){
-  const p = g.attributes.position, seen = new Map();
+  /** @type {Map<string, number>} */
+  const seen = new Map();
+  const p = g.attributes.position;
   for (let i = 0; i < p.count; i++){
     const key = `${p.getX(i).toFixed(3)},${p.getY(i).toFixed(3)},${p.getZ(i).toFixed(3)}`;
     if (!seen.has(key)) seen.set(key, 1 + (r() - .5) * amt);
-    const k = seen.get(key);
+    const k = /** @type {number} */ (seen.get(key));
     p.setXYZ(i, p.getX(i) * k, p.getY(i) * k, p.getZ(i) * k);
   }
   return g;
 }
 
+/** @param {number} a @param {number} d @param {number} y */
 const around = (a, d, y) => new THREE.Vector3(Math.sin(a) * d, y, Math.cos(a) * d);
 
 
@@ -151,19 +187,25 @@ const around = (a, d, y) => new THREE.Vector3(Math.sin(a) * d, y, Math.cos(a) * 
 // Base at the origin, roughly 1 unit tall at most. `pal` comes from the
 // plant group plus any colour its name states.
 
+/** @param {PlantSpec} p */
 function paletteOf(p){
+  /** @type {Tint} */
   const t = TINTS.find(([re]) => re.test(p.name))?.[1] || {};
   const main = col(t.main || GROUP[p.element] || GROUP.Earth);
   const alt = t.alt ? col(t.alt) : main.clone().offsetHSL(0, -.05, .07);
   const share = t.share ?? .25;
   return {
     main, alt,
-    leaf: (r) => (r() < share ? alt : main),
+    leaf: (/** @type {Rand} */ r) => (r() < share ? alt : main),
     stem: main.clone().offsetHSL(.02, -.12, -.06),
     red: col('#8e3a2c')
   };
 }
 
+/** @typedef {ReturnType<typeof paletteOf>} Palette */
+/** @typedef {(r: Rand, pal: Palette, name: string) => THREE.BufferGeometry[]} Builder */
+
+/** @type {Builder} */
 function leafPlant(r, pal){
   const parts = [], k = 3 + Math.floor(r() * 3);
   for (let i = 0; i < k; i++){
@@ -177,6 +219,7 @@ function leafPlant(r, pal){
   return parts;
 }
 
+/** @type {Builder} */
 function trailPlant(r, pal){
   const parts = [], vines = 3 + Math.floor(r() * 3);
   for (let v = 0; v < vines; v++){
@@ -193,6 +236,7 @@ function trailPlant(r, pal){
   return parts;
 }
 
+/** @type {Builder} */
 function rosettePlant(r, pal, name){
   const upright = /haworthia/i.test(name), flat = /butterwort|begonia/i.test(name);
   const parts = [];
@@ -211,6 +255,7 @@ function rosettePlant(r, pal, name){
   return parts;
 }
 
+/** @type {Builder} */
 function airPlant(r, pal){
   const parts = [paint(lumpy(new THREE.IcosahedronGeometry(.07, 0), r, .3), pal.stem, r)], n = 16 + Math.floor(r() * 8);
   for (let i = 0; i < n; i++){
@@ -221,6 +266,7 @@ function airPlant(r, pal){
   return parts;
 }
 
+/** @type {Builder} */
 function fernPlant(r, pal, name){
   const parts = [];
   if (/nest|java fern/i.test(name)){                  // strap-leaved ferns
@@ -254,6 +300,7 @@ function fernPlant(r, pal, name){
   return parts;
 }
 
+/** @type {Builder} */
 function mossPlant(r, pal, name){
   const tall = /mood/i.test(name), parts = [], n = 6 + Math.floor(r() * 4);
   for (let i = 0; i < n; i++){
@@ -266,6 +313,7 @@ function mossPlant(r, pal, name){
   return parts;
 }
 
+/** @type {Builder} */
 function trapPlant(r, pal, name){
   const parts = [];
   if (/flytrap/i.test(name)){
@@ -308,8 +356,10 @@ function trapPlant(r, pal, name){
   return parts;
 }
 
+/** @type {Record<string, Builder | undefined>} looked up by plant form */
 const BUILD = { leaf: leafPlant, trail: trailPlant, rosette: rosettePlant, air: airPlant, fern: fernPlant, moss: mossPlant, trap: trapPlant };
 
+/** @param {PlantSpec} p */
 const seeded = (p, salt = 0) => {
   const r = rng(+p.id.replace(/\D/g, '') * 7919 + 17 + salt);
   r(); r(); r();                                       // let the seed settle
@@ -322,17 +372,34 @@ const seeded = (p, salt = 0) => {
 // position + colour geometry, base on y = 0, centred. Plants share its
 // positions and normals; each gets its own colours (group tint).
 
+/** @param {PlantSpec} p @returns {PlantModel | null} */
 const modelOf = (p) => (Object.hasOwn(MODELS.plants, p.id) ? MODELS.plants[p.id] : MODELS.forms[p.form]) || null;
+/**
+ * @typedef {{ state: 'loading' | 'ready' | 'failed', geo: THREE.BufferGeometry | null,
+ *   material?: THREE.MeshStandardMaterial, promise: Promise<void> }} ModelFile
+ */
+/** @type {Map<string, ModelFile>} */
 const files = new Map();                               // file → { state: loading|ready|failed, geo, promise }
+/** @type {Promise<import('./vendor/GLTFLoader.js').GLTFLoader> | null} */
 let loader = null;
 
+/** @param {THREE.Object3D} o @returns {o is THREE.Mesh} */
+const isMesh = (o) => !!(/** @type {Partial<THREE.Mesh>} */ (o).isMesh);
+/** @param {THREE.Object3D} o @returns {o is THREE.Light} */
+const isLight = (o) => !!(/** @type {Partial<THREE.Light>} */ (o).isLight);
+/** Our meshes and the model files' all have one material each. @param {THREE.Mesh} o */
+const matOf = (o) => /** @type {THREE.Material} */ (o.material);
+
+/** @param {THREE.Object3D} scene */
 function toGeo(scene){
   scene.updateMatrixWorld(true);
+  /** @type {THREE.BufferGeometry[]} */
   const parts = [];
   scene.traverse(o => {
-    if (!o.isMesh) return;
+    if (!isMesh(o)) return;
     const src = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry;
-    const P = src.attributes.position, C = src.attributes.color, n = P.count;
+    // A model may have no vertex colours; three's types list every attribute as present.
+    const P = src.attributes.position, C = /** @type {Attr | undefined} */ (src.attributes.color), n = P.count;
     const pos = new Float32Array(n * 3), c = new Float32Array(n * 3);
     for (let i = 0; i < n; i++){                         // getX/Y/Z undo the file's quantization
       pos.set([P.getX(i), P.getY(i), P.getZ(i)], i * 3);
@@ -344,46 +411,53 @@ function toGeo(scene){
     parts.push(g.applyMatrix4(o.matrixWorld));
     if (src !== o.geometry) src.dispose();
   });
-  scene.traverse(o => { if (o.isMesh){ o.geometry.dispose(); o.material.dispose?.(); } });
+  // A loaded mesh's material may be an array, which has no dispose().
+  scene.traverse(o => { if (isMesh(o)){ o.geometry.dispose(); /** @type {{ dispose?: () => void }} */ (o.material).dispose?.(); } });
   if (!parts.length) throw new Error('empty model');
   const geo = merge(parts);
   geo.computeBoundingBox();
-  const b = geo.boundingBox;
+  const b = /** @type {THREE.Box3} */ (geo.boundingBox);
   return geo.translate(-(b.min.x + b.max.x) / 2, -b.min.y, -(b.min.z + b.max.z) / 2);
 }
 
 // A realistic scan (`textured: true`): one mesh whose texture is the point,
 // so keep its uv, normals and material; same base-on-y=0, centred contract.
+/** @param {THREE.Object3D} scene */
 function toTexturedGeo(scene){
   scene.updateMatrixWorld(true);
-  let mesh = null;
-  scene.traverse(o => { if (o.isMesh && !mesh) mesh = o; });
+  // Asserted, not annotated: the callback's assignment is invisible to
+  // control flow, so a plain `null` would stay narrowed to null.
+  let mesh = /** @type {THREE.Mesh | null} */ (null);
+  scene.traverse(o => { if (isMesh(o) && !mesh) mesh = o; });
   if (!mesh) throw new Error('empty model');
   const src = mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry;
   const g = new THREE.BufferGeometry();
   for (const name of ['position', 'normal', 'uv']){   // getX/Y undo quantization into plain floats
-    const a = src.attributes[name]; if (!a) continue;
+    // Assumes plain (non-interleaved) attributes: only BufferAttribute has getComponent.
+    const a = /** @type {THREE.BufferAttribute | undefined} */ (src.attributes[name]); if (!a) continue;
     const out = new Float32Array(a.count * a.itemSize);
     for (let i = 0; i < a.count; i++) for (let k = 0; k < a.itemSize; k++) out[i * a.itemSize + k] = a.getComponent(i, k);
     g.setAttribute(name, new THREE.BufferAttribute(out, a.itemSize));
   }
   g.applyMatrix4(mesh.matrixWorld);
-  if (!g.attributes.normal) g.computeVertexNormals();
+  const normal = /** @type {Attr | undefined} */ (g.attributes.normal);   // the scan may carry none
+  if (!normal) g.computeVertexNormals();
   g.computeBoundingBox();
-  const b = g.boundingBox;
+  const b = /** @type {THREE.Box3} */ (g.boundingBox);
   g.translate(-(b.min.x + b.max.x) / 2, -b.min.y, -(b.min.z + b.max.z) / 2);
-  const material = mesh.material;
+  const material = /** @type {THREE.MeshStandardMaterial} */ (mesh.material);   // GLTF scans: standard PBR
   material.side = THREE.DoubleSide;
   material.userData.keep = true;                       // cached: never disposed with a scene
   return { geo: g, material };
 }
 
 // Resolves once the file is ready or has failed (never rejects).
+/** @param {string} file */
 function loadModel(file){
   if (!files.has(file)){
-    const rec = { state: 'loading', geo: null };
+    const rec = /** @type {ModelFile} */ ({ state: 'loading', geo: null });
     loader ||= import('./vendor/GLTFLoader.js').then(m => new m.GLTFLoader());
-    rec.promise = Promise.all([loader, fetch(MODELS.base + file).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })])
+    rec.promise = Promise.all([loader, fetch(MODELS.base + file).then(r => { if (!r.ok) throw new Error(String(r.status)); return r.arrayBuffer(); })])
       .then(([l, buf]) => l.parseAsync(buf, ''))
       .then(gltf => {
         const textured = Object.values(MODELS.forms).concat(Object.values(MODELS.plants)).some(m => m?.file === file && m.textured);
@@ -393,23 +467,27 @@ function loadModel(file){
       .catch(() => { rec.state = 'failed'; });
     files.set(file, rec);
   }
-  return files.get(file).promise;
+  return /** @type {ModelFile} */ (files.get(file)).promise;
 }
+/** @param {PlantSpec} p */
 const modelReady = (p) => { const m = modelOf(p); return m && files.get(m.file)?.state === 'ready' ? m : null; };
 // Files a set of plants still waits for (starts loading them).
-const pendingFor = (list) => [...new Set(list.map(modelOf).filter(Boolean).map(m => m.file))]
+/** @param {PlantSpec[]} list */
+const pendingFor = (list) => [...new Set(list.map(modelOf).filter(Boolean).map(m => /** @type {PlantModel} */ (m).file))]
   .filter(f => (files.get(f)?.state ?? 'loading') === 'loading').map(loadModel);
 
 // Foliage (the model's greens) takes the plant's palette, one colour per
 // face like the procedural plants, keeping the model's own light and dark;
 // anything else (red traps, a bloom) keeps its colour.
-const _c = new THREE.Color(), _hsl = {};
+const _c = new THREE.Color(), _hsl = /** @type {THREE.HSL} */ ({});
+/** @param {THREE.BufferGeometry} base @param {PlantSpec} p @param {PlantModel} m */
 function tinted(base, p, m){
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', base.attributes.position);
   g.setAttribute('normal', base.attributes.normal);
   const src = base.attributes.color.array;
   if (m.tint === false){ g.setAttribute('color', base.attributes.color); return g; }
+  /** @param {number} i */
   const lum = (i) => .2126 * src[i] + .7152 * src[i + 1] + .0722 * src[i + 2];
   const leafy = [];
   let sum = 0, n = 0;
@@ -430,6 +508,7 @@ function tinted(base, p, m){
 }
 
 // Per-plant variety for shared models: a turn and a slight size change.
+/** @param {PlantSpec} p */
 function turnOf(p){
   const m = modelReady(p);
   if (!m) return { yaw: 0, k: 1 };
@@ -437,30 +516,37 @@ function turnOf(p){
   return { yaw: r() * Math.PI * 2 + (m.yaw || 0), k: (m.scale || 1) * (.92 + r() * .14) };
 }
 
+/** @type {Map<string, THREE.BufferGeometry>} */
 const plantGeos = new Map();                           // 'm:id' (model) or 'p:id' (procedural)
+/** A ready model's file (modelReady() checked it). @param {PlantModel} m */
+const readyFile = (m) => /** @type {ModelFile & { geo: THREE.BufferGeometry }} */ (files.get(m.file));
+/** @param {PlantSpec} p */
 function plantGeo(p){
   const m = modelReady(p), key = `${m ? 'm' : 'p'}:${p.id}`;
   if (!plantGeos.has(key))
-    plantGeos.set(key, m ? (m.textured ? files.get(m.file).geo : tinted(files.get(m.file).geo, p, m))
+    plantGeos.set(key, m ? (m.textured ? readyFile(m).geo : tinted(readyFile(m).geo, p, m))
       : merge((BUILD[p.form] || leafPlant)(seeded(p), paletteOf(p), p.name)));
-  return plantGeos.get(key);
+  return /** @type {THREE.BufferGeometry} */ (plantGeos.get(key));
 }
 // A scan's own texture, gently pulled toward the plant's colour (Neon Pink
 // shouldn't read plain green), one material per plant, cached.
+/** @type {Map<string, THREE.MeshStandardMaterial>} */
 const plantMats = new Map();
+/** @param {PlantSpec} p */
 function plantMat(p){
   const m = modelReady(p);
   if (!m?.textured) return mat;
   if (!plantMats.has(p.id)){
-    const own = files.get(m.file).material.clone();
+    const own = /** @type {THREE.MeshStandardMaterial} */ (readyFile(m).material).clone();   // textured files keep theirs
     own.userData.keep = true;
     // A tint can only shade a green texture, never make it pink: colour
     // cultivars keep the stylised model (data/maker.js); scans shade gently.
     if (m.tint !== false) own.color.set('#ffffff').lerp(paletteOf(p).main.clone().offsetHSL(0, 0, .25), .3);
     plantMats.set(p.id, own);
   }
-  return plantMats.get(p.id);
+  return /** @type {THREE.MeshStandardMaterial} */ (plantMats.get(p.id));
 }
+/** @param {PlantSpec} p */
 function plantMesh(p){
   const m = new THREE.Mesh(plantGeo(p), plantMat(p));
   m.castShadow = true;
@@ -471,18 +557,23 @@ function plantMesh(p){
 
 // ═══ CHAMBER + FOUNDATION ═════════════════════════════════════════════
 
+/** @param {number[][]} pts */
 const shapeOf = (pts) => new THREE.Shape(pts.map(([x, y]) => new THREE.Vector2(sx(x), sy(y))));
+/** @param {THREE.Shape} shape @param {number} depth */
 const extrude = (shape, depth) => new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 1 });
 
 // Depth from the chamber's own size ("H × W × D mm"), else square.
+/** @param {ChamberSpec | null} ch */
 function depthOf(ch){
   const n = String(ch?.size || '').match(/\d+/g)?.map(Number);
   return 2.41 * (n && n.length >= 3 ? n[2] / n[1] : 1);
 }
 
 // The chamber's light + climate, read from its specs.
+/** @param {ChamberSpec | null} ch */
 export function atmosOf(ch){
   if (!ch) return { power: 0, tint: '#fff1dc', mist: 0 };
+  /** @param {unknown} s */
   const num = (s) => (String(s).match(/\d+/g) || []).map(Number);
   const t = num(ch.temp), h = num(ch.humidity), L = String(ch.light).toLowerCase();
   const temp = t.length ? (t[0] + t[t.length - 1]) / 2 : 24;
@@ -494,6 +585,7 @@ export function atmosOf(ch){
   return { power, tint, mist: h.length ? clamp((h[h.length - 1] - 60) / 40, 0, 1) : 0 };
 }
 
+/** @param {ChamberSpec | null} ch @param {number} D depth */
 function chamberGroup(ch, D){
   const g = new THREE.Group(), r = rng(11);
   const frameCol = col(ch ? INK : '#c4bfb6');
@@ -539,9 +631,12 @@ function chamberGroup(ch, D){
 }
 
 // Foundation layers, as in the SVG bands: drainage, charcoal, the mix.
+/** @param {string} look @param {number} w @param {number} d @param {Rand} r */
 function floorGeo(look, w, d, r){
+  /** @type {THREE.BufferGeometry[]} */
   const parts = [], aroid = look === 'aroid';
   const top = aroid ? sy(540) : sy(548);
+  /** @param {number} y0 @param {number} y1 @param {THREE.ColorRepresentation} c */
   const slab = (y0, y1, c, j = .05) => paint(new THREE.BoxGeometry(w * 2, y1 - y0, d * 2).translate(0, (y0 + y1) / 2, 0), col(c), r, j);
   parts.push(slab(FLOOR, sy(582), '#a7a297'), slab(sy(582), sy(574), '#2b2a26'), slab(sy(574), top - .04, aroid ? '#6b4b30' : '#5a4532'));
   // A faceted soil surface.
@@ -550,6 +645,7 @@ function floorGeo(look, w, d, r){
   for (let i = 0; i < sp.count; i++) sp.setY(i, (r() - .5) * .06);
   parts.push(paint(surf.translate(0, top - .02, 0), col(aroid ? '#6b4b30' : '#5a4532'), r, .12));
   // Pebbles, bark and perlite pressed against the glass, where they show.
+  /** @param {number} n @param {number} y0 @param {number} y1 @param {number} rad @param {THREE.Color[]} colours */
   const bits = (n, y0, y1, rad, colours, flat = .7) => {
     for (let i = 0; i < n; i++){
       const onSide = i % 3 === 2, s = r() < .5 ? -1 : 1;
@@ -566,6 +662,7 @@ function floorGeo(look, w, d, r){
   return { geo: merge(parts), top };
 }
 
+/** @param {SceneSpec} spec @param {number} D */
 function floorGroup(spec, D){
   const g = new THREE.Group();
   if (spec.soilless){
@@ -598,11 +695,15 @@ function floorGroup(spec, D){
 // it meets one of the two; moss is the exception, a low, wide carpet.
 // Sized so a planted chamber reads full (owner's call, 10 Oct): the tallest
 // forms reach ~3/4 of the glass; layout() still narrows them to the walls.
+/** @type {Record<string, { h: number, r: number } | undefined> & { leaf: { h: number, r: number } }} looked up by plant form */
 const SIZE = {
   leaf: { h: 3.5, r: 1.7 }, trail: { h: 1.9, r: 1.35 }, rosette: { h: 2.1, r: 1.35 }, air: { h: 2.0, r: 1.3 },
   fern: { h: 3.1, r: 1.6 }, moss: { h: .65, r: 1.05 }, trap: { h: 2.7, r: 1.15 }
 };
+/** @typedef {THREE.BufferAttribute | THREE.InterleavedBufferAttribute} Attr */
+/** @type {WeakMap<Attr, { h: number, r: number }>} */
 const sizes = new WeakMap();                          // by position data: models share theirs
+/** @param {PlantSpec} p */
 function sizeOf(p){
   const a = plantGeo(p).attributes.position;
   if (!sizes.has(a)){
@@ -610,16 +711,18 @@ function sizeOf(p){
     for (let i = 0; i < a.count; i++){ h = Math.max(h, a.getY(i)); r = Math.max(r, Math.hypot(a.getX(i), a.getZ(i))); }
     sizes.set(a, { h: h || 1, r: r || 1 });
   }
-  return sizes.get(a);
+  return /** @type {{ h: number, r: number }} */ (sizes.get(a));
 }
 
 // How far a model reaches along x and z once turned by `yaw` (models only:
 // their footprints are uneven, so the wall check uses the real one).
+/** @type {WeakMap<Attr, Map<number, { rx: number, rz: number }>>} */
 const reach = new WeakMap();
+/** @param {Attr} a @param {number} yaw */
 function extentOf(a, yaw){
   const key = Math.round(yaw * 100);
   if (!reach.has(a)) reach.set(a, new Map());
-  const memo = reach.get(a);
+  const memo = /** @type {Map<number, { rx: number, rz: number }>} */ (reach.get(a));
   if (!memo.has(key)){
     const c = Math.cos(yaw), s = Math.sin(yaw);
     let rx = 0, rz = 0;
@@ -629,11 +732,15 @@ function extentOf(a, yaw){
     }
     memo.set(key, { rx: rx || 1, rz: rz || 1 });
   }
-  return memo.get(key);
+  return /** @type {{ rx: number, rz: number }} */ (memo.get(key));
 }
 
 // Plants spaced evenly like the SVG, alternating front and back rows,
 // narrowed a little (never below 60 %) where the glass is close.
+/**
+ * @param {SceneSpec} spec @param {number} base floor height @param {number} D
+ * @returns {{ p: PlantSpec, pos: Vec3, s: Vec3, yaw: number }[]}
+ */
 function layout(spec, base, D){
   const n = spec.plants.length, span = HALF_W * 2 - .5;
   const crowd = n <= 3 ? 1 : n <= 5 ? .88 : .74;
@@ -656,6 +763,7 @@ function layout(spec, base, D){
       // its narrow side to the near wall; where the wall is still close it
       // is drawn smaller, so nothing pokes through the glass.
       const pos = plantGeo(p).attributes.position;
+      /** @param {number} y */
       const fit = (y) => { const e = extentOf(pos, y); return Math.min(roomX / e.rx, roomZ / e.rz); };
       if (fit(yaw + Math.PI / 2) > fit(yaw)) yaw += Math.PI / 2;
       const wide = fit(yaw);
@@ -696,6 +804,8 @@ function makeStage(){
 }
 
 // Fit a box (height h, width w around y) into the view, seen from `pitch`.
+/** @typedef {{ y: number, h: number, w: number, r: number }} Frame */
+/** @param {THREE.PerspectiveCamera} camera @param {number} aspect @param {Frame} box @param {number} pitch */
 function aim(camera, aspect, { y, h, w, r }, pitch){
   const t = Math.tan(camera.fov * Math.PI / 360);
   const dist = Math.max(h / 2 / t, w / 2 / (t * aspect)) + r;
@@ -709,6 +819,7 @@ const FRAME_TALL = { y: 2.3, h: 5.5, w: 3.5, r: 1.6 };
 const FRAME_WIDE = { y: 2.35, h: 5.3, w: 3.6, r: 1.6 };   // whole chamber: plants now fill it (10 Oct)
 const FRAME_STILL = { y: 2.3, h: 5.1, w: 2.9, r: 1.2 };
 
+/** @param {SceneSpec} spec */
 function diorama(spec){
   const D = depthOf(spec.chamber);
   const chamber = chamberGroup(spec.chamber, D), floor = floorGroup(spec, D), plantsG = new THREE.Group();
@@ -722,22 +833,26 @@ function diorama(spec){
   return { chamber, floor, plantsG, D };
 }
 
+/** @type {Set<THREE.Material>} */
 const SHARED = new Set([mat, glassMat, glintMat]);
+/** @param {THREE.Object3D} o */
 function disposeTree(o){
   o.traverse(x => {
-    if (x.isMesh){ x.geometry.dispose(); if (!SHARED.has(x.material) && !x.material.userData?.keep) x.material.dispose(); }
-    if (x.isLight) x.dispose();
+    if (isMesh(x)){ x.geometry.dispose(); if (!SHARED.has(matOf(x)) && !matOf(x).userData.keep) matOf(x).dispose(); }
+    if (isLight(x)) x.dispose();
   });
 }
 
 
 // ═══ THE VIEW ═════════════════════════════════════════════════════════
 
+/** @param {{ onLost?: () => void }} [opts] */
 export function create3D({ onLost } = {}){
   const canvas = document.createElement('canvas');
   canvas.className = 'mk-3d';
   canvas.tabIndex = 0;
   canvas.setAttribute('role', 'img');
+  /** @type {THREE.WebGLRenderer} */
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
@@ -752,8 +867,18 @@ export function create3D({ onLost } = {}){
   const live = makeStage(), studio = makeStage();
   const view = { yaw: -.55, pitch: .2 };
   const t0 = performance.now();
-  let host = null, onScreen = true, raf = 0, size = [0, 0], drag = null, lost = false;
-  let parts = null, keys = {}, shown = null;          // shown: the spec on screen now
+  /** @type {HTMLElement | null} */
+  let host = null;
+  /** @type {{ x: number, y: number, yaw: number, pitch: number } | null} */
+  let drag = null;
+  let onScreen = true, raf = 0, size = [0, 0], lost = false;
+  /** @type {{ chamber: THREE.Group, floor: THREE.Group, plantsG: THREE.Group } | null} */
+  let parts = null;
+  /** @type {{ ck?: string, fk?: string }} */
+  let keys = {};
+  /** @type {SceneSpec | null} */
+  let shown = null;                                   // shown: the spec on screen now
+  /** @type {{ obj: THREE.Object3D, from: THREE.Vector3, to: THREE.Vector3, start: number, dur: number }[]} */
   const anims = [];
 
   // ─── render loop · runs only while something moves and the view is on screen
@@ -763,6 +888,7 @@ export function create3D({ onLost } = {}){
     aim(live.camera, size[0] / size[1] || 1, size[0] / size[1] > 1.15 ? FRAME_WIDE : FRAME_TALL, view.pitch);
     renderer.render(live.scene, live.camera);
   }
+  /** @param {number} now */
   function frame(now){
     raf = 0;
     for (let i = anims.length - 1; i >= 0; i--){
@@ -781,7 +907,8 @@ export function create3D({ onLost } = {}){
   const io = new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; onScreen ? schedule() : stop(); });
   io.observe(canvas);
   document.addEventListener('visibilitychange', () => (document.hidden ? stop() : schedule()));
-  reduced.addEventListener?.('change', schedule);
+  // Safari before 14 has no addEventListener on MediaQueryList.
+  /** @type {{ addEventListener?: (type: string, fn: () => void) => void }} */ (reduced).addEventListener?.('change', schedule);
 
   function resize(){
     const w = canvas.clientWidth, h = canvas.clientHeight;
@@ -824,6 +951,7 @@ export function create3D({ onLost } = {}){
     onLost?.();
   });
 
+  /** @param {THREE.Object3D} obj @param {THREE.Vector3} from */
   function grow(obj, from){
     if (reduced.matches) return;
     anims.push({ obj, from: from.clone(), to: obj.scale.clone(), start: performance.now(), dur: 600 });
@@ -831,10 +959,11 @@ export function create3D({ onLost } = {}){
   }
 
   // Draw a spec. Rebuild only what changed; a new plant (fresh) grows in.
+  /** @param {SceneSpec} spec @param {string | null} fresh @param {boolean} animate */
   function apply(spec, fresh, animate){
     const D = depthOf(spec.chamber);
     const ck = spec.chamber?.sku || '-';
-    const fk = `${ck}|${spec.soilless}|${spec.substrate}`;
+    const fk = `${ck}|${spec.soilless}|${String(spec.substrate)}`;
     if (!parts){
       parts = { chamber: new THREE.Group(), floor: new THREE.Group(), plantsG: new THREE.Group() };
       live.pivot.add(parts.chamber, parts.floor, parts.plantsG);
@@ -852,7 +981,8 @@ export function create3D({ onLost } = {}){
     keys = { ck, fk };
     // Plants: cheap to re-place every time, so the layout always matches the build.
     // A model that has just arrived replaces its stand-in and grows in.
-    const byId = new Map(parts.plantsG.children.map(m => [m.userData.pid, m]));
+    // plantsG holds only plant meshes, each tagged with its plant id.
+    const byId = new Map(parts.plantsG.children.map(m => /** @type {[string, THREE.Mesh]} */ ([m.userData.pid, m])));
     parts.plantsG.clear();
     for (const it of layout(spec, parts.floor.userData.base, D)){
       const geo = plantGeo(it.p);
@@ -869,17 +999,18 @@ export function create3D({ onLost } = {}){
     }
     // Fetch any models this build still lacks, then redraw it.
     const waiting = pendingFor(spec.plants);
-    if (waiting.length) Promise.all(waiting).then(() => { if (spec === shown && host && !lost){ apply(spec, null, false); draw(); schedule(); } });
+    if (waiting.length) void Promise.all(waiting).then(() => { if (spec === shown && host && !lost){ apply(spec, null, false); draw(); schedule(); } });
   }
 
   // Render once at w×h with the shared renderer, return a data URL.
   const shot = document.createElement('canvas');
+  /** @param {THREE.Scene} scene @param {THREE.Camera} camera @param {number} w @param {number} h */
   function snap(scene, camera, w, h){
     renderer.setPixelRatio(1);
     renderer.setSize(w, h, false);
     renderer.render(scene, camera);
     shot.width = w; shot.height = h;
-    const ctx = shot.getContext('2d');
+    const ctx = /** @type {CanvasRenderingContext2D} */ (shot.getContext('2d'));
     ctx.clearRect(0, 0, w, h);
     ctx.drawImage(canvas, 0, 0);
     return shot.toDataURL('image/webp', .9);
@@ -890,7 +1021,11 @@ export function create3D({ onLost } = {}){
     if (size[0]) { renderer.setSize(size[0], size[1], false); if (host && onScreen) draw(); }
   }
 
-  const thumbCache = new Map(), shotCache = new Map(), stillWait = new Map();
+  /** @type {Map<string, string>} */
+  const thumbCache = new Map(), shotCache = new Map();
+  /** @type {Map<string, () => void>} */
+  const stillWait = new Map();
+  /** @param {SceneSpec} spec @param {number} w @param {number} h */
   function drawStill(spec, w, h){
     const d = diorama(spec);
     studio.pivot.add(d.chamber, d.floor, d.plantsG);
@@ -903,6 +1038,7 @@ export function create3D({ onLost } = {}){
     restore();
     return url;
   }
+  /** @param {THREE.Object3D} obj @param {number} aspect */
   const studioFit = (obj, aspect, pitch = .32, pad = 1.08) => {
     const box = new THREE.Box3().setFromObject(obj), c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3());
     aim(studio.camera, aspect, { y: c.y, h: s.y * pad, w: Math.max(s.x, s.z) * pad, r: Math.max(s.x, s.z) * .3 }, pitch);
@@ -913,6 +1049,7 @@ export function create3D({ onLost } = {}){
   return {
     canvas,
     // Mount the one live view in `el` (hero or preview) and draw `spec`.
+    /** @param {HTMLElement} el @param {SceneSpec} spec @param {{ fresh?: string | null, label?: string }} [opts] */
     show(el, spec, { fresh = null, label = '' } = {}){
       if (lost) return;
       const moved = canvas.parentNode !== el;
@@ -926,15 +1063,18 @@ export function create3D({ onLost } = {}){
       schedule();
     },
     // Plant thumbnail (data URL) or undefined until it's drawn.
-    thumb: (id) => thumbCache.get(id),
+    thumb: (/** @type {string} */ id) => thumbCache.get(id),
     // Draw every thumbnail, one per idle moment; `done` runs after each.
     // Waits for the plants' models first (the line drawings show meanwhile).
     // Was 6 per frame with no break: on slow phones that froze the page for
     // seconds and swallowed taps (QA-010; CI's guided-search flake site-ktu).
     // `paused()` holds the work while a dialog is open over the Maker.
+    /** @param {PlantSpec[]} list @param {() => void} done @param {{ paused?: () => boolean }} [opts] */
     thumbs(list, done, { paused = () => false } = {}){
       const todo = list.filter(p => !thumbCache.has(p.id));
-      const idle = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 500 }) : setTimeout(fn, 50));
+      // Old Safari has no requestIdleCallback, though the DOM types say it's always there.
+      /** @param {() => void} fn */
+      const idle = (fn) => (/** @type {{ requestIdleCallback?: unknown }} */ (window).requestIdleCallback ? requestIdleCallback(fn, { timeout: 500 }) : setTimeout(fn, 50));
       const step = () => {
         if (lost) return;
         if (paused()) { setTimeout(step, 300); return; }
@@ -955,19 +1095,20 @@ export function create3D({ onLost } = {}){
         if (batch.length) done();
         if (todo.length) idle(step);
       };
-      Promise.all(pendingFor(todo)).then(() => idle(step));
+      void Promise.all(pendingFor(todo)).then(() => idle(step));   // loadModel never rejects
     },
     // A finished terrarium as an image (recipe cards). Cached by `key`.
     // While its models load it returns the procedural version (not cached),
     // then calls onUpdate() once they're in: call still() again, when it suits,
     // for the finished one. (It used to redraw here, all six recipes in one
     // burst, even after the start screen had gone: site-glj.)
+    /** @param {string} key @param {SceneSpec} spec @param {number} w @param {number} h @param {() => void} onUpdate */
     still(key, spec, w, h, onUpdate){
       if (lost) return '';
       if (shotCache.has(key)) return shotCache.get(key);
       const waiting = pendingFor(spec.plants);
       if (waiting.length){
-        if (!stillWait.has(key)) Promise.all(waiting).then(() => { const cb = stillWait.get(key); stillWait.delete(key); if (!lost) cb?.(); });
+        if (!stillWait.has(key)) void Promise.all(waiting).then(() => { const cb = stillWait.get(key); stillWait.delete(key); if (!lost) cb?.(); });
         stillWait.set(key, onUpdate);
         return drawStill(spec, w, h);
       }
@@ -975,6 +1116,7 @@ export function create3D({ onLost } = {}){
       return shotCache.get(key);
     },
     // A cut block of a foundation (Foundation step swatches).
+    /** @param {string} look */
     swatch(look){
       if (lost) return '';
       const key = `sw-${look}`;

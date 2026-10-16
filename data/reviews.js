@@ -126,12 +126,18 @@ const reviews = {
   // (Concept stage — no reviews)
 };
 
+/** @typedef {typeof reviews[keyof typeof reviews][number]} Review */
+/** @type {Record<string, Review[] | undefined>} */
+const bySku = reviews;
+
+/** @param {string} sku */
 export function getReviews(sku) {
-  return reviews[sku] || [];
+  return bySku[sku] || [];
 }
 
+/** @param {string} sku */
 export function getAverageRating(sku) {
-  const productReviews = reviews[sku];
+  const productReviews = bySku[sku];
   if (!productReviews || productReviews.length === 0) return null;
   const sum = productReviews.reduce((acc, r) => acc + r.rating, 0);
   return (sum / productReviews.length).toFixed(1);

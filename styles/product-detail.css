@@ -622,14 +622,6 @@
   font-style:italic;
   color:var(--mute);
 }
-.pd-price-range{
-  display:block;
-  margin-top:.4rem;
-  font-size:.55rem;
-  letter-spacing:.2em;
-  color:var(--mute);
-}
-
 /* ─── Placeholder for missing images ─── */
 .pd-hero-frame--placeholder{
   background:var(--bg-tint);

@@ -3,11 +3,12 @@
 // dynamic import()s), the build/check scripts and the tests.
 // Run: npm run check:unused
 export default {
-  entry: ['scripts/main.js', 'scripts/*.mjs', 'scripts/*.test.mjs', 'tests/**/*.mjs'],
+  // consent.js and theme-early.js are plain <script> tags in every page's <head>.
+  entry: ['scripts/main.js', 'scripts/consent.js', 'scripts/theme-early.js', 'scripts/*.mjs', 'scripts/*.test.mjs', 'tests/**/*.mjs', 'qa/**/*.mjs'],
   project: ['scripts/**/*.{js,mjs}', 'data/**/*.js', 'tests/**/*.mjs'],
   ignore: [
-    'scripts/vendor/**',
-    'scripts/lenis.js'             // kept on purpose: smooth scroll, off for now (see main.js header)
+    'scripts/vendor/**'
   ],
-  ignoreDependencies: ['sharp']    // used by the local image tools above
+  // Types for the vendored libraries (scripts/vendor/*.d.ts point to them).
+  ignoreDependencies: ['@types/three', 'lenis']
 };

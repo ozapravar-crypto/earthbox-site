@@ -5,15 +5,22 @@ import { test, expect } from '@playwright/test';
 
 test.skip(({ isMobile }) => isMobile, 'desktop: smooth scroll is mouse/trackpad only (phones checked below)');
 
+/** @typedef {NonNullable<Window['__earthboxLenis']>} Lenis */
+
+/**
+ * @param {import('@playwright/test').Browser} browser @param {import('@playwright/test').TestInfo} info
+ * @param {import('@playwright/test').BrowserContextOptions} [opts]
+ */
 const open = async (browser, info, opts = {}) => {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, baseURL: info.project.use.baseURL, reducedMotion: 'no-preference', ...opts });
   await page.addInitScript(() => { sessionStorage.setItem('earthbox-loader-seen', '1'); localStorage.setItem('earthbox-consent', 'denied'); });
   await page.route('**/*.mp4', r => r.abort());
   return page;
 };
+/** @param {import('@playwright/test').Page} page @param {number} at */
 const toHeading = (page, at) => page.evaluate((at) => {
-  const h = document.querySelector('#principles h2');
-  window.__earthboxLenis.scrollTo(scrollY + h.getBoundingClientRect().top - innerHeight * at, { immediate: true });
+  const h = /** @type {Element} */ (document.querySelector('#principles h2'));
+  /** @type {Lenis} */ (window.__earthboxLenis).scrollTo(scrollY + h.getBoundingClientRect().top - innerHeight * at, { immediate: true });
 }, at);
 
 test('smooth scroll: a wheel turn glides instead of jumping', async ({ browser }, info) => {
@@ -38,7 +45,7 @@ test('parallax: images drift as they cross the screen, inside their frame', asyn
   const hero = page.locator('.hero-bg img');
   await page.waitForTimeout(300);
   const a = await hero.evaluate(el => el.style.transform);
-  await page.evaluate(() => window.__earthboxLenis.scrollTo(400, { immediate: true }));
+  await page.evaluate(() => /** @type {Lenis} */ (window.__earthboxLenis).scrollTo(400, { immediate: true }));
   await page.waitForTimeout(300);
   const b = await hero.evaluate(el => el.style.transform);
   expect(a).toMatch(/scale\(/);

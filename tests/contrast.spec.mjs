@@ -4,18 +4,17 @@
 // under the glyphs wherever a photo, gradient, blend or overlay is involved.
 // The full sweep of every route × theme × state is `npm run qa:contrast`.
 import { test, expect } from '@playwright/test';
+import { quietStart } from './helpers.mjs';
 import { scanPage } from '../qa/contrast/scan.js';
 import { resolveBatch } from '../qa/contrast/measure.mjs';
 
 // These set their own viewports; running them again under the phone project would only duplicate.
 test.skip(({ isMobile }) => isMobile, 'viewports are set per test');
 
-test.beforeEach(async ({ context }) => {
-  await context.addInitScript(() => sessionStorage.setItem('earthbox-loader-seen', '1'));
-  await context.route('**/*.mp4', r => r.abort());
-});
+test.beforeEach(quietStart);
 
 // Measure everything inside `scope`; return only failures, readable in the report.
+/** @param {import('@playwright/test').Page} page @param {string} scope @param {string} state */
 async function failures(page, scope, state){
   await page.addStyleTag({ content: '.cursor-ring,.cursor-dot,.loader{display:none!important} *,*::before,*::after{transition:none!important;animation-duration:0s!important;animation-delay:0s!important}' });
   await page.evaluate(() => document.querySelectorAll('.reveal,.reveal-line').forEach(e => e.classList.add('in')));
@@ -23,7 +22,20 @@ async function failures(page, scope, state){
   expect(found.length, `nothing measured in ${scope}`).toBeGreaterThan(0);
   const measured = [...found.filter(r => r.status !== 'review'), ...await resolveBatch(page, found.filter(r => r.status === 'review'))];
   return measured.filter(r => r.status === 'fail' || r.status === 'review')
-    .map(r => `${r.status} ${r.ratio}:1 (needs ${r.threshold}) "${r.text}" ${r.fg} on ${r.bg} — ${r.selector}`);
+    .map(r => `${r.status} ${String(r.ratio)}:1 (needs ${String(r.threshold)}) "${r.text}" ${String(r.fg)} on ${String(r.bg)} — ${r.selector}`);
+}
+
+// Keyboard-focus `sel` and measure its focus ring(s) inside `scope`; return failures.
+/** @param {import('@playwright/test').Page} page @param {string} sel @param {string} [scope] */
+async function ringFailures(page, sel, scope = sel){
+  const el = page.locator(sel).first();
+  await el.scrollIntoViewIfNeeded();
+  await page.keyboard.press('Shift');                     // make focus "keyboard" focus
+  await el.focus();
+  const rings = (await page.evaluate(scanPage, { scope, state: 'focus' })).filter(r => r.kind === 'focus-ring');
+  expect(rings.length, `no focus ring measured on ${sel}`).toBeGreaterThan(0);
+  const found = [...rings.filter(r => r.status !== 'review'), ...await resolveBatch(page, rings.filter(r => r.status === 'review'))];
+  return found.filter(r => r.status !== 'pass').map(r => `${r.status} ${String(r.ratio)}:1 ${String(r.fg)} on ${String(r.bg)} — ${sel}`);
 }
 
 const THEMES = ['light', 'dark'];
@@ -33,23 +45,23 @@ const THEMES = ['light', 'dark'];
 // Root cause: the scrim (.hero::before, z -1) painted UNDER the photo (.hero-bg,
 // also z -1, later in the DOM), so it never showed. Fixed: photo z -2, scrim
 // bands held flat behind each text group, strengths set by measurement.
-for (const [w, h] of [[1280, 800], [1440, 900], [1744, 902], [1920, 1080]]) {
-  test(`CQ-001 hero + header over the photo pass at ${w}px`, async ({ browser }) => {
-    const page = await browser.newPage({ viewport: { width: w, height: h }, reducedMotion: 'reduce' });
+/** @type {[string, import('@playwright/test').BrowserContextOptions][]} */
+const HERO_VIEWS = [
+  ...[[1280, 800], [1440, 900], [1744, 902], [1920, 1080]].map(([w, h]) => /** @type {[string, import('@playwright/test').BrowserContextOptions]} */ (
+    [`at ${w}px`, { viewport: { width: w, height: h } }])),
+  ['on a phone', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }]
+];
+for (const [label, view] of HERO_VIEWS) {
+  test(`CQ-001 hero + header over the photo pass ${label}`, async ({ browser }) => {
+    const page = await browser.newPage({ ...view, reducedMotion: 'reduce' });
     await page.goto('/index.html');
     expect([...await failures(page, '#top', 'hero'), ...await failures(page, '.runhead', 'hero-header')]).toEqual([]);
     await page.close();
   });
 }
-test('CQ-001 hero on a phone: header over the photo passes', async ({ browser }) => {
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
-  await page.goto('/index.html');
-  expect([...await failures(page, '#top', 'hero'), ...await failures(page, '.runhead', 'hero-header')]).toEqual([]);
-  await page.close();
-});
 test('CQ-001 guard: the hero scrim paints above the photo', async ({ page }) => {
   await page.goto('/index.html');
-  const z = await page.evaluate(() => ({ photo: +getComputedStyle(document.querySelector('.hero-bg')).zIndex, scrim: +getComputedStyle(document.querySelector('.hero'), '::before').zIndex }));
+  const z = await page.evaluate(() => ({ photo: +getComputedStyle(/** @type {Element} */ (document.querySelector('.hero-bg'))).zIndex, scrim: +getComputedStyle(/** @type {Element} */ (document.querySelector('.hero')), '::before').zIndex }));
   expect(z.photo).toBeLessThan(z.scrim);
 });
 
@@ -93,14 +105,7 @@ for (const theme of THEMES) {
     await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation-duration:0s!important;animation-delay:0s!important}' });
     const bad = [];
     for (const sel of ['.runhead-nav a', '#catalogue-tease a.cta', 'footer .colo-col a']) {
-      const el = page.locator(sel).first();
-      await el.scrollIntoViewIfNeeded();
-      await page.keyboard.press('Shift');                     // make focus "keyboard" focus
-      await el.focus();
-      const rings = (await page.evaluate(scanPage, { scope: sel, state: 'focus' })).filter(r => r.kind === 'focus-ring');
-      expect(rings.length, `no focus ring measured on ${sel}`).toBeGreaterThan(0);
-      const found = [...rings.filter(r => r.status !== 'review'), ...await resolveBatch(page, rings.filter(r => r.status === 'review'))];
-      bad.push(...found.filter(r => r.status !== 'pass').map(r => `${r.status} ${r.ratio}:1 ${r.fg} on ${r.bg} — ${sel}`));
+      bad.push(...await ringFailures(page, sel));
     }
     expect(bad).toEqual([]);
   });
@@ -169,14 +174,7 @@ for (const theme of THEMES) {
       await page.goto(url);
       await page.waitForLoadState('load');
       await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation-duration:0s!important}' });
-      const el = page.locator(sel).first();
-      await el.scrollIntoViewIfNeeded();
-      await page.keyboard.press('Shift');
-      await el.focus();
-      const rings = (await page.evaluate(scanPage, { scope: sel, state: 'focus' })).filter(r => r.kind === 'focus-ring');
-      expect(rings.length, `no focus ring measured on ${sel}`).toBeGreaterThan(0);
-      const found = [...rings.filter(r => r.status !== 'review'), ...await resolveBatch(page, rings.filter(r => r.status === 'review'))];
-      bad.push(...found.filter(r => r.status !== 'pass').map(r => `${r.status} ${r.ratio}:1 ${r.fg} on ${r.bg} — ${sel}`));
+      bad.push(...await ringFailures(page, sel));
     }
     expect(bad).toEqual([]);
   });
@@ -190,14 +188,7 @@ test('CQ-014 Maker-invite ring passes in dark mode', async ({ page }) => {
   await page.goto('/index.html');
   await page.evaluate(() => document.querySelectorAll('.reveal,.reveal-line').forEach(e => e.classList.add('in')));
   await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation-duration:0s!important;animation-delay:0s!important}' });
-  const el = page.locator('.mi-cta').first();
-  await el.scrollIntoViewIfNeeded();
-  await page.keyboard.press('Shift');
-  await el.focus();
-  const rings = (await page.evaluate(scanPage, { scope: '.mi-cta', state: 'focus' })).filter(r => r.kind === 'focus-ring');
-  expect(rings.length).toBeGreaterThan(0);
-  const found = [...rings.filter(r => r.status !== 'review'), ...await resolveBatch(page, rings.filter(r => r.status === 'review'))];
-  expect(found.filter(r => r.status !== 'pass').map(r => `${r.ratio}:1 ${r.fg} on ${r.bg}`)).toEqual([]);
+  expect(await ringFailures(page, '.mi-cta')).toEqual([]);
 });
 
 // Audit regression · Maker buttons on phones were measured under the sticky
@@ -256,7 +247,7 @@ for (const theme of THEMES) {
     expect(await failures(page, '#business', 'default')).toEqual([]);
     await page.goto('/product.html#V1-PLT-005');
     await page.locator('.pd-care').waitFor();
-    await page.evaluate(() => document.querySelector('.pd-care').classList.add('in'));
+    await page.evaluate(() => /** @type {Element} */ (document.querySelector('.pd-care')).classList.add('in'));
     expect(await failures(page, '.pd-care', 'default')).toEqual([]);
     await page.goto('/maker#c=MossBox&s=studio&p=PLT-036');
     await page.locator('.mk-step[data-to=review]').click();
@@ -299,13 +290,6 @@ for (const theme of THEMES) {
   test(`CQ-019 card Save focus ring passes (${theme})`, async ({ page }) => {
     await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
     await page.goto('/products.html');
-    const el = page.locator('.v1-card-save').first();
-    await el.scrollIntoViewIfNeeded();
-    await page.keyboard.press('Shift');
-    await el.focus();
-    const rings = (await page.evaluate(scanPage, { scope: '.v1-card', state: 'focus' })).filter(r => r.kind === 'focus-ring');
-    expect(rings.length).toBeGreaterThan(0);
-    const found = [...rings.filter(r => r.status !== 'review'), ...await resolveBatch(page, rings.filter(r => r.status === 'review'))];
-    expect(found.filter(r => r.status !== 'pass').map(r => `${r.ratio}:1 ${r.fg} on ${r.bg}`)).toEqual([]);
+    expect(await ringFailures(page, '.v1-card-save', '.v1-card')).toEqual([]);
   });
 }

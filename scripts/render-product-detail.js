@@ -10,7 +10,7 @@
 // ─────────────────────────────────────────────────────────────────────
 
 import { SITE, PHONE } from '../data/site.js';
-import { esc, rupees, track, savedPlace, rememberPlace } from './util.js';
+import { esc, rupees, track, savedPlace, rememberPlace, radioKeys } from './util.js';
 import { volumeOne as v1Products, categories as v1Categories, materials, photoPath, places } from '../data/volume-one.js';
 import { volumeTwo } from '../data/upcoming.js';
 import { findProduct, productMeta } from './product-meta.js';
@@ -22,12 +22,25 @@ import { groupsOf, kitFor, encodePlan } from './care.js';
 import { elements, chamberElements } from '../data/maker.js';
 import { icon } from '../data/icons.js';
 
+/**
+ * @typedef {import('../data/volume-one.js').Product} Product
+ * @typedef {import('./build-codec.js').Chamber} Chamber
+ * @typedef {typeof import('../data/upcoming.js').volumeThree} Vivarium
+ * @typedef {import('./cart.js').NewLine} NewLine
+ * @typedef {{ label: string, title: string, text: string }} Point
+ * @typedef {Record<string, number>} Prices  material id → rupees
+ */
+
 // The material matching the shopper's place, if this piece comes in it.
+/** @param {string[]} mats */
 const startMaterial = (mats) => { const m = savedPlace(places).material; return mats.includes(m) ? m : mats[0]; };
 
 
 
-function enquiryHref(opts = {}){
+/**
+ * @param {{ name: string, sku?: string, material?: string, variant?: string | null, price?: string | null, volume?: number, soon?: boolean }} opts
+ */
+function enquiryHref(opts){
   const { name, sku, material, variant, price, volume = 1, soon = false } = opts;
   const productUrl = sku ? `${SITE}/product/${encodeURIComponent(sku)}` : '';
 
@@ -75,8 +88,14 @@ function enquiryHref(opts = {}){
 
 // Add to cart + Save, then WhatsApp as the quieter route. `line` is a cart
 // line (cart.js); the selectors rewrite it when size or material changes.
-const attr = (o) => JSON.stringify(o).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+/** @param {unknown} o */
+const attr = (o) => /** @type {string} */ (JSON.stringify(o)).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 const ARROW = icon('arrow-long');
+/**
+ * @param {NewLine} line
+ * @param {string} waHref
+ * @param {string} name
+ */
 function buyHTML(line, waHref, name){
   return `
     <div class="pd-buy">
@@ -91,6 +110,11 @@ function buyHTML(line, waHref, name){
 }
 // Coming-soon chambers can't go in the cart (studio decision, 12 Oct 2026):
 // the primary action registers interest on WhatsApp; Save still bookmarks it.
+/**
+ * @param {NewLine} line
+ * @param {string} waHref
+ * @param {string} name
+ */
 function interestHTML(line, waHref, name){
   return `
     <div class="pd-buy">
@@ -104,20 +128,27 @@ function interestHTML(line, waHref, name){
 }
 // Phone sticky bar shows the price beside the button (audit P8): it follows
 // size/material via updatePrice().
+/**
+ * @param {NewLine} line
+ * @param {string | null} price
+ */
 const mobileBuyHTML = (line, price) => `
     <div class="pd-mobile-cta" id="pdMobileCta">
-      <span class="pd-mobile-price" id="pdMobilePrice">${price}</span>
+      <span class="pd-mobile-price" id="pdMobilePrice">${String(price)}</span>
       <button type="button" class="cta" data-add-line="${attr(line)}">Add to cart ${ARROW}</button>
     </div>`;
 
+/** @param {number | null | undefined} price */
 const formatPrice = (price) => (price ? rupees(price) : null);
 
+/** @param {string} isoDate */
 function formatReviewDate(isoDate){
   const date = new Date(isoDate);
   return date.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
 }
 
 // Five stars read as one sentence, not five unnamed pictures (audit P5).
+/** @param {number} rating */
 function renderStars(rating){
   return `<span class="pd-stars" role="img" aria-label="Rated ${rating} out of 5">${Array.from({ length: 5 }, (_, i) => `
     <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false" class="${i < rating ? 'filled' : ''}">
@@ -125,6 +156,7 @@ function renderStars(rating){
     </svg>`).join('')}</span>`;
 }
 
+/** @param {string} sku */
 function renderReviewsSection(sku){
   const reviews = getReviews(sku);
   const avgRating = getAverageRating(sku);
@@ -196,8 +228,9 @@ function renderReviewsSection(sku){
 // ─── V1 3D Printed product · photo + material selector + variant selector ───
 // "Keep it thriving": the matching refill kit (chambers) and a visit plan,
 // prefilled for this piece on /care. Plan: CARE-PLAN.md.
+/** @param {string} sku */
 function careHTML(sku){
-  const kitsFor = groupsOf(sku).map(kitFor).filter(Boolean);
+  const kitsFor = /** @type {NonNullable<ReturnType<typeof kitFor>>[]} */ (groupsOf(sku).map(kitFor).filter(Boolean));
   const plan = encodePlan({ s: 'piece', r: sku, d: '12m', f: 'monthly', g: groupsOf(sku) });
   return `
       <section class="pd-care reveal" aria-labelledby="pdCareTitle">
@@ -210,17 +243,21 @@ function careHTML(sku){
       </section>`;
 }
 
+/** @param {Product} p */
 function renderPrinted(p){
   const cat = v1Categories.find(c => c.slug === p.category);
   const hasVariants = p.variants && p.variants.length > 0;
   const hasPricing = p.pricing !== null;
+  // With sizes, pricing holds one table per variant id; without, one table.
+  const tables = /** @type {Record<string, Prices>} */ (p.pricing), table = /** @type {Prices} */ (p.pricing);
+  const variants = p.variants || [];   // only read when hasVariants
   const isComingSoon = p.status === 'coming-soon';
 
   // Get available materials for this product
   const availableMaterials = hasPricing
     ? (hasVariants
-        ? Object.keys(p.pricing[p.variants[0].id])
-        : Object.keys(p.pricing))
+        ? Object.keys(tables[variants[0].id])
+        : Object.keys(table))
     : [];
 
   // Open on the shopper's place (Indoors / Sunny window / Balcony), as the
@@ -237,7 +274,8 @@ function renderPrinted(p){
   const avgRating = getAverageRating(p.sku);
   const reviewCount = reviews.length;
 
-  const line = { kind: 'product', sku: p.sku, variant: hasVariants ? p.variants[0].id : null,
+  /** @type {NewLine} */
+  const line = { kind: 'product', sku: p.sku, variant: hasVariants ? variants[0].id : null,
                  material: startMat || null, qty: 1 };
 
   // Extract key points from description (first sentence or up to 100 chars)
@@ -283,7 +321,7 @@ function renderPrinted(p){
             <div class="pd-selector" data-selector="variant">
               <span class="caption" id="pdVariantLabel">Size / Variant</span>
               <div class="pd-selector-options" role="radiogroup" aria-labelledby="pdVariantLabel">
-                ${p.variants.map((v, i) => `
+                ${variants.map((v, i) => `
                   <button type="button" role="radio" aria-checked="${i === 0}" tabindex="${i === 0 ? 0 : -1}" class="pd-selector-btn ${i === 0 ? 'active' : ''}" data-variant="${v.id}">
                     <span class="pd-selector-name">${v.name}</span>
                     <span class="pd-selector-desc">${v.description}</span>
@@ -314,11 +352,10 @@ function renderPrinted(p){
           <div class="pd-price-display">
             ${hasPricing ? `
               <span class="pd-price" id="pdPrice">
-                ${hasVariants
-                  ? formatPrice(p.pricing[p.variants[0].id][startMat])
-                  : formatPrice(p.pricing[startMat])}
+                ${String(hasVariants
+                  ? formatPrice(tables[variants[0].id][startMat])
+                  : formatPrice(table[startMat]))}
               </span>
-              ${p.priceRange ? `<span class="pd-price-range caption">${p.priceRange[startMat]}</span>` : ''}
             ` : `
               <span class="pd-price pd-price--enquiry">Price on enquiry</span>
             `}
@@ -328,8 +365,8 @@ function renderPrinted(p){
                name: p.name,
                sku: p.sku,
                material: startMat,
-               variant: hasVariants ? p.variants[0].name : null,
-               price: hasPricing ? formatPrice(hasVariants ? p.pricing[p.variants[0].id][startMat] : p.pricing[startMat]) : null,
+               variant: hasVariants ? variants[0].name : null,
+               price: hasPricing ? formatPrice(hasVariants ? tables[variants[0].id][startMat] : table[startMat]) : null,
                volume: 1
              }), p.name)}
           `}
@@ -343,7 +380,7 @@ function renderPrinted(p){
             ${reviewCount > 0 ? `
               <a href="#reviews" class="pd-rating-badge">
                 <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false"><path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9l-3 1.5.5-3.5L1 4.5 4.5 4z" fill="currentColor"/></svg>
-                <span>${avgRating} · ${reviewCount} ${reviewCount === 1 ? 'review' : 'reviews'}</span>
+                <span>${String(avgRating)} · ${reviewCount} ${reviewCount === 1 ? 'review' : 'reviews'}</span>
               </a>
             ` : ''}
             <div class="pd-delivery">
@@ -388,33 +425,39 @@ ${!isComingSoon && ['planters', 'plant-packets', 'plant-support'].includes(p.cat
     </article>
 
     <!-- Mobile sticky CTA (none for coming soon: there's nothing to add) -->
-    ${isComingSoon ? '' : mobileBuyHTML(line, hasPricing ? formatPrice(hasVariants ? p.pricing[p.variants[0].id][startMat] : p.pricing[startMat]) : 'Price on enquiry')}
+    ${isComingSoon ? '' : mobileBuyHTML(line, hasPricing ? formatPrice(hasVariants ? tables[variants[0].id][startMat] : table[startMat]) : 'Price on enquiry')}
   `;
 }
 
 
 // ─── V1 selector interactivity ───
+/** @param {Product} p */
 function initPrintedSelectors(p){
   const hasVariants = p.variants && p.variants.length > 0;
   const hasPricing = p.pricing !== null;
   if (!hasPricing) return;
+  const tables = /** @type {Record<string, Prices>} */ (p.pricing), table = /** @type {Prices} */ (p.pricing);   // as in renderPrinted
+  const variants = p.variants || [];
 
   const priceEl = document.getElementById('pdPrice');
-  const ctaEl = document.getElementById('pdEnquiryCta');
+  const ctaEl = /** @type {HTMLAnchorElement | null} */ (document.getElementById('pdEnquiryCta'));
   if (!priceEl || !ctaEl) return;
 
-  let currentVariant = hasVariants ? p.variants[0].id : null;
-  let currentMaterial = startMaterial(Object.keys(hasVariants ? p.pricing[p.variants[0].id] : p.pricing));
+  /** @type {string | null | undefined} */
+  let currentVariant = hasVariants ? variants[0].id : null;
+  /** @type {string | undefined} undefined when the piece has no materials */
+  let currentMaterial = startMaterial(Object.keys(hasVariants ? tables[variants[0].id] : table));
 
+  // Both elements exist: checked above, before any call.
   function updatePrice(){
     const price = hasVariants
-      ? p.pricing[currentVariant]?.[currentMaterial]
-      : p.pricing[currentMaterial];
-    priceEl.textContent = price ? formatPrice(price) : 'Price on enquiry';
+      ? /** @type {Record<string, Prices | undefined>} */ (tables)[/** @type {string} */ (currentVariant)]?.[/** @type {string} */ (currentMaterial)]
+      : table[/** @type {string} */ (currentMaterial)];
+    /** @type {HTMLElement} */ (priceEl).textContent = price ? formatPrice(price) : 'Price on enquiry';
     const mobilePrice = document.getElementById('pdMobilePrice');
-    if (mobilePrice) mobilePrice.textContent = priceEl.textContent;
+    if (mobilePrice) mobilePrice.textContent = /** @type {HTMLElement} */ (priceEl).textContent;
 
-    const variantName = hasVariants ? p.variants.find(v => v.id === currentVariant)?.name : null;
+    const variantName = hasVariants ? variants.find(v => v.id === currentVariant)?.name : null;
     const href = enquiryHref({
       name: p.name,
       sku: p.sku,
@@ -423,9 +466,9 @@ function initPrintedSelectors(p){
       price: price ? formatPrice(price) : null,
       volume: 1
     });
-    ctaEl.href = href;
+    /** @type {HTMLAnchorElement} */ (ctaEl).href = href;
     const line = JSON.stringify({ kind: 'product', sku: p.sku, variant: currentVariant, material: currentMaterial, qty: 1 });
-    document.querySelectorAll('#productDetail [data-add-line], #productDetail [data-save-line]').forEach(b => {
+    /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('#productDetail [data-add-line], #productDetail [data-save-line]')).forEach(b => {
       b.dataset[b.hasAttribute('data-add-line') ? 'addLine' : 'saveLine'] = line;
     });
     syncCartButtons();
@@ -433,8 +476,12 @@ function initPrintedSelectors(p){
 
   // Size and material are radio groups (iconography audit P1): the choice is
   // announced (aria-checked), Tab reaches the group once, arrows move within it.
+  /**
+   * @param {string} attr
+   * @param {HTMLElement} btn
+   */
   const pick = (attr, btn) => {
-    document.querySelectorAll(`[${attr}]`).forEach(b => {
+    /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll(`[${attr}]`)).forEach(b => {
       const on = b === btn;
       b.classList.toggle('active', on);
       b.setAttribute('aria-checked', String(on));
@@ -449,17 +496,8 @@ function initPrintedSelectors(p){
     updatePrice();
   };
   for (const attr of ['data-variant', 'data-material']) {
-    const btns = [...document.querySelectorAll(`[${attr}]`)];
-    btns.forEach((btn, i) => {
-      btn.addEventListener('click', () => pick(attr, btn));
-      btn.addEventListener('keydown', (e) => {
-        const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
-        if (!step) return;
-        e.preventDefault();
-        const next = btns[(i + step + btns.length) % btns.length];
-        pick(attr, next); next.focus();
-      });
-    });
+    const btns = [.../** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll(`[${attr}]`))];
+    radioKeys(btns, (btn) => pick(attr, btn));
   }
 }
 
@@ -470,15 +508,20 @@ function initPrintedSelectors(p){
 // (desktop) or tap (touch), so the photo stays the focus and the facts are
 // there on demand. Built from the chamber's own data; a box can override
 // them with `points: [{ label, title, text }]` in data/upcoming.js.
+/**
+ * @param {Chamber & { points?: Point[] }} b
+ * @returns {Point[]}
+ */
 export function boxPoints(b){
   if (Array.isArray(b.points) && b.points.length) return b.points.slice(0, 3);
-  const groups = (chamberElements[b.sku] === 'all' ? elements : elements.filter(e => (chamberElements[b.sku] || []).includes(e.id))).map(e => e.heading.toLowerCase());
+  const groups = (chamberElements[b.sku] === 'all' ? elements : elements.filter(e => (/** @type {Record<string, string[] | 'all' | undefined>} */ (chamberElements)[b.sku] || []).includes(e.id))).map(e => e.heading.toLowerCase());
   return [
     { label: b.plants, title: `What grows: ${b.plants.toLowerCase()}`, text: [b.capacity, groups.length ? `Suits ${groups.join(', ')}.` : 'The studio picks the culture with you.'].filter(Boolean).join(' · ') },
     { label: 'Climate', title: 'The climate inside', text: `${b.temp} · ${b.humidity} humidity · ${b.light}` },
     { label: 'The object', title: 'The object', text: `${b.size} · ${b.weight} · ${b.power} · ${b.edition} edition · made in ${b.lead} · ${b.warranty} warranty` }
   ];
 }
+/** @param {Point[]} points */
 function pointsHTML(points){
   return `<div class="pd-points" data-points>
     <ol class="pd-points-list">${points.map((pt, i) => `
@@ -494,8 +537,9 @@ function pointsHTML(points){
   </div>`;
 }
 
+/** @param {Chamber} b */
 function renderBox(b){
-  const desc = (b.description || []).map(p => `<p>${p}</p>`).join('');
+  const desc = b.description.map(p => `<p>${p}</p>`).join('');
 
   const related = volumeTwo.boxes.filter(o => o.sku !== b.sku).slice(0, 4);
 
@@ -562,6 +606,7 @@ function renderBox(b){
 
 
 // ─── V3 vivarium · concept + research note ───
+/** @param {Vivarium} v */
 function renderVivarium(v){
   return `
     <article class="pd-page pd-page--vivarium">
@@ -604,6 +649,7 @@ function renderVivarium(v){
 
 
 // ─── Render product by ID ───
+/** @param {string | null} id */
 function renderProduct(id){
   const host = document.getElementById('productDetail');
   if (!host) return;
@@ -630,6 +676,10 @@ function renderProduct(id){
   document.title = `EarthBox — ${name}`;
 
   // Update meta tags for social sharing
+  /**
+   * @param {string} selector
+   * @param {string} content
+   */
   const updateMeta = (selector, content) => {
     const el = document.querySelector(selector);
     if (el) el.setAttribute('content', content);
@@ -712,9 +762,11 @@ export function initProductDetail(){
   // The hash is the product id, so in-page links (#reviews) must scroll
   // without touching it, or the page re-renders as product "reviews".
   host.addEventListener('click', (e) => {
-    const a = e.target.closest('a[href^="#"]');
-    const target = a && document.getElementById(a.getAttribute('href').slice(1));
-    if (!target || findProduct(a.getAttribute('href').slice(1))) return;
+    const a = /** @type {Element} */ (e.target).closest('a[href^="#"]');
+    if (!a) return;
+    const id = /** @type {string} */ (a.getAttribute('href')).slice(1);   // the selector guarantees an href
+    const target = document.getElementById(id);
+    if (!target || findProduct(id)) return;
     e.preventDefault();
     target.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   });
@@ -726,30 +778,41 @@ export function initProductDetail(){
   // Numbered points: one open at a time. Mouse: hover opens, leaving the
   // points closes. Keyboard: focus opens, Escape or tabbing away closes.
   // Touch / click: tap toggles, tapping another switches.
+  /**
+   * @param {Element} wrap
+   * @param {number | null} i  the open point, or null for none
+   */
   const show = (wrap, i) => {
     wrap.querySelectorAll('.pd-point').forEach((b, n) => b.setAttribute('aria-expanded', String(n === i)));
-    wrap.querySelectorAll('.pd-point-panel').forEach((p, n) => { p.hidden = n !== i; });
+    /** @type {NodeListOf<HTMLElement>} */ (wrap.querySelectorAll('.pd-point-panel')).forEach((p, n) => { p.hidden = n !== i; });
     wrap.classList.toggle('is-open', i !== null);
   };
-  const wrapOf = (e) => e.target.closest?.('[data-points]');
+  // Pointer and focus events on host always target an element inside it.
+  /** @param {Event} e */
+  const wrapOf = (e) => /** @type {Element} */ (e.target).closest('[data-points]');
+  /** @param {Event} e */
+  const pointOf = (e) => /** @type {HTMLElement | null} */ (/** @type {Element} */ (e.target).closest('.pd-point'));
+  // A point always sits inside its [data-points] block.
+  /** @param {Event} e */
+  const blockOf = (e) => /** @type {Element} */ (wrapOf(e));
   // Hover only where the device really hovers: iPhone Safari turns a tap into
   // mouse-looking events, which reopened a panel the tap had just closed
   // (found by the WebKit job, 12 Oct 2026).
   const canHover = () => matchMedia('(hover: hover) and (pointer: fine)').matches;
   host.addEventListener('pointerover', (e) => {
-    const b = canHover() && e.pointerType === 'mouse' && e.target.closest('.pd-point');
-    if (b) show(wrapOf(e), +b.dataset.point);
+    const b = canHover() && e.pointerType === 'mouse' && pointOf(e);
+    if (b) show(blockOf(e), +/** @type {string} */ (b.dataset.point));
   });
   host.addEventListener('pointerout', (e) => {
     const w = canHover() && e.pointerType === 'mouse' && wrapOf(e);
-    if (w && !w.contains(e.relatedTarget) && !w.contains(document.activeElement)) show(w, null);
+    if (w && !w.contains(/** @type {Node | null} */ (e.relatedTarget)) && !w.contains(document.activeElement)) show(w, null);
   });
-  host.addEventListener('focusin', (e) => { const b = e.target.closest('.pd-point'); if (b && b.matches(':focus-visible')) show(wrapOf(e), +b.dataset.point); });
-  host.addEventListener('focusout', (e) => { const w = wrapOf(e); if (w && !w.contains(e.relatedTarget)) show(w, null); });
+  host.addEventListener('focusin', (e) => { const b = pointOf(e); if (b?.matches(':focus-visible')) show(blockOf(e), +/** @type {string} */ (b.dataset.point)); });
+  host.addEventListener('focusout', (e) => { const w = wrapOf(e); if (w && !w.contains(/** @type {Node | null} */ (e.relatedTarget))) show(w, null); });
   host.addEventListener('click', (e) => {
-    const b = e.target.closest('.pd-point');
+    const b = pointOf(e);
     if (!b) return;
-    const w = wrapOf(e), i = +b.dataset.point;
+    const w = blockOf(e), i = +/** @type {string} */ (b.dataset.point);
     // With hover, a click on the open point keeps it (hover opened it). Without
     // hover (touch), a tap toggles. Keyboard (detail 0) always opens.
     if (b.getAttribute('aria-expanded') === 'true' && !canHover() && e.detail !== 0) show(w, null);

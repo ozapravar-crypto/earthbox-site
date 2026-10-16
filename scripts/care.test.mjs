@@ -9,6 +9,7 @@ import { volumeTwo } from '../data/upcoming.js';
 import { encodeBuild, emptyBuild } from './build-codec.js';
 
 // Visit counts: every duration × frequency.
+/** @type {Record<string, number[]>} */
 const want = { once: [1, 1, 1], '3m': [6, 3, 1], '6m': [12, 6, 2], '12m': [24, 12, 4] };
 for (const d of visit.durations) visit.frequencies.forEach((f, i) => assert.equal(visitsFor(d.id, f.id), want[d.id][i], `${d.id} × ${f.id}`));
 assert.equal(visitsFor('nope', 'monthly'), 0);
@@ -33,7 +34,7 @@ assert.equal(decodePlan('s=piece&d=once&r=NOPE'), null);           // unknown pi
 assert.equal(decodePlan('s=custom&d=once&r=MossBox'), null);       // a piece is not a build
 assert.equal(decodePlan('s=own&d=3m'), null);                      // a term needs a frequency
 assert.equal(decodePlan('s=x&d=once'), null);
-const junk = decodePlan('s=own&d=once&f=monthly&n=99999&g=Moss,<script>&p=12');
+const junk = /** @type {import('./care.js').Plan} */ (decodePlan('s=own&d=once&f=monthly&n=99999&g=Moss,<script>&p=12'));
 assert.deepEqual([junk.n, junk.g, junk.p, junk.f], [500, ['Moss'], '', null]);
 
 // Every chamber points at a real kit (Lab suits every group, so it asks).

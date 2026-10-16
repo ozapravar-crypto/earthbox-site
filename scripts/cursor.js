@@ -19,6 +19,7 @@ const SPRIG_SVG = `
 `;
 
 // Hover label per element type · element can override via data-cursor
+/** @param {HTMLElement} el */
 const labelFor = (el) => {
   if (el.dataset.cursor) return el.dataset.cursor;
   if (el.closest('a[href*="mailto"]')) return 'WRITE';
@@ -27,6 +28,7 @@ const labelFor = (el) => {
   return '';
 };
 
+/** @param {Element} el */
 const isFrameTarget = (el) =>
   el.matches('img, .vis svg, .product-vis svg, .chamber-visual svg, .logo-svg');
 
@@ -94,7 +96,7 @@ export function initCursor(){
     dot.classList .toggle('is-hover', !!interactive);
     ring.classList.toggle('is-frame', frameish && !interactive);
 
-    label.textContent = interactive ? labelFor(interactive) : '';
+    label.textContent = interactive ? labelFor(/** @type {HTMLElement} */ (interactive)) : '';
   });
 
   // ─── Animation loop · lerp ring + dot toward mouse ───
@@ -121,6 +123,7 @@ export function initCursor(){
 
 
 // ─── Trail helpers ───
+/** @param {number} x @param {number} y @param {HTMLElement} layer */
 function plantSprig(x, y, layer){
   const el = document.createElement('div');
   el.className = 'cursor-sprig';
@@ -132,6 +135,7 @@ function plantSprig(x, y, layer){
   setTimeout(() => el.remove(), 2100);
 }
 
+/** @param {number} x @param {number} y @param {HTMLElement} layer */
 function plantDot(x, y, layer){
   const el = document.createElement('div');
   el.className = 'cursor-trail-dot';

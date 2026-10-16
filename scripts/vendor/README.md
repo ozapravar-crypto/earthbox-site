@@ -15,3 +15,5 @@ except the import lines: in the two loader files `'three'` is rewritten to
 `'./three.module.min.js'` and `'../utils/BufferGeometryUtils.js'` to
 `'./BufferGeometryUtils.js'` (no bundler, no import map). To upgrade, replace
 all three with the same release and update these rows.
+
+**Types:** each file has a `.d.ts` beside it that points to the published types for the same release (`@types/three@0.160.0`, `lenis@1.3.26`, dev dependencies only). That way `npm run typecheck` checks how we *use* these libraries without checking their minified code. dist copies `.js` only, so the `.d.ts` files never ship.

@@ -12,9 +12,11 @@
 
 import { volumeTwo } from './upcoming.js';
 
+/** @typedef {typeof volumeTwo.boxes[number]} Chamber */
 export const chambers = volumeTwo.boxes;
 
 // The nine elemental plant groups · `focus` is the list's own wording.
+/** @typedef {typeof elements[number]} Element */
 export const elements = [
   { id: 'Earth', focus: 'Robust growth, diverse variegation', heading: 'Soil-based classics' },
   { id: 'Fire',  focus: 'Heat-tolerant, water-storing', heading: 'High light & succulents' },
@@ -30,6 +32,7 @@ export const elements = [
 // Which plant groups each chamber's climate suits.
 // Lab is adjustable, so every group. Spore grows mushroom cultures,
 // which are not on the plant list — the studio picks the strain.
+/** @type {Record<string, string[] | 'all'>} */
 export const chamberElements = {
   WaterBox: ['Water'], MossBox: ['Moss'], FireBox: ['Fire'], DarkBox: ['Dark'],
   AeroBox: ['Aero'], AirBox: ['Air'], FrostBox: ['Frost'], BiteBox: ['Bite'],
@@ -45,6 +48,8 @@ export const SOILLESS = ['AirBox', 'AeroBox'];
  * id 'PLT-nnn' unique · element ∈ elements[].id · form ∈ keys of forms.
  * Optional later: price (whole rupees), light, care, humidity, photo — see the note below.
  * Checked by scripts/data.test.mjs.
+ * @typedef {{ id: string, element: string, name: string, form: string, botanical: string, price?: number }} Plant
+ * @type {Plant[]}
  */
 export const plants = [
   ['PLT-001', 'Earth', 'Syngonium Neon Pink', 'leaf', "Syngonium podophyllum 'Neon'"],
@@ -96,6 +101,10 @@ export const plants = [
 
 // Only SOIL-001 is filled in the workbook (tab 07). "Studio's choice" is the
 // honest default until the other mixes exist. `suits` = plant groups.
+/**
+ * @typedef {{ id: string, name: string, note: string, look: string, suits?: string[], price?: number }} Substrate
+ * @type {Substrate[]}
+ */
 export const substrates = [
   {
     id: 'studio',
@@ -113,6 +122,7 @@ export const substrates = [
 ];
 
 // Starter recipes · every item is a real entry above.
+/** @typedef {typeof recipes[number]} Recipe */
 export const recipes = [
   { id: 'misty-forest', name: 'Misty Forest', line: 'A moss floor under constant mist.',
     chamber: 'MossBox', substrate: 'studio', plants: ['PLT-036', 'PLT-037', 'PLT-040'] },
@@ -151,6 +161,7 @@ export const answerArt = {
 // care: 'easy'|'moderate'|'high', humidity: '60–80 %', price: 1200, photo: 'x.webp'.
 
 // Shape labels for `form` (assigned per species from its growth habit).
+/** @type {Record<string, string>} */
 export const forms = {
   leaf: 'Broad leaf', trail: 'Trailing', rosette: 'Rosette', air: 'Air plant',
   fern: 'Fern', moss: 'Moss carpet', trap: 'Pitcher / trap'
@@ -167,7 +178,7 @@ export const forms = {
 //          plant group's colour + any colour its name states, like the procedural plants)
 // Changing a model's look? Give the file a new name: /assets is cached for a year.
 /**
- * @typedef {{ file: string, scale?: number, yaw?: number, tint?: boolean }} PlantModel
+ * @typedef {{ file: string, scale?: number, yaw?: number, tint?: boolean, textured?: boolean }} PlantModel
  * @type {{ base: string, forms: Record<string, PlantModel|null>, plants: Record<string, PlantModel|null> }}
  */
 export const models = {

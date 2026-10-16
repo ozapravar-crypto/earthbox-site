@@ -23,14 +23,34 @@ import { emptyDiscovery, searchPlants, dropChip, clearGuided, climateOrder } fro
 
 export const STAGES = ['start', 'chamber', 'foundation', 'plants', 'space', 'review'];
 const STEPS = ['chamber', 'foundation', 'plants', 'space'];   // the numbered ones
+/** @type {Record<string, string>} */
 const LABEL = { chamber: 'Chamber', foundation: 'Foundation', plants: 'Plants', space: 'Your space', review: 'Review' };
 const STORE = 'earthbox-maker';
 const SITE = 'https://www.earthbox.in';
 
+/** @param {string | number | null | undefined} s */
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => (
-  { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  /** @type {Record<string, string>} */ ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
 ));
+/**
+ * @template {Record<string, unknown>} T
+ * @param {readonly T[]} list @param {unknown} id @param {string} [key]
+ * @returns {T | undefined}
+ */
 const find = (list, id, key = 'id') => list.find(x => x[key] === id);
+
+/**
+ * @typedef {import('./build-codec.js').Build} Build
+ * @typedef {import('../data/maker.js').Plant} Plant
+ * @typedef {import('../data/maker.js').Chamber} Chamber
+ * @typedef {import('../data/maker.js').Substrate} Substrate
+ * @typedef {import('./plant-search.js').Discovery} Discovery
+ * @typedef {{ text: string, undo?: Build }} Notice
+ * @typedef {{ look: string, light: string, roles: string[], room: string, care: string }} GuideAnswers
+ * @typedef {{ build: Build, disc: Discovery }} Saved
+ * @typedef {{ fresh: string|null, error: string, notice: Notice|null, disc: Discovery, pin: string|null,
+ *   refineOpen: boolean, gd: { step: number, a: GuideAnswers }|null, shared: boolean, own: Saved|null }} UI
+ */
 
 
 // ═══ RULES (pure) ═════════════════════════════════════════════════════
@@ -39,30 +59,42 @@ const find = (list, id, key = 'id') => list.find(x => x[key] === id);
 import { emptyBuild, chamberOf, plantOf, isSoilless, suitedElements, isSuited, capacity, substrateSuits, encodeBuild, decodeBuild } from './build-codec.js';
 export { emptyBuild, chamberOf, plantOf, isSoilless, suitedElements, isSuited, capacity, substrateSuits, encodeBuild, decodeBuild };
 
+// Ids already in a build are known, and a stage past 'chamber' has one.
+const knownPlant = (/** @type {string} */ id) => /** @type {Plant} */ (plantOf(id));
+const chosenChamber = (/** @type {Build} */ b) => /** @type {Chamber} */ (chamberOf(b));
+
 // Is a stage's required choice made?
+/** @param {Build} b @param {string} stage */
 export function done(b, stage){
   if (stage === 'chamber')    return !!b.chamber;
   if (stage === 'foundation') return isSoilless(b.chamber) || !!b.substrate;
   if (stage === 'plants')     return b.plants.length > 0 || suitedElements(b.chamber).length === 0;
   return true;
 }
+/** @param {Build} b @param {string} stage */
 export const canEnter = (b, stage) =>
   STAGES.slice(1, STAGES.indexOf(stage)).every(s => done(b, s));
-export const furthest = (b) => [...STAGES].reverse().find(s => canEnter(b, s));
+/** @param {Build} b */
+export const furthest = (b) => /** @type {string} */ ([...STAGES].reverse().find(s => canEnter(b, s)));   // 'start' always qualifies
 
 // Switching chamber keeps every choice that still fits, and reports the rest.
+/** @param {Build} b @param {string} sku */
 export function swapChamber(b, sku){
   const ch = find(chambers, sku, 'sku');
   const keep = b.plants.filter(id => isSuited(plantOf(id), sku)).slice(0, capacity(ch));
   const subOk = substrateSuits(find(substrates, b.substrate), sku);
   return {
     build: { ...b, chamber: sku, plants: keep, substrate: subOk ? b.substrate : null },
-    removed: b.plants.filter(id => !keep.includes(id)).map(id => plantOf(id).name),
+    removed: b.plants.filter(id => !keep.includes(id)).map(id => knownPlant(id).name),
     clearedSubstrate: !!b.substrate && !subOk
   };
 }
 
 // Add or remove one plant. Returns { build } or { error }.
+/**
+ * @param {Build} b @param {string} id
+ * @returns {{ build: Build, error?: undefined } | { error: string, build?: undefined }}
+ */
 export function togglePlant(b, id){
   if (b.plants.includes(id)) return { build: { ...b, plants: b.plants.filter(p => p !== id) } };
   const p = plantOf(id), ch = chamberOf(b);
@@ -73,11 +105,14 @@ export function togglePlant(b, id){
 }
 
 
+/** @param {Build} b */
 export const shareUrl = (b) => `${SITE}/maker#${encodeBuild(b)}`;
 
+/** @param {Build} b */
 export function enquiryText(b){
-  const ch = chamberOf(b), sub = find(substrates, b.substrate), s = b.space;
-  const names = b.plants.map(id => plantOf(id).name);
+  const ch = chosenChamber(b), sub = find(substrates, b.substrate), s = b.space;
+  const names = b.plants.map(id => knownPlant(id).name);
+  /** @param {string} label @param {string} v */
   const line = (label, v) => (v ? `${label}: ${v}` : null);
   return [
     'Hi Aayush, I designed a terrarium in the EarthBox Maker.',
@@ -99,8 +134,10 @@ export function enquiryText(b){
 }
 
 // The cart keeps the composition only (same as the share link).
+/** @param {Build} b */
 export const cartLine = (b) => ({ kind: 'build', code: encodeBuild(b) });
 
+/** @param {Build} b */
 export const whatsappHref = (b) =>
   `https://wa.me/${ENQUIRY_PHONE}?text=${encodeURIComponent(enquiryText(b))}`;
 
@@ -115,8 +152,10 @@ const OUTER = 'M 282 131 L 463 131 L 493 161 L 493 585 L 463 615 L 282 615 L 252
 const INNER = 'M 287 144 L 459 144 L 480 165 L 480 581 L 459 602 L 287 602 L 265 581 L 265 165 Z';
 
 // Tiny deterministic random so pebbles don't reshuffle on every render.
+/** @param {number} seed @returns {() => number} */
 export const rng = (seed) => () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
 
+/** @param {number} x2 @param {number} y2 @param {number} sign */
 function fernFrond(x2, y2, sign){
   let d = `M0 0 Q${x2 / 2 + sign * 6} ${y2 / 2} ${x2} ${y2}`;
   for (let t = .2; t < .95; t += .12){
@@ -126,6 +165,7 @@ function fernFrond(x2, y2, sign){
   return `<path class="st fern" d="${d}"/>`;
 }
 
+/** @type {Record<string, string>} */
 const GLYPH = {
   leaf: `<path class="st" d="M0 0 Q-3 -24 -14 -42 M0 0 Q3 -32 11 -58 M0 0 Q1 -16 5 -28"/>
     <ellipse class="lf" cx="-20" cy="-50" rx="9" ry="14" transform="rotate(-38 -20 -50)"/>
@@ -145,8 +185,10 @@ const GLYPH = {
      <ellipse class="trap hood" cx="${x}" cy="${-h - 1}" rx="7" ry="3.2"/>`).join('')
 };
 
+/** @param {string} look */
 function bands(look){
   const r = rng(look === 'aroid' ? 7 : 3), top = look === 'aroid' ? 540 : 548;
+  /** @param {number} n @param {number} y0 @param {number} y1 @param {string} cls @param {number} rad */
   const dots = (n, y0, y1, cls, rad) => Array.from({ length: n }, () =>
     `<circle class="${cls}" cx="${(265 + r() * 215).toFixed(1)}" cy="${(y0 + r() * (y1 - y0)).toFixed(1)}" r="${rad}"/>`).join('');
   return `<g class="mk-bands">
@@ -158,6 +200,7 @@ function bands(look){
 }
 
 let clipSeq = 0;
+/** @param {Build} b @param {{ fresh?: string|null, label?: string }} [opts] */
 export function previewSVG(b, { fresh = null, label = '' } = {}){
   const ch = chamberOf(b);
   const sub = find(substrates, b.substrate);
@@ -168,7 +211,7 @@ export function previewSVG(b, { fresh = null, label = '' } = {}){
   // Back row (odd) first so the front row overlaps it.
   const order = b.plants.map((id, i) => ({ id, i })).sort((a, c) => (c.i % 2) - (a.i % 2));
   const plantsSVG = order.map(({ id, i }) => {
-    const p = plantOf(id);
+    const p = knownPlant(id);
     const x = 272 + (i + .5) * (202 / n);
     const y = base - (i % 2 ? 7 : 0);
     const s = scale * (i % 2 ? .88 : 1);
@@ -192,6 +235,7 @@ export function previewSVG(b, { fresh = null, label = '' } = {}){
 }
 
 // 3D thumbnail once maker-3d.js has drawn it; the line drawing until then (or without WebGL).
+/** @param {Plant} p */
 const glyphThumb = (p) => {
   const src = view3d?.thumb(p.id);
   return src ? `<img class="mk-thumb" src="${src}" alt="" width="56" height="64">`
@@ -205,18 +249,21 @@ const glyphThumb = (p) => {
 // so the build stays the one source of truth. Until it loads, or if WebGL
 // fails, everything above is the fallback.
 
+/** @type {ReturnType<typeof import('./maker-3d.js').create3D> | null} */
 let view3d = null;
 
+/** @param {Plant} p */
 const plantSpec = (p) => ({ id: p.id, form: p.form, element: p.element, name: p.name });
 
 // What the 3D view draws: the same facts previewSVG reads, nothing more.
+/** @param {Build} b */
 export function sceneSpec(b){
   const ch = chamberOf(b), sub = find(substrates, b.substrate);
   return {
     chamber: ch ? { sku: ch.sku, name: ch.name, size: ch.size, temp: ch.temp, humidity: ch.humidity, light: ch.light } : null,
     soilless: !!ch && isSoilless(ch.sku),
     substrate: ch && !isSoilless(ch.sku) && sub ? sub.look : null,
-    plants: b.plants.map(id => plantSpec(plantOf(id)))
+    plants: b.plants.map(id => plantSpec(knownPlant(id)))
   };
 }
 
@@ -232,16 +279,19 @@ function webglOK(){
 // ═══ VIEW ═════════════════════════════════════════════════════════════
 
 const arrow = icon('arrow-long');
+/** @param {Chamber} ch */
 const climate = (ch) => `${ch.temp} · ${ch.humidity} humidity`;
 
+/** @param {Build} b */
 function describe(b){
   const ch = chamberOf(b);
   if (!ch) return 'Empty chamber. Choose a chamber to begin.';
-  const names = b.plants.map(id => plantOf(id).name);
+  const names = b.plants.map(id => knownPlant(id).name);
   const sub = find(substrates, b.substrate);
   return `${ch.name} chamber${sub ? `, ${sub.name} foundation` : ''}${names.length ? `, with ${names.join(', ')}` : ', no plants yet'}.`;
 }
 
+/** @param {Build} b @param {string} stage */
 function stepsHTML(b, stage){
   return `<ol class="mk-steps-list">${[...STEPS, 'review'].map((s, i) => {
     const open = canEnter(b, s);
@@ -255,10 +305,12 @@ function stepsHTML(b, stage){
   <p class="mk-steps-compact caption">${stage === 'review' ? 'Review' : `Step ${STEPS.indexOf(stage) + 1} of 4`}</p>`;
 }
 
+/** @param {string} title @param {string} line */
 function head(title, line){
   return `<header class="mk-panel-head"><h2 class="mk-title" tabindex="-1">${title}</h2>${line ? `<p class="mk-line">${line}</p>` : ''}</header>`;
 }
 
+/** @param {Build} b */
 function chamberPanel(b){
   return head('Choose a chamber', 'Ten climates. The chamber decides which plants can live inside.')
   + `<p class="mk-note">Elemental chambers are in production. Your design is sent as an enquiry, and we confirm availability and the quote with you.</p>
@@ -281,14 +333,16 @@ function chamberPanel(b){
   }).join('')}</div>`;
 }
 
+/** @param {string} look */
 function swatch(look){
   const src = view3d?.swatch(look);
   if (src) return `<img class="mk-swatch" src="${src}" alt="" width="96" height="44">`;
   return `<svg class="mk-swatch" viewBox="250 530 250 80" aria-hidden="true">${bands(look)}</svg>`;
 }
 
+/** @param {Build} b */
 function foundationPanel(b){
-  const ch = chamberOf(b);
+  const ch = chosenChamber(b);
   if (isSoilless(ch.sku)) return head('Foundation', '')
     + `<div class="mk-empty">${art('empty-soil-free')}<p>The ${ch.name} chamber is soil-free: plants grow in air, fed by mist.</p><p>Nothing to choose here.</p></div>`;
   return head('Build the foundation', 'The layers your plants root into.')
@@ -301,7 +355,7 @@ function foundationPanel(b){
         <span class="mk-card-name">${s.name}</span>
         <span class="mk-card-desc">${s.note}</span>
         ${ok ? '<span class="mk-card-price">Quoted on enquiry</span>'
-             : `<span class="mk-why" id="why-${s.id}">Suits ${s.suits.join(', ')} plants, not the ${ch.name} chamber.</span>`}
+             : `<span class="mk-why" id="why-${s.id}">Suits ${/** @type {string[]} */ (s.suits).join(', ')} plants, not the ${ch.name} chamber.</span>`}
       </span>
       <span class="mk-check" aria-hidden="true">${on ? 'Selected' : ok ? 'Choose' : 'Unsuited'}</span>
     </button>`;
@@ -313,10 +367,13 @@ function foundationPanel(b){
 // render the same `results`, so a view switch never changes what is shown.
 
 // A plant's own chamber (one group), else Lab, which takes every group.
-const homeOf = (p) => chambers.find(c => chamberElements[c.sku]?.length === 1 && chamberElements[c.sku][0] === p.element)
-  || find(chambers, 'LabBox', 'sku');
+/** @param {Plant} p @returns {Chamber} */
+const homeOf = (p) => /** @type {Chamber} */ (chambers.find(c => { const els = /** @type {Record<string, string[] | 'all' | undefined>} */ (chamberElements)[c.sku]; return els?.length === 1 && els[0] === p.element; })
+  || find(chambers, 'LabBox', 'sku'));
+/** @param {Plant} p */
 const fitsIn = (p) => chambers.filter(c => isSuited(p, c.sku)).map(c => c.name);
 
+/** @param {Build} b @param {Plant} p @param {Chamber} ch */
 function plantAction(b, p, ch){
   const on = b.plants.includes(p.id);
   if (!isSuited(p, ch.sku)) {
@@ -332,8 +389,9 @@ function plantAction(b, p, ch){
 }
 
 // Only what the studio has published. Empty workbook columns say so, never guess.
+/** @param {Plant} p */
 function plantDetail(p){
-  const el = find(elements, p.element), home = homeOf(p);
+  const el = /** @type {typeof elements[number]} */ (find(elements, p.element)), home = homeOf(p);
   const own = home.sku !== 'LabBox';
   return `<dl class="mk-dl">
     <div><dt>Group</dt><dd>${p.element} · ${el.heading}</dd></div>
@@ -345,6 +403,7 @@ function plantDetail(p){
   </dl>`;
 }
 
+/** @param {Build} b @param {Plant} p @param {Chamber} ch */
 function plantRow(b, p, ch){
   const on = b.plants.includes(p.id), ok = isSuited(p, ch.sku);
   return `<li class="mk-plant-row${on ? ' is-on' : ''}${ok ? '' : ' is-off'}">
@@ -360,8 +419,10 @@ function plantRow(b, p, ch){
   </li>`;
 }
 
+/** @param {Chamber|undefined} c */
 const climateLine = (c) => (c ? `${c.humidity} · ${c.temp}` : 'Lab chamber only');
 
+/** @param {Build} b @param {Chamber} ch @param {Plant[]} results @param {UI} ui */
 function mapHTML(b, ch, results, ui){
   const fits = suitedElements(ch.sku);
   return `<p class="mk-map-key caption">Mapped by climate, driest to most humid. Tap a plant.</p>
@@ -385,16 +446,19 @@ function mapHTML(b, ch, results, ui){
   }).join('')}</ol>`;
 }
 
+/** @param {Build} b */
 const disCtx = (b) => {
-  const ch = chamberOf(b);
+  const ch = chosenChamber(b);
   return { suited: suitedElements(ch.sku), chamber: ch.name, space: b.space };
 };
 
+/** @param {Build} b @param {UI} ui */
 function resultsHTML(b, ui){
-  const ch = chamberOf(b), d = ui.disc;
+  const ch = chosenChamber(b), d = ui.disc;
   const { results, constraints: cs, preferences: prefs, relax } = searchPlants(d, disCtx(b));
   const look = find(guide.looks, d.g.look);
   const guided = cs.some(c => c.guided) || prefs.length > 0;
+  /** @param {{ key: string, label: string, guided?: boolean }} c */
   const chip = (c) => `<button type="button" class="mk-chip${c.guided || !('test' in c) ? ' is-guided' : ''}" data-act="chip" data-id="${esc(c.key)}"
     data-key="chip-${esc(c.key)}" aria-label="Remove ${esc(c.label)}">${esc(c.label)} ${icon('x')}</button>`;
   const head = `<p class="mk-found" aria-live="polite" tabindex="-1">${look ? `Showing ${results.length} plant${results.length === 1 ? '' : 's'} for your ${look.label.toLowerCase()} terrarium`
@@ -412,7 +476,9 @@ function resultsHTML(b, ui){
     : `<ul class="mk-plants">${results.map(p => plantRow(b, p, ch)).join('')}</ul>`);
 }
 
+/** @param {Discovery} d @param {UI} ui */
 function refineHTML(d, ui){
+  /** @param {string} kind @param {string} id @param {string} label @param {boolean} on */
   const chipBtn = (kind, id, label, on) => `<button type="button" class="selector-chip${on ? ' active' : ''}" data-act="refine"
     data-id="${kind}:${id}" data-key="rf-${kind}-${id}" aria-pressed="${on}">${label}</button>`;
   return `<details class="mk-refine"${ui.refineOpen ? ' open' : ''}><summary>${icon('sliders-horizontal', { size: 'xs' })}Filter &amp; sort${icon('chevron-down', { size: 'xs' })}</summary>
@@ -425,8 +491,9 @@ function refineHTML(d, ui){
     </div></details>`;
 }
 
+/** @param {Build} b @param {UI} ui */
 function plantsPanel(b, ui){
-  const ch = chamberOf(b);
+  const ch = chosenChamber(b);
   if (!suitedElements(ch.sku).length) return head('Plants', '')
     + `<div class="mk-empty">${art('empty-mushroom')}<p>The ${ch.name} chamber grows mushroom cultures, which aren’t on our plant list.</p>
        <p>The studio chooses the strain with you. Continue to tell us about your space.</p></div>`;
@@ -435,8 +502,8 @@ function plantsPanel(b, ui){
   return head('Add plants', `Search all ${plants.length}, or let us guide you. Each one shows whether it suits the ${ch.name} chamber.`)
   + `<p class="mk-count"><strong>${b.plants.length}</strong> of ${max} plants${b.plants.length >= max ? ' · chamber full' : ''}</p>
   ${b.plants.length ? `<ul class="mk-tray" aria-label="Selected plants">${b.plants.map(id => `<li>
-      <span>${esc(plantOf(id).name)}</span>
-      <button type="button" data-act="plant" data-id="${id}" data-key="tray-${id}" aria-label="Remove ${esc(plantOf(id).name)}">${icon('x')}</button></li>`).join('')}</ul>` : ''}
+      <span>${esc(knownPlant(id).name)}</span>
+      <button type="button" data-act="plant" data-id="${id}" data-key="tray-${id}" aria-label="Remove ${esc(knownPlant(id).name)}">${icon('x')}</button></li>`).join('')}</ul>` : ''}
   <div class="mk-disc" role="search">
     <label class="mk-search"><span class="u-sr-only">Search plants</span>
       <input type="search" name="q" value="${esc(d.q)}" placeholder="Search plants, groups or shapes…" autocomplete="off" data-key="q"></label>
@@ -459,9 +526,12 @@ const GD = [
   { id: 'roles', q: 'What should the plants add?',           line: 'Optional. Pick any.' }
 ];
 
+/** @param {string} step @param {GuideAnswers} a */
 function guideOptions(step, a){
+  const answers = /** @type {Record<string, string | string[]>} */ (a);
+  /** @param {string} name @param {string} value @param {string} label @param {string} line @param {string} [type] */
   const opt = (name, value, label, line, type = 'radio') => `<label class="mk-gd-opt">
-    <input type="${type}" name="gd-${name}" value="${esc(value)}" data-key="gd-${name}-${esc(value)}" ${(type === 'radio' ? a[name] === value : a[name].includes(value)) ? 'checked' : ''}>
+    <input type="${type}" name="gd-${name}" value="${esc(value)}" data-key="gd-${name}-${esc(value)}" ${(type === 'radio' ? answers[name] === value : answers[name].includes(value)) ? 'checked' : ''}>
     <span>${art(answerArt[name]?.[value])}<strong>${esc(label)}</strong>${line ? `<em>${esc(line)}</em>` : ''}</span></label>`;
   if (step === 'look')  return guide.looks.map(o => opt('look', o.id, o.label, o.line)).join('');
   if (step === 'room')  return spaceQuestions.room.map(v => opt('room', v, v, '')).join('');
@@ -470,9 +540,11 @@ function guideOptions(step, a){
   return guide.roles.map(o => opt('roles', o.id, o.label, '', 'checkbox')).join('');
 }
 
+/** @param {Build} b @param {UI} ui */
 function guideHTML(b, ui){
-  const { step, a } = ui.gd, i = step, cur = GD[i];
-  const answered = (s) => (s.id === 'roles' ? a.roles.length > 0 : !!a[s.id]);
+  const { step, a } = /** @type {NonNullable<UI['gd']>} */ (ui.gd), i = step, cur = /** @type {typeof GD[number]} */ (GD[i]);
+  /** @param {typeof GD[number]} s */
+  const answered = (s) => (s.id === 'roles' ? a.roles.length > 0 : !!/** @type {Record<string, unknown>} */ (a)[s.id]);
   const last = i === GD.length - 1;
   const n = searchPlants({ ...ui.disc, g: { look: a.look, light: a.light, roles: a.roles } }, disCtx(b)).results.length;
   return `<form class="mk-gd" method="dialog">
@@ -493,12 +565,14 @@ function guideHTML(b, ui){
   </form>`;
 }
 
+/** @param {string} name @param {string} value @param {string} type @param {boolean} checked */
 function choice(name, value, type, checked){
   const pic = answerArt[name]?.[value];
   return `<label class="mk-choice${pic ? ' has-art' : ''}"><input type="${type}" name="${name}" value="${esc(value)}" ${checked ? 'checked' : ''}>
     <span>${art(pic)}${esc(value.split(' —')[0])}</span></label>`;
 }
 
+/** @param {Build} b */
 function spacePanel(b){
   const s = b.space;
   return head('Your space', 'Optional. It helps us quote, and choose species that are safe where it lives.')
@@ -517,9 +591,10 @@ function spacePanel(b){
 
 // Care for this world (CARE-PLAN.md): kits for its plant groups, or visits
 // (always quoted for custom worlds), planned on /care.
+/** @param {Build} b */
 function careGroup(b){
   const code = encodeBuild(b);
-  const kits = (b.plants.length ? groupsOf(code) : suitedElements(b.chamber)).slice(0, 3).map(kitFor).filter(Boolean);
+  const kits = (b.plants.length ? groupsOf(code) : suitedElements(b.chamber)).slice(0, 3).map(kitFor).filter(/** @returns {k is NonNullable<ReturnType<typeof kitFor>>} */ k => Boolean(k));
   return `<section class="mk-group mk-care">
     <header><h3 class="caption">Keep it thriving</h3></header>
     <p class="mk-sub">A refill kit for its plants, or visits from the studio in Mumbai (quoted for custom worlds).</p>
@@ -530,8 +605,10 @@ function careGroup(b){
   </section>`;
 }
 
+/** @param {Build} b */
 function reviewPanel(b){
-  const ch = chamberOf(b), sub = find(substrates, b.substrate), s = b.space;
+  const ch = chosenChamber(b), sub = find(substrates, b.substrate), s = b.space;
+  /** @param {string} title @param {string} stage @param {string} body */
   const group = (title, stage, body) => `<section class="mk-group">
     <header><h3 class="caption">${title}</h3><button type="button" class="mk-edit" data-act="goto" data-to="${stage}" data-key="edit-${stage}">Edit<span class="u-sr-only"> ${title}</span></button></header>${body}</section>`;
   const spaceBits = [s.room, s.household.join(', '), s.maturity.split(' —')[0], s.care && `${s.care} care`, s.note && `“${s.note}”`].filter(Boolean).map(esc);
@@ -540,10 +617,10 @@ function reviewPanel(b){
       <input type="text" name="name" maxlength="60" value="${esc(b.name)}" placeholder="Untitled world" autocomplete="off"></label>
   ${group('Chamber', 'chamber', `<p class="mk-item"><span>${ch.name}</span><span>${ch.price}</span></p>
       <p class="mk-sub">${climate(ch)} · lead time ${ch.lead}</p>`)}
-  ${group('Foundation', 'foundation', `<p class="mk-item"><span>${isSoilless(ch.sku) ? 'None, soil-free' : sub.name}</span><span>${isSoilless(ch.sku) ? '—' : 'On enquiry'}</span></p>`)}
+  ${group('Foundation', 'foundation', `<p class="mk-item"><span>${isSoilless(ch.sku) ? 'None, soil-free' : /** @type {Substrate} */ (sub).name}</span><span>${isSoilless(ch.sku) ? '—' : 'On enquiry'}</span></p>`)}
   ${group('Plants', 'plants', b.plants.length ? `<ul class="mk-items">${b.plants.map(id => `<li class="mk-item">
-      <span>${esc(plantOf(id).name)}</span><span>On enquiry
-      <button type="button" class="mk-x" data-act="plant" data-id="${id}" data-key="rv-${id}" aria-label="Remove ${esc(plantOf(id).name)}">${icon('x')}</button></span></li>`).join('')}</ul>`
+      <span>${esc(knownPlant(id).name)}</span><span>On enquiry
+      <button type="button" class="mk-x" data-act="plant" data-id="${id}" data-key="rv-${id}" aria-label="Remove ${esc(knownPlant(id).name)}">${icon('x')}</button></span></li>`).join('')}</ul>`
       : '<p class="mk-sub">The studio chooses with you.</p>')}
   ${group('Your space', 'space', `<p class="mk-sub">${spaceBits.length ? spaceBits.join(' · ') : 'Not given'}</p>`)}
   <div class="mk-total">
@@ -568,9 +645,12 @@ function reviewPanel(b){
   </div>`;
 }
 
+/** @type {Record<string, string>} */
 const NEXT = { chamber: 'Continue', foundation: 'Continue to plants', plants: 'Continue', space: 'Review design' };
+/** @type {Record<string, string>} */
 const NEED = { chamber: 'Choose a chamber to continue.', foundation: 'Choose a foundation to continue.', plants: 'Add at least one plant to continue.' };
 
+/** @param {Build} b @param {string} stage @param {string} error */
 function barHTML(b, stage, error){
   const ch = chamberOf(b);
   const sum = ch ? `<strong>${ch.name}</strong> · ${ch.price}${b.plants.length ? ` · ${b.plants.length} plant${b.plants.length > 1 ? 's' : ''}` : ''}`
@@ -586,17 +666,25 @@ function barHTML(b, stage, error){
 
 // ═══ CONTROLLER ═══════════════════════════════════════════════════════
 
-const track = (name, params = {}) => { if (typeof gtag === 'function') gtag('event', name, params); };
+/** @param {string} name @param {Record<string, unknown>} [params] */
+const track = (name, params = {}) => { const gtag = /** @type {typeof globalThis & { gtag?: Window['gtag'] }} */ (globalThis).gtag; if (typeof gtag === 'function') gtag('event', name, params); };
 
 // Saved discovery state is untrusted: keep only values we know.
-function cleanDisc(d){
+/** @param {unknown} raw @returns {Discovery} */
+function cleanDisc(raw){
   const e = emptyDiscovery();
-  if (!d || typeof d !== 'object') return e;
-  const ids = (list, key = 'id') => list.map(x => x[key]);
-  const pick = (v, ok) => (ok.includes(v) ? v : '');
+  if (!raw || typeof raw !== 'object') return e;
+  // Untyped JSON: every field below is checked before use.
+  const d = /** @type {{ q?: unknown, sort?: unknown, view?: unknown,
+    f?: { groups?: unknown, forms?: unknown, fit?: unknown }, g?: { look?: unknown, light?: unknown, roles?: unknown } }} */ (raw);
+  /** @param {readonly { id: string }[]} list */
+  const ids = (list) => list.map(x => x.id);
+  /** @param {unknown} v @param {string[]} ok */
+  const pick = (v, ok) => (typeof v === 'string' && ok.includes(v) ? v : '');
+  /** @param {unknown} v @param {string[]} ok @returns {string[]} */
   const many = (v, ok) => (Array.isArray(v) ? v.filter(x => ok.includes(x)) : []);
   return {
-    q: String(d.q || '').slice(0, 80),
+    q: (typeof d.q === 'string' ? d.q : '').slice(0, 80),
     sort: pick(d.sort, ['name', 'group']) || 'recommended',
     view: d.view === 'map' ? 'map' : 'list',
     f: { groups: many(d.f?.groups, ids(elements)), forms: many(d.f?.forms, Object.keys(forms)), fit: d.f?.fit !== false },
@@ -604,9 +692,12 @@ function cleanDisc(d){
   };
 }
 
+/** @returns {{ build: Build, disc?: Discovery, shared?: boolean, dropped?: number, own?: Saved|null } | null} */
 function load(){
+  /** @type {Saved|null} */
   let own = null;
   try {
+    /** @type {{ code?: unknown, space?: Partial<Build['space']>, disc?: unknown } | null} */
     const saved = JSON.parse(localStorage.getItem(STORE) || 'null');
     const b = saved && decodeBuild(saved.code);
     if (b) own = { build: { ...b, space: { ...emptyBuild().space, ...saved.space } }, disc: cleanDisc(saved.disc) };
@@ -621,21 +712,29 @@ function load(){
 }
 
 export function initMaker(){
-  const root = document.getElementById('maker');
-  if (!root) return;
+  const found = document.getElementById('maker');
+  if (!found) return;
+  const root = found;
 
-  const $ = (id) => document.getElementById(id);
+  // The Maker page's own ids (maker.html); the few that may be absent are checked.
+  const $ = (/** @type {string} */ id) => /** @type {HTMLElement} */ (document.getElementById(id));
+  const $maybe = (/** @type {string} */ id) => document.getElementById(id);
+  /** @param {Element|null|undefined} el */
+  const focusEl = (el) => /** @type {HTMLElement|null|undefined} */ (el);
+  /** The focused control's data-key, if any. */
+  const activeKey = () => /** @type {HTMLElement|null} */ (document.activeElement)?.dataset.key;
   const start = $('mkStart'), build = $('mkBuild');
   const restored = load();
   let b = restored?.build || emptyBuild();
   let stage = 'start';
-  let ui = { fresh: null, error: '', notice: null, disc: restored?.disc || emptyDiscovery(), pin: null, refineOpen: false, gd: null,
+  /** @type {UI} */
+  const ui = { fresh: null, error: '', notice: null, disc: restored?.disc || emptyDiscovery(), pin: null, refineOpen: false, gd: null,
              shared: !!restored?.shared, own: restored?.own || null };
   if (restored?.dropped) {
     const n = restored.dropped;
-    ui.notice = { text: `${n} plant${n > 1 ? 's' : ''} in this link ${n > 1 ? "don't" : "doesn't"} fit the ${find(chambers, b.chamber, 'sku').name} chamber and ${n > 1 ? 'were' : 'was'} left out.` };
+    ui.notice = { text: `${n} plant${n > 1 ? 's' : ''} in this link ${n > 1 ? "don't" : "doesn't"} fit the ${chosenChamber(b).name} chamber and ${n > 1 ? 'were' : 'was'} left out.` };
   }
-  const dialog = $('mkGuide');
+  const dialog = /** @type {HTMLDialogElement} */ ($('mkGuide'));
 
   const save = () => {
     // While a shared design is open, the link follows the edits, so a reload
@@ -648,21 +747,21 @@ export function initMaker(){
   // Search typing, view switch, chips: redraw only the results, so the
   // search box keeps its caret and the page keeps its scroll.
   function renderResults(){
-    const key = document.activeElement?.dataset?.key;
-    const box = $('mkResults');
+    const key = activeKey();
+    const box = $maybe('mkResults');   // drawn by render() only on some steps
     if (!box) return render();
     box.innerHTML = resultsHTML(b, ui);
-    root.querySelectorAll('.mk-views [data-act=view]').forEach(x => x.setAttribute('aria-pressed', x.dataset.id === ui.disc.view));
+    root.querySelectorAll('.mk-views [data-act=view]').forEach(x => x.setAttribute('aria-pressed', String(/** @type {HTMLElement} */ (x).dataset.id === ui.disc.view)));
     save();
     // The clicked chip may be gone: land on the result count instead of <body>.
-    if (key && !root.contains(document.activeElement)) (box.querySelector(`[data-key="${key}"]`) || box.querySelector('.mk-found'))?.focus({ preventScroll: true });
+    if (key && !root.contains(document.activeElement)) focusEl(box.querySelector(`[data-key="${key}"]`) || box.querySelector('.mk-found'))?.focus({ preventScroll: true });
   }
-  const setDisc = (d) => { ui.disc = d; renderResults(); };
+  const setDisc = (/** @type {Discovery} */ d) => { ui.disc = d; renderResults(); };
 
   function renderGuide(){
-    const key = document.activeElement?.dataset?.key;
+    const key = activeKey();
     dialog.innerHTML = guideHTML(b, ui);
-    (key && dialog.querySelector(`[data-key="${key}"]`) || dialog.querySelector('.mk-title')).focus({ preventScroll: true });
+    /** @type {HTMLElement} */ (key && dialog.querySelector(`[data-key="${key}"]`) || dialog.querySelector('.mk-title')).focus({ preventScroll: true });
   }
   function openGuide(){
     const { look, light, roles } = ui.disc.g;
@@ -672,14 +771,15 @@ export function initMaker(){
     track('maker_guided_open');
   }
   function closeGuide(){ ui.gd = null; if (dialog.open) dialog.close(); }   // the draft is dropped; search + plants untouched
-  dialog?.addEventListener('close', () => { ui.gd = null; root.querySelector('[data-key="guide"]')?.focus({ preventScroll: true }); });
+  dialog.addEventListener('close', () => { ui.gd = null; focusEl(root.querySelector('[data-key="guide"]'))?.focus({ preventScroll: true }); });
 
   // Say what changed (M-03). Cleared first so the same words are re-read.
-  const say = (text) => { const el = $('mkLive'); if (!el) return; el.textContent = ''; setTimeout(() => { el.textContent = text; }, 50); };
+  const say = (/** @type {string} */ text) => { const el = $maybe('mkLive'); if (!el) return; el.textContent = ''; setTimeout(() => { el.textContent = text; }, 50); };
+  /** @type {string|null} */
   let focusNext = null;   // a key to focus after the redraw, when the pressed control goes away (M-04)
 
   function render(){
-    const key = focusNext || document.activeElement?.dataset?.key;
+    const key = focusNext || activeKey();
     focusNext = null;
     root.dataset.stage = stage;
     start.hidden = stage !== 'start';
@@ -689,19 +789,19 @@ export function initMaker(){
 
     $('mkSteps').innerHTML = stepsHTML(b, stage);
     renderPreview();
-    const panel = { chamber: chamberPanel, foundation: foundationPanel, plants: plantsPanel, space: spacePanel, review: reviewPanel }[stage];
+    const panel = /** @type {Record<string, (b: Build, ui: UI) => string>} */ ({ chamber: chamberPanel, foundation: foundationPanel, plants: plantsPanel, space: spacePanel, review: reviewPanel })[stage];
     const notice = ui.notice ? `<div class="mk-notice" role="status"><p>${ui.notice.text}</p>
       ${ui.notice.undo ? '<button type="button" class="cta cta-secondary cta-small" data-act="undo" data-key="undo">Undo</button>' : ''}</div>` : '';
     const sharedBar = ui.own ? `<div class="mk-notice"><p>You're looking at a shared design. Your own saved design is kept.</p>
       <button type="button" class="cta cta-secondary cta-small" data-act="own" data-key="own">Open mine</button>
       <button type="button" class="cta cta-secondary cta-small" data-act="adopt" data-key="adopt">Keep this one instead</button></div>` : '';
-    $('mkPanelBody').innerHTML = sharedBar + notice + panel(b, ui);
+    $('mkPanelBody').innerHTML = sharedBar + notice + /** @type {(b: Build, ui: UI) => string} */ (panel)(b, ui);
     $('mkBar').innerHTML = barHTML(b, stage, ui.error);
     ui.fresh = null;
     syncCartButtons();
     if (stage === 'plants') startThumbs();
 
-    if (key) (document.querySelector(`[data-key="${key}"]:not([disabled])`) || (/^(tray|rv)-/.test(key) ? root.querySelector('.mk-title') : null))?.focus({ preventScroll: true });
+    if (key) /** @type {HTMLElement | null} */ (document.querySelector(`[data-key="${key}"]:not([disabled])`) || (/^(tray|rv)-/.test(key) ? root.querySelector('.mk-title') : null))?.focus({ preventScroll: true });
   }
 
   // The preview only (3D, or the drawing). Called on its own when the 3D view
@@ -718,7 +818,7 @@ export function initMaker(){
 
   // The start screen's big picture: 3D when available, else the drawing.
   function renderHeroArt(){
-    const hero = recipes[0];
+    const hero = /** @type {typeof recipes[number]} */ (recipes[0]);
     const hb = { ...emptyBuild(), chamber: hero.chamber, substrate: hero.substrate, plants: hero.plants };
     if (view3d) view3d.show($('mkHeroArt'), sceneSpec(hb), { label: 'A finished Moss chamber with three mosses.' });
     else $('mkHeroArt').innerHTML = previewSVG(hb, { label: 'A finished Moss chamber with three mosses' });
@@ -727,10 +827,11 @@ export function initMaker(){
   // Recipe pictures: 3D stills, drawn one per idle moment and swapped in over
   // the line drawing. Drawing all six at once froze a slow phone for ~3 s
   // as the Maker opened, before anything could be tapped (site-glj).
-  const recipeBuild = (r) => ({ ...emptyBuild(), chamber: r.chamber, substrate: r.substrate, plants: r.plants });
+  const recipeBuild = (/** @type {typeof recipes[number]} */ r) => ({ ...emptyBuild(), chamber: r.chamber, substrate: r.substrate, plants: r.plants });
+  /** @type {Map<string, string>} */
   const stills = new Map();                                   // recipe id → image URL
-  const stillImg = (r) => `<img src="${stills.get(r.id)}" alt="${esc(describe(recipeBuild(r)))}" width="150" height="220">`;
-  const idle = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 500 }) : setTimeout(fn, 50));
+  const stillImg = (/** @type {typeof recipes[number]} */ r) => `<img src="${String(stills.get(r.id))}" alt="${esc(describe(recipeBuild(r)))}" width="150" height="220">`;
+  const idle = (/** @type {() => void} */ fn) => (/** @type {{ requestIdleCallback?: unknown }} */ (window).requestIdleCallback ? requestIdleCallback(fn, { timeout: 500 }) : setTimeout(fn, 50));
   let drawing = false;                                        // one queue at a time
   function drawStills(){
     if (drawing) return;
@@ -740,7 +841,7 @@ export function initMaker(){
       if (!r || !view3d || stage !== 'start') { drawing = false; return; }
       const src = view3d.still(r.id, sceneSpec(recipeBuild(r)), 300, 440, () => { stills.delete(r.id); drawStills(); });   // its models arrived: redraw it
       if (src) stills.set(r.id, src);
-      const art = $('mkRecipes')?.querySelector(`[data-id="${r.id}"] .mk-recipe-art`);
+      const art = $maybe('mkRecipes')?.querySelector(`[data-id="${r.id}"] .mk-recipe-art`);
       if (art && src) art.innerHTML = stillImg(r);
       if (src) idle(step); else drawing = false;
     };
@@ -756,7 +857,7 @@ export function initMaker(){
         <span class="mk-recipe-art">${stills.has(r.id) ? stillImg(r) : previewSVG(rb, { label: describe(rb) })}</span>
         <span class="mk-card-name">${r.name}</span>
         <span class="mk-card-desc">${r.line}</span>
-        <span class="mk-card-meta">${chamberOf(rb).name} chamber · ${r.plants.length} plants</span>
+        <span class="mk-card-meta">${chosenChamber(rb).name} chamber · ${r.plants.length} plants</span>
       </button></li>`;
     }).join('');
     if (view3d) drawStills();
@@ -764,6 +865,7 @@ export function initMaker(){
   }
 
   // Every state change goes through here.
+  /** @param {Build} next @param {{ notice?: Notice|null, stage?: string, fresh?: string|null }} [opts] */
   function commit(next, opts = {}){
     b = next;
     ui.error = '';
@@ -773,32 +875,34 @@ export function initMaker(){
     if (opts.fresh) ui.fresh = opts.fresh;
     save();
     render();
-    if (opts.stage) root.querySelector('.mk-title')?.focus({ preventScroll: true });
+    if (opts.stage) focusEl(root.querySelector('.mk-title'))?.focus({ preventScroll: true });
     if (opts.stage) window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   }
 
-  const go = (to) => commit(b, { stage: to });
+  const go = (/** @type {string} */ to) => commit(b, { stage: to });
 
+  /** @param {string} sku */
   function pickChamber(sku){
     if (b.chamber === sku) return;
     const before = b;
     const { build: nb, removed, clearedSubstrate } = swapChamber(b, sku);
     const bits = [];
-    if (removed.length) bits.push(`Removed ${removed.join(', ')}: ${removed.length > 1 ? 'they don’t' : 'it doesn’t'} fit the ${chamberOf(nb).name} chamber.`);
-    if (clearedSubstrate) bits.push(`Foundation cleared: it doesn’t suit the ${chamberOf(nb).name} chamber.`);
+    if (removed.length) bits.push(`Removed ${removed.join(', ')}: ${removed.length > 1 ? 'they don’t' : 'it doesn’t'} fit the ${chosenChamber(nb).name} chamber.`);
+    if (clearedSubstrate) bits.push(`Foundation cleared: it doesn’t suit the ${chosenChamber(nb).name} chamber.`);
     commit(nb, { notice: bits.length ? { text: bits.join(' '), undo: before } : null });
   }
 
   root.addEventListener('click', (e) => {
-    const el = e.target.closest('[data-act]');
+    const el = /** @type {HTMLButtonElement|null} */ (/** @type {Element} */ (e.target).closest('[data-act]'));
     if (!el || el.disabled) return;
-    const { act, id, to } = el.dataset;
+    // Each act's control carries the data-id / data-to that act reads.
+    const { act, id, to } = /** @type {Record<string, string>} */ (el.dataset);
 
     if (act === 'start')   { track('maker_start'); commit(b, { stage: 'chamber' }); }
     if (act === 'resume')  { commit(b, { stage: furthest(b) }); }
     if (act === 'fresh')   { commit(emptyBuild(), { stage: 'chamber' }); }
     if (act === 'recipe')  {
-      const r = find(recipes, id);
+      const r = /** @type {typeof recipes[number]} */ (find(recipes, id));
       track('maker_recipe', { recipe: id });
       commit({ ...emptyBuild(), name: r.name, chamber: r.chamber, substrate: r.substrate, plants: [...r.plants] }, { stage: 'plants' });
     }
@@ -808,21 +912,22 @@ export function initMaker(){
     if (act === 'plant') {
       const res = togglePlant(b, id);
       if (res.error) { ui.error = res.error; render(); say(res.error); return; }
-      const added = res.build.plants.includes(id);
+      const built = /** @type {Build} */ (res.build);   // no error, so a build
+      const added = built.plants.includes(id);
       // Removing from the tray or Review: focus the next plant there, else the heading.
       const k = el.dataset.key, prefix = k?.match(/^(tray|rv)-/)?.[0];
       if (prefix && !added) {
-        const keys = [...root.querySelectorAll(`[data-key^="${prefix}"]`)].map(x => x.dataset.key), i = keys.indexOf(k);
+        const keys = [...root.querySelectorAll(`[data-key^="${prefix}"]`)].map(x => /** @type {HTMLElement} */ (x).dataset.key), i = keys.indexOf(k);
         focusNext = keys[i + 1] || keys[i - 1] || `${prefix}none`;
       }
-      commit(res.build, { fresh: added ? id : null });
-      say(`${added ? 'Added' : 'Removed'} ${plantOf(id).name}. ${res.build.plants.length} of ${capacity(chamberOf(res.build))} plants.`);
+      commit(built, { fresh: added ? id : null });
+      say(`${added ? 'Added' : 'Removed'} ${knownPlant(id).name}. ${built.plants.length} of ${capacity(chamberOf(built))} plants.`);
     }
     if (act === 'undo' && ui.notice?.undo) commit(ui.notice.undo);
     // Shared design over the visitor's own: go back to theirs, or replace it on purpose.
     if (act === 'own' && ui.own) {
       const own = ui.own;
-      ui.own = null; ui.shared = false; ui.disc = own.disc || ui.disc;
+      ui.own = null; ui.shared = false; ui.disc = own.disc;
       history.replaceState(null, '', location.pathname);
       commit(own.build, { stage: furthest(own.build), notice: { text: 'Back to your own design.' } });
     }
@@ -849,11 +954,13 @@ export function initMaker(){
     if (act === 'switch') switchFor(id);
     if (act === 'guide') openGuide();
     if (act === 'gd-close') closeGuide();
-    if (act === 'gd-step') { ui.gd.step = +id; renderGuide(); }
-    if (act === 'gd-back') { ui.gd.step--; renderGuide(); }
-    if (act === 'gd-next') { ui.gd.step++; renderGuide(); }
+    // The gd-* controls live in the dialog, which only shows while ui.gd is set.
+    const gd = /** @type {NonNullable<UI['gd']>} */ (ui.gd);
+    if (act === 'gd-step') { gd.step = +id; renderGuide(); }
+    if (act === 'gd-back') { gd.step--; renderGuide(); }
+    if (act === 'gd-next') { gd.step++; renderGuide(); }
     if (act === 'gd-apply') {
-      const { look, light, roles, room, care } = ui.gd.a;
+      const { look, light, roles, room, care } = gd.a;
       ui.disc = { ...ui.disc, g: { look, light, roles } };
       ui.pin = null;
       track('maker_guided_apply', { look, light, care });
@@ -861,16 +968,16 @@ export function initMaker(){
       commit({ ...b, space: { ...b.space, room, care } });
       root.querySelector('.mk-found')?.scrollIntoView({ block: 'nearest' });
     }
-    if (act === 'back')  go(STAGES[STAGES.indexOf(stage) - 1]);
+    if (act === 'back')  go(/** @type {string} */ (STAGES[STAGES.indexOf(stage) - 1]));
     if (act === 'next') {
       if (!done(b, stage)) { ui.error = NEED[stage]; render(); return; }
-      go(STAGES[STAGES.indexOf(stage) + 1]);
+      go(/** @type {string} */ (STAGES[STAGES.indexOf(stage) + 1]));
     }
     if (act === 'send') {
       track('maker_send', { method: 'whatsapp', chamber: b.chamber, plants: b.plants.length });
-      root.querySelector('.mk-sent').textContent = 'WhatsApp opened with your design. It is sent once you press send there.';
+      /** @type {Element} */ (root.querySelector('.mk-sent')).textContent = 'WhatsApp opened with your design. It is sent once you press send there.';
     }
-    if (act === 'copy') copyLink();
+    if (act === 'copy') void copyLink();   // handles its own failure
     if (act === 'reset' && confirm(ui.own ? 'Close this shared design? Your own design is kept.' : 'Start over? This clears your design.')) {
       history.replaceState(null, '', location.pathname);
       ui.shared = false;
@@ -881,8 +988,9 @@ export function initMaker(){
 
   // A plant from another climate: move to its chamber (keeping what fits,
   // with Undo), then add it. A new chamber may need a new foundation first.
+  /** @param {string} id */
   function switchFor(id){
-    const p = plantOf(id), home = homeOf(p), before = b;
+    const p = knownPlant(id), home = homeOf(p), before = b;
     const { build: nb, removed, clearedSubstrate } = swapChamber(b, home.sku);
     const res = togglePlant(nb, id);
     const next = res.build || nb;
@@ -897,7 +1005,7 @@ export function initMaker(){
 
   async function copyLink(){
     const url = shareUrl(b);
-    const out = root.querySelector('.mk-copied');
+    const out = /** @type {Element} */ (root.querySelector('.mk-copied'));
     try {
       await navigator.clipboard.writeText(url);
       out.textContent = 'Link copied. Anyone with it can open this design.';
@@ -907,17 +1015,18 @@ export function initMaker(){
     }
   }
 
-  root.addEventListener('toggle', (e) => { if (e.target.classList?.contains('mk-refine')) ui.refineOpen = e.target.open; }, true);
+  root.addEventListener('toggle', (e) => { const t = /** @type {HTMLDetailsElement} */ (e.target); if (t.classList.contains('mk-refine')) ui.refineOpen = t.open; }, true);
 
   // "Your space" + name: plain inputs, saved as typed.
   root.addEventListener('input', (e) => {
-    const t = e.target;
+    // Every field in the Maker is an <input>, <textarea> or <select>; these share the props read here.
+    const t = /** @type {HTMLInputElement} */ (e.target);
     if (t.name === 'q') { ui.disc = { ...ui.disc, q: t.value.slice(0, 80) }; renderResults(); return; }
     if (t.name === 'sort') { ui.disc = { ...ui.disc, sort: t.value }; renderResults(); return; }
     if (t.dataset.act === 'fit') { ui.disc = { ...ui.disc, f: { ...ui.disc.f, fit: t.checked } }; renderResults(); return; }
-    if (t.name?.startsWith('gd-') && ui.gd) {
+    if (t.name.startsWith('gd-') && ui.gd) {
       const k = t.name.slice(3);
-      ui.gd.a[k] = k === 'roles' ? [...dialog.querySelectorAll('[name=gd-roles]:checked')].map(x => x.value) : t.value;
+      /** @type {Record<string, string | string[]>} */ (ui.gd.a)[k] = k === 'roles' ? [...dialog.querySelectorAll('[name=gd-roles]:checked')].map(x => /** @type {HTMLInputElement} */ (x).value) : t.value;
       renderGuide();
       return;
     }
@@ -927,10 +1036,11 @@ export function initMaker(){
     if (t.name === 'room' || t.name === 'maturity') s[t.name] = t.value;
     if (t.name === 'note') s.note = t.value;
     if (t.name === 'household') {
-      s.household = [...t.form.querySelectorAll('[name=household]:checked')].map(x => x.value);
+      const form = /** @type {HTMLFormElement} */ (t.form);
+      s.household = [...form.querySelectorAll('[name=household]:checked')].map(x => /** @type {HTMLInputElement} */ (x).value);
       // "Neither" and the others are mutually exclusive.
       if (t.checked) s.household = t.value === 'Neither' ? ['Neither'] : s.household.filter(v => v !== 'Neither');
-      t.form.querySelectorAll('[name=household]').forEach(x => { x.checked = s.household.includes(x.value); });
+      form.querySelectorAll('[name=household]').forEach(x => { const box = /** @type {HTMLInputElement} */ (x); box.checked = s.household.includes(box.value); });
     }
     b = { ...b, space: s };
     save();   // no re-render: keeps the caret where it is
@@ -938,20 +1048,20 @@ export function initMaker(){
 
   // Keep the WhatsApp text and email prefill in step with the name field.
   function refreshSend(){
-    const a = root.querySelector('[data-act="send"]');
+    const a = /** @type {HTMLAnchorElement|null} */ (root.querySelector('[data-act="send"]'));
     if (a) a.href = whatsappHref(b);
     const line = JSON.stringify(cartLine(b));
     // Only the design's own buttons: the care kits on the review step carry their own line.
-    root.querySelectorAll('[data-add-line][data-key="cart"]').forEach(x => { x.dataset.addLine = line; });
-    root.querySelectorAll('[data-save-line][data-key="save"]').forEach(x => { x.dataset.saveLine = line; });
+    root.querySelectorAll('[data-add-line][data-key="cart"]').forEach(x => { /** @type {HTMLElement} */ (x).dataset.addLine = line; });
+    root.querySelectorAll('[data-save-line][data-key="save"]').forEach(x => { /** @type {HTMLElement} */ (x).dataset.saveLine = line; });
     syncCartButtons();
-    const msg = root.querySelector('.enquiry-form textarea[name="message"]');
+    const msg = /** @type {HTMLTextAreaElement|null} */ (root.querySelector('.enquiry-form textarea[name="message"]'));
     if (msg) msg.value = enquiryText(b);
   }
 
   // Desktop email route: log it like the WhatsApp send.
   root.addEventListener('submit', (e) => {
-    if (e.target.closest('.enquiry-form')) track('maker_send', { method: 'form', chamber: b.chamber, plants: b.plants.length });
+    if (/** @type {Element} */ (e.target).closest('.enquiry-form')) track('maker_send', { method: 'form', chamber: b.chamber, plants: b.plants.length });
   });
 
   // Entry from a box page: /maker?box=FireBox
@@ -997,7 +1107,7 @@ export function initMaker(){
     thumbsStarted = true;
     view3d.thumbs(plants.map(plantSpec), () => {
       root.querySelectorAll('svg.mk-thumb[data-thumb]').forEach(svg => {
-        const src = view3d?.thumb(svg.dataset.thumb);
+        const src = view3d?.thumb(/** @type {string} */ (/** @type {SVGElement} */ (svg).dataset.thumb));
         if (src) svg.outerHTML = `<img class="mk-thumb" src="${src}" alt="" width="56" height="64">`;
       });
     }, { paused: () => !!document.querySelector('dialog[open]') });   // guided search or the cart is open
