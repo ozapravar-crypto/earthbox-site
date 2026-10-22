@@ -88,11 +88,11 @@ function body(a) {
 // that don't run JavaScript follow them too.
 /** @type {Record<string, { href: string, text: string }[]>} */
 const STUDIO = {
-  'terrarium-care':     [{ href: '/maker', text: 'Design your own terrarium in the Maker' }, { href: '/care', text: 'Care: refill kits and visits in Mumbai' }],
-  'plant-fundamentals': [{ href: '/maker', text: 'Design your own terrarium in the Maker' }, { href: '/care', text: 'Care: refill kits and visits in Mumbai' }],
+  'terrarium-care':     [{ href: '/products', text: 'The catalogue' }, { href: '/care', text: 'Care: refill kits and visits in Mumbai' }],
+  'plant-fundamentals': [{ href: '/products', text: 'The catalogue' }, { href: '/care', text: 'Care: refill kits and visits in Mumbai' }],
   'mumbai-plants':      [{ href: '/care', text: 'Care: refill kits and visits in Mumbai' }, { href: '/products', text: 'The catalogue' }],
   '3d-printing':        [{ href: '/products', text: 'The catalogue: 3D-printed pieces, made to order' }],
-  'design-notes':       [{ href: '/products', text: 'The catalogue' }, { href: '/maker', text: 'The Maker' }]
+  'design-notes':       [{ href: '/products', text: 'The catalogue' }]
 };
 /** @param {Article} a */
 function studioHTML(a){

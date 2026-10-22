@@ -6,57 +6,46 @@
 // which confirms stock, delivery and the final total, then sends a
 // payment link. Swap `orderText` → a checkout call once Razorpay exists.
 //
-// Three kinds of line, because the catalogue has three kinds of price:
+// Two kinds of line, because the catalogue has two kinds of price:
 //   fixed   · Volume I pieces with a price per size × material → qty × price
 //   enquiry · no price (coming soon pieces, Elemental chambers) → "On enquiry",
 //             with the chamber's published range shown as a guide
-//   custom  · a Maker build → one row per component (chamber, foundation,
-//             plants), each priced or "on enquiry", summed into a build total
 // Care (/care) adds two line types that land in those kinds:
 //   refill kits are ordinary product lines (KIT-…, priced or on enquiry);
 //   a visit plan is {kind:'care', code} → fixed when the studio has set a
-//   per-visit rate, else on enquiry; custom boxes are always quoted.
+//   per-visit rate, else on enquiry.
 //
 // Lines are stored as ids only and resolved against data on every read, so
 // a price change in data/ shows up in carts already saved, and anything
-// unknown (old SKU, edited storage) is dropped. Rules are checked by
-// cart.test.mjs.
+// unknown (old SKU, edited storage, a retired custom build) is dropped.
+// Rules are checked by cart.test.mjs.
 // ─────────────────────────────────────────────────────────────────────
 
 import { volumeOne, materials, photoPath, places } from '../data/volume-one.js';
 import { volumeTwo } from '../data/upcoming.js';
-import { substrates } from '../data/maker.js';
 import { kits } from '../data/care.js';
 import { decodePlan, encodePlan, planPrice, planSummary, refLabel } from './care.js';
 import { suggest } from './pairings.js';
-import { decodeBuild, encodeBuild, chamberOf, plantOf, isSoilless } from './build-codec.js';
 import { enquiryAltHTML, ENQUIRY_PHONE } from './enquiry-form.js';
-import { SITE } from '../data/site.js';
 import { esc, rupees, track, art } from './util.js';
 import { icon } from '../data/icons.js';
 
 /**
- * @typedef {import('./build-codec.js').Chamber} Chamber
- * @typedef {import('./build-codec.js').Plant} Plant
- * @typedef {import('./build-codec.js').Substrate} Substrate
  * @typedef {import('../data/volume-one.js').PriceTable} PriceTable
- * @typedef {{ price?: number }} Priced  maker.js adds `price` once the workbook has one
  *
  * @typedef {'cart' | 'saved'} List
  * @typedef {{ kind: 'product', sku: string, variant?: string | null, material?: string | null, qty: number }} ProductLine
  * @typedef {{ code: string, sku?: undefined, qty?: number }} CodeLineBase
- * @typedef {(CodeLineBase & { kind: 'build' }) | (CodeLineBase & { kind: 'care' })} CodeLine  a Maker build or a care plan; no quantity
+ * @typedef {CodeLineBase & { kind: 'care' }} CodeLine  a care plan; no quantity
  * @typedef {ProductLine | CodeLine} Line  a stored line: ids only
  * @typedef {CodeLine | (Omit<ProductLine, 'qty'> & { qty?: number })} NewLine  a line being added (qty defaults to 1)
  * @typedef {{ cart: Line[], saved: Line[] }} CartState
  *
- * @typedef {{ label: string, price: number | null, range?: [number, number] | null, note?: string }} Part
  * @typedef {{ key: string, qty: number, title: string, sub: string, href: string, img: string | null, status: string,
  *   care?: boolean, cartable?: boolean, range?: [number, number] | null, note?: string }} RowBase
  * @typedef {RowBase & { kind: 'fixed', unit: number }} FixedRow
  * @typedef {RowBase & { kind: 'enquiry', unit: null }} EnquiryRow
- * @typedef {RowBase & { kind: 'custom', parts: Part[] }} CustomRow
- * @typedef {FixedRow | EnquiryRow | CustomRow} Row  a resolved line: what the drawer and the order message show
+ * @typedef {FixedRow | EnquiryRow} Row  a resolved line: what the drawer and the order message show
  */
 
 const STORE = 'earthbox-cart';
@@ -71,9 +60,6 @@ export const parseRange = (s) => {
   const n = String(s || '').replace(/,/g, '').match(/\d+/g);
   return n ? [+n[0], +n[n.length - 1]] : null;
 };
-/** @param {unknown} v */
-const num = (v) => (typeof v === 'number' && v > 0 ? v : null);
-
 
 // ═══ RULES (pure) ═════════════════════════════════════════════════════
 
@@ -82,13 +68,13 @@ export const emptyCart = () => ({ cart: [], saved: [] });
 
 // A line's identity: the same piece in another size or material is a new line.
 /** @param {NewLine} l */
-export const keyOf = (l) => l.kind === 'build' ? `build:${l.code}` : l.kind === 'care' ? `care:${l.code}`
+export const keyOf = (l) => l.kind === 'care' ? `care:${l.code}`
   : [l.sku, l.variant, l.material].filter(Boolean).join('|');
 /**
  * @param {{ kind?: unknown }} l
  * @returns {l is CodeLine}
  */
-const ONE_OFF = (l) => l.kind === 'build' || l.kind === 'care';   // no quantity
+const ONE_OFF = (l) => l.kind === 'care';   // no quantity
 
 // Line (ids) → everything the drawer and the order message need.
 /**
@@ -97,28 +83,13 @@ const ONE_OFF = (l) => l.kind === 'build' || l.kind === 'care';   // no quantity
  * @returns {Row | null}
  */
 export function resolve(l, list = 'cart'){
-  if (l.kind === 'build') {
-    const b = decodeBuild(l.code);
-    if (!b) return null;
-    // A decoded build's chamber and plants always exist.
-    const ch = /** @type {Chamber} */ (chamberOf(b)), sub = /** @type {(Substrate & Priced) | undefined} */ (substrates.find(s => s.id === b.substrate));
-    const parts = [
-      { label: `${ch.name} chamber`, price: null, range: parseRange(ch.price), note: ch.price },
-      isSoilless(ch.sku) ? { label: 'No foundation, soil-free', price: 0, note: '—' }
-        : { label: sub ? sub.name : 'Foundation · studio’s choice', price: num(sub?.price) },
-      ...b.plants.map(id => ({ label: /** @type {Plant} */ (plantOf(id)).name, price: num(/** @type {Plant & Priced} */ (plantOf(id)).price) }))
-    ];
-    return { kind: 'custom', key: keyOf(l), qty: 1, title: b.name || `${ch.name} world`, sub: 'Custom build · Maker',
-      // The chamber's own line art, not a letter (audit K4): botanical art, not an icon.
-      href: `/maker#${encodeBuild(b)}`, img: ch.illustration ? `/assets/boxes/${ch.illustration}` : null, parts, status: `Made to order · ${ch.lead}` };
-  }
   if (l.kind === 'care') {
     const plan = decodePlan(l.code);
     if (!plan) return null;
     const price = planPrice(plan);
     return /** @type {FixedRow | EnquiryRow} */ ({ kind: price ? 'fixed' : 'enquiry', care: true, key: keyOf(l), qty: 1, title: `Care visits · ${refLabel(plan)}`,
       sub: planSummary(plan), href: `/care#${encodePlan(plan)}`, img: null, unit: price,
-      status: plan.s === 'custom' ? 'Quoted for custom boxes' : 'Mumbai · studio confirms dates' });
+      status: 'Mumbai · studio confirms dates' });
   }
   // Stored lines always carry qty; a line still being added may not, and
   // add() only checks that it resolves.
@@ -156,26 +127,16 @@ export function resolve(l, list = 'cart'){
   return null;
 }
 
-// A build's own total: priced parts summed, the chamber range carried, the rest counted.
-/** @param {CustomRow} r */
-export function buildTotal(r){
-  const fixed = r.parts.reduce((s, p) => s + (p.price || 0), 0);
-  const range = r.parts.find(p => p.range)?.range || [0, 0];
-  return { low: fixed + range[0], high: fixed + range[1], quoted: r.parts.filter(p => p.price === null && !p.range).length };
-}
-
 // The whole cart. `fixed` is exact; low/high add the guide ranges; `quoted`
-// counts lines (or build parts) the studio still has to price.
-// Counts a visitor sees are pieces, never a build's parts (UX audit S-07):
+// counts lines the studio still has to price.
 // `priced` = pieces with an exact price, `toQuote` = pieces the studio still
-// prices (a build with any unpriced part counts once).
+// prices (UX audit S-07).
 /** @param {Row[]} lines */
 export function totals(lines){
   let fixed = 0, low = 0, high = 0, quoted = 0, items = 0, priced = 0, toQuote = 0;
   for (const r of lines) {
     items += r.qty;
     if (r.kind === 'fixed') { fixed += r.unit * r.qty; priced += r.qty; continue; }
-    if (r.kind === 'custom') { const t = buildTotal(r); low += t.low; high += t.high; quoted += t.quoted; if (t.quoted) toQuote += 1; continue; }
     if (r.range) { low += r.range[0] * r.qty; high += r.range[1] * r.qty; } else { quoted += r.qty; toQuote += r.qty; }
   }
   return { items, fixed, low: fixed + low, high: fixed + high, ranged: high > 0, quoted, priced, toQuote };
@@ -273,15 +234,9 @@ export function orderText(lines, contact = {}){
   const t = totals(lines);
   const out = ['Hi Aayush, I’d like to order from EarthBox.', ''];
   lines.forEach((r, i) => {
-    if (r.kind === 'custom') {
-      out.push(`${i + 1}. ${r.title} (custom build)`);
-      r.parts.forEach(p => out.push(`   · ${p.label}: ${p.price ? rupees(p.price) : p.note || 'on enquiry'}`));
-      out.push(`   Design: ${SITE}${r.href}`);
-    } else {
-      const price = r.kind === 'fixed' ? `${rupees(r.unit)}${r.qty > 1 ? ` × ${r.qty} = ${rupees(r.unit * r.qty)}` : ''}`
-        : r.note ? `on enquiry (guide ${r.note})` : 'on enquiry';
-      out.push(`${i + 1}. ${r.title}${r.sub ? ` · ${r.sub}` : ''}${r.qty > 1 && r.kind !== 'fixed' ? ` × ${r.qty}` : ''}: ${price}`);
-    }
+    const price = r.kind === 'fixed' ? `${rupees(r.unit)}${r.qty > 1 ? ` × ${r.qty} = ${rupees(r.unit * r.qty)}` : ''}`
+      : r.note ? `on enquiry (guide ${r.note})` : 'on enquiry';
+    out.push(`${i + 1}. ${r.title}${r.sub ? ` · ${r.sub}` : ''}${r.qty > 1 && r.kind !== 'fixed' ? ` × ${r.qty}` : ''}: ${price}`);
   });
   out.push('');
   if (t.fixed) out.push(`Priced items: ${rupees(t.fixed)}`);
@@ -344,23 +299,18 @@ const has = (list, line) => state[list].some(l => keyOf(l) === keyOf(line));
  */
 function lineHTML(r, list){
   const k = esc(r.key);
-  // Icons, not letters, where there's no photo (S-10): a visit plan, a kit, a build.
+  // Icons, not letters, where there's no photo (S-10): a visit plan, a kit.
   const thumb = r.img ? `<img src="${esc(r.img)}" alt="" width="72" height="72" loading="lazy">`
-    : `<span class="ct-thumb-mark" aria-hidden="true">${icon(r.kind === 'custom' ? 'sprout' : r.key.startsWith('care:') ? 'calendar-clock' : 'package', { size: 'lg' })}</span>`;
-  const qty = list === 'cart' && r.kind !== 'custom' && !r.key.startsWith('care:') ? `
+    : `<span class="ct-thumb-mark" aria-hidden="true">${icon(r.key.startsWith('care:') ? 'calendar-clock' : 'package', { size: 'lg' })}</span>`;
+  const qty = list === 'cart' && !r.key.startsWith('care:') ? `
       <div class="ct-qty" role="group" aria-label="Quantity of ${esc(r.title)}">
         <button type="button" data-ct="qty" data-k="${k}" data-d="-1" ${r.qty <= 1 ? 'disabled' : ''} aria-label="One fewer">−</button>
         <output aria-live="polite">${r.qty}</output>
         <button type="button" data-ct="qty" data-k="${k}" data-d="1" ${r.qty >= MAX_QTY ? 'disabled' : ''} aria-label="One more">+</button>
       </div>` : '';
-  const parts = r.kind === 'custom' ? (() => {
-    const t = buildTotal(r);
-    return `<ul class="ct-parts">${r.parts.map(p => `<li><span>${esc(p.label)}</span><span>${p.price ? rupees(p.price) : p.price === 0 ? '—' : esc(p.note || 'On enquiry')}</span></li>`).join('')}
-      <li class="ct-parts-total"><span>Build estimate</span><span>${t.high ? `${rupees(t.low)} – ${rupees(t.high)}` : '—'}${t.quoted ? ` + ${t.quoted} quoted` : ''}</span></li></ul>`;
-  })() : '';
   // A coming-soon piece in Saved: its guide and its status, said once (S-19).
   const soon = list === 'saved' && r.cartable === false;
-  const price = r.kind === 'custom' || soon ? ''
+  const price = soon ? ''
     : r.kind === 'fixed' ? `<span class="ct-price">${rupees(list === 'cart' ? r.unit * r.qty : r.unit)}</span>`
     : '<span class="ct-price ct-price--enquiry">On enquiry</span>';
   const each = r.kind === 'fixed' ? `<span class="ct-each">${rupees(r.unit)} each</span>`
@@ -372,10 +322,9 @@ function lineHTML(r, list){
       <div class="ct-top"><a class="ct-title" href="${esc(r.href)}">${esc(r.title)}</a>${price}</div>
       <div class="ct-meta"><span class="ct-sub">${esc(r.sub)}</span>${each}</div>
       <span class="ct-status">${status}</span>
-      ${parts}
       ${qty}
       <div class="ct-actions">
-        ${r.kind === 'custom' ? `<a class="ct-link" href="${esc(r.href)}">Edit design</a>` : r.key.startsWith('care:') ? `<a class="ct-link" href="${esc(r.href)}">Change plan</a>` : ''}
+        ${r.key.startsWith('care:') ? `<a class="ct-link" href="${esc(r.href)}">Change plan</a>` : ''}
         ${soon ? '' : `<button type="button" class="ct-link" data-ct="move" data-from="${list}" data-k="${k}">${list === 'cart' ? 'Save for later' : 'Move to cart'}</button>`}
         <button type="button" class="ct-link" data-ct="remove" data-from="${list}" data-k="${k}">Remove<span class="u-sr-only"> ${esc(r.title)}</span></button>
       </div>
@@ -420,7 +369,7 @@ function breakdownHTML(t){
   const row = (a, b) => `<p class="ct-row"><span>${a}</span><span>${b}</span></p>`;
   return `<div class="ct-breakdown">
     ${t.fixed ? row(`Priced pieces · ${t.priced}`, rupees(t.fixed)) : ''}
-    ${t.ranged ? row('Chamber &amp; build guide', `${rupees(t.low - t.fixed)} – ${rupees(t.high - t.fixed)}`) : ''}
+    ${t.ranged ? row('Chamber guide', `${rupees(t.low - t.fixed)} – ${rupees(t.high - t.fixed)}`) : ''}
     ${t.toQuote ? row('To be quoted', pieces(t.toQuote)) : ''}
     ${row('Delivery', 'Mumbai · confirmed by the studio')}
   </div>`;
@@ -455,12 +404,12 @@ function drawerHTML(){
    * @param {List} id
    * @param {string} label
    */
-  // "Cart · 5 pieces | Saved · 2" (UX audit D1): pieces, not a build's parts.
+  // "Cart · 5 pieces | Saved · 2" (UX audit D1).
   const tabBtn = (id, label) => `<button type="button" role="tab" id="ct-tab-${id}" aria-controls="ct-panel" aria-selected="${tab === id}" data-ct="tab" data-tab="${id}" ${tab === id ? '' : 'tabindex="-1"'}>${label} <span>· ${id === 'cart' ? pieces(count(id)) : count(id)}</span></button>`;
   const list = lines[tab];
   const empty = tab === 'cart'
-    ? `${art('system-cart-empty', 'ct-art')}<p class="ct-empty">Your cart is empty.</p><p class="ct-note">Add pieces from the <a href="/products">catalogue</a>, or design your own in the <a href="/maker">Maker</a>.</p>`
-    : `${art('system-saved-empty', 'ct-art')}<p class="ct-empty">Nothing saved yet.</p><p class="ct-note">Use “Save” on any piece or design to keep it here.</p>`;
+    ? `${art('system-cart-empty', 'ct-art')}<p class="ct-empty">Your cart is empty.</p><p class="ct-note">Add pieces from the <a href="/products">catalogue</a>.</p>`
+    : `${art('system-saved-empty', 'ct-art')}<p class="ct-empty">Nothing saved yet.</p><p class="ct-note">Use “Save” on any piece to keep it here.</p>`;
   return `<header class="ct-head">
       <h2 id="ct-title" class="caption">Your selection</h2>
       <button type="button" class="ct-close" data-ct="close" aria-label="Close">${icon('x', { size: 'md' })}</button>

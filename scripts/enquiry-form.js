@@ -37,7 +37,7 @@ const isConfigured = () => !WEB3FORMS_ACCESS_KEY.startsWith('PASTE_');
 // ─── Markup ───
 // `product` is the thing being enquired about, used to prefill the message
 // and to label the email subject. Pass '' for a general enquiry.
-// `message` overrides the prefill (the Maker sends the whole design).
+// `message` overrides the prefill.
 // `order` is the cart's route (UX audit S-08/S-09): shown at every width,
 // asks for name, phone and pincode (email optional), and shows the order
 // read-only. `values` refills what the visitor already typed, since the cart

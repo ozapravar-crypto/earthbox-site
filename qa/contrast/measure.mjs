@@ -114,7 +114,7 @@ export async function resolveBatch(page, items){
   const restore = async () => { await page.evaluate((y) => scrollTo({ top: y, behavior: 'instant' }), startY); await page.waitForTimeout(150); };
   if (flowing.length) {
     // Usable band of the viewport: below the fixed header and above any fixed or
-    // sticky bar along the bottom (the Maker's action bar covered buttons on phones).
+    // sticky bar along the bottom (a sticky action bar once covered buttons on phones).
     const { vh, head } = await page.evaluate(() => {
       let foot = innerHeight;
       for (const x of [innerWidth * .25, innerWidth * .5, innerWidth * .75])
@@ -148,7 +148,7 @@ export async function resolveBatch(page, items){
         if (top < head && sy > 0) break;
       }
       // Is each item really the topmost thing at its spot on this screen? A
-      // sticky panel (the Maker's preview on phones) can sit over it. 14 of 30
+      // sticky panel (as a preview once did on phones) can sit over it. 14 of 30
       // phone items were measured against the preview before this check.
       const ids = flowing.slice(start, i).map(it => it.cq);
       const clear = await page.evaluate((ids) => ids.map(id => {

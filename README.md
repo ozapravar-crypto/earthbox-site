@@ -25,7 +25,7 @@ flowchart LR
     SITE[site.js<br/>nav · contact · footer · refund policy]
     V1[volume-one.js<br/>3D-printed pieces + prices]
     V2[upcoming.js<br/>Elemental chambers]
-    MK[maker.js<br/>plants · foundations · recipes]
+    EL[elements.js<br/>plant groups per chamber]
     ART[articles.js + article-bodies/]
   end
 
@@ -37,44 +37,39 @@ flowchart LR
 
   subgraph browser["browser (every page)"]
     MAIN[main.js] --> SHARED[theme · header · menu · cart · motion]
-    MAIN -.import() only if root exists.-> PAGE[render-products · catalogue · render-product-detail · render-about · render-blog · maker]
-    PAGE -. maker only, WebGL only .-> M3D[maker-3d.js + vendor/three]
-    M3D -. when a plant needs one .-> GLB[vendor/GLTFLoader + assets/plants3d/*.glb]
+    MAIN -.import() only if root exists.-> PAGE[render-products · catalogue · render-product-detail · render-about · render-blog · care-page]
   end
 
   SITE --> INC
   ART --> PRE
-  V1 & V2 & MK --> PAGE
-  V1 & V2 & MK --> CART[cart.js]
-  MK --> CODEC[build-codec.js]
-  CODEC --> CART
-  CODEC --> PAGE
+  V1 & V2 & EL --> PAGE
+  V1 & V2 & EL --> CART[cart.js]
   SHARED --- CART
 ```
 
 | Layer | Files | Owns | Never does |
 |---|---|---|---|
-| **Data** | `data/*.js` | Every product, price, plant, article, nav link, phone number | Touch the DOM |
-| **Pure rules** | `build-codec.js`, `plant-search.js`, the rule half of `maker.js` and `cart.js`, `util.js` | Decisions (what fits, what it costs, what matches), each with a `*.test.mjs` | Touch the DOM |
-| **Renderers** | `render-*.js`, `catalogue.js`, the UI half of `maker.js`/`cart.js`, `maker-3d.js` | Turning data into markup, wiring clicks | Hold facts of their own |
+| **Data** | `data/*.js` | Every product, price, plant group, article, nav link, phone number | Touch the DOM |
+| **Pure rules** | `care.js`, `pairings.js`, the rule half of `cart.js`, `util.js` | Decisions (what fits, what it costs, what matches), each with a `*.test.mjs` | Touch the DOM |
+| **Renderers** | `render-*.js`, `catalogue.js`, `care-page.js`, the UI half of `cart.js` | Turning data into markup, wiring clicks | Hold facts of their own |
 | **Motion** | `reveal`, `scramble`, `magnetic`, `cursor`, `parallax`, `pin`, `loader`, `manifesto-spotlight` | Behaviour only (spec: `MOTION.md`) | Change content |
 | **Build + checks** | `includes.mjs`, `prerender.mjs`, `check-*.mjs` | Static HTML for crawlers; the deploy gate | Run in the browser |
 | **Styles** | `tokens.css` (all colours/fonts/spacing) → `reset`/`typography`/`primitives`/`components` (every page) → one file per page | Look | Hard-code colours (use tokens) |
 
-Feature docs: **`MAKER.md`** (terrarium Maker, discovery, 3D) · **`CART.md`** (cart + saved list, three kinds of line) · **`MOTION.md`** (motion rules per section) · **`_audits/`** (dated audits and what was fixed).
+Feature docs: **`CART.md`** (cart + saved list, two kinds of line) · **`MOTION.md`** (motion rules per section) · **`_audits/`** (dated audits and what was fixed).
 
 ## The checks
 
 | Command | On deploy | Fails when |
 |---|---|---|
-| `npm run test:unit` | ✓ | Maker/search/cart/form rules break, or **data shape** is wrong (`data.test.mjs`) |
+| `npm run test:unit` | ✓ | Cart/care/form rules break, or **data shape** is wrong (`data.test.mjs`) |
 | `npm run lint` | ✓ | Correctness, not style. Core: unused/undefined names, `==`, `var`, stray `console.log`. Type-aware (typescript-eslint): promises left unhandled, conditions that can't be false, casts that do nothing, `[object Object]` in text. Any warning or stale `eslint-disable` fails |
 | `npm run typecheck` | ✓ | TypeScript in strict mode finds a type error in the JavaScript (`tsconfig.json`: `checkJs`, no compiling, the site ships as written). Types come from inference + JSDoc; the vendored libraries are typed by the `.d.ts` beside them |
 | `npm run check:unused` | ✓ | knip: an unused file, export or dependency |
 | `npm run check:dupes` | ✓ | jscpd: a copy-pasted block of 50+ tokens (`.jscpd.json`, threshold 0) |
 | `node scripts/includes.mjs --check` | ✓ | A page's header/footer differs from `data/site.js` |
 | `npm run check:prerender` | ✓ | An article page has no `<h1>`, too little text, or duplicated sections |
-| `npm run check:assets` | ✓ | Any `src`/`href`/product photo/Maker plant model points at a missing file |
+| `npm run check:assets` | ✓ | Any `src`/`href`/product photo/illustration points at a missing file |
 | `npm run check:contrast` | ✓ | A text colour token falls below 4.5:1 on `--bg` or `--bg-tint`, light or dark |
 | `npm run test:e2e` | — (no browser on Vercel) | A page errors, 404s or scrolls sideways; a fixed bug comes back |
 | `npm run qa:contrast` | CI (GitHub Actions) | Any text, placeholder, icon or focus ring under WCAG AA on any page × theme × size × state, measured from real pixels (see `qa/CONTRAST.md`) |
@@ -87,16 +82,6 @@ Feature docs: **`MAKER.md`** (terrarium Maker, discovery, 3D) · **`CART.md`** (
 2. Put `name.webp`, `name-600.webp` and `name-300.webp` in `assets/v1/` (plants go in `assets/plants/`).
 3. Run `npm test`. `data.test` checks the shape and `check-assets` checks the photos.
 
-**Add a plant to the Maker** (`data/maker.js`)
-1. Add a row `['PLT-046', group, name, shape, botanical]`. The group must be in `elements` and the shape in `forms`.
-2. Add `price` when there is one; the cart picks it up with no other change.
-3. Run `npm test`. Recipes are re-checked so every plant still fits its chamber.
-
-**Give a plant (or a whole shape) a 3D model in the Maker** (`data/maker.js` → `models`)
-1. Put a CC0/CC BY `.glb` (vertex colours, no textures, ≤ ~5k triangles) in `assets/plants3d/` under a new name, and credit it in `assets/plants3d/CREDITS.md` (CC BY also on `maker.html`).
-2. Map it: `models.forms.<form>` for every plant of that shape, or `models.plants['PLT-0nn']` for one plant (`null` = keep the procedural plant).
-3. Run `npm test` (the file must exist, the keys must be real) and look at it in the Maker. Details: `MAKER.md` → Plant models.
-
 **Add a Journal article**
 1. Add its body to the right `data/article-bodies/*.js` and its entry to `data/articles.js`.
 2. Copy any `blog/*.html` to `blog/<slug>.html` and set `<body data-article="<slug>">`.
@@ -105,7 +90,7 @@ Feature docs: **`MAKER.md`** (terrarium Maker, discovery, 3D) · **`CART.md`** (
 **Add a botanical drawing** (`assets/illustrations/`)
 1. Generate it in the engraved style with a print-kit plate as the style reference (black ink on white, no frame, nothing touching the edges), and keep the original PNG in `earthbox-print/img/site-art/`.
 2. Turn it into an **ink mask**: 480 × 480 WebP, black pixels, alpha = ink density, cropped to the drawing. CSS paints it in `currentColor`, so one file works in light mode, dark mode and the inverted "selected" state.
-3. Add its entry to `assets/illustrations/manifest.json`. Use it with `art('<id>')` (`scripts/util.js`). For a Maker answer, map it in `answerArt` (`data/maker.js`).
+3. Add its entry to `assets/illustrations/manifest.json`. Use it with `art('<id>')` (`scripts/util.js`).
 4. Run `npm test`. `check-assets` fails if any `art()` id, `answerArt` entry or `--art:url()` points at a missing file.
 
 **Change the nav, contact details, footer or refund policy**
@@ -124,14 +109,13 @@ Only in `styles/tokens.css`, for both light and dark. `check:contrast` tells you
   - contact, nav and footer: `data/site.js`
   - colours: `tokens.css`
   - the photo folder: `photoPath()`
-  - the build codec: `build-codec.js`
 
   Don't retype a number that already lives somewhere.
-- **Types, not comments.** New code passes `npm run typecheck` with no `any`, `@ts-ignore` or `@ts-nocheck`; `@ts-expect-error` only with a reason. Data shapes are inferred from `data/` and imported as `@typedef`s (`Plant`, `Build`, `Line`, …), not retyped.
+- **Types, not comments.** New code passes `npm run typecheck` with no `any`, `@ts-ignore` or `@ts-nocheck`; `@ts-expect-error` only with a reason. Data shapes are inferred from `data/` and imported as `@typedef`s (`Product`, `Plan`, `Line`, …), not retyped.
 - **No dead or duplicate code.** knip and jscpd run in `npm test`; delete instead of commenting out.
 - **Pure rules get a test.** Anything that decides (fits, costs, matches, parses untrusted input) lives in a DOM-free function with a `*.test.mjs`.
-- **Untrusted input is validated at the edge.** URL hashes, localStorage and the share link go through `decodeBuild` / `clean()` / `cleanDisc`, which keep known ids only.
-- **Page code loads only where it's used** (`PAGE_MODULES`). A heavy dependency (three.js) loads only on its page and only when it can run, with a fallback.
+- **Untrusted input is validated at the edge.** URL hashes and localStorage go through `decodePlan` / `clean()`, which keep known ids only.
+- **Page code loads only where it's used** (`PAGE_MODULES`).
 - **Static where crawlers look.** Header, footer and articles are real HTML at deploy time.
 - **Accessibility floor:** 44 px tap targets, visible focus, `prefers-reduced-motion` honoured, text ≥ 4.5:1, a skip link on every page.
 - **Design rules:** site tokens, sharp rectangular edges (the homepage hero's round arrow is the one agreed exception), and checks at 1440 / 375 px plus dark mode.

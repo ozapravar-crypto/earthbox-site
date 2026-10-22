@@ -2,7 +2,7 @@
 /**
  * seo.mjs — everything search and answer engines read, generated from data/.
  *
- * WHY: since the 28 Sep audit the site grew Care, the Maker and 41 product
+ * WHY: since the 28 Sep audit the site grew Care and 41 product
  * pages, but the sitemap, schema and crawler files were hand-kept and fell
  * behind. Product pages were one URL (/product#SKU): crawlers saw an empty
  * "Loading…" shell, so no piece could be found or cited on its own.
@@ -48,7 +48,7 @@ const seller = { '@type': 'Organization', '@id': BUSINESS_ID, name: 'EarthBox', 
 const business = (catalogue) => ({
   '@context': 'https://schema.org', '@type': 'LocalBusiness', '@id': BUSINESS_ID,
   name: 'EarthBox', alternateName: 'EarthBox Mumbai', url: SITE,
-  description: 'Mumbai-based studio making terrariums and 3D-printed plant accessories as design objects, with a terrarium Maker and plant care.',
+  description: 'Mumbai-based studio making terrariums and 3D-printed plant accessories as design objects, with plant care.',
   image: `${SITE}/assets/logo.webp`, logo: `${SITE}/assets/logo.webp`,
   founder: { '@type': 'Person', name: 'Aayush Lilani', sameAs: ['https://www.linkedin.com/in/aayush-lilani-13a329292/'] },
   address: { '@type': 'PostalAddress', streetAddress: 'Kandivali', addressLocality: 'Mumbai', addressRegion: 'Maharashtra', postalCode: '400101', addressCountry: 'IN' },
@@ -59,8 +59,7 @@ const business = (catalogue) => ({
   ...(catalogue && { hasOfferCatalog: { '@type': 'OfferCatalog', name: 'EarthBox Catalogue', itemListElement: [
     { '@type': 'OfferCatalog', name: 'Volume I · 3D-printed plant accessories', url: `${SITE}/products` },
     { '@type': 'OfferCatalog', name: 'Volume II · Elemental Boxes (coming soon)', url: `${SITE}/products` },
-    { '@type': 'OfferCatalog', name: 'Care · refill kits and plant-care visits', url: `${SITE}/care` },
-    { '@type': 'OfferCatalog', name: 'The Maker · design your own terrarium', url: `${SITE}/maker` }] } })
+    { '@type': 'OfferCatalog', name: 'Care · refill kits and plant-care visits', url: `${SITE}/care` }] } })
 });
 /** @param {string} html @param {object} o */
 const withBusiness = (html, o) => html.replace(/<!-- LocalBusiness Schema -->\s*<script type="application\/ld\+json">[\s\S]*?<\/script>/,
@@ -166,13 +165,12 @@ ${urls.map(u => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod}<
 const line = (title, url, note) => `- [${title}](${url})${note ? `: ${note}` : ''}`;
 out.set('llms.txt', `# EarthBox
 
-> EarthBox is a terrarium and 3D-printing studio in ${ADDRESS}, India. It makes closed terrariums ("Elemental Boxes"), 3D-printed planters, moss poles and plant accessories (live plant packets are coming soon), lets you design your own terrarium online (the Maker), and offers Care: refill kits and plant-care visits. Delivery within ${coverage.city}. Orders and questions: WhatsApp ${PHONE_DISPLAY} or ${EMAIL}.
+> EarthBox is a terrarium and 3D-printing studio in ${ADDRESS}, India. It makes closed terrariums ("Elemental Boxes"), 3D-printed planters, moss poles and plant accessories (live plant packets are coming soon), and offers Care: refill kits and plant-care visits. Delivery within ${coverage.city}. Orders and questions: WhatsApp ${PHONE_DISPLAY} or ${EMAIL}.
 
 Prices are in Indian rupees. 3D-printed pieces are made to order (about 1 week). Pieces marked "Coming soon" can't be ordered yet.
 
 ## Pages
 ${line('Catalogue', `${SITE}/products`, 'every piece, with prices')}
-${line('The Maker', `${SITE}/maker`, 'design your own terrarium: pick a chamber, then plants, moss and stones, in 3D')}
 ${line('Care', `${SITE}/care`, `refill kits and visit plans for homes in ${coverage.city}; quotes for offices, cafés and hotels`)}
 ${line('About', `${SITE}/about`, 'the studio and its founder, Aayush Lilani')}
 ${line('Journal', `${SITE}/blog`, 'guides to terrarium care and plants in Mumbai')}

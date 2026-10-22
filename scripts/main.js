@@ -3,7 +3,7 @@
 //
 // Shared modules (header, theme, cart, motion) load everywhere. Page
 // modules load only when their root element is on the page, via import():
-// an article page no longer downloads the Maker, the catalogue or the
+// an article page no longer downloads the catalogue or the
 // product renderer. A page module that fails is logged and skipped; the
 // rest of the page keeps working.
 //
@@ -49,7 +49,6 @@ const PAGE_MODULES = [
   ['#productDetail',                                    () => import('./render-product-detail.js').then(m => m.initProductDetail())],
   ['#aboutSections',                                    () => import('./render-about.js').then(m => m.initAbout())],
   ['#journalGrid, #journalFilters',                     () => import('./render-blog.js').then(m => m.initBlog())],
-  ['#maker',                                            () => import('./maker.js').then(m => m.initMaker())],
   ['#carePlanner',                                      () => import('./care-page.js').then(m => m.initCare())],
   ['#account',                                          () => import('./account.js').then(m => m.initAccountPage(/** @type {HTMLElement} */ (document.getElementById('account')), reloadCart))]
 ];

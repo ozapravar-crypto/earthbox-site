@@ -9,21 +9,16 @@
 // ─────────────────────────────────────────────────────────────────────
 
 import { visit, subjects, businessSites, groupNames, coverage } from '../data/care.js';
-import { elements } from '../data/maker.js';
+import { elements } from '../data/elements.js';
 import { volumeOne } from '../data/volume-one.js';
 import { planPrice, groupsOf, kitFor, encodePlan, decodePlan, planSummary, refLabel } from './care.js';
-import { decodeBuild, chamberOf } from './build-codec.js';
 import { esc, rupees } from './util.js';
 import { icon } from '../data/icons.js';
 
-/**
- * @typedef {import('./care.js').Plan} Plan
- * @typedef {import('./build-codec.js').Build} Build
- * @typedef {import('./build-codec.js').Chamber} Chamber
- */
+/** @typedef {import('./care.js').Plan} Plan */
 
 const GROUP_NOTE = Object.fromEntries(elements.map(e => [e.id, e.heading]));
-// "Mosses (Moss)": the plain name first, the Maker's name second (UX audit S-21).
+// "Mosses (Moss)": the plain name first, the group's name second (UX audit S-21).
 /** @param {string} g */
 const groupLabel = (g) => `${groupNames[g] || g} (${g})`;
 // The quiet line under the pincode (UX audit S-24): a hint, never a refusal.
@@ -34,20 +29,6 @@ const attr = (o) => esc(JSON.stringify(o));
 // Pieces someone can own and that hold plants: available Volume I planters,
 // plant packets and supports. Chambers are coming soon, so they're not here.
 const OWNABLE = volumeOne.filter(p => p.status !== 'coming-soon' && ['planters', 'plant-packets', 'plant-support'].includes(p.category));
-
-// Maker designs the visitor already has (cart or saved), for "A custom box".
-function savedBuilds(){
-  try {
-    // Untrusted storage: only lines whose code decodes to a build are kept.
-    /** @type {{ cart?: ({ kind?: unknown, code?: unknown } | null)[], saved?: ({ kind?: unknown, code?: unknown } | null)[] }} */
-    const s = JSON.parse(localStorage.getItem('earthbox-cart') || '{}');
-    return [...(s.cart || []), ...(s.saved || [])].filter(l => l?.kind === 'build' && decodeBuild(l.code))
-      .map(l => {
-        const line = /** @type {{ code: string }} */ (l), b = /** @type {Build} */ (decodeBuild(line.code));
-        return { code: line.code, name: b.name || `${/** @type {Chamber} */ (chamberOf(b)).name} world` };
-      });
-  } catch { return []; }
-}
 
 export function initCare(){
   const root = document.getElementById('carePlanner');
@@ -68,7 +49,7 @@ export function initCare(){
   /** @param {string} sel */
   const $ = (sel) => /** @type {HTMLElement} */ (root.querySelector(sel));
   const plan = () => ({ s: st.s, r: st.s === 'own' ? '' : st.r, d: st.d, f: st.d === 'once' ? null : st.f, g: groups(), n: st.n, p: st.p });
-  // Plant groups: known from the piece or design, else chosen by the visitor.
+  // Plant groups: known from the piece, else chosen by the visitor.
   const derived = () => (st.s === 'own' ? [] : groupsOf(st.r));
   const groups = () => derived().length ? derived() : st.g;
 
@@ -76,16 +57,6 @@ export function initCare(){
     if (st.s === 'own') return `
       <label class="care-field"><span>About how many plants?</span>
         <input type="number" name="n" min="1" max="500" value="${st.n}" inputmode="numeric"></label>`;
-    if (st.s === 'custom') {
-      const builds = savedBuilds();
-      const linked = decodeBuild(st.r);   // arrived from the Maker with a design
-      if (linked && !builds.some(b => b.code === st.r)) builds.unshift({ code: st.r, name: linked.name || `${/** @type {Chamber} */ (chamberOf(linked)).name} world` });
-      if (!builds.some(b => b.code === st.r)) st.r = builds[0]?.code || '';
-      return builds.length ? `
-      <label class="care-field"><span>Which design?</span>
-        <select name="r">${builds.map(b => `<option value="${esc(b.code)}"${b.code === st.r ? ' selected' : ''}>${esc(b.name)}</option>`).join('')}</select></label>`
-        : `<p class="care-note">Design your world in the <a href="/maker">Maker</a> and add it to your cart or saved list. It will appear here.</p>`;
-    }
     /**
      * @param {string} sku
      * @param {string} name
@@ -104,7 +75,6 @@ export function initCare(){
   function groupsPart(){
     if (st.mode !== 'kit') return '';
     if (derived().length) return `<p class="care-note">For ${derived().map(g => `<strong>${esc(groupLabel(g))}</strong>`).join(' and ')}.</p>`;
-    if (st.s === 'custom' && !st.r) return '';
     return `<fieldset class="care-groups"><legend>Which plants live in it?</legend>
       ${elements.map(e => `<label class="care-check"><input type="checkbox" name="g" value="${e.id}"${st.g.includes(e.id) ? ' checked' : ''}>
         <span>${esc(groupLabel(e.id))}</span><small>${esc(e.heading)}</small></label>`).join('')}</fieldset>`;
@@ -124,11 +94,11 @@ export function initCare(){
         </li>`).join('')}</ul>
         <p class="care-note">The studio confirms what goes in each kit before it's sent.</p>`;
     }
-    const p = plan(), price = planPrice(p), ready = st.s !== 'custom' || st.r;
+    const p = plan(), price = planPrice(p);
     return `
       <p class="care-summary" aria-live="polite">${esc(planSummary(p))}</p>
-      <p class="care-price">${st.s === 'custom' ? 'Quoted by the studio' : price ? rupees(price) : 'On enquiry'}</p>
-      <button type="button" class="cta" ${ready ? `data-add-line='${attr({ kind: 'care', code: encodePlan(p) })}'` : 'disabled'}>Add visits to cart</button>
+      <p class="care-price">${price ? rupees(price) : 'On enquiry'}</p>
+      <button type="button" class="cta" data-add-line='${attr({ kind: 'care', code: encodePlan(p) })}'>Add visits to cart</button>
       <p class="care-note">Nothing is charged here. The studio confirms dates and the price, then sends a payment link.</p>`;
   }
 

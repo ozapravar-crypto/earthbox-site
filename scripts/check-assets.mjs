@@ -11,7 +11,7 @@
  *
  * Checks: src / href / srcset in every deployed .html, product photos in
  * data/ (+ the -300/-600 sizes the catalogue asks for), images inside
- * article bodies, Maker 3D plant models. Skips external URLs and template placeholders.
+ * article bodies. Skips external URLs and template placeholders.
  * Run: node scripts/check-assets.mjs   (part of npm test)
  */
 import { readFile, readdir, access } from 'node:fs/promises';
@@ -68,21 +68,12 @@ for (const b of volumeTwo.boxes) {
   if (b.illustration) refs.push({ file: `data/upcoming.js (${b.sku})`, path: `assets/boxes/${b.illustration}` });
 }
 
-// 3 · Maker 3D plant models (data/maker.js → models), plus their credits file.
-const { models } = /** @type {typeof import('../data/maker.js')} */ (await import(path.join(ROOT, 'data/maker.js')));
-for (const [kind, table] of /** @type {const} */ ([['forms', models.forms], ['plants', models.plants]]))
-  for (const [k, m] of Object.entries(table)) if (m) refs.push({ file: `data/maker.js (models.${kind}.${k})`, path: models.base + m.file });
-refs.push({ file: 'data/maker.js (models)', path: models.base + 'CREDITS.md' });
-
-// 4 · Article bodies render inside /blog/.
+// 3 · Article bodies render inside /blog/.
 for (const f of await readdir(path.join(ROOT, 'data/article-bodies')))
   scanMarkup(`data/article-bodies/${f}`, 'blog', await readFile(path.join(ROOT, 'data/article-bodies', f), 'utf8'));
 
-// 5 · Botanical art (assets/illustrations): the Maker's answer map, ids passed to
+// 4 · Botanical art (assets/illustrations): ids passed to
 // art('…') in scripts, and --art:url(...) in pages and article bodies.
-const { answerArt } = await import(path.join(ROOT, 'data/maker.js'));
-for (const [q, table] of Object.entries(answerArt))
-  for (const id of Object.values(table)) refs.push({ file: `data/maker.js (answerArt.${q})`, path: `assets/illustrations/${id}.webp` });
 for (const f of (await readdir(path.join(ROOT, 'scripts'))).filter((x) => x.endsWith('.js'))) {
   const src = await readFile(path.join(ROOT, 'scripts', f), 'utf8');
   for (const m of src.matchAll(/\bart\('([a-z0-9-]+)'/g)) refs.push({ file: `scripts/${f}`, path: `assets/illustrations/${m[1]}.webp` });

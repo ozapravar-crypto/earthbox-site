@@ -64,7 +64,6 @@ const ROUTES = [
   { path: '/product.html#MossBox', name: 'product-chamber' },
   { path: '/product.html#VIV-III', name: 'product-vivarium' },
   { path: '/product.html#NOPE', name: 'product-not-found' },
-  { path: '/maker.html', name: 'maker' },
   { path: '/blog.html', name: 'journal' },
   { path: '/about.html', name: 'about' },
   ...articles.map((f, i) => ({ path: `/blog/${f}`, name: `article:${f.replace('.html', '')}`, light: i > 0 }))
@@ -124,19 +123,6 @@ const STATES = {
     { name: 'cart-notice-undo', cart: true, setup: seq(openCart, click('dialog.ct [data-ct=remove]')), scope: 'dialog.ct' },
     { name: 'saved-tab', cart: true, setup: seq(openCart, click('dialog.ct [data-tab=saved]')), scope: 'dialog.ct' },
     { name: 'cart-empty', setup: openCart, scope: 'dialog.ct' }
-  ],
-  maker: [
-    { name: 'chamber-step', setup: click('#mkBegin') },
-    { name: 'plants-list', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]')) },
-    { name: 'plants-map', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]'), click('[data-act=explore]'), click('[data-act=view][data-id=map]')) },
-    { name: 'plants-pin-card', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]'), click('[data-act=explore]'), click('[data-act=view][data-id=map]'), click('[data-act=pin]')) },
-    { name: 'plants-refine-open', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]'), click('[data-act=explore]'), click('summary:has-text("Filter")')) },
-    { name: 'plants-no-results', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]'), click('[data-act=explore]'), async p => { await p.fill('input[name=q]', 'zzqx'); await p.waitForTimeout(300); }) },
-    { name: 'plants-error-full', setup: seq(click('[data-act=recipe] >> nth=2'), click('.mk-step[data-to=plants]'), click('[data-act=next]'), click('.mk-step[data-to=plants]')) },
-    ...[1, 2, 3, 4, 5].map(n => ({ name: `guided-step-${n}`, scope: '#mkGuide', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=plants]'), click('[data-act=explore]'), click('[data-act=guide]'),
-      async p => { for (let i = 1; i < n; i++) await p.locator('#mkGuide [data-act=gd-next]').click(); await p.waitForTimeout(200); }) })),
-    { name: 'space-step', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=space]')) },
-    { name: 'review-step', setup: seq(click('[data-act=recipe] >> nth=0'), click('.mk-step[data-to=review]')) }
   ],
   journal: [{ name: 'filter-active', setup: click('#journalFilters .filter-btn >> nth=1') }],
   'article:anatomy-earthbox-cradle': [],

@@ -8,10 +8,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { volumeOne, categories, materials, places, priceOf } from '../data/volume-one.js';
 import { volumeTwo } from '../data/upcoming.js';
-import { plants, elements, chamberElements, substrates, recipes, forms, SOILLESS, models } from '../data/maker.js';
+import { elements, chamberElements } from '../data/elements.js';
 import { articles, categories as articleCats } from '../data/articles.js';
 import { NAV } from '../data/site.js';
-import { decodeBuild, encodeBuild } from './build-codec.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 /**
@@ -57,49 +56,12 @@ for (const b of volumeTwo.boxes) {
   assert.ok(chamberElements[b.sku], `${at}: no entry in chamberElements (which plant groups it takes)`);
 }
 
-// ── Maker: plants, foundations, recipes ──────────────────────────────
-unique(plants, 'id', 'plants');
+// ── Plant groups per chamber ─────────────────────────────────────────
 const EL = elements.map(e => e.id);
-for (const p of plants) {
-  assert.match(p.id, /^PLT-\d{3}$/, `plant ${p.id}: id`);
-  assert.ok(EL.includes(p.element), `plant ${p.id}: group "${p.element}"`);
-  assert.ok(forms[p.form], `plant ${p.id}: shape "${p.form}" has no label in forms`);
-  assert.ok(p.name && p.botanical, `plant ${p.id}: name + botanical`);
-  if ('price' in p) assert.ok(Number.isInteger(p.price) && /** @type {number} */ (p.price) > 0, `plant ${p.id}: price is whole rupees`);
-}
 for (const [sku, els] of Object.entries(chamberElements)) {
   assert.ok(volumeTwo.boxes.some(b => b.sku === sku), `chamberElements: "${sku}" is not a chamber`);
   if (els !== 'all') for (const e of els) assert.ok(EL.includes(e), `chamberElements ${sku}: group "${e}"`);
 }
-for (const s of SOILLESS) assert.ok(chamberElements[s], `SOILLESS: "${s}" is not a chamber`);
-unique(substrates, 'id', 'substrates');
-for (const s of substrates) if ('price' in s) assert.ok(Number.isInteger(s.price) && /** @type {number} */ (s.price) > 0, `substrate ${s.id}: price`);
-unique(recipes, 'id', 'recipes');
-for (const r of recipes) {
-  // A recipe must survive the share-link codec unchanged: every plant fits its chamber.
-  const b = decodeBuild(encodeBuild({ name: '', chamber: r.chamber, substrate: r.substrate, plants: r.plants, space: /** @type {import('./build-codec.js').Space} */ ({}) }));
-  assert.ok(b, `recipe ${r.id}: chamber "${r.chamber}"`);
-  assert.deepEqual(b.plants, r.plants, `recipe ${r.id}: a plant doesn't fit ${r.chamber} or the chamber is over capacity`);
-}
-
-// Plant models: keys are real forms / plant ids; entries well formed (files: check-assets).
-assert.ok(typeof models.base === 'string' && models.base.endsWith('/'), 'models.base ends in /');
-/**
- * @param {string} at
- * @param {import('../data/maker.js').PlantModel | null} m
- */
-const checkModel = (at, m) => {
-  if (m === null) return;                                              // null = procedural plant
-  assert.match(m.file, /^[a-z0-9-]+\.glb$/, `${at}: file is a .glb name`);
-  if ('scale' in m) assert.ok(/** @type {number} */ (m.scale) > 0 && /** @type {number} */ (m.scale) <= 2, `${at}: scale`);
-  if ('yaw' in m) assert.ok(Number.isFinite(m.yaw), `${at}: yaw`);
-  if ('tint' in m) assert.equal(typeof m.tint, 'boolean', `${at}: tint`);
-  if ('textured' in m) assert.equal(typeof m.textured, 'boolean', `${at}: textured`);   // realistic scan keeping its texture
-  for (const k of Object.keys(m)) assert.ok(['file', 'scale', 'yaw', 'tint', 'textured'].includes(k), `${at}: unknown option "${k}"`);
-};
-for (const [f, m] of Object.entries(models.forms)) { assert.ok(forms[f], `models.forms: "${f}" is not a form`); checkModel(`models.forms.${f}`, m); }
-const PIDS = new Set(plants.map(p => p.id));
-for (const [id, m] of Object.entries(models.plants)) { assert.ok(PIDS.has(id), `models.plants: "${id}" is not a plant`); checkModel(`models.plants.${id}`, m); }
 
 // ── Journal ──────────────────────────────────────────────────────────
 unique(articles, 'slug', 'articles');
@@ -117,7 +79,10 @@ for (const a of articles) {
 
 // ── Site nav ─────────────────────────────────────────────────────────
 // Clean URLs (cleanUrls in vercel.json): "/about" must have about.html behind it.
-assert.equal(JSON.parse(readFileSync(path.join(ROOT, 'vercel.json'), 'utf8')).cleanUrls, true, 'vercel.json must keep cleanUrls: the site links to /about, not /about.html');
+const vercel = JSON.parse(readFileSync(path.join(ROOT, 'vercel.json'), 'utf8'));
+assert.equal(vercel.cleanUrls, true, 'vercel.json must keep cleanUrls: the site links to /about, not /about.html');
+// The design tool left the site (D-2026-10-22-a): old links and shared designs land on the home page.
+assert.ok(vercel.redirects.some((/** @type {{ source: string, destination: string }} */ r) => r.source === '/maker' && r.destination === '/'), 'vercel.json: /maker redirects home');
 for (const n of NAV) {
   assert.match(n.href, /^\/[a-z-]*$/, `NAV: ${n.href} should be a clean link like /about`);
   assert.ok(existsSync(path.join(ROOT, `${n.href.slice(1) || 'index'}.html`)), `NAV: no page behind ${n.href}`);
@@ -146,4 +111,4 @@ assert.equal(priceOf(/** @type {import('../data/volume-one.js').Product} */ (vol
 assert.equal(priceOf(/** @type {import('../data/volume-one.js').Product} */ (volumeOne.find(p => p.sku === 'V1-PLT-005')), 'petg'), 1399);   // first size
 assert.equal(priceOf(/** @type {import('../data/volume-one.js').Product} */ (volumeOne.find(p => p.status === 'coming-soon')), 'petg'), null);
 
-console.log(`data: all checks passed (${volumeOne.length} products, ${volumeTwo.boxes.length} chambers, ${plants.length} plants, ${articles.length} articles)`);
+console.log(`data: all checks passed (${volumeOne.length} products, ${volumeTwo.boxes.length} chambers, ${articles.length} articles)`);

@@ -22,7 +22,7 @@ async function settle(page){
   // once showed "Loading…" with no Saved/Cart). Wait for the scripts' marks,
   // then for the page to stop changing for 600 ms (at most 4 s).
   await page.waitForFunction(() => document.querySelector('[data-cart-count]') && ![...document.querySelectorAll('.caption')].some(e => e.textContent.includes('Loading') && e.checkVisibility()));
-  await page.evaluate(() => /** @type {Promise<void>} */ (new Promise(done => { let t = /** @type {ReturnType<typeof setTimeout> | undefined} */ (undefined); const mo = new MutationObserver(() => { clearTimeout(t); t = setTimeout(() => { mo.disconnect(); done(); }, 600); }); mo.observe(document.body, { subtree: true, childList: true, attributes: true, characterData: true }); t = setTimeout(() => { mo.disconnect(); done(); }, 600); setTimeout(() => { mo.disconnect(); done(); }, 4000); })));   // ponytail: 4 s cap, the Maker's 3D preview never goes quiet (canvas is masked)
+  await page.evaluate(() => /** @type {Promise<void>} */ (new Promise(done => { let t = /** @type {ReturnType<typeof setTimeout> | undefined} */ (undefined); const mo = new MutationObserver(() => { clearTimeout(t); t = setTimeout(() => { mo.disconnect(); done(); }, 600); }); mo.observe(document.body, { subtree: true, childList: true, attributes: true, characterData: true }); t = setTimeout(() => { mo.disconnect(); done(); }, 600); setTimeout(() => { mo.disconnect(); done(); }, 4000); })));   // ponytail: 4 s cap, for pages that never go quiet
   await page.evaluate(() => document.querySelectorAll('.reveal,.reveal-line,.reveal-clip').forEach(e => e.classList.add('in')));
   // fonts.ready resolves even when a font fails to arrive, which once
   // captured a page in system fonts (Google Fonts, before self-hosting). Load each site face explicitly, and fail
@@ -45,19 +45,14 @@ const shot = { maxDiffPixelRatio: 0.01, animations: 'disabled' };
 
 const PAGES = [
   ['home', '/index.html'], ['catalogue', '/products.html'], ['product', '/product.html#V1-PLT-005'],
-  ['chamber', '/product.html#MossBox'], ['maker-start', '/maker.html'], ['journal', '/blog.html'],
+  ['chamber', '/product.html#MossBox'], ['journal', '/blog.html'],
   ['article', '/blog/designing-drainage.html'], ['about', '/about.html'], ['not-found', '/product.html#NOPE'],
   ['care', '/care.html'], ['page-404', '/this-page-does-not-exist']
 ];
 for (const [name, path] of PAGES) {
   test(`visual: ${name} (first screen)`, async ({ page }) => {
-    if (name === 'maker-start') test.slow();
     await page.goto(path);
     await settle(page);
-    if (name === 'maker-start') {   // the recipe stills redraw once their plant models arrive; wait for them, then settle again
-      await page.waitForFunction(() => performance.getEntriesByType('resource').some(e => /plants3d\/moss-/.test(e.name)), null, { timeout: 30000 });
-      await settle(page);
-    }
     await expect(page).toHaveScreenshot(`${name}.png`, { ...shot, mask: mask(page) });
   });
 }
@@ -65,16 +60,11 @@ for (const [name, path] of PAGES) {
 /** @type {[string, string, (p: Page) => Promise<void>][]} */
 const STATES = [
   ['cart-drawer', '/product.html#V1-PLT-006', async p => { await p.locator('.pd-buy [data-add-line], #pdMobileCta [data-add-line]').first().click(); }],
-  ['maker-plants', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); }],
-  ['guided-search', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); await p.locator('[data-act=explore]').click(); await p.locator('[data-act=guide]').click(); }],
-  ['maker-review', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=review]').click(); }],
   ['care-visits', '/care.html', async p => { const c = p.locator('#carePlanner'); await c.getByText('Visits from the studio').click(); await c.locator('.care-result').scrollIntoViewIfNeeded(); }],
-  ['product-points', '/product#SporeBox', async p => { await p.locator('.pd-point').nth(1).click(); await p.locator('[data-points]').scrollIntoViewIfNeeded(); }],
-  ['cart-suggestions', '/maker#c=MossBox&s=studio&p=PLT-036', async p => { await p.locator('.mk-step[data-to=review]').click(); await p.locator('[data-key=cart]').click(); }]
+  ['product-points', '/product#SporeBox', async p => { await p.locator('.pd-point').nth(1).click(); await p.locator('[data-points]').scrollIntoViewIfNeeded(); }]
 ];
 for (const [name, path, setup] of STATES) {
   test(`visual state: ${name}`, async ({ page }) => {
-    if (path.includes('maker')) test.slow();   // software 3D on CI (bead: Maker CI speed)
     await page.goto(path);
     await settle(page);
     await setup(page);

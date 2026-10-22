@@ -1,24 +1,21 @@
 // ─────────────────────────────────────────────────────────────────────
 // care.js · what a Care plan IS (pure, no DOM)
 //
-// A visit plan is stored as a short code (like a Maker share link) so the
+// A visit plan is stored as a short code so the
 // cart keeps ids only and re-reads prices from data/care.js every time.
-//   s = subject (piece | custom | own)   r = the piece's SKU or the build code
+//   s = subject (piece | own)   r = the piece's SKU
 //   d = duration   f = frequency   g = plant groups   n = number of plants
 //   p = pincode
 // Checked by care.test.mjs.
 // ─────────────────────────────────────────────────────────────────────
 
 import { visit, subjects, kits, coverage } from '../data/care.js';
-import { elements, chamberElements, plants } from '../data/maker.js';
+import { elements, chamberElements } from '../data/elements.js';
 import { volumeOne } from '../data/volume-one.js';
 import { volumeTwo } from '../data/upcoming.js';
-import { decodeBuild, chamberOf, plantOf } from './build-codec.js';
-
-/** @typedef {import('./build-codec.js').Chamber} Chamber */
 
 /**
- * A decoded visit plan (decodePlan). r = a piece's SKU or a build code;
+ * A decoded visit plan (decodePlan). r = a piece's SKU;
  * f is null for a one-off visit.
  * @typedef {{ s: string, d: string, f: string | null, r: string, g: string[], n: number, p: string }} Plan
  */
@@ -42,26 +39,22 @@ export function visitsFor(durationId, freqId){
   return f ? Math.max(1, Math.round(d.months * f.perMonth)) : 0;
 }
 
-// Rupees, or null = "On enquiry" (no rate yet, or a custom box).
+// Rupees, or null = "On enquiry" (no rate yet).
 /** @param {Pick<Plan, 's' | 'd' | 'f'> | null | undefined} plan */
 export function planPrice(plan){
-  if (!plan || plan.s === 'custom' || !visit.perVisit) return null;
+  if (!plan || !visit.perVisit) return null;
   const n = visitsFor(plan.d, plan.f);
   return n ? Math.round(visit.perVisit * n * (1 - (/** @type {Record<string, number | undefined>} */ (visit.termDiscount)[plan.d] || 0))) : null;
 }
 
-// Which plant groups a piece or build belongs to → which refill kit fits.
+// Which plant groups a piece belongs to → which refill kit fits.
 /**
- * @param {string | undefined} ref  a SKU, plant id or build code
+ * @param {string | undefined} ref  a SKU
  * @returns {string[]}
  */
 export function groupsOf(ref){
   const box = volumeTwo.boxes.find(b => b.sku === ref);
   if (box) { const e = chamberElements[box.sku]; return e === 'all' ? [] : e; }   // Lab: any group, so ask
-  const plant = plants.find(p => p.id === ref);
-  if (plant) return [plant.element];
-  const b = decodeBuild(ref);
-  if (b) return [...new Set(/** @type {string[]} */ (b.plants.map(id => plantOf(id)?.element).filter(Boolean)))];
   return [];
 }
 /** @param {string} group */
@@ -70,9 +63,7 @@ export const kitFor = (group) => kits.find(k => k.element === group) || null;
 // The thing being looked after, for the cart and the order message.
 /** @param {Plan} plan */
 export function refLabel(plan){
-  // A decoded build's chamber always exists, hence the Chamber cast.
   if (plan.s === 'own') return `${plan.n} of my own plant${plan.n > 1 ? 's' : ''}`;
-  if (plan.s === 'custom') { const b = decodeBuild(plan.r); return b ? (b.name || `${/** @type {Chamber} */ (chamberOf(b)).name} world`) : ''; }
   const v1 = volumeOne.find(p => p.sku === plan.r);
   const box = volumeTwo.boxes.find(b => b.sku === plan.r);
   return v1 ? v1.name : box ? `${box.name} chamber` : '';
@@ -90,6 +81,7 @@ export function encodePlan(plan){
 }
 
 // Untrusted input (cart storage, URL): keep only what we know, else null.
+// Old custom-box plans (s=custom, retired 22 Oct 2026) fail the subject check.
 /**
  * @param {string | null | undefined} str
  * @returns {Plan | null}
@@ -105,7 +97,7 @@ export function decodePlan(str){
   if (plan.s === 'own') {
     plan.r = '';
     plan.n = Math.min(500, Math.max(1, parseInt(/** @type {string} */ (q.get('n')), 10) || 1));
-  } else if (!refLabel(plan) || (plan.s === 'custom') !== !!decodeBuild(plan.r)) return null;
+  } else if (!refLabel(plan)) return null;
   const pin = q.get('p') || '';
   plan.p = /^\d{6}$/.test(pin) ? pin : '';
   return plan;

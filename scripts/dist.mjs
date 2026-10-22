@@ -34,10 +34,9 @@ const keep = {
   styles: (f) => f.endsWith('.css'),
   data:   (f) => f.endsWith('.js'),
   // Runtime modules are .js; build tools are .mjs/.cjs and tests are *.test.mjs.
-  scripts: (f) => f.endsWith('.js') || f.endsWith('LICENSE'),
-  // Media, except the social-card templates (design sources). Markdown stays
-  // out, except the 3D models' CC BY credits, which must be reachable.
-  assets: (f) => !f.startsWith(path.join('assets', 'og-templates')) && (!f.endsWith('.md') || f === path.join('assets', 'plants3d', 'CREDITS.md'))
+  scripts: (f) => f.endsWith('.js'),
+  // Media, except the social-card templates (design sources). Markdown stays out.
+  assets: (f) => !f.startsWith(path.join('assets', 'og-templates')) && !f.endsWith('.md')
 };
 for (const [dir, ok] of Object.entries(keep)) {
   await cp(path.join(ROOT, dir), path.join(OUT, dir), { recursive: true, filter: (src) => {

@@ -204,11 +204,6 @@
   justify-content:center;
   margin-top:.5rem;
 }
-.pd-maker-link{
-  display:block;margin-top:1rem;text-align:center;
-  font-size:.62rem;letter-spacing:.24em;color:var(--ink-soft);
-}
-.pd-maker-link:hover{color:var(--ink)}
 .pd-note{
   margin-top:1rem;
   font-size:.62rem;

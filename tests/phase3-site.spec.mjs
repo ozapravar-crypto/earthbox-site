@@ -53,14 +53,11 @@ test.describe('home', () => {
     await expect(page.locator('.hero-proof li')).toHaveText(['Handcrafted in Mumbai', 'Made to order', 'Delivered within Mumbai']);
   });
 
-  test('C-10/C-11 + D5: no lone "02"; "Price", not "Disposition"; sections in the new order', async ({ page }) => {
+  test('C-11 + D5: not "Disposition"; sections in the new order', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('.mi-num')).toHaveCount(0);
-    await expect(page.locator('.maker-invite')).not.toContainText(/\b02\b/);
-    await expect(page.locator('.mi-spec dt')).toHaveText(['Chambers', 'Plants', 'Price']);
     await expect(page.locator('main')).not.toContainText('Disposition');
     const order = await page.locator('main > section').evaluateAll(els => els.map(e => e.id));
-    expect(order).toEqual(['top', 'catalogue-tease', 'maker-invite', 'film', 'care', 'principles']);
+    expect(order).toEqual(['top', 'catalogue-tease', 'film', 'care', 'principles']);
     // Principles and Purpose are one band, with the way to About.
     const band = page.locator('#principles');
     await expect(band.locator('#purpose')).toHaveCount(1);

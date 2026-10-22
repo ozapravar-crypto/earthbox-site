@@ -19,12 +19,12 @@ import { observeReveals } from './reveal.js';
 import { enquiryAltHTML } from './enquiry-form.js';
 import { syncCartButtons } from './cart.js';
 import { groupsOf, kitFor, encodePlan } from './care.js';
-import { elements, chamberElements } from '../data/maker.js';
+import { elements, chamberElements } from '../data/elements.js';
 import { icon } from '../data/icons.js';
 
 /**
  * @typedef {import('../data/volume-one.js').Product} Product
- * @typedef {import('./build-codec.js').Chamber} Chamber
+ * @typedef {typeof import('../data/upcoming.js').volumeTwo.boxes[number]} Chamber
  * @typedef {typeof import('../data/upcoming.js').volumeThree} Vivarium
  * @typedef {import('./cart.js').NewLine} NewLine
  * @typedef {{ label: string, title: string, text: string }} Point
@@ -586,7 +586,6 @@ function renderBox(b){
         <aside class="pd-body-side reveal" style="--d:120ms">
           ${interestHTML({ kind: 'product', sku: b.sku, qty: 1 }, enquiryHref({ name: b.sku, sku: b.sku, volume: 2 }), b.sku)}
           <p class="caption pd-note">Coming soon · not yet in the cart</p>
-          <a class="caption pd-maker-link" href="/maker?box=${b.sku}">Design yours in the Maker &rarr;</a>
         </aside>
       </section>
 
