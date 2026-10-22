@@ -38,7 +38,55 @@
 .hero-copy{align-self:center;max-width:36rem;opacity:0;animation:fadeInHero 1.2s ease 2.6s forwards}
 /* Repeat visits skip the intro loader (loader.js): the hero's fades start at
    once instead of after the intro's ~2.6–3.3 s (UX audit C-03). */
-.no-intro .hero-copy,.no-intro .hero-aside,.no-intro .hero-proof,.no-intro .hero a:focus-visible{outline:1px solid #FBF8F2;outline-offset:6px}
+.no-intro .hero-copy,.no-intro .hero-aside,.no-intro .hero-proof{animation-delay:.1s}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:.9rem;
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.36em;text-transform:uppercase;color:rgba(246,241,232,.82);
+}
+.hero-eyebrow::before{content:"";width:.5rem;height:1px;background:currentColor}
+.hero-eyebrow::after{content:"";width:3.5rem;height:1px;background:currentColor;opacity:.6}
+.hero-title{
+  margin:1.25rem 0 .5rem;
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(4.25rem,10.5vw,9.75rem);line-height:.92;letter-spacing:-.02em;
+  color:#FBF8F2;
+}
+.hero-sub{font-family:var(--body);font-size:clamp(1.05rem,1.7vw,1.45rem);letter-spacing:.22em;color:rgba(251,248,242,.92)}
+.hero-lede{margin-top:2rem;max-width:24rem;font-family:var(--body);font-style:italic;font-size:1rem;line-height:1.6;color:rgba(246,241,232,.86)}
+
+.hero-cta{
+  display:inline-flex;align-items:center;gap:1.6rem;margin-top:2.5rem;
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.32em;text-transform:uppercase;color:#FBF8F2;
+}
+.hero-cta-ring{                 /* circle per the reference — the one round CTA on the site */
+  display:grid;place-items:center;width:58px;height:58px;border-radius:50%;
+  border:1px solid rgba(251,248,242,.75);transition:background .35s var(--ease-archival),color .35s ease,border-color .35s ease;
+}
+.hero-cta-ring svg{width:18px;height:9px;transition:transform .35s ease}
+.hero-cta:hover .hero-cta-ring,.hero-cta:focus-visible .hero-cta-ring{background:#FBF8F2;color:#2A241C;border-color:#FBF8F2}
+.hero-cta:hover .hero-cta-ring svg{transform:translateX(3px)}
+
+.hero-aside{
+  grid-column:2;grid-row:1;align-self:center;
+  display:grid;justify-items:end;gap:.55rem;padding-right:3.25rem;position:relative;
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.36em;text-transform:uppercase;color:rgba(251,248,242,.8);
+  opacity:0;animation:fadeInHero 1.2s ease 3s forwards;
+}
+.hero-aside::before{content:"";position:absolute;right:0;top:-.5rem;width:2rem;height:1px;background:currentColor}
+.hero-aside::after{content:"";position:absolute;right:.9rem;top:1rem;bottom:0;width:1px;background:currentColor}
+
+.hero-proof{
+  grid-column:1;grid-row:2;align-self:end;
+  display:flex;flex-wrap:wrap;align-items:center;gap:1rem 0;
+  list-style:none;margin:0;padding:1.75rem 0 2.25rem;
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(251,248,242,.86);
+  opacity:0;animation:fadeInHero 1s ease 3.2s forwards;
+}
+.hero-proof li{display:inline-flex;align-items:center;gap:.75rem;padding-right:1.75rem;margin-right:1.75rem;border-right:1px solid rgba(251,248,242,.35)}
+.hero-proof li:last-child{border-right:0}
+.hero-proof svg{width:var(--icon-sm);height:var(--icon-sm);flex:none}
+
+.hero a:focus-visible{outline:1px solid #FBF8F2;outline-offset:6px}
 
 /* Header reads as light text over the photo until the page scrolls. */
 body:has(.hero-bg) .runhead:not(.is-scrolled){mix-blend-mode:normal;text-shadow:0 1px 10px rgba(20,16,10,.45)}
