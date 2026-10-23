@@ -54,7 +54,7 @@
 <section class="page about-head">
   <div class="reveal">
     <h1 class="scramble">Your account</h1>
-    <span class="italic">Your cart and saved pieces, on every device. No password: we email you a code.</span>
+    <span class="italic">Your cart and saved pieces, on every device. No password: sign in with Google or your email.</span>
     <span class="rule-s"></span>
   </div>
 </section>
@@ -63,11 +63,13 @@
   <p id="acMsg" role="status" aria-live="polite"></p>
 
   <form id="acSignIn" class="account-form" hidden>
-    <label class="enquiry-field">
+    <a id="acGoogle" class="cta" href="/api/auth/google" hidden>Continue with Google</a>
+    <p id="acOr" class="caption" hidden>or with your email</p>
+    <label class="enquiry-field" id="acEmailField">
       <span>Email</span>
       <input type="email" name="email" required autocomplete="email"/>
     </label>
-    <button type="submit" class="cta">Email me a code</button>
+    <button type="submit" class="cta" id="acEmailBtn">Email me a code</button>
   </form>
 
   <form id="acCode" class="account-form" hidden>

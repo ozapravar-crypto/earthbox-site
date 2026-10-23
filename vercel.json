@@ -73,5 +73,11 @@
       "destination": "/products",
       "permanent": true
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://earthbox.earthbox.workers.dev/api/:path*"
+    }
   ]
 }
