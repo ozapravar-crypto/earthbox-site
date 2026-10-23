@@ -136,6 +136,25 @@ export async function initAccountPage(root, reload){
     catch (e) { say(/** @type {Error} */ (e).message); }
   });
 
-  try { fill(await call('GET', '/api/me')); flag.set(true); }
-  catch (e) { show(signIn); if (/** @type {any} */ (e).status !== 401) say("Accounts aren't available right now. Your cart still works in this browser."); }
+  // Which ways in are switched on (Google needs its client id, email needs the mail key).
+  const opts = await call('GET', '/api/auth/options').catch(() => ({ google: false, email: false }));
+  $('#acGoogle').hidden = !opts.google;
+  $('#acOr').hidden = !(opts.google && opts.email);
+  $('#acEmailField').hidden = $('#acEmailBtn').hidden = !opts.email;
+  // eslint-disable-next-line require-atomic-updates -- signIn is a fixed element; nothing else writes this
+  signIn.elements.email.required = !!opts.email;
+
+  const q = new URLSearchParams(location.search);
+  try {
+    const me = await call('GET', '/api/me');
+    flag.set(true);
+    adopt(me, reload);   // back from Google, or a new device: keep what's in this browser too
+    fill(me);
+    if (q.has('signed-in')) say('Signed in. Your cart and saved pieces now follow you to any device.');
+  } catch (e) {
+    show(signIn);
+    if (q.get('google') === 'failed') say("Google sign-in didn't finish. Please try again.");
+    else if (/** @type {any} */ (e).status !== 401 || !(opts.google || opts.email)) say("Accounts aren't available right now. Your cart still works in this browser.");
+  }
+  if (q.size) history.replaceState(null, '', location.pathname);
 }

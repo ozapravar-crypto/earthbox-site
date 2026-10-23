@@ -29,6 +29,7 @@ import { suggest } from './pairings.js';
 import { enquiryAltHTML, ENQUIRY_PHONE } from './enquiry-form.js';
 import { esc, rupees, track, art } from './util.js';
 import { icon } from '../data/icons.js';
+import { SITE_ACCOUNTS } from '../data/site.js';
 
 /**
  * @typedef {import('../data/volume-one.js').PriceTable} PriceTable
@@ -49,6 +50,8 @@ import { icon } from '../data/icons.js';
  */
 
 const STORE = 'earthbox-cart';
+// account.js keeps this hint in step with the session cookie (which JS can't read).
+const signedIn = () => { try { return localStorage.getItem('earthbox-signed-in') === '1'; } catch { return false; } };
 const MAX_QTY = 20;
 
 // "₹8,000 – ₹12,000" → [8000, 12000]
@@ -483,7 +486,7 @@ export function initCart(){
   btns.className = 'runhead-bag';
   // Heart + bag (audit item 10): the word shows ≥1081px, icon-only below;
   // the count shows only when there's something. Read as "Cart 2 items".
-  btns.innerHTML = `<button type="button" class="runhead-bag-btn" data-open="saved">${icon('heart', { size: 'md' })}<span class="rb-label">Saved</span> <span class="rb-count" data-saved-count></span><span class="u-sr-only"> items</span></button>
+  btns.innerHTML = `${SITE_ACCOUNTS ? `<a class="runhead-bag-btn" href="/account" data-account-link>${icon('user', { size: 'md' })}<span class="rb-label">${signedIn() ? 'Account' : 'Sign in'}</span></a>` : ''}<button type="button" class="runhead-bag-btn" data-open="saved">${icon('heart', { size: 'md' })}<span class="rb-label">Saved</span> <span class="rb-count" data-saved-count></span><span class="u-sr-only"> items</span></button>
     <button type="button" class="runhead-bag-btn" data-open="cart">${icon('shopping-bag', { size: 'md' })}<span class="rb-label">Cart</span> <span class="rb-count" data-cart-count></span><span class="u-sr-only"> items</span></button>`;
   // Right column = cart buttons + theme toggle, so the header stays a 3-column grid.
   const end = document.createElement('div');

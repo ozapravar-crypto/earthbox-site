@@ -13,9 +13,9 @@
     "not_found_handling": "404-page"
   },
   "d1_databases": [
-    // database_id: paste the id printed by `npx wrangler d1 create earthbox` (placeholder works for local dev)
-    { "binding": "DB", "database_name": "earthbox", "database_id": "00000000-0000-0000-0000-000000000000" }
+    // created 23 Oct 2026 in the ozapravar@gmail.com account
+    { "binding": "DB", "database_name": "earthbox", "database_id": "1a124b6b-f4ef-417d-8ad6-362547142590" }
   ],
-  "vars": { "MAIL_FROM": "EarthBox <hello@earthbox.in>" },
+  "vars": { "MAIL_FROM": "EarthBox <hello@earthbox.in>", "SITE_URL": "https://www.earthbox.in" },
   "observability": { "enabled": true }
 }

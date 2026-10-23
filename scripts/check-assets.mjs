@@ -27,7 +27,8 @@ const KNOWN_MISSING = {
 };
 
 const exists = (/** @type {string} */ p) => access(path.join(ROOT, p)).then(() => true, () => false);
-const isLocal = (/** @type {string | undefined} */ u) => u && !/^(https?:|mailto:|tel:|data:|javascript:|#|\/\/)/.test(u) && !u.includes('${');
+// /api/* is the Worker (vercel.json rewrite), not a file.
+const isLocal = (/** @type {string | undefined} */ u) => u && !/^(https?:|mailto:|tel:|data:|javascript:|#|\/\/|\/api\/)/.test(u) && !u.includes('${');
 
 // "/assets/x.svg" is from the root; "assets/x.svg" is from the page's folder.
 /** @param {string} dir @param {string} u */

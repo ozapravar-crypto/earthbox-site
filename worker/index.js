@@ -5,6 +5,8 @@
 // reaches this code (wrangler.jsonc → run_worker_first). Same origin, so the
 // CSP's connect-src 'self' already allows it and no CORS is needed.
 //
+//   GET    /api/auth/options                → which sign-in ways are switched on
+//   GET    /api/auth/google                 → Google sign-in (redirect), back to /account
 //   POST   /api/auth/start   {email}        → emails a 6-digit code
 //   POST   /api/auth/verify  {email, code}  → sets the session cookie
 //   POST   /api/auth/logout
@@ -13,12 +15,16 @@
 //   DELETE /api/me                          → deletes the account (DPDP Act)
 //   PUT    /api/cart         {cart, saved}  → same shape as localStorage['earthbox-cart']
 //
+// Live on earthbox.in through a Vercel rewrite (vercel.json /api/* → this
+// Worker) until the domain moves to Cloudflare; SITE_URL is that public
+// address, used for Google's redirect and the same-origin check.
+//
 // No passwords. A code is valid 10 minutes for 5 tries; 5 codes per email
 // and 20 per IP an hour. Codes and session tokens are stored only as hashes.
 // Checked by worker/api.test.mjs against `wrangler dev`.
 // ─────────────────────────────────────────────────────────────────────
 
-/** @typedef {{ DB: any, ASSETS: { fetch: (r: Request) => Promise<Response> }, RESEND_KEY?: string, MAIL_FROM?: string, DEV_ECHO_CODE?: string }} Env */
+/** @typedef {{ DB: any, ASSETS: { fetch: (r: Request) => Promise<Response> }, RESEND_KEY?: string, MAIL_FROM?: string, DEV_ECHO_CODE?: string, SITE_URL?: string, GOOGLE_CLIENT_ID?: string, GOOGLE_CLIENT_SECRET?: string }} Env */
 /** @typedef {{ id: number, email: string, name: string, phone: string, address: string, pincode: string, newsletter: number, cart: string }} User */
 
 const CODE_TTL = 10 * 60e3;
@@ -78,7 +84,9 @@ async function start(req, env){
   const { email: raw } = /** @type {any} */ (await req.json());
   const email = str(raw, 254).toLowerCase();
   if (!EMAIL.test(email)) return err(400, 'Enter a valid email address.');
-  const ip = req.headers.get('cf-connecting-ip') || 'local';
+  // Through the Vercel rewrite every visitor arrives from Vercel's IPs, so take the visitor's from x-forwarded-for.
+  // ponytail: that header can be faked by calling workers.dev directly; the per-email limit still holds. Drop this once DNS is on Cloudflare.
+  const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || req.headers.get('cf-connecting-ip') || 'local';
   const now = Date.now();
   await env.DB.prepare('DELETE FROM codes WHERE created_at < ?').bind(now - HOUR).run();
   const { byEmail, byIp } = await env.DB.prepare(
@@ -108,15 +116,64 @@ async function verify(req, env){
   if (row.hash !== await sha256(`${email}:${code}`)) return err(400, "That code isn't right.");
 
   await env.DB.prepare('DELETE FROM codes WHERE email = ?').bind(email).run();
-  const user = await env.DB.prepare(
-    'INSERT INTO users (email, created_at, updated_at) VALUES (?, ?, ?) ON CONFLICT(email) DO UPDATE SET updated_at = excluded.updated_at RETURNING *'
-  ).bind(email, now, now).first();
+  const { user, setCookie } = await signIn(env, email);
+  return json(publicUser(user), 200, { 'set-cookie': setCookie });
+}
+
+/** Find or create the account for a checked email and open a session. Google's name fills an empty name only.
+ * @param {Env} env  @param {string} email  @param {string} [name] */
+async function signIn(env, email, name = ''){
+  const now = Date.now();
+  const user = /** @type {User} */ (await env.DB.prepare(
+    "INSERT INTO users (email, name, created_at, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(email) DO UPDATE SET updated_at = excluded.updated_at, name = CASE WHEN users.name = '' THEN excluded.name ELSE users.name END RETURNING *"
+  ).bind(email, str(name, 120), now, now).first());
   const token = randomHex(32);
   await env.DB.batch([
     env.DB.prepare('DELETE FROM sessions WHERE expires_at < ?').bind(now),
     env.DB.prepare('INSERT INTO sessions (hash, user_id, expires_at) VALUES (?, ?, ?)').bind(await sha256(token), user.id, now + SESSION_TTL)
   ]);
-  return json(publicUser(user), 200, { 'set-cookie': cookie(token, SESSION_TTL / 1000) });
+  return { user, setCookie: cookie(token, SESSION_TTL / 1000) };
+}
+
+const siteUrl = (/** @type {Request} */ req, /** @type {Env} */ env) => env.SITE_URL || new URL(req.url).origin;
+const STATE = 'eb_oauth';
+
+/** Step 1: send the visitor to Google with a one-time state (CSRF) in a short cookie. @param {Request} req  @param {Env} env */
+function googleStart(req, env){
+  if (!env.GOOGLE_CLIENT_ID) return err(404, 'Google sign-in is not switched on.');
+  const state = randomHex(16);
+  const u = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+  u.search = new URLSearchParams({
+    client_id: env.GOOGLE_CLIENT_ID, redirect_uri: `${siteUrl(req, env)}/api/auth/google/callback`,
+    response_type: 'code', scope: 'openid email profile', state, prompt: 'select_account'
+  }).toString();
+  return new Response(null, { status: 302, headers: {
+    location: u.toString(), 'cache-control': 'no-store',
+    'set-cookie': `${STATE}=${state}; Path=/api/auth/google; HttpOnly; Secure; SameSite=Lax; Max-Age=600`
+  } });
+}
+
+/** Step 2: Google sends the visitor back with a code; swap it for the verified email. @param {Request} req  @param {Env} env */
+async function googleCallback(req, env){
+  const url = new URL(req.url);
+  const back = (/** @type {string} */ q, /** @type {Record<string, string>} */ h = {}) => new Response(null, { status: 302, headers: { location: `${siteUrl(req, env)}/account?${q}`, 'cache-control': 'no-store', ...h } });
+  const expected = (req.headers.get('cookie') || '').match(new RegExp(`(?:^|; )${STATE}=([0-9a-f]{32})`))?.[1];
+  const code = url.searchParams.get('code');
+  if (!code || !expected || url.searchParams.get('state') !== expected || !env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) return back('google=failed');
+  const r = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ code, client_id: env.GOOGLE_CLIENT_ID, client_secret: env.GOOGLE_CLIENT_SECRET, redirect_uri: `${siteUrl(req, env)}/api/auth/google/callback`, grant_type: 'authorization_code' })
+  });
+  if (!r.ok) return back('google=failed');
+  // The id_token came straight from Google over TLS in exchange for our secret, so its signature needn't be re-checked (OpenID Connect Core 3.1.3.7).
+  const { id_token } = /** @type {any} */ (await r.json());
+  const claims = JSON.parse(atob(String(id_token).split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+  if (claims.aud !== env.GOOGLE_CLIENT_ID || !['accounts.google.com', 'https://accounts.google.com'].includes(claims.iss) || !claims.email_verified) return back('google=failed');
+  const { setCookie } = await signIn(env, String(claims.email).toLowerCase(), claims.name || '');
+  const res = back('signed-in=1');
+  res.headers.append('set-cookie', setCookie);
+  res.headers.append('set-cookie', `${STATE}=; Path=/api/auth/google; HttpOnly; Secure; SameSite=Lax; Max-Age=0`);
+  return res;
 }
 
 /** @param {Request} req  @param {Env} env */
@@ -169,8 +226,12 @@ async function api(req, env){
     // CSRF: a cross-site form can't send JSON, and browsers send Origin on every write.
     const origin = req.headers.get('origin');
     if (!(req.headers.get('content-type') || '').startsWith('application/json')) return err(415, 'JSON only.');
-    if (origin && new URL(origin).host !== new URL(req.url).host) return err(403, 'Wrong origin.');
+    if (origin && origin !== new URL(req.url).origin && origin !== siteUrl(req, env)) return err(403, 'Wrong origin.');
   }
+
+  if (m === 'GET' && pathname === '/api/auth/options') return json({ google: !!env.GOOGLE_CLIENT_ID, email: !!env.RESEND_KEY || env.DEV_ECHO_CODE === '1' });
+  if (m === 'GET' && pathname === '/api/auth/google') return googleStart(req, env);
+  if (m === 'GET' && pathname === '/api/auth/google/callback') return googleCallback(req, env);
 
   if (m === 'POST' && pathname === '/api/auth/start') return start(req, env);
   if (m === 'POST' && pathname === '/api/auth/verify') return verify(req, env);
