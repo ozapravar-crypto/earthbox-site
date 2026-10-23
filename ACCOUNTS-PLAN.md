@@ -85,7 +85,7 @@
 | Feature | What it does | Phase |
 |---|---|---|
 | **Sign in with Google**, or **email link** (no passwords) | One tap with Google, or a sign-in link sent by email | A |
-| **Saved designs + favourites everywhere** | Maker designs and saved items follow you to any device. On first sign-in, what's in this browser is kept | A |
+| **Saved designs + favourites everywhere** | Cart and saved items follow you to any device. On first sign-in, what's in this browser is kept | A |
 | **Account page** | Name, phone, delivery address; sign out; **delete my account** (required by India's DPDP Act) | A |
 | **Order history** | Every order sent from the cart is saved with its lines and status: *Requested → Paid → Making → Shipped → Delivered*. Aayush updates the status | B |
 | **Care plan + visit reminders** | A Care plan shows its visit dates; an email reminder goes out 2 days before each visit; reschedule by WhatsApp link | B |
