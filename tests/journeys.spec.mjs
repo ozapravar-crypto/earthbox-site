@@ -240,21 +240,6 @@ test('cart drawer by keyboard: opens, takes focus, Escape returns focus', async 
   expect(await page.evaluate(() => /** @type {HTMLElement | null} */ (document.activeElement)?.dataset.open)).toBe('cart');
 });
 
-test('guided search by keyboard: Escape closes and returns focus', async ({ page, isMobile }) => {
-  test.skip(isMobile, 'keyboard journey');
-  await page.goto('/maker.html#c=MossBox&s=studio&p=PLT-036');
-  await page.locator('.mk-step[data-to=plants]').click();
-  await page.locator('[data-act=explore]').click();                 // guided search lives in explore mode (UX audit M-06)
-  const open = page.locator('[data-act=guide]');
-  await open.focus();
-  await page.keyboard.press('Enter');
-  await expect(page.locator('#mkGuide')).toBeVisible();
-  expect(await page.evaluate(() => !!/** @type {Element} */ (document.activeElement).closest('#mkGuide'))).toBe(true);
-  await page.keyboard.press('Escape');
-  await expect(page.locator('#mkGuide')).toBeHidden();
-  expect(await page.evaluate(() => /** @type {HTMLElement | null} */ (document.activeElement)?.dataset.act)).toBe('guide');
-});
-
 // ── Cart storage ─────────────────────────────────────────────────────
 test('cart stays in step across two tabs', async ({ context }) => {
   const a = await context.newPage(), b = await context.newPage();
@@ -278,92 +263,6 @@ test('tampered cart storage is cleaned, not crashed on', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('earthbox-cart', '{"cart":[{"kind":"product","sku":"NOPE"},{"kind":"build","code":"c=<script>"},"x",{"kind":"product","sku":"V1-PLT-006","material":"petg","qty":"9999"}],"saved":"nope"}'));
   await page.goto('/products.html');
   await expect(page.locator('[data-cart-count]').first()).toHaveText('20');   // one valid line, qty clamped to 20
-  expect(errs).toEqual([]);
-});
-
-// ── Maker ────────────────────────────────────────────────────────────
-test('Maker: a design survives a reload (resume)', async ({ page }) => {
-  await page.goto('/maker.html');
-  await page.locator('[data-act=recipe]').first().click();
-  await page.locator('.mk-step[data-to=review]').click();
-  await page.reload();
-  await expect(page.locator('#mkResume')).toBeVisible({ timeout: 15_000 });   // the Maker is the heaviest page
-});
-
-test('Maker: a shared link opens the same design; a bad link is ignored safely', async ({ page }) => {
-  const errs = errorsOf(page);
-  await page.goto('/maker.html#c=MossBox&s=studio&p=PLT-036,PLT-037&n=QA%20World');
-  await expect(page.locator('.mk-sum')).toContainText('2 plants', { timeout: 15_000 });
-  await page.goto('/maker.html#c=NotAChamber&p=<img>');
-  await expect(page.locator('#maker')).toBeVisible();
-  expect(errs).toEqual([]);
-});
-
-// UX audit M-01/M-02/M-20: a shared link keeps the visitor's own design,
-// names the plants it had to leave out, and keeps edits through a reload.
-test('Maker: a shared link never overwrites my design, and its edits survive a reload', async ({ page }) => {
-  test.slow();   // software 3D on CI
-  await page.goto('/maker.html');
-  await page.locator('[data-act=recipe]').first().click();
-  const mine = await page.evaluate(() => JSON.parse(/** @type {string} */ (localStorage.getItem('earthbox-maker'))).code);
-  // Same page, new link: the Maker reloads itself to open it (M-19). PLT-001 is an Earth plant: doesn't fit Moss.
-  await page.goto('/maker.html#c=MossBox&s=studio&p=PLT-036,PLT-001&n=Shared');
-  await expect(page.locator('.mk-notice').first()).toContainText('Your own saved design is kept', { timeout: 15_000 });
-  await expect(page.locator('#mkPanelBody')).toContainText(/1 plant in this link doesn't fit the .* chamber/);
-  await page.locator('.mk-step[data-to=plants]').click();
-  await page.locator('.mk-add[data-id=PLT-037]').click();
-  await page.reload();
-  await expect(page.locator('.mk-sum')).toContainText('2 plants', { timeout: 15_000 });
-  expect(await page.evaluate(() => JSON.parse(/** @type {string} */ (localStorage.getItem('earthbox-maker'))).code)).toBe(mine);   // untouched
-  await page.getByRole('button', { name: 'Open mine' }).click();
-  await expect(page).not.toHaveURL(/#c=/);
-  await expect(page.locator('#mkPanelBody')).toContainText('Back to your own design');
-});
-
-// UX audit M-03/M-04: selection changes are spoken; removing a plant keeps focus nearby.
-test('Maker: adding and removing plants is announced, and focus stays in the tray', async ({ page }) => {
-  test.slow();   // software 3D on CI
-  await page.goto('/maker.html#c=MossBox&s=studio&p=PLT-036,PLT-037&n=QA');
-  await page.locator('.mk-step[data-to=plants]').click();
-  const live = page.locator('#mkLive');
-  await page.locator('.mk-add[data-id=PLT-038]').click();
-  await expect(live).toHaveText(/^Added .+\. 3 of \d+ plants\.$/);
-  await page.locator('[data-act=tray]').click();                     // the tray sits in the bottom bar, folded (M-05)
-  const first = page.locator('[data-key^="tray-"]').first();
-  await first.focus();
-  await page.keyboard.press('Enter');
-  await expect(live).toHaveText(/^Removed .+\. 2 of \d+ plants\.$/);
-  await expect(page.locator(':focus')).toHaveAttribute('data-key', /^tray-/);   // the next plant, not the page
-});
-
-// Continue on "Your space" leads to Review, which has no Continue: the focused
-// control vanishes. The focus fallback threw (false?.focus) — found by the type checker.
-test('Maker: reaching Review by keyboard raises no error and keeps focus on the page', async ({ page }) => {
-  const errs = errorsOf(page);
-  await page.goto('/maker.html#c=MossBox&s=studio&p=PLT-036&n=QA');
-  await page.locator('.mk-step[data-to=space]').click();
-  await page.locator('[data-act=next]').focus();
-  await page.keyboard.press('Enter');
-  await expect(page.locator('#maker')).toHaveAttribute('data-stage', 'review');
-  expect(errs).toEqual([]);
-});
-
-test('Maker: if 3D files fail to load, the drawing preview is shown', async ({ page }) => {
-  const errs = errorsOf(page);
-  await page.route('**/scripts/vendor/three*', r => r.abort());
-  await page.route('**/*.glb', r => r.abort());
-  await page.goto('/maker.html#c=DarkBox&s=SOIL-001&p=PLT-041');
-  await page.locator('.mk-step[data-to=plants]').click();
-  await expect(page.locator('#mkPreview svg').first()).toBeVisible();
-  expect(errs).toEqual([]);
-});
-
-test('Maker: plant models failing falls back to drawn plants, no errors', async ({ page }) => {
-  const errs = errorsOf(page);
-  await page.route('**/*.glb', r => r.abort());
-  await page.goto('/maker.html#c=DarkBox&s=SOIL-001&p=PLT-041');
-  await page.locator('.mk-step[data-to=plants]').click();
-  await expect(page.locator('#mkPreview canvas, #mkPreview svg').first()).toBeVisible();
   expect(errs).toEqual([]);
 });
 
@@ -481,19 +380,6 @@ test('Care: visits for my own plants → plan in cart and in the order message',
   expect(errs).toEqual([]);
 });
 
-test('Care: a custom box from the Maker is quoted, and its plan opens prefilled', async ({ page }) => {
-  await page.goto('/maker.html#c=MossBox&s=studio&p=PLT-036&n=QA%20World');
-  await page.locator('.mk-step[data-to=review]').click();
-  const care = page.locator('.mk-care');
-  await expect(care.getByRole('button', { name: 'Add Moss refill kit' })).toBeVisible();
-  await care.getByRole('link', { name: 'Plan care visits' }).click();
-  await expect(page).toHaveURL(/\/care#s=custom/);
-  const planner = page.locator('#carePlanner');
-  await expect(planner.locator('input[name=s][value=custom]')).toBeChecked();
-  await expect(planner.locator('select[name=r] option:checked')).toHaveText('QA World');
-  await expect(planner.locator('.care-price')).toHaveText('Quoted by the studio');
-});
-
 test('Care: planter page offers a prefilled visit plan; chamber pages register interest instead', async ({ page }) => {
   await page.goto('/product.html#V1-PLT-005');
   await expect(page.locator('.pd-care').getByRole('link', { name: 'Plan care visits' })).toHaveAttribute('href', /^\/care#s=piece.*r=V1-PLT-005/);
@@ -503,16 +389,12 @@ test('Care: planter page offers a prefilled visit plan; chamber pages register i
   await expect(page.locator('.pd-buy [data-add-line]')).toHaveCount(0);
 });
 
-test('Cart suggests the matching kit and visits; adding the kit removes it from the list', async ({ page }) => {
-  await page.goto('/maker#c=MossBox&s=studio&p=PLT-036&n=QA');        // a Maker design (chambers alone can't be carted)
-  await page.locator('.mk-step[data-to=review]').click();
-  await page.locator('[data-key=cart]').click();
+test('Cart suggests something to grow in a planter (chambers, with their kit and visits, are Saved-only)', async ({ page }) => {
+  await page.goto('/product.html#V1-PLT-006');
+  await page.locator('.pd-buy [data-add-line]').click();
   const sug = cartDrawer(page).locator('.ct-suggest');
-  await expect(sug.locator('.ct-suggest-name')).toHaveText(['Moss refill kit', 'Care visits']);
-  await sug.getByRole('button', { name: /Add/ }).click();
-  await expect(cartDrawer(page).locator('.ct-line')).toHaveCount(2);
-  await expect(sug.locator('.ct-suggest-name')).toHaveText(['Care visits']);
-  await expect(sug.getByRole('link', { name: 'Plan visits Care visits' })).toHaveAttribute('href', /^\/care#/);   // labelled by what it does (S-06)
+  await expect(sug.locator('.ct-suggest-why')).toHaveText(['Pairs with your planter.']);
+  await expect(sug.getByRole('link', { name: /^View / })).toHaveAttribute('href', /^\/product\//);
 });
 
 test.describe('Care business form', () => {
@@ -613,11 +495,6 @@ test('toggles keep their name; the state is pressed/checked', async ({ page, isM
     await expect(save).toContainText('Save');                      // label doesn't flip to "Saved"
     await expect(page.locator('.runhead .theme-toggle')).toHaveAttribute('aria-label', 'Dark mode');
   }
-  await page.goto('/maker#c=MossBox&s=studio&p=PLT-036');
-  await page.locator('.mk-step[data-to=plants]').click();
-  const add = page.locator('.mk-add[data-id="PLT-036"]');
-  await expect(add).toHaveAttribute('aria-pressed', 'true');
-  await expect(add).toHaveAccessibleName(/^Add /);                  // was "Remove …" while showing "Added"
 });
 
 test('catalogue volume tabs: real ids, arrow keys move and select', async ({ page, isMobile }) => {
@@ -686,26 +563,4 @@ test('phone sticky bar shows the price and follows the choice', async ({ page, i
   await page.locator('[data-variant="small-circle"]').click();
   await page.locator('[data-material="asa"]').click();
   await expect(price).toHaveText('₹799');
-});
-
-test('cart: a Maker design shows its chamber drawing, not a letter', async ({ page }) => {
-  await page.goto('/maker#c=MossBox&s=studio&p=PLT-036&n=QA');
-  await page.locator('.mk-step[data-to=review]').click();
-  await page.locator('[data-key=cart]').click();
-  await expect(page.locator('dialog.ct .ct-line--custom .ct-thumb img')).toHaveAttribute('src', /^\/assets\/boxes\/moss\.svg$/);
-});
-
-// When the 3D view arrives it must not rebuild the Maker's buttons: on slow
-// phones a tap landed on a button replaced mid-press and did nothing (CI
-// flake site-ktu, 12 Oct 2026). Delay 3D, tag the button, let 3D arrive.
-test('Maker: the 3D view arriving late does not rebuild buttons', async ({ page }) => {
-  await page.route('**/scripts/maker-3d.js', async r => { await new Promise(res => { setTimeout(res, 2500); }); await r.continue(); });
-  await page.goto('/maker#c=MossBox&s=studio&p=PLT-036');
-  await page.locator('.mk-step[data-to=plants]').click();
-  const explore = page.locator('[data-act=explore]');
-  await explore.evaluate(el => { el.dataset.qaSame = '1'; });
-  await expect(page.locator('#mkPreview canvas')).toBeVisible({ timeout: 15_000 });   // 3D arrived
-  await expect(explore).toHaveAttribute('data-qa-same', '1');                       // same element, not rebuilt
-  await explore.click();
-  await expect(page.locator('[data-act=guide]')).toBeVisible();
 });

@@ -8,7 +8,7 @@
  * re-drawn from data/icons.js, so static pages can't drift from the registry.
  *
  * WHY: the same header and footer were hand-copied into 29 pages. Adding
- * "Maker" took 30 edits and the mobile menu was missed; the footers drifted
+ * a nav link took 30 edits and the mobile menu was missed; the footers drifted
  * into two different refund policies. Now there is one source and this
  * stamps it in at build time, so pages stay plain static HTML.
  *

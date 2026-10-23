@@ -16,7 +16,7 @@
 //   used absolute scrollY and jumped).
 // · Text: headings and short intro lines fade and rise in as they come up
 //   the screen, and fade as they slide under the header. Never prices,
-//   buttons, forms, product details, the Maker, or article body text.
+//   buttons, forms, product details, or article body text.
 // ─────────────────────────────────────────────────────────────────────
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -24,7 +24,7 @@ const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
 
 // Which text fades: editorial headings and intros on content pages.
 const FADE = 'main h2, main .lede, .about-head .italic, .care-lede, .home-care p, .page-intro p';
-const NO_FADE = '#maker, .pd-page, form, dialog, .hero, [data-no-fade]';
+const NO_FADE = '.pd-page, form, dialog, .hero, [data-no-fade]';
 
 const smooth = (/** @type {number} */ t) => t * t * (3 - 2 * t);
 const clamp01 = (/** @type {number} */ x) => Math.min(1, Math.max(0, x));

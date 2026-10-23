@@ -13,7 +13,7 @@
 // Checked by scripts/care.test.mjs.
 // ─────────────────────────────────────────────────────────────────────
 
-import { elements } from './maker.js';
+import { elements } from './elements.js';
 
 // What a kit holds, per plant group. Soils follow the studio's requirements
 // workbook (03 · Taxonomy). Carnivorous plants get no feed: fertiliser
@@ -31,9 +31,9 @@ const KIT = {
   Dark:  ['Aroid mix top-up', 'Low-strength liquid feed', 'Leaf-cleaning cloth', 'Care card']
 };
 
-// Plain names first, the Maker's house names second (UX audit S-21, rule
-// E12): "Mosses (Moss)", not "Moss". Written from each group's plants
-// (data/maker.js); no new claims.
+// Plain names first, the house group names second (UX audit S-21, rule
+// E12): "Mosses (Moss)", not "Moss". Written from each group's plants;
+// no new claims.
 /** @type {Record<string, string>} */
 export const groupNames = {
   Earth: 'Leafy soil plants',
@@ -76,7 +76,6 @@ export const visit = {
 // What a home customer wants looked after.
 export const subjects = [
   { id: 'piece',  label: 'An EarthBox piece',  note: 'A planter or plant support you bought from us.' },
-  { id: 'custom', label: 'A custom box',       note: 'A world designed in the Maker. Visits are quoted, as each one is different.' },
   { id: 'own',    label: 'My own plants',      note: 'Plants and terrariums from anywhere. Tell us roughly how many.' }
 ];
 

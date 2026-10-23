@@ -7,7 +7,7 @@
 // ─────────────────────────────────────────────────────────────────────
 
 /**
- * Each box: sku (unique, also the key in data/maker.js chamberElements), name,
+ * Each box: sku (unique, also the key in data/elements.js chamberElements), name,
  * price as a '₹a – ₹b' range (the cart parses it), lead, capacity, photo.
  * Checked by scripts/data.test.mjs.
  */

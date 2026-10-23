@@ -1,14 +1,12 @@
 // Run: node scripts/cart.test.mjs
-// Guards the cart: three line kinds, tallies, untrusted storage, order text.
+// Guards the cart: line kinds, tallies, untrusted storage, order text.
 import assert from 'node:assert/strict';
-import { resolve, totals, clean, add, remove, setQty, move, orderText, keyOf, emptyCart, parseRange, buildTotal, estimateLine, pieces } from './cart.js';
-import { encodeBuild, emptyBuild } from './build-codec.js';
+import { resolve, totals, clean, add, remove, setQty, move, orderText, keyOf, emptyCart, parseRange, estimateLine, pieces } from './cart.js';
 
 /**
  * @typedef {import('./cart.js').NewLine} NewLine
  * @typedef {import('./cart.js').Row} Row
- * @typedef {import('./cart.js').CustomRow} CustomRow
- * @typedef {import('./cart.js').RowBase & { kind: Row['kind'], unit?: number | null, parts?: import('./cart.js').Part[] }} AnyRow
+ * @typedef {import('./cart.js').RowBase & { kind: Row['kind'], unit?: number | null }} AnyRow
  */
 // A line the test expects to resolve, with every kind's fields readable.
 /**
@@ -29,8 +27,6 @@ const soon    = { kind: 'product', sku: 'V1-PLT-001', qty: 1 };                 
 const kit     = { kind: 'product', sku: 'KIT-EARTH', qty: 1 };                              // on enquiry (no price yet)
 /** @type {NewLine} */
 const moss    = { kind: 'product', sku: 'MossBox', qty: 1 };                                // range
-/** @type {NewLine} */
-const build   = { kind: 'build', code: encodeBuild({ ...emptyBuild(), chamber: 'MossBox', substrate: null, plants: ['PLT-036'] }) };
 
 // Kinds.
 assert.equal(row(capsule).kind, 'fixed');
@@ -50,13 +46,11 @@ assert.equal(sv.saved.length, 1);
 assert.deepEqual(move(sv, 'saved', keyOf(moss)), sv);                 // refused, and not lost from Saved
 assert.deepEqual(clean({ cart: [moss], saved: [moss] }).cart, []);
 assert.equal(clean({ cart: [moss], saved: [moss] }).saved.length, 1);
-assert.equal(row(build).kind, 'custom');
 
 // Unknown or mismatched ids never resolve.
 assert.equal(resolve({ kind: 'product', sku: 'NOPE', qty: 1 }), null);
 assert.equal(resolve({ kind: 'product', sku: 'V1-PLT-005', variant: 'huge', material: 'asa' }), null, 'bad variant');
 assert.equal(resolve({ kind: 'product', sku: 'V1-PLT-006', material: 'gold' }), null, 'bad material');
-assert.equal(resolve({ kind: 'build', code: 'c=Nope' }), null);
 
 // Same piece twice → qty 2; another material → its own line.
 let s = add(add(emptyCart(), 'cart', capsule), 'cart', capsule);
@@ -64,9 +58,8 @@ assert.equal(s.cart.length, 1);
 assert.equal(s.cart[0].qty, 2);
 s = add(s, 'cart', /** @type {NewLine} */ ({ ...capsule, material: 'asa' }));
 assert.equal(s.cart.length, 2);
-assert.equal(add(add(emptyCart(), 'cart', build), 'cart', build).cart.length, 1, 'a build is added once');
 
-// Qty clamps 1..20; builds have no qty.
+// Qty clamps 1..20.
 assert.equal(setQty(s, keyOf(capsule), 0).cart[0].qty, 1);
 assert.equal(setQty(s, keyOf(capsule), 99).cart[0].qty, 20);
 
@@ -74,26 +67,17 @@ assert.equal(setQty(s, keyOf(capsule), 99).cart[0].qty, 20);
 /** @param {NewLine[]} lines */
 const r = (lines) => totals(lines.map(resolveAll));
 assert.deepEqual(r([capsule, stack]), { items: 2, fixed: 2328, low: 2328, high: 2328, ranged: false, quoted: 0, priced: 2, toQuote: 0 });
-const mixed = r([/** @type {NewLine} */ ({ ...capsule, qty: 2 }), kit, build]);       // the build carries the chamber's range
-assert.equal(mixed.fixed, 1058);
-assert.equal(mixed.low, 1058 + 6000);
-assert.equal(mixed.high, 1058 + 9000);
-assert.equal(mixed.quoted, 1 + 2);
-// What a visitor sees counts pieces, not a build's parts (UX audit S-07):
-// 2 capsules priced; the kit and the build (2 unpriced parts) are 2 pieces to quote.
-assert.equal(mixed.priced, 2);
-assert.equal(mixed.toQuote, 2);
-assert.equal(mixed.items, 4);
+const mixed = r([/** @type {NewLine} */ ({ ...capsule, qty: 2 }), kit]);
+assert.deepEqual(mixed, { items: 3, fixed: 1058, low: 1058, high: 1058, ranged: false, quoted: 1, priced: 2, toQuote: 1 });
+// A chamber's guide range is carried (chambers are Saved-only while coming soon).
+const ranged = totals([row(moss, 'saved')].map(x => /** @type {Row} */ (x)));
+assert.deepEqual([ranged.low, ranged.high, ranged.ranged, ranged.toQuote], [6000, 9000, true, 0]);
 // The one estimate line says how firm it is (S-04, rule E3).
-assert.deepEqual(estimateLine(mixed), { label: 'Estimate so far', value: '₹7,058 – ₹10,058 + 2 to quote' });
+assert.deepEqual(estimateLine(ranged), { label: 'Estimate so far', value: '₹6,000 – ₹9,000' });
 assert.deepEqual(estimateLine(r([capsule, stack])), { label: 'Estimate so far', value: '₹2,328' });
 assert.deepEqual(estimateLine(r([kit, /** @type {NewLine} */ ({ ...kit, sku: 'KIT-MOSS' })])), { label: 'To be quoted', value: '2 pieces' });   // no rupee figure
 assert.deepEqual(estimateLine(r([capsule, kit])), { label: 'Estimate so far', value: '₹529 + 1 to quote' });
 assert.equal(pieces(1), '1 piece');
-// Build: chamber range + foundation (studio's choice, unpriced) + 1 unpriced plant → 2 quoted.
-const bt = buildTotal(/** @type {CustomRow} */ (resolve(build)));
-assert.deepEqual([bt.low, bt.high, bt.quoted], [6000, 9000, 2]);
-assert.equal(/** @type {CustomRow} */ (resolve(build)).parts.length, 3);
 
 // Move between cart and saved; remove.
 let m = move(add(emptyCart(), 'cart', capsule), 'cart', keyOf(capsule));
@@ -108,15 +92,16 @@ assert.equal(c.cart.length, 2);
 assert.equal(c.cart[1].qty, 20);
 assert.deepEqual(c.saved, []);
 assert.deepEqual(clean(null), emptyCart());
+// Retired custom builds in an old saved cart are dropped silently (22 Oct 2026).
+const old = clean({ cart: [{ kind: 'build', code: 'c=MossBox&p=PLT-036' }, capsule], saved: [{ kind: 'build', code: 'c=MossBox' }] });
+assert.deepEqual([old.cart.map(keyOf), old.saved], [[keyOf(capsule)], []]);
 
 // Order text carries every line, how it's priced, and the tallies.
-const text = orderText([/** @type {NewLine} */ ({ ...capsule, qty: 2 }), kit, build].map(l => /** @type {Row} */ (resolve(l))));
+const text = orderText([/** @type {NewLine} */ ({ ...capsule, qty: 2 }), kit].map(l => /** @type {Row} */ (resolve(l))));
 assert.match(text, /Capsule Planter · Sunny window \(ABS\): ₹529 × 2 = ₹1,058/);   // the place, then its material (D1)
 assert.match(text, /Earth refill kit.*on enquiry/);
-assert.match(text, /custom build/);
-assert.match(text, /earthbox\.in\/maker#c=MossBox/);
 assert.match(text, /Priced items: ₹1,058/);
-assert.match(text, /Still to quote: 2 pieces/);
+assert.match(text, /Still to quote: 1 piece\b/);
 assert.doesNotMatch(text, /Name:|Pincode:/);                       // nothing typed, nothing added
 // Name and pincode from the email form ride along on WhatsApp too (S-09).
 const withContact = orderText([capsule].map(resolveAll), { name: ' Asha ', pincode: '400101' });

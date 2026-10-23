@@ -49,6 +49,11 @@
   ],
   "redirects": [
     {
+      "source": "/maker",
+      "destination": "/",
+      "permanent": true
+    },
+    {
       "source": "/catalogue/terrariums.html",
       "destination": "/products",
       "permanent": true

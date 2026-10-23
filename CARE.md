@@ -7,7 +7,6 @@
 | Who | Looks after | Kit | Visits | Price |
 |---|---|---|---|---|
 | Home | An EarthBox piece | Matched to the piece's plant group automatically | Plan: duration × frequency | Kit: its own price. Visits: rate × number of visits |
-| Home | A custom box (Maker design) | Kits for the groups in the design | Plan | Visits always **quoted** |
 | Home | Their own plants | They pick the plant groups | Plan + how many plants | As for a piece |
 | Business | Anything | — | — | Always a quote (form on `care.html#business`) |
 
@@ -16,7 +15,6 @@ Visits are Mumbai only. The pincode is optional; anything outside 400001–40010
 ## Where it shows
 - **`care.html`:** the home planner, then the business form. Linked from the top bar, the footer and a homepage band.
 - **Product pages** (chambers, planters, plants, supports): "Keep it thriving" offers the matching kit plus a link to a visit plan prefilled for that piece.
-- **Maker review step:** kits for the design's plants, plus a visit plan (quoted).
 - **Cart drawer:** "Goes with your order": up to two items, never a coming-soon piece, never something already in the cart, and no visit suggestion once a plan is in the cart.
 
 ## For the studio: setting prices (one file, `data/care.js`)

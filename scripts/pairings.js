@@ -39,16 +39,16 @@ export function suggest(cart){
   const push = (s) => { if (out.length < MAX && !out.some(o => o.key === s.key)) out.push(s); };
 
   for (const l of cart) {
-    const ref = l.kind === 'build' ? l.code : l.sku;
-    const isBox = l.kind === 'build' || volumeTwo.boxes.some(b => b.sku === l.sku);
+    const ref = l.sku;
+    const isBox = volumeTwo.boxes.some(b => b.sku === l.sku);
 
-    // Chamber or custom box → its refill kit, then visits.
+    // Chamber → its refill kit, then visits.
     for (const g of groupsOf(ref)) {
       const kit = kitFor(g);
       if (kit && !inCart.has(kit.sku)) push({ key: kit.sku, line: { kind: 'product', sku: kit.sku }, title: kit.name, reason: `Soil, feed and tools for ${g} plants.` });
     }
     if (isBox && !hasCare) {
-      const plan = { s: l.kind === 'build' ? 'custom' : 'piece', r: ref, d: '12m', f: 'monthly', g: groupsOf(ref) };
+      const plan = { s: 'piece', r: ref, d: '12m', f: 'monthly', g: groupsOf(ref) };
       push({ key: `care:${String(ref)}`, href: `/care#${encodePlan(plan)}`, title: 'Care visits', reason: 'We come and look after it, in Mumbai.' });
     }
 

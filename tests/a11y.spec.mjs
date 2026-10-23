@@ -18,7 +18,7 @@ const scan = async (page, include) => {
 };
 
 const PAGES = ['/index.html', '/products.html', '/product.html#V1-PLT-005', '/product.html#MossBox', '/product.html#VIV-III',
-  '/product.html#NOPE', '/product/V1-PLT-005', '/maker.html', '/blog.html', '/blog/designing-drainage.html', '/about.html', '/privacy.html', '/care.html', '/404.html'];
+  '/product.html#NOPE', '/product/V1-PLT-005', '/blog.html', '/blog/designing-drainage.html', '/about.html', '/privacy.html', '/care.html', '/404.html'];
 
 for (const path of PAGES) {
   test(`a11y: ${path}`, async ({ page }) => {
@@ -32,15 +32,11 @@ for (const path of PAGES) {
 const STATES = [
   ['cart drawer', '/product.html#V1-PLT-006', async p => { await p.locator('.pd-buy [data-add-line], #pdMobileCta [data-add-line]').first().click(); }, 'dialog.ct'],
   ['saved tab', '/products.html', async p => { await p.locator('[data-open=saved]').click(); }, 'dialog.ct'],
-  ['guided search', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); await p.locator('[data-act=explore]').click(); await p.locator('[data-act=guide]').click(); }, '#mkGuide'],
-  ['maker map', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=plants]').click(); await p.locator('[data-act=explore]').click(); await p.locator('[data-act=view][data-id=map]').click(); }, null],
-  ['maker review', '/maker.html', async p => { await p.locator('[data-act=recipe]').first().click(); await p.locator('.mk-step[data-to=review]').click(); }, null],
   ['catalogue search', '/products.html', async p => { await p.locator('#catalogueSearchBtn').click(); await p.fill('#cat-search', 'moss'); }, null],
   ['enquiry form open', '/product.html#V1-PLT-005', async p => { await p.locator('.pd-other-ways > summary').click(); await p.locator('.enquiry-alt summary').first().click(); }, null],
   ['care: own plants, visits', '/care.html', async p => { const c = p.locator('#carePlanner'); await c.getByText('My own plants').click(); await c.getByText('Visits from the studio').click(); }, '#carePlanner'],
   ['care: kits', '/care.html', async p => { await p.locator('#carePlanner').getByRole('checkbox', { name: /^Moss/ }).check(); }, '#carePlanner'],
-  ['product points open', '/product#SporeBox', async p => { await p.locator('.pd-point').nth(1).click(); }, '[data-points]'],
-  ['cart with suggestions', '/maker#c=MossBox&s=studio&p=PLT-036', async p => { await p.locator('.mk-step[data-to=review]').click(); await p.locator('[data-key=cart]').click(); }, 'dialog.ct']
+  ['product points open', '/product#SporeBox', async p => { await p.locator('.pd-point').nth(1).click(); }, '[data-points]']
 ];
 for (const [name, path, setup, include] of STATES) {
   test(`a11y state: ${name}`, async ({ page, isMobile }) => {

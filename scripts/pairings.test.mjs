@@ -3,7 +3,6 @@
 import assert from 'node:assert/strict';
 import { suggest } from './pairings.js';
 import { volumeOne } from '../data/volume-one.js';
-import { encodeBuild, emptyBuild } from './build-codec.js';
 
 assert.deepEqual(suggest([]), []);
 
@@ -15,12 +14,6 @@ assert.match(/** @type {string} */ (moss[1].href), /^\/care#s=piece&d=12m/);
 
 // Already in the cart → not suggested again; care already planned → no visits.
 assert.deepEqual(suggest([{ kind: 'product', sku: 'MossBox' }, { kind: 'product', sku: 'KIT-MOSS' }, { kind: 'care', code: 'x' }]), []);
-
-// A custom box → kits for its groups (capped at 2).
-const build = encodeBuild({ ...emptyBuild(), chamber: 'LabBox', plants: ['PLT-036', 'PLT-001', 'PLT-006'] });
-const b = suggest([{ kind: 'build', code: build }]);
-assert.equal(b.length, 2);
-assert.ok(b.every(s => s.key.startsWith('KIT-')));
 
 // A planter → an available plant packet or support, never coming-soon.
 const planter = /** @type {import('../data/volume-one.js').Product} */ (volumeOne.find(p => p.category === 'planters' && p.pricing));

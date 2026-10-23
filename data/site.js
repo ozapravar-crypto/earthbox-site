@@ -7,7 +7,7 @@
 //     at build time (static HTML, so crawlers still see it), and
 //     `npm test` fails if a page is out of step;
 //   · menu.js builds the mobile menu from TOP_NAV (NAV minus the Journal);
-//   · enquiry-form.js, cart.js, maker.js … read the contact constants.
+//   · enquiry-form.js, cart.js … read the contact constants.
 // Change a link, a phone number or the refund policy HERE, then run
 // `npm run build`.
 // ─────────────────────────────────────────────────────────────────────
@@ -24,7 +24,6 @@ export const SITE_ACCOUNTS = /** @type {boolean} */ (false);
 export const NAV = [
   { href: '/',         label: 'Home' },
   { href: '/products', label: 'Catalogue' },
-  { href: '/maker',    label: 'Maker' },
   { href: '/care',     label: 'Care' },
   { href: '/blog',     label: 'Journal' },
   { href: '/about',    label: 'About' }
@@ -55,8 +54,8 @@ const SOCIAL = [
 // The home page's first footer column links to its own sections.
 const HOME_STUDY = [
   { href: '/about#philosophy', label: 'Philosophy' }, { href: '#principles', label: 'Principles' },
-  { href: '/products', label: 'Catalogue' }, { href: '/maker', label: 'Maker' },
-  { href: '/blog', label: 'Journal' }, { href: '#purpose', label: 'Purpose' },
+  { href: '/products', label: 'Catalogue' }, { href: '/blog', label: 'Journal' },
+  { href: '#purpose', label: 'Purpose' },
   { href: '/about', label: 'About' }
 ];
 

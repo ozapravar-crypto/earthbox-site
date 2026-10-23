@@ -7,7 +7,7 @@ const KNOWN_404 = /** @type {RegExp[]} */ ([]);   // the Bird Feeder now falls b
 
 const PAGES = ['/', '/products.html', '/product.html#V1-PLT-005', '/product.html#MossBox', '/product.html#V1-PP-001',
   '/product/V1-PLT-005', '/product/MossBox',
-  '/maker.html', '/blog.html', '/blog/designing-drainage.html', '/about.html', '/privacy.html', '/care.html'];
+  '/blog.html', '/blog/designing-drainage.html', '/about.html', '/privacy.html', '/care.html'];
 
 // Collect page errors + failed requests for the whole test.
 /** @typedef {import('@playwright/test').Response} Response */
@@ -22,22 +22,20 @@ function watch(page){
   page.on('response', r => { if (r.status() >= 400 && !KNOWN_404.some(k => k.test(r.url()))) problems.push(`${r.status()} ${r.url()}`); });
   return problems;
 }
-// Clear the cart/maker state, skip the once-per-session intro loader.
+// Clear the cart state, skip the once-per-session intro loader.
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => { if (!sessionStorage.getItem('eb-test')) { localStorage.clear(); sessionStorage.setItem('eb-test', '1'); } });
 });
 
 for (const path of PAGES) {
   test(`loads clean: ${path}`, async ({ page }) => {
-    const problems = watch(page), heavy = /** @type {string[]} */ ([]);
-    page.on('request', r => { if (/plants3d\/|GLTFLoader|three\.module/.test(r.url())) heavy.push(r.url()); });
+    const problems = watch(page);
     await page.goto(path);
     await expect(page.locator('h1:visible').first()).toBeVisible();
     await expect(page.locator('.runhead-bag')).toBeVisible();          // cart reached every page
     await page.waitForLoadState('networkidle');
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth), 'no sideways scroll').toBeLessThanOrEqual(0);
     expect(problems).toEqual([]);
-    if (!path.startsWith('/maker')) expect(heavy, 'three.js and plant models load on the Maker only').toEqual([]);
     // No template leaks ("From ₹[object Object]" shipped on the catalogue, 10 Oct 2026).
     expect(await page.locator('body').innerText()).not.toMatch(/\[object |\bundefined\b|\bNaN\b/);
     // Footer icons stay icon-sized. On privacy.html they rendered 1440px wide:
@@ -66,12 +64,19 @@ test('review badge scrolls, keeps the product (was a blank page)', async ({ page
   await expect(page.locator('#reviews')).toBeInViewport();
 });
 
-test('cart tallies a priced piece and a Maker build; coming-soon pieces register interest instead', async ({ page }) => {
-  test.slow();   // the Maker draws 3D in software on CI: ~30 s of the 45 s budget already on main (bead: Maker CI speed)
+test('cart tallies a priced piece; coming-soon pieces register interest instead', async ({ page }) => {
   const add = '.pd-buy [data-add-line]';   // the phone bar shows only once this has scrolled away (UX audit D2)
   await page.goto('/product.html#V1-PLT-006');                          // Capsule Planter, PETG ₹429
   await page.locator(add).click();
-  await expect(page.locator('dialog.ct .ct-line--fixed')).toHaveCount(1);
+  const d = page.locator('dialog.ct');
+  await expect(d.locator('.ct-line--fixed')).toHaveCount(1);
+  await expect(d.locator('.ct-row--total')).toContainText('₹429');
+  await expect(page.locator('[data-cart-count]').first()).toHaveText('1');
+  // Remove → Undo puts it back.
+  await d.locator('[data-ct=remove]').first().click();
+  await expect(d.locator('.ct-line')).toHaveCount(0);
+  await d.locator('[data-ct=undo]').click();
+  await expect(d.locator('.ct-line')).toHaveCount(1);
   await page.keyboard.press('Escape');
   await page.goto('/product.html#MossBox');                             // coming soon: register interest, no cart button
   await expect(page.locator('.pd-buy [data-add-line], #pdMobileCta [data-add-line]')).toHaveCount(0);
@@ -79,67 +84,15 @@ test('cart tallies a priced piece and a Maker build; coming-soon pieces register
   await expect(page.locator('.pd-buy [data-add-line], #pdMobileCta [data-add-line]')).toHaveCount(0);
   await expect(page.locator('.pd-buy #pdEnquiryCta')).toContainText('Register interest');
   await expect(page.locator('.pd-lead-time')).toHaveCount(0);
-  await page.goto('/maker.html');
-  await page.locator('[data-act=recipe]').first().click();
-  for (let i = 0; i < 6 && await page.locator('[data-act=next]').count(); i++) await page.locator('[data-act=next]').click();
-  await page.locator('.mk-send [data-add-line]').click();
-  const d = page.locator('dialog.ct');
-  await expect(d.locator('.ct-line')).toHaveCount(2);
-  await expect(d.locator('.ct-line--custom .ct-parts-total')).toContainText('Build estimate');
-  await expect(d.locator('.ct-row--total')).toContainText('₹6,429');    // 429 + the build's 6,000 (Misty Forest = Moss)
-  await expect(page.locator('[data-cart-count]').first()).toHaveText('2');
-  // Remove → Undo puts it back.
-  await d.locator('[data-ct=remove]').first().click();
-  await expect(d.locator('.ct-line')).toHaveCount(1);
-  await d.locator('[data-ct=undo]').click();
-  await expect(d.locator('.ct-line')).toHaveCount(2);
 });
 
-test('guided search opens centred and its answers filter the list', async ({ page, isMobile }) => {
-  test.slow();   // the Maker draws 3D in software on CI: ~30 s of the 45 s budget already on main (bead: Maker CI speed)
-  await page.goto('/maker.html');
-  await page.locator('[data-act=recipe]').first().click();
-  await page.locator('[data-act=goto][data-to=plants]').click();
-  await page.locator('[data-act=explore]').click();                    // guided search lives in explore mode (UX audit M-06)
-  await page.locator('[data-act=guide]').click();
-  const g = page.locator('#mkGuide');
-  await expect(g).toBeVisible();
-  if (!isMobile) {                                                      // was stuck top-left
-    const b = /** @type {{ x: number, width: number }} */ (await g.boundingBox()), vw = /** @type {{ width: number }} */ (page.viewportSize()).width;
-    expect(Math.abs(b.x + b.width / 2 - vw / 2)).toBeLessThan(4);
-  }
-  await g.locator('input[name=gd-look][value=woodland]').check({ force: true });
-  while (await g.locator('[data-act=gd-next]').count()) await g.locator('[data-act=gd-next]').click();
-  await g.locator('[data-act=gd-apply]').click();
-  await expect(g).toBeHidden();
-  await expect(page.locator('#mkResults')).toContainText('Woodland');   // the answer became a removable chip
-});
-
-test('Maker preview renders (3D, or the drawing without WebGL)', async ({ page }) => {
-  await page.goto('/maker.html#c=DarkBox&s=SOIL-001&p=PLT-041');
-  await page.locator('.mk-step[data-to=plants]').click();
-  await expect(page.locator('#mkPreview canvas, #mkPreview svg').first()).toBeVisible();
-});
-
-test('Maker 3D preview loads its plant models (.glb), no errors', async ({ page }) => {
-  const problems = watch(page), glbs = /** @type {number[]} */ ([]);
-  page.on('response', r => { if (r.url().endsWith('.glb')) glbs.push(r.status()); });
-  await page.goto('/maker.html#c=DarkBox&s=SOIL-001&p=PLT-041,PLT-042');
-  test.skip(!(await page.evaluate(() => !!document.createElement('canvas').getContext('webgl2'))), 'no WebGL here: the drawings are the fallback');
-  await expect(page.locator('#mkPreview canvas')).toBeVisible();
-  await expect.poll(() => glbs.length, { timeout: 15_000 }).toBeGreaterThan(0);
-  await page.waitForLoadState('networkidle');
-  expect(glbs.every(s => s === 200), 'every model file loads').toBe(true);
-  expect(problems).toEqual([]);
-});
-
-test('mobile menu lists the Maker; the Journal is in the footer, not the top menus', async ({ page, isMobile }) => {
+test('mobile menu lists Care; the Journal is in the footer, not the top menus', async ({ page, isMobile }) => {
   await page.goto('/blog/designing-drainage.html');
   await expect(page.locator('.runhead-nav a', { hasText: 'Journal' })).toHaveCount(0);
   await expect(page.locator('footer.colophon a', { hasText: 'Journal' })).toHaveCount(1);
   if (!isMobile) return;
   await page.locator('.hamburger').click();
-  await expect(page.locator('#mobile-nav a', { hasText: 'Maker' })).toBeVisible();
+  await expect(page.locator('#mobile-nav a', { hasText: 'Care' })).toBeVisible();
   await expect(page.locator('#mobile-nav a', { hasText: 'Journal' })).toHaveCount(0);
 });
 
@@ -193,7 +146,7 @@ for (const path of ['/index.html', '/products.html', '/product.html#V1-PLT-005',
 test('clean URLs: pages load without .html, and no internal link exposes .html', async ({ page }) => {
   /** @type {string[]} */
   const bad = [];
-  for (const path of ['/', '/products', '/product#V1-PLT-005', '/maker', '/care', '/blog', '/blog/designing-drainage', '/about', '/privacy']) {
+  for (const path of ['/', '/products', '/product#V1-PLT-005', '/care', '/blog', '/blog/designing-drainage', '/about', '/privacy']) {
     const res = /** @type {Response} */ (await page.goto(path));
     expect(res.status(), path).toBe(200);
     await expect(page.locator('h1:visible').first()).toBeVisible();
@@ -246,7 +199,6 @@ test('tooling files are not served', async ({ request }) => {
     if (r.status() !== 404) open.push(`${p} → ${r.status()}`);
   }
   expect(open).toEqual([]);
-  expect((await request.get('/assets/plants3d/CREDITS.md')).status(), 'CC BY credits must stay reachable').toBe(200);
 });
 
 // QA-017 · Blocks drawn by script after the reveal set-up were never

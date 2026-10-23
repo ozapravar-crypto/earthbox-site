@@ -1,5 +1,5 @@
 // Cookie consent. Google Analytics loads only after the visitor taps Accept
-// (DPDP / GDPR). Cart, Saved, the Maker design and the theme stay in the
+// (DPDP / GDPR). Cart, Saved and the theme stay in the
 // visitor's browser and are needed for the site to work, so they don't ask.
 // The gtag() queue is set up at the top of this file, so track() calls are
 // harmless until GA loads, and are dropped if it never does.

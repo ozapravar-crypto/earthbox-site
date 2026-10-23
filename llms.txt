@@ -1,12 +1,11 @@
 # EarthBox
 
-> EarthBox is a terrarium and 3D-printing studio in Kandivali, Mumbai 400101, India. It makes closed terrariums ("Elemental Boxes"), 3D-printed planters, moss poles and plant accessories (live plant packets are coming soon), lets you design your own terrarium online (the Maker), and offers Care: refill kits and plant-care visits. Delivery within Mumbai. Orders and questions: WhatsApp +91 81048 11584 or aayush.lilani@gmail.com.
+> EarthBox is a terrarium and 3D-printing studio in Kandivali, Mumbai 400101, India. It makes closed terrariums ("Elemental Boxes"), 3D-printed planters, moss poles and plant accessories (live plant packets are coming soon), and offers Care: refill kits and plant-care visits. Delivery within Mumbai. Orders and questions: WhatsApp +91 81048 11584 or aayush.lilani@gmail.com.
 
 Prices are in Indian rupees. 3D-printed pieces are made to order (about 1 week). Pieces marked "Coming soon" can't be ordered yet.
 
 ## Pages
 - [Catalogue](https://www.earthbox.in/products): every piece, with prices
-- [The Maker](https://www.earthbox.in/maker): design your own terrarium: pick a chamber, then plants, moss and stones, in 3D
 - [Care](https://www.earthbox.in/care): refill kits and visit plans for homes in Mumbai; quotes for offices, cafés and hotels
 - [About](https://www.earthbox.in/about): the studio and its founder, Aayush Lilani
 - [Journal](https://www.earthbox.in/blog): guides to terrarium care and plants in Mumbai

@@ -13,7 +13,7 @@ test.beforeEach(async ({ context }) => {
   await context.route('**/*.mp4', r => r.abort());
 });
 
-for (const path of ['/', '/products', '/product#V1-PLT-005', '/product#MossBox', '/maker', '/care', '/blog', '/blog/designing-drainage', '/about', '/privacy']) {
+for (const path of ['/', '/products', '/product#V1-PLT-005', '/product#MossBox', '/care', '/blog', '/blog/designing-drainage', '/about', '/privacy']) {
   test(`live page works: ${path}`, async ({ page }) => {
     /** @type {string[]} */
     const errors = [];

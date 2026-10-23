@@ -18,8 +18,7 @@ Static marketing site for EarthBox - Mumbai-based studio selling terrariums and 
 | Journal | `/blog.html` | Article grid, category filters |
 | Article | `/blog/[slug].html` | Static HTML written at build (prerender.mjs) |
 | About | `/about.html` | Founder, materials, method |
-| Maker | `/maker.html` | Chamber → foundation → plants (search, map, guided) → your space → review; 3D preview with drawing fallback |
-| Cart / Saved | header on every page | Drawer: fixed-price, on-enquiry and custom-build lines; send order on WhatsApp/email |
+| Cart / Saved | header on every page | Drawer: fixed-price and on-enquiry lines; send order on WhatsApp/email |
 
 ---
 

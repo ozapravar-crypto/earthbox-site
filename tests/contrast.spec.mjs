@@ -111,33 +111,6 @@ for (const theme of THEMES) {
   });
 }
 
-// CQ-008 · Placeholders used the browser default #757575 = 3.74:1.
-test('CQ-008 Maker placeholders pass', async ({ page }) => {
-  await page.goto('/maker.html');
-  await page.locator('[data-act=recipe]').first().click();
-  await page.locator('.mk-step[data-to=plants]').click();
-  await page.locator('[data-act=explore]').click();   // search lives in explore mode (UX audit M-06)
-  expect(await failures(page, '.mk-search', 'plants')).toEqual([]);
-  await page.locator('.mk-step[data-to=space]').click();
-  expect(await failures(page, '.mk-space', 'space')).toEqual([]);
-});
-
-// CQ-009 · Map view: empty regions at opacity .5 (2.07–2.91:1), and the
-// light "your chamber" plate kept dark-mode tokens in dark mode (1.72–2.47:1).
-for (const theme of THEMES) {
-  test(`CQ-009 Maker map + pin card pass (${theme})`, async ({ page }) => {
-    test.slow();   // software 3D on CI (bead: Maker CI speed)
-    await page.addInitScript(t => localStorage.setItem('earthbox-theme', t), theme);
-    await page.goto('/maker.html');
-    await page.locator('[data-act=recipe]').first().click();
-    await page.locator('.mk-step[data-to=plants]').click();
-    await page.locator('[data-act=explore]').click();
-    await page.locator('[data-act=view][data-id=map]').click();
-    await page.locator('[data-act=pin]').first().click();
-    expect(await failures(page, '.mk-map', 'map-pin')).toEqual([]);
-  });
-}
-
 // CQ-011 · Product "Coming soon" block (its label was --accent-dk, 3.10:1;
 // the label itself was removed with the other eyebrows on 11 Oct 2026, the
 // caption remains) and footer link hover (--accent-dk, 3.10:1).
@@ -181,29 +154,6 @@ for (const theme of THEMES) {
     expect(bad).toEqual([]);
   });
 }
-
-// CQ-014 · "Build your little world" keeps its light paper in dark mode, but
-// dark mode's --ink is light: its focus ring measured 1.05:1. --ink is now
-// set to the section's own ink.
-test('CQ-014 Maker-invite ring passes in dark mode', async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem('earthbox-theme', 'dark'));
-  await page.goto('/index.html');
-  await page.evaluate(() => document.querySelectorAll('.reveal,.reveal-line').forEach(e => e.classList.add('in')));
-  await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation-duration:0s!important;animation-delay:0s!important}' });
-  expect(await ringFailures(page, '.mi-cta')).toEqual([]);
-});
-
-// Audit regression · Maker buttons on phones were measured under the sticky
-// action bar (11 'review' items). The review step must measure cleanly.
-test('Maker review step on a phone measures with no review/fail items', async ({ browser }) => {
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
-  await page.addInitScript(() => sessionStorage.setItem('earthbox-loader-seen', '1'));
-  await page.goto('/maker.html');
-  await page.locator('[data-act=recipe]').first().click();
-  await page.locator('.mk-step[data-to=review]').click();
-  expect(await failures(page, '#mkPanelBody', 'review-step')).toEqual([]);
-  await page.close();
-});
 
 // Audit regression · hovered primary buttons were reported 1:1 because the
 // per-element shot scrolled the button out from under the pointer (fill gone).
@@ -251,9 +201,8 @@ for (const theme of THEMES) {
     await page.locator('.pd-care').waitFor();
     await page.evaluate(() => /** @type {Element} */ (document.querySelector('.pd-care')).classList.add('in'));
     expect(await failures(page, '.pd-care', 'default')).toEqual([]);
-    await page.goto('/maker#c=MossBox&s=studio&p=PLT-036');
-    await page.locator('.mk-step[data-to=review]').click();
-    await page.locator('[data-key=cart]').click();
+    await page.goto('/product.html#V1-PLT-006');
+    await page.locator('.pd-buy [data-add-line]').click();
     expect(await failures(page, '.ct-suggest', 'default')).toEqual([]);
   });
 }

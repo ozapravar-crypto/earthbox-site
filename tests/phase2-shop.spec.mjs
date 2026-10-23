@@ -4,7 +4,6 @@
 // fold, what the price is for, related row, chamber guide, the phone bar.
 // External services are mocked (Web3Forms, wa.me); nothing real is sent.
 import { test, expect } from '@playwright/test';
-import { encodeBuild, emptyBuild } from '../scripts/build-codec.js';
 import { encodePlan } from '../scripts/care.js';
 
 /** @typedef {import('@playwright/test').Page} Page */
@@ -12,7 +11,6 @@ import { encodePlan } from '../scripts/care.js';
 
 const capsule = { kind: 'product', sku: 'V1-PLT-006', material: 'petg', qty: 2 };          // ₹429 each
 const kit = { kind: 'product', sku: 'KIT-MOSS', qty: 1 };                                   // on enquiry
-const build = { kind: 'build', code: encodeBuild({ ...emptyBuild(), chamber: 'MossBox', substrate: null, plants: ['PLT-036'] }) };   // ₹6,000 – ₹9,000 + parts to quote
 const plan = { kind: 'care', code: encodePlan({ s: 'own', d: 'once', f: 'once', g: ['Moss'], n: 3, p: '400101' }) };
 
 /**
@@ -71,20 +69,19 @@ test.describe('cart drawer', () => {
     for (const m of await marks.all()) expect((await m.innerText()).trim()).toBe('');
   });
 
-  test('counts pieces, not a build’s parts; breakdown rows; estimate in the sticky footer (S-04, S-07, S-11)', async ({ page, context }) => {
-    await start(context, { cart: [capsule, kit, build] });
+  test('counts pieces; breakdown rows; estimate in the sticky footer (S-04, S-07, S-11)', async ({ page, context }) => {
+    await start(context, { cart: [capsule, kit] });
     const d = await openCart(page);
-    await expect(d.locator('#ct-tab-cart')).toHaveText('Cart · 4 pieces');           // 2 capsules + kit + build
+    await expect(d.locator('#ct-tab-cart')).toHaveText('Cart · 3 pieces');           // 2 capsules + kit
     await expect(d.locator('#ct-tab-saved')).toHaveText('Saved · 0');
     const rows = d.locator('.ct-breakdown .ct-row');
     await expect(rows).toHaveText([
       'Priced pieces · 2₹858',
-      'Chamber & build guide₹6,000 – ₹9,000',
-      'To be quoted2 pieces',                                                     // the kit + the build, not its 2 parts
+      'To be quoted1 piece',                                                      // the kit
       'DeliveryMumbai · confirmed by the studio'
     ]);
     const est = d.locator('.ct-foot .ct-row--total');
-    await expect(est).toHaveText('Estimate so far₹6,858 – ₹9,858 + 2 to quote');
+    await expect(est).toHaveText('Estimate so far₹858 + 1 to quote');
     // The qualifier is the same size as the number (rule E3).
     const sizes = await est.locator('span').evaluateAll(els => els.map(e => getComputedStyle(e).fontSize));
     expect(new Set(sizes).size).toBe(1);
@@ -94,7 +91,7 @@ test.describe('cart drawer', () => {
     await expect(d.locator('.ct-foot')).toHaveCSS('position', 'sticky');
     await expect(d.locator('a.cta[data-ct=send]')).toBeInViewport();
     await expect(d.getByText('Send by email instead')).toBeInViewport();
-    expect(await waText(page)).toContain('Still to quote: 2 pieces');
+    expect(await waText(page)).toContain('Still to quote: 1 piece');
   });
 
   test('estimate wording: all priced, and nothing priced (S-04)', async ({ page, context }) => {
