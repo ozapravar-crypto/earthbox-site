@@ -10,7 +10,7 @@
  *
  * Run: last step of `npm run build`. Tests serve dist/ the same way.
  */
-import { cp, rm, readdir, mkdir, copyFile } from 'node:fs/promises';
+import { cp, rm, readdir, mkdir, copyFile, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -45,5 +45,16 @@ for (const [dir, ok] of Object.entries(keep)) {
     return rel === dir || !path.extname(rel) ? true : ok(rel);
   } });
 }
+
+// Cloudflare reads headers and redirects from files in dist/; vercel.json stays
+// the one source for both, so the two hosts can't drift while both are live.
+const vercel = JSON.parse(await readFile(path.join(ROOT, 'vercel.json'), 'utf8'));
+/** @type {{ headers: { source: string, headers: { key: string, value: string }[] }[], redirects: { source: string, destination: string, permanent: boolean }[] }} */
+const vercelTyped = vercel;
+const glob = (/** @type {string} */ s) => s.replace('(.*)', '*').replace(/:\w+/g, '*');
+await writeFile(path.join(OUT, '_headers'), vercelTyped.headers.map(h =>
+  `${glob(h.source)}\n${h.headers.map(x => `  ${x.key}: ${x.value}`).join('\n')}`).join('\n') + '\n');
+await writeFile(path.join(OUT, '_redirects'), vercelTyped.redirects.map(r =>
+  `${glob(r.source)} ${r.destination} ${r.permanent ? 301 : 302}`).join('\n') + '\n');
 
 console.log('dist: website copied (allow-list)');

@@ -1,0 +1,21 @@
+// Cloudflare Worker: serves dist/ (static) + /api/* (worker/index.js) on one origin.
+// Local:  npm run build && npm run api:dev        Deploy: npm run build && npx wrangler deploy
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "earthbox",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"],
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "d1_databases": [
+    // database_id: paste the id printed by `npx wrangler d1 create earthbox` (placeholder works for local dev)
+    { "binding": "DB", "database_name": "earthbox", "database_id": "00000000-0000-0000-0000-000000000000" }
+  ],
+  "vars": { "MAIL_FROM": "EarthBox <hello@earthbox.in>" },
+  "observability": { "enabled": true }
+}

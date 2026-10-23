@@ -301,7 +301,10 @@ export function orderText(lines, contact = {}){
 
 let state = emptyCart();
 const read = () => { try { state = clean(JSON.parse(localStorage.getItem(STORE) || 'null')); } catch { state = emptyCart(); } };
-const write = () => { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch { /* private mode: lives for this page only */ } };
+const write = () => {
+  try { localStorage.setItem(STORE, JSON.stringify(state)); } catch { /* private mode: lives for this page only */ }
+  document.dispatchEvent(new Event('cart:change'));   // account.js pushes it to the signed-in account
+};
 
 /** @type {HTMLDialogElement | undefined} set by initCart; stays unset on a page without the header */
 let dlg;
@@ -611,3 +614,5 @@ export function initCart(){
 
 // Pages call this after rendering new buttons so their Save state is right.
 export const syncCartButtons = () => refresh();
+// account.js calls this after merging a signed-in visitor's saved cart into storage.
+export const reloadCart = () => { read(); refresh(); };

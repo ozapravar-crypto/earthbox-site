@@ -36,4 +36,4 @@ The summary shows: priced items (exact), chambers & builds (guide range), how ma
 ## Taking payment later (needs Razorpay KYC in EarthBox's name)
 
 1. **Now:** the studio sends a Razorpay Payment Link per order. No code needed.
-2. **Later:** add a small serverless checkout (Vercel Functions). It re-prices the cart on the server from the same data, creates the Razorpay order, verifies the signature and handles the webhook. Swap the "Send order" button for "Pay". Only "Ready to order" lines can be charged up front; enquiry and custom lines still need a quote.
+2. **Later:** add a small serverless checkout (the Cloudflare Worker, `worker/index.js`; see ACCOUNTS-PLAN.md). It re-prices the cart on the server from the same data, creates the Razorpay order, verifies the signature and handles the webhook. Swap the "Send order" button for "Pay". Only "Ready to order" lines can be charged up front; enquiry and custom lines still need a quote.

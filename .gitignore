@@ -32,3 +32,5 @@ C:*
 
 # Built site (scripts/dist.mjs): what Vercel serves
 dist/
+.wrangler/
+.dev.vars

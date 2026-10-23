@@ -10,7 +10,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['node_modules/**', 'dist/**', 'scripts/vendor/**', 'assets/**', '.claude/**', '_audits/**', 'qa/reports/**', '**/*.d.ts',
+  { ignores: ['node_modules/**', 'dist/**', '.wrangler/**', 'scripts/vendor/**', 'assets/**', '.claude/**', '_audits/**', 'qa/reports/**', '**/*.d.ts',
     // local-only image tools (gitignored)
     'scripts/optimize-images.*', 'scripts/generate-responsive.cjs'] },
   { linterOptions: { reportUnusedDisableDirectives: 'error' } },
@@ -60,6 +60,8 @@ export default tseslint.config(
     languageOptions: { globals: { ...globals.node } }
   },
   { files: ['scripts/**/*.cjs'], languageOptions: { sourceType: 'commonjs' } },
+  // The Cloudflare Worker and its test (fetch, crypto, Response are globals in both).
+  { files: ['worker/**/*.{js,mjs}'], languageOptions: { globals: { ...globals.node, ...globals.serviceworker } } },
   // Playwright callbacks passed to page.evaluate() run in the browser.
   { files: ['tests/**/*.mjs', 'qa/**/*.{js,mjs}'], languageOptions: { globals: { ...globals.node, ...globals.browser } } }
 );
