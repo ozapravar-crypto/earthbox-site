@@ -43,11 +43,11 @@
 
 **Run locally:** `npm run build && npm run api:dev` → http://localhost:8787/account. Codes come back in the API response because `.dev.vars` has `DEV_ECHO_CODE=1`.
 
-## 3 · Go-live checklist (needs Aayush for 1–3)
+## 3 · Go-live checklist (Aayush only for the nameserver change in 2)
 
-1. **Cloudflare account** (free) under `aayush.lilani@gmail.com`; add me as a member.
-2. **Move `earthbox.in` DNS to Cloudflare:** change the nameservers at the registrar. About 10 minutes, plus propagation. This also makes `hello@earthbox.in` free through Cloudflare Email Routing (no ImprovMX needed).
-3. **Resend account** (free, 3,000 emails/month): verify `earthbox.in` with its DNS records, then `npx wrangler secret put RESEND_KEY`.
+1. **Cloudflare account:** `ozapravar@gmail.com` (owner's decision, 23 Oct). The Worker, D1 and the `earthbox.in` zone live there.
+2. **Move `earthbox.in` DNS to Cloudflare:** add the site in the ozapravar account, then whoever holds the registrar login changes the nameservers at the registrar. About 10 minutes, plus propagation. This also makes `hello@earthbox.in` free through Cloudflare Email Routing (no ImprovMX needed).
+3. **Resend account** (free, 3,000 emails/month), also under `ozapravar@gmail.com`: verify `earthbox.in` with its DNS records, then `npx wrangler secret put RESEND_KEY`.
 4. `npx wrangler d1 create earthbox`, paste the id into `wrangler.jsonc`, then `npx wrangler d1 execute earthbox --remote --file worker/schema.sql`.
 5. `npm run build && npx wrangler deploy`, then attach the domain in the dashboard.
 6. Set `SITE_ACCOUNTS = true` (`data/site.js`), add an "Account" link (header or cart drawer), and update the privacy page. Accounts store email, name, phone, address and cart on Cloudflare.
