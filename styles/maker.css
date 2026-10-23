@@ -197,7 +197,9 @@ img.mk-thumb,img.mk-swatch{display:block;object-fit:contain}
   display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:.9rem;align-items:center;
   padding:.55rem 0;border-bottom:1px solid var(--rule);
 }
-.mk-plant-row.is-off{opacity:.62}
+/* A plant that needs another chamber: its row text already says so ("Needs the Lab chamber’s climate"),
+   so only the picture fades. Fading the whole row put its text under 4.5:1 (720 contrast-audit failures). */
+.mk-plant-row.is-off .mk-thumb{opacity:.62}
 .mk-plant-row .mk-card-name{font-size:1.1rem}
 .mk-thumb{width:56px;height:64px;background:var(--mk-plate);border:1px solid var(--rule)}
 .mk-add{
