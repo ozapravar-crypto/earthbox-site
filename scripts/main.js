@@ -25,7 +25,8 @@ import { initCursor }     from './cursor.js';
 import { initMagnetic }   from './magnetic.js';
 import { initScramble }   from './scramble.js';
 import { initEnquiryForm } from './enquiry-form.js';
-import { initCart }        from './cart.js';
+import { initCart, reloadCart } from './cart.js';
+import { SITE_ACCOUNTS }   from '../data/site.js';
 
 // Broken images (no inline onerror, so the CSP can forbid inline script):
 //   data-fallback="hide" | "parent:<class>" | "parent:<class> remove"
@@ -49,7 +50,8 @@ const PAGE_MODULES = [
   ['#aboutSections',                                    () => import('./render-about.js').then(m => m.initAbout())],
   ['#journalGrid, #journalFilters',                     () => import('./render-blog.js').then(m => m.initBlog())],
   ['#maker',                                            () => import('./maker.js').then(m => m.initMaker())],
-  ['#carePlanner',                                      () => import('./care-page.js').then(m => m.initCare())]
+  ['#carePlanner',                                      () => import('./care-page.js').then(m => m.initCare())],
+  ['#account',                                          () => import('./account.js').then(m => m.initAccountPage(/** @type {HTMLElement} */ (document.getElementById('account')), reloadCart))]
 ];
 
 async function initPage(){
@@ -67,6 +69,7 @@ const boot = async () => {
   initTheme();
   initRunhead();
   initCart();         // after initTheme: wraps the desktop toggle
+  if (SITE_ACCOUNTS) void import('./account.js').then(m => m.initSync(reloadCart));
   initMenu();
   initReveal();       // Must run before catalogue so observeReveals() works
   await initPage();

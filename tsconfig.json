@@ -20,6 +20,6 @@
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": ["scripts/**/*", "data/**/*", "tests/**/*", "qa/**/*.mjs", "*.config.*"],
+  "include": ["scripts/**/*", "worker/**/*", "data/**/*", "tests/**/*", "qa/**/*.mjs", "*.config.*"],
   "exclude": ["node_modules", "dist", "scripts/vendor", "scripts/optimize-images.*", "scripts/generate-responsive.cjs", "qa/reports"]
 }

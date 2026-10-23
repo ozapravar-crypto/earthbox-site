@@ -285,7 +285,7 @@
   .enquiry-alt[open] summary{color:var(--ink)}
   .enquiry-alt summary:focus-visible{outline:1px solid var(--ink);outline-offset:4px}
 
-  .enquiry-form{
+  .enquiry-form, .account-form{
     display:grid;
     gap:.85rem;
     margin-top:1.25rem;
@@ -633,3 +633,6 @@
   .colo-mark{grid-column:1/-1}
   .colo-bar{flex-direction:column;gap:1rem;text-align:center}
 }
+
+/* /account (account.js): .account-form shares the enquiry form layout above */
+.account-form[hidden]{display:none}

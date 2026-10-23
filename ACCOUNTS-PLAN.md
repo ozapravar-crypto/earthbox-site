@@ -1,3 +1,74 @@
+# EarthBox accounts: Cloudflare plan, requirements and costs
+
+*23 Oct 2026. Replaces the 13 Oct Supabase + Vercel plan, which is kept below in §6 for the record. Owner approved the switch on 23 Oct. Free-tier limits are as of Oct 2026; re-check before launch.*
+
+**TL;DR:** ***Accounts run on Cloudflare for ₹0 a month, including once payments are live. One Cloudflare Worker serves the site and a small API. The data sits in Cloudflare's database (D1). Sign-in is a 6-digit code sent by email (Resend). Phase A is built and tested on branch `feat/cloudflare-accounts`. It's switched off (`SITE_ACCOUNTS = false`) until the domain moves to Cloudflare.***
+
+## 1 · Why Cloudflare, not Supabase + Vercel (or Neon)
+
+| | Cloudflare (chosen) | Supabase + Vercel (13 Oct plan) | Neon |
+|---|---|---|---|
+| Monthly cost once it's a shop | **₹0** (the free plan allows commercial use) | ₹1,760 (Vercel Pro, for commercial terms) | It's only a database: hosting, server code and sign-in still needed |
+| Database on the free plan | D1: 5 GB, never pauses | Pauses after 7 quiet days | Postgres, sleeps when idle |
+| Sign-in | Built here (about 100 lines, tested) | Ready-made | None |
+| Claude Code fit | The `wrangler` CLI does everything. Local dev runs the same code on a local database | Good | Good |
+
+## 2 · What's built (phase A)
+
+| File | Does |
+|---|---|
+| `worker/index.js` | `/api/*`: email-code sign-in, session cookie, profile, cart/saved sync, delete account |
+| `worker/schema.sql` | Tables `users`, `codes`, `sessions` |
+| `wrangler.jsonc` | Serves `dist/` + `/api/*` on one origin, so the CSP's `'self'` is unchanged |
+| `scripts/account.js` + `account.html` | The `/account` page. Every page merges the signed-in cart in and pushes changes back |
+| `scripts/dist.mjs` | Writes `_headers` / `_redirects` from `vercel.json`, so security headers and redirects match on both hosts |
+
+**Security:**
+- Codes and session tokens are stored only as hashes.
+- A code lasts 10 minutes and allows 5 tries. At most 5 codes per email and 20 per IP an hour.
+- The cookie is HttpOnly + Secure + SameSite=Lax.
+- Writes must be JSON from the same origin, which blocks cross-site requests.
+
+**Tests:**
+- `npm run test:api`: 7 end-to-end tests against a real local Worker + D1:
+  - sign in
+  - two devices
+  - another person can't see your data
+  - code expiry
+  - rate limit
+  - delete
+  - cross-site writes blocked
+- `scripts/account.test.mjs`: the merge rules.
+- Checked by hand in Chromium: a saved build and profile go from laptop to phone.
+
+**Run locally:** `npm run build && npm run api:dev` → http://localhost:8787/account. Codes come back in the API response because `.dev.vars` has `DEV_ECHO_CODE=1`.
+
+## 3 · Go-live checklist (needs Aayush for 1–3)
+
+1. **Cloudflare account** (free) under `aayush.lilani@gmail.com`; add me as a member.
+2. **Move `earthbox.in` DNS to Cloudflare:** change the nameservers at the registrar. About 10 minutes, plus propagation. This also makes `hello@earthbox.in` free through Cloudflare Email Routing (no ImprovMX needed).
+3. **Resend account** (free, 3,000 emails/month): verify `earthbox.in` with its DNS records, then `npx wrangler secret put RESEND_KEY`.
+4. `npx wrangler d1 create earthbox`, paste the id into `wrangler.jsonc`, then `npx wrangler d1 execute earthbox --remote --file worker/schema.sql`.
+5. `npm run build && npx wrangler deploy`, then attach the domain in the dashboard.
+6. Set `SITE_ACCOUNTS = true` (`data/site.js`), add an "Account" link (header or cart drawer), and update the privacy page. Accounts store email, name, phone, address and cart on Cloudflare.
+7. Point CI deploys at Cloudflare (a `wrangler deploy` step in `live.yml`), then retire Vercel.
+
+**Backups:** a weekly GitHub Action runs `wrangler d1 export` into a private repo. D1 also has point-in-time restore.
+
+## 4 · Next phases
+
+- **B · Orders + Care reminders:**
+  - `POST /api/order` re-prices the cart on the server and saves it.
+  - Order history on `/account`.
+  - Aayush changes statuses in the D1 dashboard.
+  - A daily Cron Trigger (free) sends Care reminders.
+- **C · Pay online:** Razorpay (about 2% per payment), with a webhook to `/api/razorpay-webhook`. Waits on KYC in EarthBox's name and the Stage 2 legal answers.
+- **WhatsApp sign-in:** optional, later. Meta charges about ₹0.12 per code and needs a verified business. Email covers it for now.
+
+---
+
+## 6 · Previous plan (13 Oct, superseded)
+
 # EarthBox accounts: Premium plan, requirements and costs
 
 *13 Oct 2026. Owner chose Premium. Builds on `earthbox-production-discovery.md` (Milestone 5) and `CART.md`. Prices are the providers' public free tiers as of Oct 2026; re-check before launch.*

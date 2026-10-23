@@ -17,6 +17,9 @@ export const EMAIL = 'aayush.lilani@gmail.com';
 export const PHONE = '918104811584';              // wa.me / tel: form
 export const PHONE_DISPLAY = '+91 81048 11584';
 export const ADDRESS = 'Kandivali, Mumbai 400101';
+// Accounts (sign-in, cart sync) need the Cloudflare host's /api. Flip to true
+// once earthbox.in is served by Cloudflare (ACCOUNTS-PLAN.md, cutover).
+export const SITE_ACCOUNTS = /** @type {boolean} */ (false);
 
 export const NAV = [
   { href: '/',         label: 'Home' },
