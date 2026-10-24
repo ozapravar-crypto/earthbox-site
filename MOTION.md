@@ -47,12 +47,13 @@ Template: `Downloads/NCERT Complete/product_motion_director_agent.md` (skill: `p
 | `.scramble` | `scramble.js` | Section titles only |
 | `.magnetic`, cursor | `magnetic.js`, `cursor.js` | CTAs only |
 | `pin` | `pin.js` | Principles list only |
+| hero garden | `hero-garden.js` | Home `#heroTitle` only. Don't reuse elsewhere: one living word per site |
 
 ## 4. Section specs (homepage, in order)
 
 | # | Section | First thing to notice | Motion (intensity) | Status |
 |---|---|---|---|---|
-| 1 | Hero | The terrarium photo, then "EarthBox" | Full-bleed photo (owner-supplied, 10 Oct); after the loader the copy, side line and proof row fade in 2.6–3.3 s (1). No parallax | Updated 10 Oct |
+| 1 | Hero | The terrarium photo, then "EarthBox" | Full-bleed photo (owner-supplied, 10 Oct); after the loader the copy, side line and proof row fade in 2.6–3.3 s (1). Ferns, fiddleheads and moss grow out of "EarthBox" letter by letter (120 ms stagger) as the copy fades in, then hold; a slow lean toward a mouse pointer is the hero's one ambient motion (3). See *Hero garden* below. No parallax | Updated 24 Oct |
 | 2 | Trust strip | Proof points | None (0). It's reassurance, not a moment. | Existing |
 | 3 | Film | The video | Plays muted, inline. No extra motion (0). | Existing |
 | 4 | Principles | One commitment at a time | Hover highlight; title `scramble` (2) | Existing |
@@ -69,3 +70,19 @@ Other pages: catalogue, product, about and journal use `.reveal` on blocks (1).
 - [ ] Works with `prefers-reduced-motion: reduce`
 - [ ] LCP not delayed, no layout shift, no `reveal-clip` / mid-page `data-parallax`
 - [ ] Checked at 1440 / 375 and in dark mode
+
+## Hero garden (24 Oct 2026)
+
+Adapted from **Type Garden** by Akshat Agarwal (type-garden.vercel.app): stems root in each letter and weave behind / in front of it. Changed for EarthBox:
+
+| Original | EarthBox |
+|---|---|
+| Live typing | Grows once, on load, timed to the `.hero-copy` fade |
+| Roses, thorns, spring overshoot | Fern fronds, fiddleheads, moss cushions; ease-out only |
+| Boil jitter every 120 ms | None: lines hold still |
+| Red / blue on black | `#7C8B6C` stems, `#6F8257` moss: ≥3:1 on the scrim, title stays ≥3:1 over them |
+| Canvas text | The h1 stays real text; two aria-hidden canvases behind / in front |
+| Fills the screen | Keep-out under the eyebrow line; some letters stay bare; fixed seed (same garden every visit) |
+| Leans to every pointer | Mouse only, slow (4 %/frame); stops redrawing once settled or off-screen |
+
+Reduced motion: drawn fully grown, no lean. Test: `scripts/hero-garden.test.mjs` (deterministic, keep-out holds).

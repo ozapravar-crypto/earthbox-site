@@ -35,10 +35,15 @@
     linear-gradient(0deg,rgba(18,15,10,var(--s-bot)) 0,rgba(18,15,10,0) 9rem);
 }
 
-.hero-copy{align-self:center;max-width:36rem;opacity:0;animation:fadeInHero 1.2s ease 2.6s forwards}
+.hero-copy{position:relative;isolation:isolate;align-self:center;max-width:36rem;opacity:0;animation:fadeInHero 1.2s ease 2.6s forwards}
 /* Repeat visits skip the intro loader (loader.js): the hero's fades start at
    once instead of after the intro's ~2.6–3.3 s (UX audit C-03). */
 .no-intro .hero-copy,.no-intro .hero-aside,.no-intro .hero-proof{animation-delay:.1s}
+/* Ferns and moss growing out of the title (hero-garden.js): one canvas behind
+   the letters, one in front; inside .hero-copy so they fade in with it. */
+.hero-garden{position:absolute;pointer-events:none}
+.hero-garden--back{z-index:-1}
+.hero-garden--front{z-index:1}
 .hero-eyebrow{
   display:inline-flex;align-items:center;gap:.9rem;
   font-family:var(--sans);font-size:.62rem;letter-spacing:.36em;text-transform:uppercase;color:rgba(246,241,232,.82);
