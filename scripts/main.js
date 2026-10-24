@@ -50,6 +50,7 @@ const PAGE_MODULES = [
   ['#aboutSections',                                    () => import('./render-about.js').then(m => m.initAbout())],
   ['#journalGrid, #journalFilters',                     () => import('./render-blog.js').then(m => m.initBlog())],
   ['#carePlanner',                                      () => import('./care-page.js').then(m => m.initCare())],
+  ['#heroTitle',                                        () => import('./hero-garden.js').then(m => m.initHeroGarden())],
   ['#account',                                          () => import('./account.js').then(m => m.initAccountPage(/** @type {HTMLElement} */ (document.getElementById('account')), reloadCart))]
 ];
 
